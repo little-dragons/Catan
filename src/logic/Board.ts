@@ -36,3 +36,4 @@ export function allPositions(board: Board): [number, number][] {
 }
 
 
+
