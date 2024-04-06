@@ -6,4 +6,4 @@ export enum Resource {
     Brick
 }
 
-export const allResources = [ Resource.Wheat, Resource.Ore, Resource.Lumber, Resource.Brick, Resource.Sheep ]
+export const allResources: readonly Resource[] = [Resource.Wheat, Resource.Ore, Resource.Lumber, Resource.Brick, Resource.Sheep]

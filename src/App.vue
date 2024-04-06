@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { defaultBoard } from './logic/Generation'
-import BoardRenderer from './components/BoardRenderer.vue'
-import { minimalFillingTileRadius, type BoardRenderInfo } from './drawing/BoardRendering';
+import BoardRenderer from './drawing/board/Renderer.vue'
+import { minimalFillingTileRadius } from './drawing/board/Layout';
 
 const board = defaultBoard(0)
 </script>

@@ -1,13 +1,6 @@
+import type { CoordinateMap } from "./Coordinate"
+import type { Orientation } from "./Orientation"
 import type { Resource } from "./Resource"
-
-export enum Orientation {
-    LeftDown,
-    Down,
-    RightDown,
-    LeftUp,
-    Up,
-    RightUp
-}
 
 
 export type PortTile = {
@@ -19,12 +12,12 @@ export type ResourceTile = {
     number: number
 }
 
-export type Tile = ResourceTile | PortTile | 'Desert'
+export type Tile = ResourceTile | PortTile | 'Desert' | 'Ocean'
 
 export interface Board {
     rowCount: number
     columnCount: number
-    map: Map<[number, number], Tile>
+    map: CoordinateMap<Tile>
 }
 
 export function allPositions(board: Board): [number, number][] {
