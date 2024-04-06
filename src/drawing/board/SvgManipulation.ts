@@ -1,8 +1,9 @@
-import { allPositions, type PortTile, type Tile } from "@/logic/Board"
+import { allCoordinates, type PortTile, type ResourceTile, type Tile } from "@/logic/Board"
 import * as d3 from "d3"
-import { tileHexagon, tileResourceIconPosition, tileResourceIconSize } from "./Layout"
+import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize } from "./Layout"
 import brick from '@/assets/brick.svg'
 import type { BoardRenderInfo } from "./Renderer.vue"
+import type { Coordinate } from "@/logic/Coordinate"
 
 export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInfo) {
     // clean previous group
@@ -12,8 +13,8 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
 
     // make group
     const allTiles = 
-        allPositions(info.board)
-        .map<[[number, number], Tile]>(pos => [pos, info.board.map.get(pos)!])
+        allCoordinates(info.board)
+        .map<[Coordinate, Tile]>(pos => [pos, info.board.map.get(pos)!])
         .filter(x => x[1] != undefined)
     
     const enter =
@@ -28,7 +29,17 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
       .append('path')
         .attr('d', x => d3.line()(tileHexagon(x[0], info.tileRadius)))
         .attr('fill', x => x[1] == 'Desert' ? 'yellow' : (x[1] == 'Ocean' || (x[1] as PortTile).orientation != undefined ? 'blue' : 'green'))
-    
+
+    enter
+      .filter(x => (x[1] as ResourceTile).number != undefined)
+      .datum<[[number, number], ResourceTile]>(x => [tileNumberPosition(x[0], (x[1] as ResourceTile).number, info.tileRadius)!, x[1] as ResourceTile])
+      .append('text')
+        .attr('x', x => x[0][0])
+        .attr('y', x => x[0][1])
+        .attr('font-size', x => `${tileNumberFontSize(x[1].number, info.tileRadius)!}px`)
+        .attr('text-anchor', 'middle')
+        .text(x => x[1].number.toString())
+        
     // enter
     //   .append('image')
     //     .filter(x => x[1] ResourceTile)

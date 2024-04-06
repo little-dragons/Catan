@@ -1,4 +1,4 @@
-import type { CoordinateMap } from "./Coordinate"
+import type { Coordinate, CoordinateMap } from "./Coordinate"
 import type { Orientation } from "./Orientation"
 import type { Resource } from "./Resource"
 
@@ -20,8 +20,8 @@ export interface Board {
     map: CoordinateMap<Tile>
 }
 
-export function allPositions(board: Board): [number, number][] {
-    let res: [number, number][] = []
+export function allCoordinates(board: Board): Coordinate[] {
+    let res: Coordinate[] = []
     for (let i = 0; i < board.rowCount; i++)
         for (let j = 0; j < board.columnCount; j++)
             res.push([i, j])
