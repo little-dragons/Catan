@@ -1,9 +1,10 @@
 import { allCoordinates, type PortTile, type ResourceTile, type Tile } from "@/logic/Board"
 import * as d3 from "d3"
-import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize } from "./Layout"
+import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners } from "./Layout"
 import brick from '@/assets/brick.svg'
 import type { BoardRenderInfo } from "./Renderer.vue"
 import type { Coordinate } from "@/logic/Coordinate"
+import { stringColor } from "@/logic/Player"
 
 export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInfo) {
     // clean previous group
@@ -24,7 +25,7 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
           .selectAll()
             .data(allTiles)
             .enter()
-
+    
     enter
       .append('path')
         .attr('d', x => d3.line()(tileHexagon(x[0], info.tileRadius)))
@@ -32,7 +33,7 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
 
     enter
       .filter(x => (x[1] as ResourceTile).number != undefined)
-      .datum<[[number, number], ResourceTile]>(x => [tileNumberPosition(x[0], (x[1] as ResourceTile).number, info.tileRadius)!, x[1] as ResourceTile])
+      .datum<[Coordinate, ResourceTile]>(x => [tileNumberPosition(x[0], (x[1] as ResourceTile).number, info.tileRadius)!, x[1] as ResourceTile])
       .append('text')
         .attr('x', x => x[0][0])
         .attr('y', x => x[0][1])
@@ -49,4 +50,26 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
     //     .attr('width', tileResourceIconSize(info.tileRadius)[0])
     //     .attr('height', tileResourceIconSize(info.tileRadius)[1])
     //     .attr('href', brick)
+}
+
+
+export function renderRoads(html: HTMLElement & SVGElement, info: BoardRenderInfo) {
+    // clean previous group
+    d3.select(html)
+      .select('#roads')
+      .remove()
+
+    const enter =
+        d3.select(html)
+          .append('g')
+            .attr('id', 'roads')
+          .selectAll()
+            .data(info.board.roads)
+            .enter()
+    
+    enter
+      .append('path')
+        .attr('d', x => d3.line()(roadCorners(x[1], x[2], info.tileRadius)))
+        .attr('fill', x => stringColor(x[0]))
+    
 }

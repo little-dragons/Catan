@@ -1,3 +1,4 @@
+import type { Color } from "./Player"
 import type { Coordinate, CoordinateMap } from "./Coordinate"
 import type { Orientation } from "./Orientation"
 import type { Resource } from "./Resource"
@@ -18,6 +19,7 @@ export interface Board {
     rowCount: number
     columnCount: number
     map: CoordinateMap<Tile>
+    roads: [Color, Coordinate, Coordinate][] 
 }
 
 export function allCoordinates(board: Board): Coordinate[] {

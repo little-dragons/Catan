@@ -1,3 +1,5 @@
+import type { Coordinate } from "./Coordinate"
+
 export enum Orientation {
     LeftDown,
     RightDown,
@@ -10,7 +12,7 @@ export enum Orientation {
 export const allOrientations: readonly Orientation[] = [Orientation.LeftDown, Orientation.Left, Orientation.RightDown, Orientation.LeftUp, Orientation.Right, Orientation.RightUp]
 
 
-export function neighborTile(pos: [number, number], orientation: Orientation): [number, number] {
+export function neighborTile(pos: Coordinate, orientation: Orientation): Coordinate {
     switch (orientation) {
         case Orientation.Left:
             return [pos[0] - 1, pos[1]]

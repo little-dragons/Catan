@@ -1,19 +1,25 @@
 import type { Board } from "@/logic/Board"
 import type { BoardRenderInfo } from "./Renderer.vue"
 import type { Coordinate } from "@/logic/Coordinate"
+import { add, middlepoint, opposite, perpendicular, withLength } from "../Vector"
 
 
 export function minimalFillingTileRadius(board: Board, width: number, height: number): number {
     return Math.min(width / (2 * (board.columnCount + 0.5) * Math.cos(30 / 180 * Math.PI)), height / (board.rowCount * 1.5 + 0.5))
 }
 
-export function tileCenter(coord: Coordinate, radius: number): [number, number] {
+function tileWidth(radius: number): number {
     const halfTileWidth = radius * Math.cos(30 / 180 * Math.PI)
-    const tileWidth = 2 * halfTileWidth
-    const firstMiddlePointInRowOffset = coord[1] % 2 == 0 ? halfTileWidth : tileWidth
-
-    return [firstMiddlePointInRowOffset + coord[0] * tileWidth, radius + coord[1] * radius * 1.5]
+    return 2 * halfTileWidth
 }
+export function tileCenter(coord: Coordinate, radius: number): [number, number] {
+    const fullTileWidth = tileWidth(radius)
+    const halfTileWidth = fullTileWidth / 2
+    const firstMiddlePointInRowOffset = coord[1] % 2 == 0 ? halfTileWidth : fullTileWidth
+
+    return [firstMiddlePointInRowOffset + coord[0] * fullTileWidth, radius + coord[1] * radius * 1.5]
+}
+
 
 
 export function tileHexagon(coord: Coordinate, tileRadius: number): [number, number][] {
@@ -69,4 +75,28 @@ export function tileNumberPosition(coord: Coordinate, number: number, tileRadius
     const heightOffset = 0.2 * tileRadius
 
     return [center[0], center[1] + size / 2 + heightOffset]
+}
+
+function crossingPosition(coord: Coordinate, radius: number): [number, number] {
+    const yBaseline = (coord[1] * 1.5 + (coord[1] % 2 == 1 ? 0.5 : 0)) * radius
+    const yOffset = coord[0] % 2 == 1 ? 0 : (coord[1] % 2 == 1 ? -radius / 2 : radius / 2)
+    return [tileWidth(radius) / 2 * coord[0], yBaseline + yOffset]
+}
+
+export function roadPosition(coord1: Coordinate, coord2: Coordinate, radius: number): [number, number][] {
+    const roadLength = 0.8 * radius
+    const roadWidth = 0.1 * radius
+
+    const cross1 = crossingPosition(coord1, radius)
+    const cross2 = crossingPosition(coord2, radius)
+    const midpoint = middlepoint(cross1, cross2)
+    const lengthVector = withLength([cross1[0] - midpoint[0], cross1[1] - midpoint[1]], roadLength / 2)
+    const widthVector =  withLength(perpendicular(lengthVector), roadWidth / 2)
+
+    return [
+        add(midpoint, lengthVector, widthVector),
+        add(midpoint, opposite(lengthVector), widthVector),
+        add(midpoint, opposite(lengthVector), opposite(widthVector)),
+        add(midpoint, lengthVector, opposite(widthVector))
+    ]
 }

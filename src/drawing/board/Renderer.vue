@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, toRefs, type Ref } from 'vue';
-import { renderTiles } from './SvgManipulation';
+import { renderRoads, renderTiles } from './SvgManipulation';
 import type { Board } from '@/logic/Board';
 
 export type BoardRenderInfo = {
@@ -9,13 +9,20 @@ export type BoardRenderInfo = {
 }
 
 const props = defineProps<BoardRenderInfo>()
-const refProps = toRefs(props)
 
 const boardSvg = ref(null) as Ref<null | HTMLElement & SVGElement>
 
 function renderEverything() {
     renderTiles(boardSvg.value!, props)
+    renderRoads(boardSvg.value!, props)
 }
+
+type InteractionPoint = [[number, number], any]
+const interactionPoints = ref([]) as Ref<InteractionPoint[]>
+function setInteractionPoints(points: InteractionPoint[], clicked: (point: InteractionPoint) => void) {
+
+}
+defineExpose({ setInteractionPoints })
 
 onMounted(renderEverything)
 </script>
