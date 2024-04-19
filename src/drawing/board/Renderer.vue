@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { onMounted, ref, toRefs, type Ref } from 'vue';
-import { renderRoads, renderTiles } from './SvgManipulation';
+import { onMounted, ref, toRefs, watch, type Ref } from 'vue';
+import { renderInteractionPoints, renderRoads, renderTiles } from './SvgManipulation';
 import type { Board } from '@/logic/Board';
+import { distance } from '../Vector';
+import { interactionPointRadius } from './Layout';
 
 export type BoardRenderInfo = {
     board: Board
     tileRadius: number
+}
+export type BoardRendererExposes<T> = {
+    setInteractionPoints: (points: InteractionPoint<T>[], clicked: ((point: InteractionPoint<T>) => void) | undefined) => void
 }
 
 const props = defineProps<BoardRenderInfo>()
@@ -17,18 +22,33 @@ function renderEverything() {
     renderRoads(boardSvg.value!, props)
 }
 
-type InteractionPoint = [[number, number], any]
-const interactionPoints = ref([]) as Ref<InteractionPoint[]>
-function setInteractionPoints(points: InteractionPoint[], clicked: (point: InteractionPoint) => void) {
+export type InteractionPoint<T> = [[number, number], T]
 
+let activeClickHandler = (_: MouseEvent) => {}
+function setInteractionPoints<T>(points: InteractionPoint<T>[], clicked: ((point: InteractionPoint<T>) => void) | undefined) {
+    renderInteractionPoints(boardSvg.value!, props, points)
+
+    if (clicked == undefined)
+        activeClickHandler = _ => {}
+    else
+        activeClickHandler = (ev: MouseEvent) => {
+            if (points.length == 0 || activeClickHandler == undefined)
+                return
+
+            for (const p of points) {
+                if (distance([ev.offsetX, ev.offsetY], p[0]) < interactionPointRadius(props.tileRadius))
+                    clicked(p)
+            }
+        }
 }
+
 defineExpose({ setInteractionPoints })
 
 onMounted(renderEverything)
 </script>
 
 <template>
-    <svg ref="boardSvg" />
+    <svg ref="boardSvg" @click="activeClickHandler"/>
 </template>
 
 <style scoped>

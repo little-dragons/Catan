@@ -1,10 +1,11 @@
 import { allCoordinates, type PortTile, type ResourceTile, type Tile } from "@/logic/Board"
 import * as d3 from "d3"
-import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners } from "./Layout"
+import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius } from "./Layout"
 import brick from '@/assets/brick.svg'
-import type { BoardRenderInfo } from "./Renderer.vue"
+import type { BoardRenderInfo, InteractionPoint } from "./Renderer.vue"
 import type { Coordinate } from "@/logic/Coordinate"
 import { stringColor } from "@/logic/Player"
+import './Styling.css'
 
 export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInfo) {
     // clean previous group
@@ -22,6 +23,7 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
         d3.select(html)
           .append('g')
             .attr('id', 'board')
+            .classed('tiles', true)
           .selectAll()
             .data(allTiles)
             .enter()
@@ -29,16 +31,18 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
     enter
       .append('path')
         .attr('d', x => d3.line()(tileHexagon(x[0], info.tileRadius)))
-        .attr('fill', x => x[1] == 'Desert' ? 'yellow' : (x[1] == 'Ocean' || (x[1] as PortTile).orientation != undefined ? 'blue' : 'green'))
+        .attr('fill', x => 
+            x[1] == 'Desert' ? 'yellow' : 
+            (x[1] == 'Ocean' || (x[1] as PortTile).orientation != undefined ? 'blue' : 'green'))
 
     enter
       .filter(x => (x[1] as ResourceTile).number != undefined)
-      .datum<[Coordinate, ResourceTile]>(x => [tileNumberPosition(x[0], (x[1] as ResourceTile).number, info.tileRadius)!, x[1] as ResourceTile])
+      .datum<[Coordinate, ResourceTile]>(x => 
+        [tileNumberPosition(x[0], (x[1] as ResourceTile).number, info.tileRadius)!, x[1] as ResourceTile])
       .append('text')
         .attr('x', x => x[0][0])
         .attr('y', x => x[0][1])
         .attr('font-size', x => `${tileNumberFontSize(x[1].number, info.tileRadius)!}px`)
-        .attr('text-anchor', 'middle')
         .text(x => x[1].number.toString())
         
     // enter
@@ -54,7 +58,6 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
 
 
 export function renderRoads(html: HTMLElement & SVGElement, info: BoardRenderInfo) {
-    // clean previous group
     d3.select(html)
       .select('#roads')
       .remove()
@@ -63,6 +66,7 @@ export function renderRoads(html: HTMLElement & SVGElement, info: BoardRenderInf
         d3.select(html)
           .append('g')
             .attr('id', 'roads')
+            .classed('roads', true)
           .selectAll()
             .data(info.board.roads)
             .enter()
@@ -71,5 +75,32 @@ export function renderRoads(html: HTMLElement & SVGElement, info: BoardRenderInf
       .append('path')
         .attr('d', x => d3.line()(roadCorners(x[1], x[2], info.tileRadius)))
         .attr('fill', x => stringColor(x[0]))
+    
+}
+
+
+export function renderInteractionPoints<T>(
+    html: HTMLElement & SVGElement, 
+    info: BoardRenderInfo, 
+    interactionPoints: InteractionPoint<T>[]) {
+
+    d3.select(html)
+      .select('#interaction')
+      .remove()
+
+    const enter =
+        d3.select(html)
+          .append('g')
+            .attr('id', 'interaction')
+            .classed('interaction-points', true)
+          .selectAll()
+            .data(interactionPoints)
+            .enter()
+    
+    enter
+      .append('circle')
+        .attr('cx', x => x[0][0])
+        .attr('cy', x => x[0][1])
+        .attr('r', interactionPointRadius(info.tileRadius))
     
 }

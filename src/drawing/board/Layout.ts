@@ -100,3 +100,7 @@ export function roadPosition(coord1: Coordinate, coord2: Coordinate, radius: num
         add(midpoint, lengthVector, opposite(widthVector))
     ]
 }
+
+export function interactionPointRadius(tileRadius: number) {
+    return tileRadius * 0.25
+}

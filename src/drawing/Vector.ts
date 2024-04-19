@@ -32,3 +32,9 @@ export function add(...v: Vector[]): Vector {
 export function opposite(v: Vector): Vector {
     return [-v[0], -v[1]]
 }
+
+export function distance(v1: Vector, v2: Vector): number {
+    const x = (v1[0] - v2[0]) * (v1[0] - v2[0])
+    const y = (v1[1] - v2[1]) * (v1[1] - v2[1])
+    return Math.sqrt(x + y)
+}
