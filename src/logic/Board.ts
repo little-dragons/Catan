@@ -2,6 +2,7 @@ import type { Color } from "./Player"
 import type { Coordinate, CoordinateMap } from "./Coordinate"
 import type { Orientation } from "./Orientation"
 import type { Resource } from "./Resource"
+import type { BuildingType } from "./Buildings"
 
 
 export type PortTile = {
@@ -20,6 +21,8 @@ export interface Board {
     columnCount: number
     map: CoordinateMap<Tile>
     roads: [Color, Coordinate, Coordinate][] 
+    robber: Coordinate
+    buildings: [Color, Coordinate, BuildingType][]
 }
 
 export function allCoordinates(board: Board): Coordinate[] {

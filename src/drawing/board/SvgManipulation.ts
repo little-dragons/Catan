@@ -1,10 +1,12 @@
 import { allCoordinates, type PortTile, type ResourceTile, type Tile } from "@/logic/Board"
 import * as d3 from "d3"
-import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius } from "./Layout"
+import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius, tileCenter, robberWidth, robberHeight, crossingPosition, buildingWidth, buildingHeight } from "./Layout"
 import brick from '@/assets/brick.svg'
+import robber from '@/assets/robber.svg'
+import building from '@/assets/house.svg'
 import type { BoardRenderInfo, InteractionPoint } from "./Renderer.vue"
 import type { Coordinate } from "@/logic/Coordinate"
-import { stringColor } from "@/logic/Player"
+import { filterColor, stringColor } from "@/logic/Player"
 import './Styling.css'
 
 export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInfo) {
@@ -45,15 +47,7 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
         .attr('font-size', x => `${tileNumberFontSize(x[1].number, info.tileRadius)!}px`)
         .text(x => x[1].number.toString())
         
-    // enter
-    //   .append('image')
-    //     .filter(x => x[1] ResourceTile)
-    //     .datum(x => tileResourceIconPosition(x[0], info.tileRadius))
-    //     .attr('x', x => x[0])
-    //     .attr('y', x => x[1])
-    //     .attr('width', tileResourceIconSize(info.tileRadius)[0])
-    //     .attr('height', tileResourceIconSize(info.tileRadius)[1])
-    //     .attr('href', brick)
+
 }
 
 
@@ -103,4 +97,64 @@ export function renderInteractionPoints<T>(
         .attr('cy', x => x[0][1])
         .attr('r', interactionPointRadius(info.tileRadius))
     
+}
+
+export function renderRobber(
+    html: HTMLElement & SVGElement, 
+    info: BoardRenderInfo) {
+    
+    d3.select(html)
+      .select('#robber')
+      .remove()
+
+    const robberCoord = info.board.robber
+
+    d3.select(html)
+      .append('g')
+        .attr('id', 'robber')
+        .classed('robber', true)
+      .append('image')
+        .attr('x', tileCenter(robberCoord, info.tileRadius)[0] - robberWidth(info.tileRadius) / 2)
+        .attr('y', tileCenter(robberCoord, info.tileRadius)[1] - robberHeight(info.tileRadius) / 2)
+        .attr('width', robberWidth(info.tileRadius))
+        .attr('height', robberHeight(info.tileRadius))
+        .attr('href', robber)
+    }
+
+export function renderBuildings(
+    html: HTMLElement & SVGElement, 
+    info: BoardRenderInfo
+) {
+    d3.select(html)
+      .select('#buildings')
+      .remove()
+    
+    const enter =
+        d3.select(html)
+        .append('g')
+            .attr('id', 'buildings')
+            .classed('buildings', true)
+        .selectAll()
+            .data(info.board.buildings)
+            .enter()
+
+
+    enter
+      .append('image')
+        .attr('x', x => crossingPosition(x[1], info.tileRadius)[0] - buildingWidth(info.tileRadius) / 2)
+        .attr('y', x => crossingPosition(x[1], info.tileRadius)[1] - buildingHeight(info.tileRadius) / 2)
+        .attr('width', buildingWidth(info.tileRadius))
+        .attr('height', buildingHeight(info.tileRadius))
+        // .style('filter', x => 'opacity(100%) brightness(0) saturate(100%) ' + filterColor(x[0]))
+        .style('background-color', x => stringColor(x[0]))
+        .attr('href', building)
+
+    // enter
+    //   .append('image')
+    //     .attr('x', x => crossingPosition(x[1], info.tileRadius)[0] - buildingWidth(info.tileRadius) / 2)
+    //     .attr('y', x => crossingPosition(x[1], info.tileRadius)[1] - buildingHeight(info.tileRadius) / 2)
+    //     .attr('width', buildingWidth(info.tileRadius))
+    //     .attr('height', buildingHeight(info.tileRadius))
+    //     .attr('href', building)
+      
 }

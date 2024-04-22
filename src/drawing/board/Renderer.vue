@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, toRefs, watch, type Ref } from 'vue';
-import { renderInteractionPoints, renderRoads, renderTiles } from './SvgManipulation';
+import { renderBuildings, renderInteractionPoints, renderRoads, renderRobber, renderTiles } from './SvgManipulation';
 import type { Board } from '@/logic/Board';
 import { distance } from '../Vector';
 import { interactionPointRadius } from './Layout';
@@ -20,6 +20,8 @@ const boardSvg = ref(null) as Ref<null | HTMLElement & SVGElement>
 function renderEverything() {
     renderTiles(boardSvg.value!, props)
     renderRoads(boardSvg.value!, props)
+    renderRobber(boardSvg.value!, props)
+    renderBuildings(boardSvg.value!, props)
 }
 
 export type InteractionPoint<T> = [[number, number], T]

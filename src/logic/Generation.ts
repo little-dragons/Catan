@@ -118,6 +118,8 @@ export function defaultBoard(seed: number): Board {
         columnCount: 7,
         rowCount: 7,
         map: map,
-        roads: [] 
+        roads: [],
+        robber: [2,2],
+        buildings: []
     }
 }

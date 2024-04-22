@@ -16,3 +16,18 @@ export function stringColor(c: Color) {
             return 'Blue'
     }
 }
+
+export function filterColor(c: Color): string {
+    switch (c) {
+        case Color.Yellow:
+            return 'invert(83%) sepia(70%) saturate(1392%) hue-rotate(2deg) brightness(103%) contrast(104%)'
+        case Color.Orange: 
+            return 'invert(66%) sepia(70%) saturate(1759%) hue-rotate(357deg) brightness(99%) contrast(107%)'
+        case Color.Red: 
+            return 'invert(15%) sepia(84%) saturate(6682%) hue-rotate(0deg) brightness(117%) contrast(121%)'
+        case Color.Green: 
+            return 'invert(57%) sepia(91%) saturate(2946%) hue-rotate(82deg) brightness(118%) contrast(126%)'
+        case Color.Blue: 
+            return 'invert(8%) sepia(100%) saturate(6766%) hue-rotate(247deg) brightness(109%) contrast(144%)'
+    }
+}

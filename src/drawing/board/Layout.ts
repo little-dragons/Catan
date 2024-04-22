@@ -77,7 +77,7 @@ export function tileNumberPosition(coord: Coordinate, number: number, tileRadius
     return [center[0], center[1] + size / 2 + heightOffset]
 }
 
-function crossingPosition(coord: Coordinate, radius: number): [number, number] {
+export function crossingPosition(coord: Coordinate, radius: number): [number, number] {
     const yBaseline = (coord[1] * 1.5 + (coord[1] % 2 == 1 ? 0.5 : 0)) * radius
     const yOffset = coord[0] % 2 == 1 ? 0 : (coord[1] % 2 == 1 ? -radius / 2 : radius / 2)
     return [tileWidth(radius) / 2 * coord[0], yBaseline + yOffset]
@@ -103,4 +103,20 @@ export function roadPosition(coord1: Coordinate, coord2: Coordinate, radius: num
 
 export function interactionPointRadius(tileRadius: number) {
     return tileRadius * 0.25
+}
+
+export function robberHeight(tileRadius: number) {
+    return tileRadius * 0.7;
+}
+
+export function robberWidth(tileRadius: number) {
+    return tileRadius * 0.4;
+}
+
+export function buildingHeight(tileRadius: number) {
+    return tileRadius * 0.5;
+}
+
+export function buildingWidth(tileRadius: number) {
+    return tileRadius * 0.5;
 }
