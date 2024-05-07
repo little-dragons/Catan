@@ -1,14 +1,6 @@
 import type { Board } from "@/logic/Board"
-import type { BoardRenderInfo } from "./Renderer.vue"
 import type { Coordinate } from "@/logic/Coordinate"
 import { add, middlepoint, opposite, perpendicular, withLength } from "../Vector"
-import { Resource } from "@/logic/Resource"
-import brick from '@/assets/brick.svg'
-import grain from '@/assets/grain.svg'
-import lumber from '@/assets/lumber.svg'
-import ore from '@/assets/ore.svg'
-import wool from '@/assets/wool.svg'
-
 
 export function minimalFillingTileRadius(board: Board, width: number, height: number): number {
     return Math.min(width / (2 * (board.columnCount + 0.5) * Math.cos(30 / 180 * Math.PI)), height / (board.rowCount * 1.5 + 0.5))
@@ -44,7 +36,6 @@ export function tileResourceIconSize(tileRadius: number): [number, number] {
 }
 
 export function tileResourceIconPosition(coord: Coordinate, tileRadius: number) : [number, number] {
-    console.log("trp" + coord)
     const center = tileCenter(coord, tileRadius)
     const size = tileResourceIconSize(tileRadius)
     const heightOffset = -0.4 * tileRadius
@@ -73,7 +64,6 @@ export function tileNumberFontSize(number: number, tileRadius: number): number |
 }
 
 export function tileNumberPosition(coord: Coordinate, number: number, tileRadius: number): [number, number] | undefined {
-    console.log("tnp" + coord)
     const center = tileCenter(coord, tileRadius)
     const size = tileNumberFontSize(number, tileRadius)
 
@@ -128,34 +118,3 @@ export function buildingHeight(tileRadius: number) {
 export function buildingWidth(tileRadius: number) {
     return tileRadius * 0.5;
 }
-
-export function resourceToIcon(resource: Resource): string {
-    switch (resource) {
-        case Resource.Brick:
-            return brick
-        case Resource.Grain:
-            return grain
-        case Resource.Lumber:
-            return lumber
-        case Resource.Ore:
-            return ore
-        case Resource.Wool:
-            return wool
-    }
-}
-
-export function tileColor(resource: Resource): string {
-    switch (resource) {
-        case Resource.Brick:
-            return 'maroon'
-        case Resource.Grain:
-            return 'gold'
-        case Resource.Lumber:
-            return 'darkgreen'
-        case Resource.Ore:
-            return 'dimgray'
-        case Resource.Wool:
-            return 'yellowgreen'
-    }
-}
-

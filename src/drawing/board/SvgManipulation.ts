@@ -1,14 +1,50 @@
 import { allCoordinates, type PortTile, type ResourceTile, type Tile } from "@/logic/Board"
 import * as d3 from "d3"
-import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius, tileCenter, robberWidth, robberHeight, crossingPosition, buildingWidth, buildingHeight, tileColor, resourceToIcon } from "./Layout"
-
+import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius, tileCenter, robberWidth, robberHeight, crossingPosition, buildingWidth, buildingHeight } from "./Layout"
 import robber from '@/assets/robber.svg'
 import building from '@/assets/house.svg'
 import type { BoardRenderInfo, InteractionPoint } from "./Renderer.vue"
 import type { Coordinate } from "@/logic/Coordinate"
-import { filterColor, stringColor } from "@/logic/Player"
+import { stringColor } from "@/logic/Player"
 import './Styling.css'
 import { Resource } from "@/logic/Resource"
+import brick from '@/assets/brick.svg'
+import grain from '@/assets/grain.svg'
+import lumber from '@/assets/lumber.svg'
+import ore from '@/assets/ore.svg'
+import wool from '@/assets/wool.svg'
+
+
+function resourceToIcon(resource: Resource): string {
+    switch (resource) {
+        case Resource.Brick:
+            return brick
+        case Resource.Grain:
+            return grain
+        case Resource.Lumber:
+            return lumber
+        case Resource.Ore:
+            return ore
+        case Resource.Wool:
+            return wool
+    }
+}
+
+function tileColor(resource: Resource): string {
+    switch (resource) {
+        case Resource.Brick:
+            return 'maroon'
+        case Resource.Grain:
+            return 'gold'
+        case Resource.Lumber:
+            return 'darkgreen'
+        case Resource.Ore:
+            return 'dimgray'
+        case Resource.Wool:
+            return 'yellowgreen'
+    }
+}
+
 
 export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInfo) {
     // clean previous group
@@ -42,25 +78,20 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
 
     enter
       .filter(x => (x[1] as ResourceTile).number != undefined)
-      .datum<[Coordinate, ResourceTile]>(x => 
-        [tileResourceIconPosition(x[0], info.tileRadius), x[1] as ResourceTile])
       .append('image')
-        .attr('x', x => x[0][0])
-        .attr('y', x => x[0][1])
+        .attr('x', x => tileResourceIconPosition(x[0], info.tileRadius)[0])
+        .attr('y', x => tileResourceIconPosition(x[0], info.tileRadius)[1])
         .attr('width', tileResourceIconSize(info.tileRadius)[0])
         .attr('height', tileResourceIconSize(info.tileRadius)[1])
-        .attr('href', x => resourceToIcon(x[1].resource))
+        .attr('href', x => resourceToIcon((x[1] as ResourceTile).resource))
 
-        
     enter
       .filter(x => (x[1] as ResourceTile).number != undefined)
-      .datum<[Coordinate, ResourceTile]>(x => 
-        [tileNumberPosition(x[0], (x[1] as ResourceTile).number, info.tileRadius)!, x[1] as ResourceTile])
       .append('text')
-        .attr('x', x => x[0][0])
-        .attr('y', x => x[0][1])
-        .attr('font-size', x => `${tileNumberFontSize(x[1].number, info.tileRadius)!}px`)
-        .text(x => x[1].number.toString())
+        .attr('x', x => tileNumberPosition(x[0], (x[1] as ResourceTile).number, info.tileRadius)![0])
+        .attr('y', x => tileNumberPosition(x[0], (x[1] as ResourceTile).number, info.tileRadius)![1])
+        .attr('font-size', x => `${tileNumberFontSize((x[1] as ResourceTile).number, info.tileRadius)!}px`)
+        .text(x => (x[1] as ResourceTile).number.toString())
   
 }
 
@@ -133,7 +164,7 @@ export function renderRobber(
         .attr('width', robberWidth(info.tileRadius))
         .attr('height', robberHeight(info.tileRadius))
         .attr('href', robber)
-    }
+}
 
 export function renderBuildings(
     html: HTMLElement & SVGElement, 
@@ -162,13 +193,4 @@ export function renderBuildings(
         // .style('filter', x => 'opacity(100%) brightness(0) saturate(100%) ' + filterColor(x[0]))
         .style('background-color', x => stringColor(x[0]))
         .attr('href', building)
-
-    // enter
-    //   .append('image')
-    //     .attr('x', x => crossingPosition(x[1], info.tileRadius)[0] - buildingWidth(info.tileRadius) / 2)
-    //     .attr('y', x => crossingPosition(x[1], info.tileRadius)[1] - buildingHeight(info.tileRadius) / 2)
-    //     .attr('width', buildingWidth(info.tileRadius))
-    //     .attr('height', buildingHeight(info.tileRadius))
-    //     .attr('href', building)
-      
 }

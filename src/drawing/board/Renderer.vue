@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, toRefs, watch, type Ref } from 'vue';
+import { onMounted, ref, type Ref } from 'vue';
 import { renderBuildings, renderInteractionPoints, renderRoads, renderRobber, renderTiles } from './SvgManipulation';
 import type { Board } from '@/logic/Board';
 import { distance } from '../Vector';
