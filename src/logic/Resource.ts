@@ -1,9 +1,9 @@
 export enum Resource {
-    Wheat,
+    Grain,
     Ore,
-    Sheep,
+    Wool,
     Lumber,
     Brick
 }
 
-export const allResources: readonly Resource[] = [Resource.Wheat, Resource.Ore, Resource.Lumber, Resource.Brick, Resource.Sheep]
+export const allResources: readonly Resource[] = [Resource.Grain, Resource.Ore, Resource.Lumber, Resource.Brick, Resource.Wool]

@@ -1,13 +1,14 @@
 import { allCoordinates, type PortTile, type ResourceTile, type Tile } from "@/logic/Board"
 import * as d3 from "d3"
-import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius, tileCenter, robberWidth, robberHeight, crossingPosition, buildingWidth, buildingHeight } from "./Layout"
-import brick from '@/assets/brick.svg'
+import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius, tileCenter, robberWidth, robberHeight, crossingPosition, buildingWidth, buildingHeight, tileColor, resourceToIcon } from "./Layout"
+
 import robber from '@/assets/robber.svg'
 import building from '@/assets/house.svg'
 import type { BoardRenderInfo, InteractionPoint } from "./Renderer.vue"
 import type { Coordinate } from "@/logic/Coordinate"
 import { filterColor, stringColor } from "@/logic/Player"
 import './Styling.css'
+import { Resource } from "@/logic/Resource"
 
 export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInfo) {
     // clean previous group
@@ -34,9 +35,23 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
       .append('path')
         .attr('d', x => d3.line()(tileHexagon(x[0], info.tileRadius)))
         .attr('fill', x => 
-            x[1] == 'Desert' ? 'yellow' : 
-            (x[1] == 'Ocean' || (x[1] as PortTile).orientation != undefined ? 'blue' : 'green'))
+            x[1] == 'Desert' ? 'gold' : 
+            (x[1] == 'Ocean' || (x[1] as PortTile).orientation != undefined ? 'blue' : 
+            (x[1] as ResourceTile).resource != undefined ? tileColor((x[1] as ResourceTile).resource) : ''
+          ))
 
+    enter
+      .filter(x => (x[1] as ResourceTile).number != undefined)
+      .datum<[Coordinate, ResourceTile]>(x => 
+        [tileResourceIconPosition(x[0], info.tileRadius), x[1] as ResourceTile])
+      .append('image')
+        .attr('x', x => x[0][0])
+        .attr('y', x => x[0][1])
+        .attr('width', tileResourceIconSize(info.tileRadius)[0])
+        .attr('height', tileResourceIconSize(info.tileRadius)[1])
+        .attr('href', x => resourceToIcon(x[1].resource))
+
+        
     enter
       .filter(x => (x[1] as ResourceTile).number != undefined)
       .datum<[Coordinate, ResourceTile]>(x => 
@@ -46,8 +61,7 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
         .attr('y', x => x[0][1])
         .attr('font-size', x => `${tileNumberFontSize(x[1].number, info.tileRadius)!}px`)
         .text(x => x[1].number.toString())
-        
-
+  
 }
 
 
