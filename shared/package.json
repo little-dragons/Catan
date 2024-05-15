@@ -1,0 +1,15 @@
+{
+  "name": "shared",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsup index.ts --format cjs,esm --dts"
+  },
+  "devDependencies": {
+    "@types/seedrandom": "^3.0.8",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "seedrandom": "^3.0.5"
+  }
+}

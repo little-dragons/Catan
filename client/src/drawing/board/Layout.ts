@@ -1,5 +1,4 @@
-import type { Board } from "@/shared/logic/Board"
-import type { Coordinate } from "@/shared/logic/Coordinate"
+import type { Board, Coordinate } from "shared"
 import { add, middlepoint, opposite, perpendicular, withLength } from "../Vector"
 
 export function minimalFillingTileRadius(board: Board, width: number, height: number): number {
