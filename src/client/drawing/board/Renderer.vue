@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, type Ref } from 'vue';
 import { renderBuildings, renderInteractionPoints, renderRoads, renderRobber, renderTiles } from './SvgManipulation';
-import type { Board } from '@/logic/Board';
+import type { Board } from '@/shared/logic/Board';
 import { distance } from '../Vector';
 import { interactionPointRadius } from './Layout';
 

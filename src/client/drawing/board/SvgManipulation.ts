@@ -1,13 +1,13 @@
-import { allCoordinates, type PortTile, type ResourceTile, type Tile } from "@/logic/Board"
+import { allCoordinates, type PortTile, type ResourceTile, type Tile } from "@/shared/logic/Board"
 import * as d3 from "d3"
 import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius, tileCenter, robberWidth, robberHeight, crossingPosition, buildingWidth, buildingHeight } from "./Layout"
 import robber from '@/assets/robber.svg'
 import building from '@/assets/house.svg'
 import type { BoardRenderInfo, InteractionPoint } from "./Renderer.vue"
-import type { Coordinate } from "@/logic/Coordinate"
-import { stringColor } from "@/logic/Player"
+import type { Coordinate } from "@/shared/logic/Coordinate"
+import { stringColor } from "@/shared/logic/Player"
 import './Styling.css'
-import { Resource } from "@/logic/Resource"
+import { Resource } from "@/shared/logic/Resource"
 import brick from '@/assets/brick.svg'
 import grain from '@/assets/grain.svg'
 import lumber from '@/assets/lumber.svg'

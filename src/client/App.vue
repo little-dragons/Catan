@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { defaultBoard } from './logic/Generation'
+import { defaultBoard } from '@/shared/logic/Generation'
 import BoardRenderer, { type BoardRendererExposes } from './drawing/board/Renderer.vue'
 import { minimalFillingTileRadius } from './drawing/board/Layout';
-import { Color } from './logic/Player';
+import { Color } from '@/shared/logic/Player';
 import { onMounted, ref, type Ref } from 'vue';
-import { BuildingType } from './logic/Buildings';
+import { BuildingType } from '@/shared/logic/Buildings';
 
 const board = defaultBoard(0)
 board.roads.push([Color.Red, [6,6], [7,6]])
