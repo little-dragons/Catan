@@ -19,7 +19,7 @@ export type Tile = ResourceTile | PortTile | 'Desert' | 'Ocean'
 export interface Board {
     rowCount: number
     columnCount: number
-    map: CoordinateMap<Tile>
+    tiles: [Tile, Coordinate][]
     roads: [Color, Coordinate, Coordinate][] 
     robber: Coordinate
     buildings: [Color, Coordinate, BuildingType][]

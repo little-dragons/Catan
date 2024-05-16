@@ -40,7 +40,13 @@ export function defaultBoard(seed: number): Board {
     }
 
     
-    const map = new CoordinateMap<Tile>()
+    const tiles: [Tile, Coordinate][] = []
+    function getTile(coord: Coordinate): Tile | undefined{
+        const tile = tiles.find(([_, c]) => c[0] == coord[0] && c[1] == coord[1])
+        if (tile == undefined)
+            return undefined
+        return tile[0]
+    }
     // place tiles starting in the middle and choose a random starting orientation. This is the reverse of the original process.
     // set first few tiles manually
     // then place each tile and try to turn clockwise. If there is a free place, set a tile, otherwise, follow straight
@@ -49,26 +55,26 @@ export function defaultBoard(seed: number): Board {
     
     // to really understand the following part, look at the visualization of the rule set almanach
     // and consider that we follow the path in the reverse direction
-    map.set(coord, landTiles.pop()!)
+    tiles.push([landTiles.pop()!, coord])
     coord = neighborTile(coord, orientation)
-    map.set(coord, landTiles.pop()!)
+    tiles.push([landTiles.pop()!, coord])
     orientation = counterclockwise(opposite(orientation))
     coord = neighborTile(coord, orientation)
-    map.set(coord, landTiles.pop()!)
+    tiles.push([landTiles.pop()!, coord])
     // now orientation and position contain the data to the last tile
 
     while (landTiles.length > 0) {
         const turnedOrientation = clockwise(orientation)
         const turnedCoord = neighborTile(coord, turnedOrientation)
-        if (map.get(turnedCoord) == undefined) {
+        if (getTile(turnedCoord) == undefined) {
             orientation = turnedOrientation
             coord = turnedCoord
-            map.set(turnedCoord, landTiles.pop()!)
+            tiles.push([landTiles.pop()!, turnedCoord])
         }
         else {
             // follow straight
             coord = neighborTile(coord, orientation)
-            map.set(coord, landTiles.pop()!)
+            tiles.push([landTiles.pop()!, coord])
         }
     }
 
@@ -82,7 +88,7 @@ export function defaultBoard(seed: number): Board {
         // we have a port and need to figure out an orientation
         // a port may turned to every land tile
         const possibleOrientations = allOrientations.filter(o => {
-            const neighbor = map.get(neighborTile(coord, o))
+            const neighbor = getTile(neighborTile(coord, o))
             return neighbor != undefined && neighbor != 'Ocean'
         })
 
@@ -101,15 +107,15 @@ export function defaultBoard(seed: number): Board {
     while (oceanTiles.length > 0) {
         const turnedOrientation = clockwise(orientation)
         const turnedCoord = neighborTile(coord, turnedOrientation)
-        if (map.get(turnedCoord) == undefined) {
+        if (getTile(turnedCoord) == undefined) {
             orientation = turnedOrientation
             coord = turnedCoord
-            map.set(turnedCoord, popWaterTile()!)
+            tiles.push([popWaterTile()!, turnedCoord])
         }
         else {
             // follow straight
             coord = neighborTile(coord, orientation)
-            map.set(coord, popWaterTile()!)
+            tiles.push([popWaterTile()!, coord])
         }
     }
 
@@ -117,7 +123,7 @@ export function defaultBoard(seed: number): Board {
     return {
         columnCount: 7,
         rowCount: 7,
-        map: map,
+        tiles: tiles,
         roads: [],
         robber: [2,2],
         buildings: []

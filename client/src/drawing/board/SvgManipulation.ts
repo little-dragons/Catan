@@ -49,46 +49,40 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
       .select('#board')
       .remove()
 
-    // make group
-    const allTiles = 
-        allCoordinates(info.board)
-        .map<[Coordinate, Tile]>(pos => [pos, info.board.map.get(pos)!])
-        .filter(x => x[1] != undefined)
-    
     const enter =
         d3.select(html)
           .append('g')
             .attr('id', 'board')
             .classed('tiles', true)
           .selectAll()
-            .data(allTiles)
+            .data(info.board.tiles)
             .enter()
     
     enter
       .append('path')
-        .attr('d', x => d3.line()(tileHexagon(x[0], info.tileRadius)))
+        .attr('d', x => d3.line()(tileHexagon(x[1], info.tileRadius)))
         .attr('fill', x => 
-            x[1] == 'Desert' ? 'gold' : 
-            (x[1] == 'Ocean' || (x[1] as PortTile).orientation != undefined ? 'blue' : 
-            (x[1] as ResourceTile).resource != undefined ? tileColor((x[1] as ResourceTile).resource) : ''
+            x[0] == 'Desert' ? 'gold' : 
+            (x[0] == 'Ocean' || (x[0] as PortTile).orientation != undefined ? 'blue' : 
+            (x[0] as ResourceTile).resource != undefined ? tileColor((x[0] as ResourceTile).resource) : ''
           ))
 
     enter
-      .filter(x => (x[1] as ResourceTile).number != undefined)
+      .filter(x => (x[0] as ResourceTile).number != undefined)
       .append('image')
-        .attr('x', x => tileResourceIconPosition(x[0], info.tileRadius)[0])
-        .attr('y', x => tileResourceIconPosition(x[0], info.tileRadius)[1])
+        .attr('x', x => tileResourceIconPosition(x[1], info.tileRadius)[0])
+        .attr('y', x => tileResourceIconPosition(x[1], info.tileRadius)[1])
         .attr('width', tileResourceIconSize(info.tileRadius)[0])
         .attr('height', tileResourceIconSize(info.tileRadius)[1])
-        .attr('href', x => resourceToIcon((x[1] as ResourceTile).resource))
+        .attr('href', x => resourceToIcon((x[0] as ResourceTile).resource))
 
     enter
-      .filter(x => (x[1] as ResourceTile).number != undefined)
+      .filter(x => (x[0] as ResourceTile).number != undefined)
       .append('text')
-        .attr('x', x => tileNumberPosition(x[0], (x[1] as ResourceTile).number, info.tileRadius)![0])
-        .attr('y', x => tileNumberPosition(x[0], (x[1] as ResourceTile).number, info.tileRadius)![1])
-        .attr('font-size', x => `${tileNumberFontSize((x[1] as ResourceTile).number, info.tileRadius)!}px`)
-        .text(x => (x[1] as ResourceTile).number.toString())
+        .attr('x', x => tileNumberPosition(x[1], (x[0] as ResourceTile).number, info.tileRadius)![0])
+        .attr('y', x => tileNumberPosition(x[1], (x[0] as ResourceTile).number, info.tileRadius)![1])
+        .attr('font-size', x => `${tileNumberFontSize((x[0] as ResourceTile).number, info.tileRadius)!}px`)
+        .text(x => (x[0] as ResourceTile).number.toString())
   
 }
 

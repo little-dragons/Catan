@@ -1,3 +1,3 @@
 export type ServerEventMap = {
-    requestDisconnect: (message: string) => void
+    requestState: () => void
 }

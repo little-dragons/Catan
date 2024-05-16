@@ -1,3 +1,5 @@
+import { State } from "../logic/State"
+
 export type ClientEventMap = {
-    sendHello: (message: string) => void
+    state: (state: State) => void
 }
