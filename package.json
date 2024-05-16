@@ -6,5 +6,7 @@
   },
   "dependencies": {
     "concurrently": "^8.2.2"
-  }
+  },
+  
+  "workspaces": [ "client", "shared", "server" ]
 }

@@ -8,6 +8,6 @@
     "ts-node-dev": "^2.0.0"
   },
   "dependencies": {
-    "shared": "file:../shared"
+    "shared": "^1.0.0"
   }
 }
