@@ -2,7 +2,7 @@
   "name": "server",
   "version": "1.0.0",
   "scripts": {
-    "dev": "ts-node-dev --respawn server.ts"
+    "dev": "ts-node-dev --respawn Server.ts"
   },
   "devDependencies": {
     "ts-node-dev": "^2.0.0"

@@ -5,3 +5,7 @@ export * from './logic/Generation';
 export * from './logic/Orientation';
 export * from './logic/Player';
 export * from './logic/Resource';
+
+export * from './socket/Configuration';
+export * from './socket/ClientEventMap';
+export * from './socket/ServerEventMap';
