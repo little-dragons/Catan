@@ -1,13 +1,16 @@
 :root {
     --color-background: #ffffff;
-    --color-background-soft: #f8f8f8;
-    --color-background-mute: v#f2f2f2;
+    --color-background-overlay: #f2f2f2af;
+
+    --modal-background-color: #ffffff;
+    --modal-border: 1px solid black;
+
 
     --color-border: rgba(60, 60, 60, 0.12);
     --color-border-hover: rgba(60, 60, 60, 0.29);
 
     --color-heading: #2c3e50;
-    --color-text: #2c3e50;
+    --color-text: #000000;
 
     --section-gap: 160px;
 }

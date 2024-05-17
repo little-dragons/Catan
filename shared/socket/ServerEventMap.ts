@@ -1,3 +1,5 @@
+import { AuthId } from "../authentication/AuthId"
+
 export type ServerEventMap = {
-    requestState: () => void
+    stateRequest: (id: AuthId) => void
 }
