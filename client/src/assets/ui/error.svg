@@ -3,7 +3,7 @@
  <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
  <g class="layer">
   <title>Layer 1</title>
-  <line fill="none" fill-opacity="0" id="svg_1" stroke="#ff0000" stroke-width="24" x1="15" x2="385" y1="15" y2="385"/>
-  <line fill="none" fill-opacity="0" id="svg_2" stroke="#ff0000" stroke-width="24" x1="15" x2="385" y1="385" y2="15"/>
+  <line fill="none" fill-opacity="0" id="svg_1" stroke="#ff0000" stroke-width="24" x1="30" x2="370" y1="30" y2="370"/>
+  <line fill="none" fill-opacity="0" id="svg_2" stroke="#ff0000" stroke-width="24" x1="30" x2="370" y1="370" y2="30"/>
  </g>
 </svg>

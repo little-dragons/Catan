@@ -166,7 +166,7 @@ label > span {
     white-space: nowrap;
 }
 
-label >>> :not(span) {
+label:deep(:not(span)) {
     max-width: 6rem;
 }
 
