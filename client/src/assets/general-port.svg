@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<svg width="180" height="280" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+ <g class="layer">
+  <title>Layer 1</title>
+  <rect fill="#965416" height="13.53" id="svg_10" stroke="#000000" stroke-width="2" width="6.47" x="60.74" y="190.63"/>
+  <path d="m13.09,219.45c17.06,40.59 17.06,41.18 22.94,44.12c5.88,2.94 108.82,1.76 118.82,-1.76c10,-3.53 29.41,-80 15.88,-70.59c-13.53,9.41 -65.29,12.35 -80,10c-14.71,-2.35 -54.12,5.88 -65.29,0c-11.18,-5.88 -29.41,-22.35 -12.35,18.24l0,-0.01z" fill="#6d3400" id="svg_9" stroke="#000000" stroke-width="2"/>
+  <rect fill="#965416" height="14" id="svg_2" rx="5" ry="5" stroke="#000000" stroke-width="2" width="100" x="11.5" y="29.63"/>
+  <rect fill="#965416" height="11.82" id="svg_3" rx="5" ry="5" stroke="#000000" stroke-width="2" width="20.53" x="52.62" y="20.92"/>
+  <path d="m17.74,191.45c-14.87,-4.62 -4.57,-151.96 -1.69,-153.82c0.72,-0.46 1.71,0.29 2.83,1.71c1.12,1.42 2.38,3.49 3.64,5.66c1.26,2.17 2.54,4.44 3.69,6.25c1.15,1.81 2.18,3.15 2.96,3.46c3.13,1.26 10.17,-15.53 13.36,-16.54c3.19,-1.02 -7.28,14.57 5.72,15.53c13,0.96 12.52,-15.71 14.93,-15.71c2.41,0 -2.83,15.89 3.07,16.72c5.9,0.84 17.21,-16.54 19.62,-15.95c2.41,0.6 -5.72,16.24 3.79,17.56c9.51,1.32 15.41,-17.74 17.09,-16.72c1.69,1.02 -3.25,147.58 6.14,151.84c9.39,4.26 -80.29,4.62 -95.16,0l0.01,0.01z" fill="#e5e5e5" id="svg_5" stroke="#000000" stroke-width="3"/>
+  <rect fill="#965416" height="8.82" id="svg_6" stroke="#000000" stroke-width="2" width="4.12" x="61.32" y="12.39"/>
+  <path d="m58.91,15.16c-2.26,-1.74 -1.13,-8.68 0,-9.55c1.13,-0.87 23.12,-0.87 29.89,-0.87c6.77,0 -2.26,4.77 -2.82,5.21c-0.56,0.43 24.25,-3.91 24.81,-3.47c0.56,0.43 2.26,7.38 0.56,7.81c-1.69,0.43 -32.14,7.38 -34.96,4.77c-2.82,-2.6 2.26,-6.08 1.13,-6.95c-1.13,-0.87 -16.35,4.77 -18.61,3.04l0,0.01z" fill="#e5e5e5" id="svg_7" stroke="#000000" stroke-width="3"/>
+  <text fill="#000000" font-family="Cursive" font-size="25" id="svg_12" stroke="#000000" stroke-width="0" text-anchor="middle" x="58.38" xml:space="preserve" y="165.04">3:1</text>
+  <text fill="#000000" font-family="Cursive" font-size="44" id="svg_14" stroke="#000000" stroke-width="0" text-anchor="middle" textLength="0" x="58.37" xml:space="preserve" y="119.74"/>
+  <text fill="#000000" font-family="Cursive" font-size="60" id="svg_15" lengthAdjust="spacing" letter-spacing="0" stroke="#000000" stroke-width="0" text-anchor="middle" transform="rotate(-5 63.9118 101.636)" word-spacing="1" x="63.69" xml:space="preserve" y="126.05">?</text>
+ </g>
+</svg>
