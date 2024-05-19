@@ -1,15 +1,15 @@
 import { allCoordinates, type PortTile, type ResourceTile, type Tile, type Coordinate, stringColor, Resource } from "shared"
 import * as d3 from "d3"
 import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius, tileCenter, robberWidth, robberHeight, crossingPosition, buildingWidth, buildingHeight } from "./Layout"
-import robber from '@/assets/robber.svg'
-import building from '@/assets/house.svg'
+import robber from '@/assets/board/robber.svg'
+import building from '@/assets/board/house.svg'
 import type { BoardRenderInfo, InteractionPoint } from "./Renderer.vue"
 import './Styling.css'
-import brick from '@/assets/brick.svg'
-import grain from '@/assets/grain.svg'
-import lumber from '@/assets/lumber.svg'
-import ore from '@/assets/ore.svg'
-import wool from '@/assets/wool.svg'
+import brick from '@/assets/resources/brick.svg'
+import grain from '@/assets/resources/grain.svg'
+import lumber from '@/assets/resources/lumber.svg'
+import ore from '@/assets/resources/ore.svg'
+import wool from '@/assets/resources/wool.svg'
 
 
 function resourceToIcon(resource: Resource): string {

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { validUsername } from 'shared';
 import { computed, ref, watch } from 'vue';
-import error from '@/assets/Error.svg'
-import ok from '@/assets/Ok.svg'
+import error from '@/assets/ui/error.svg'
+import ok from '@/assets/ui/ok.svg'
 
 const props = defineProps<{
     id?: string,
