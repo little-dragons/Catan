@@ -1,4 +1,4 @@
-import { BuildingType, ClientEventMap, Color, GuestLogin, MemberLogin, ServerEventMap, SocketPort, UserWithAuth, defaultBoard } from "shared"
+import { BuildingType, ClientEventMap, Color, ConnectionError, GuestLogin, MemberLogin, ServerEventMap, SocketPort, UserWithAuth, defaultBoard } from "shared"
 import { Server } from "socket.io"
 import { addGuest, checkUser, removeUser } from "./authentication/AuthIdMap"
 
@@ -17,11 +17,15 @@ board.buildings.push([Color.Green, [4,4], BuildingType.Settlement])
 
 io
 .use((socket, next) => {
+    function nextError(err: ConnectionError) {
+        next(new Error(err))
+    }
+
     const auth = socket.handshake.auth as GuestLogin | MemberLogin
     if (auth.type == 'guest') {
         const id = addGuest(auth)
         if (id == undefined)
-            next(new Error('Name already in use'))
+            nextError('name in use')
         else {
             const user: UserWithAuth = { isGuest: true, name: auth.name, authId: id }
             socket.emit('loggedIn', user)
@@ -30,9 +34,9 @@ io
         }
     }
     else if (auth.type == 'member')
-        next(new Error('Not implemented'))
+        nextError('not implemented')
     else 
-        next(new Error('malformed auth object'))
+        nextError('invalid auth object')
 })
 .on('connection', socket => {
     socket.on('stateRequest', id => {

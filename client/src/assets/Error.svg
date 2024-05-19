@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+ <g class="layer">
+  <title>Layer 1</title>
+  <line fill="none" fill-opacity="0" id="svg_1" stroke="#ff0000" stroke-width="24" x1="15" x2="385" y1="15" y2="385"/>
+  <line fill="none" fill-opacity="0" id="svg_2" stroke="#ff0000" stroke-width="24" x1="15" x2="385" y1="385" y2="15"/>
+ </g>
+</svg>
