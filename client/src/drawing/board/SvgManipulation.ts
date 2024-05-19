@@ -1,6 +1,6 @@
 import { allCoordinates, type PortTile, type ResourceTile, type Tile, type Coordinate, stringColor, Resource } from "shared"
 import * as d3 from "d3"
-import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius, tileCenter, robberWidth, robberHeight, crossingPosition, buildingWidth, buildingHeight } from "./Layout"
+import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius, tileCenter, robberWidth, robberHeight, crossingPosition, buildingWidth, buildingHeight, tilePortIconSize } from "./Layout"
 import robber from '@/assets/board/robber.svg'
 import building from '@/assets/board/house.svg'
 import type { BoardRenderInfo, InteractionPoint } from "./Renderer.vue"
@@ -10,6 +10,15 @@ import grain from '@/assets/resources/grain.svg'
 import lumber from '@/assets/resources/lumber.svg'
 import ore from '@/assets/resources/ore.svg'
 import wool from '@/assets/resources/wool.svg'
+import desert from '@/assets/board/desert.svg'
+
+import brickPort from '@/assets/board/brick-port.svg'
+import grainPort from '@/assets/board/grain-port.svg'
+import lumberPort from '@/assets/board/lumber-port.svg'
+import orePort from '@/assets/board/ore-port.svg'
+import woolPort from '@/assets/board/wool-port.svg'
+import generalPort from '@/assets/board/general-port.svg'
+
 
 
 function resourceToIcon(resource: Resource): string {
@@ -25,6 +34,23 @@ function resourceToIcon(resource: Resource): string {
         case Resource.Wool:
             return wool
     }
+}
+
+function portToIcon(port: PortTile): string {
+  switch (port.resource) {
+    case Resource.Brick:
+        return brickPort
+    case Resource.Grain:
+        return grainPort
+    case Resource.Lumber:
+        return lumberPort
+    case Resource.Ore:
+        return orePort
+    case Resource.Wool:
+        return woolPort
+    case 'General':
+        return generalPort
+  }
 }
 
 function tileColor(resource: Resource): string {
@@ -63,9 +89,18 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
         .attr('d', x => d3.line()(tileHexagon(x[1], info.tileRadius)))
         .attr('fill', x => 
             x[0] == 'Desert' ? 'gold' : 
-            (x[0] == 'Ocean' || (x[0] as PortTile).orientation != undefined ? 'blue' : 
+            (x[0] == 'Ocean' || (x[0] as PortTile).orientation != undefined ? 'royalblue' : 
             (x[0] as ResourceTile).resource != undefined ? tileColor((x[0] as ResourceTile).resource) : ''
           ))
+    
+    enter
+      .filter(x => (x[0] as PortTile).orientation != undefined)
+      .append('image')
+      .attr('x', x => tileCenter(x[1], info.tileRadius)[0] - tilePortIconSize(info.tileRadius)[0]/2)
+      .attr('y', x => tileCenter(x[1], info.tileRadius)[1] - tilePortIconSize(info.tileRadius)[1]/2)
+      .attr('width', tilePortIconSize(info.tileRadius)[0])
+      .attr('height', tilePortIconSize(info.tileRadius)[1])
+      .attr('href', x => portToIcon(x[0] as PortTile))
 
     enter
       .filter(x => (x[0] as ResourceTile).number != undefined)
@@ -83,6 +118,15 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
         .attr('y', x => tileNumberPosition(x[1], (x[0] as ResourceTile).number, info.tileRadius)![1])
         .attr('font-size', x => `${tileNumberFontSize((x[0] as ResourceTile).number, info.tileRadius)!}px`)
         .text(x => (x[0] as ResourceTile).number.toString())
+    
+    enter
+      .filter(x => x[0] == 'Desert')
+      .append('image')
+        .attr('x', x => tileResourceIconPosition(x[1], info.tileRadius)[0])
+        .attr('y', x => tileResourceIconPosition(x[1], info.tileRadius)[1])
+        .attr('width', tileResourceIconSize(info.tileRadius)[0])
+        .attr('height', tileResourceIconSize(info.tileRadius)[1])
+        .attr('href', desert)
   
 }
 
@@ -185,3 +229,4 @@ export function renderBuildings(
         .style('background-color', x => stringColor(x[0]))
         .attr('href', building)
 }
+

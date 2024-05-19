@@ -34,6 +34,11 @@ export function tileResourceIconSize(tileRadius: number): [number, number] {
     return [0.6 * tileRadius, 0.5 * tileRadius]
 }
 
+export function tilePortIconSize(tileRadius: number): [number, number] {
+    return [0.8 * tileRadius, tileRadius]
+}
+
+
 export function tileResourceIconPosition(coord: Coordinate, tileRadius: number) : [number, number] {
     const center = tileCenter(coord, tileRadius)
     const size = tileResourceIconSize(tileRadius)
