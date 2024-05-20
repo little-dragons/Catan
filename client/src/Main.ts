@@ -12,14 +12,13 @@ const app = createApp(App)
 app.use(router)
 
 
-const socket = io(`ws://localhost:${SocketPort}`, { 
-    autoConnect: false,
+const socket = io(`ws://localhost:${SocketPort}`, {
 }) as Socket<ClientEventMap, ServerEventMap>
 
 app.provide(SocketKey, socket)
 
 
-const userLoginStatusRef = ref(['anonymous'] as UserLoginStatus)
+const userLoginStatusRef = ref<UserLoginStatus>(['anonymous'])
 app.provide(UserLoginStatusKey, userLoginStatusRef)
 
 const userRef = computed(() => {

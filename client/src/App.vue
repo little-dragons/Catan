@@ -10,9 +10,12 @@ const userLoginStatus = inject(UserLoginStatusKey)!
 const showLoginModal = ref(false)
 
 function logout() {
-    socket.disconnect()
-    userLoginStatus.value = ['anonymous']
+    if (userLoginStatus.value[0] == 'logged in') {
+        socket.emit('logout', userLoginStatus.value[1].authId)
+        userLoginStatus.value = ['anonymous']
+    }
 }
+
 </script>
 
 <template>

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import CustomInput from '@/CustomInput.vue';
 import { SocketKey, UserLoginStatusKey } from '@/InjectionKeys';
-import type { ConnectionError, GuestLogin } from 'shared';
-import { inject, ref, watch } from 'vue';
+import type { GuestLogin } from 'shared';
+import { inject, onMounted, ref, shallowRef, watch, watchEffect } from 'vue';
+import UsernameInput from '@/ui/UsernameInput.vue';
+import PasswordInput from '@/ui/PasswordInput.vue';
 
 const emit = defineEmits(['close'])
 
@@ -10,38 +11,52 @@ const socket = inject(SocketKey)!
 const userLoginStatus = inject(UserLoginStatusKey)!
 
 
-const guestname = ref(null as null | string)
 const password = ref(null as null | string)
-const membername = ref(null as null | string)
-const error = ref(null as null | string)
+const guestnameInput = ref<null | InstanceType<typeof UsernameInput>>(null)
+const membernameInput = ref<null | InstanceType<typeof UsernameInput>>(null)
+const passwordInput = ref(null as null)
 
 socket.on('loggedIn', user => {
+    if (userLoginStatus.value[0] != 'pending') {
+        console.log('Received valid login, but no login was pending. Discarding this.')
+        return
+    }
+
     userLoginStatus.value = ['logged in', user]
     emit('close')
 })
 
-socket.on('connect_error', err => {
-    const custom = err.message as ConnectionError
-    if (custom == 'invalid auth object' || custom == 'not implemented')
-        error.value = 'Mistake by developers'
-    else if (custom == 'name in use')
-        error.value = 'The given name is already in use'
-    else if (custom == 'password invalid')
-        error.value = 'The entered password does not match'
+socket.on('rejectLogin', err => {
+    if (userLoginStatus.value[0] != 'pending') {
+        console.log('Received that login was rejected, but no login was pending.')
+        return
+    }
+
+    if (err == 'invalid auth object' || err == 'not implemented')
+        alert('Mistake by developers')
+    else if (err == 'name in use') {
+        if (userLoginStatus.value[1].type == 'guest')
+            guestnameInput.value?.nameInUse(userLoginStatus.value[1].name)
+        if (userLoginStatus.value[1].type == 'member')
+            membernameInput.value?.nameInUse(userLoginStatus.value[1].name)
+    }
+    else if (err == 'password invalid')
+        membernameInput.value
+
+    userLoginStatus.value = ['anonymous']
 })
 
 function triggerGuestLogin() {
-    if (guestname.value == null)
+    if (guestnameInput.value?.result == null)
         return
 
-    const trim = guestname.value.trim()
     const login: GuestLogin = {
         type: 'guest',
-        name: trim
+        name: guestnameInput.value.result
     }
 
-    socket.auth = login
-    socket.connect()
+    userLoginStatus.value = ['pending', login]
+    socket.emit('login', login)
 }
 
 </script>
@@ -60,22 +75,22 @@ function triggerGuestLogin() {
                     <form class="member-login">
                         <label for="membername">
                             <span>Member name:</span>
-                            <CustomInput id="membername" type="username" label="Membername" :rules="[]" v-model="membername"/>
+                            <UsernameInput ref="membernameInput" tagId="membername"/>
                         </label>
                         <label for="password">
                             <span>Password:</span>
-                            <CustomInput id="password" type="password" label="Password" :rules="[]" v-model="password"/>
+                            <PasswordInput ref="passwordInput" tagId="password" v-model="password"/>
                         </label>
 
-                        <input type="button" value="Login" :disabled="membername == null || password == null"></input>
+                        <input type="button" value="Login" :disabled="membernameInput?.result == null || password == null"></input>
                     </form>
                     <div class="vertical-line"/>
                     <form class="guest-login">
                         <label for="guestname">
                             <span>Guest name:</span>
-                            <CustomInput id="guestname" type="username" label="Guestname" :rules="[]" v-model="guestname"/>
+                            <UsernameInput ref="guestnameInput" tagId="guestname"/>
                         </label>
-                        <input type="button" value="Guest login" @click="triggerGuestLogin" :disabled="guestname == null"></input>
+                        <input type="button" value="Guest login" @click="triggerGuestLogin" :disabled="guestnameInput?.result == null"></input>
                     </form>
                 </div>
                 

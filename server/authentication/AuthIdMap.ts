@@ -26,7 +26,6 @@ export function checkUser(id: AuthId): boolean {
     return map.get(id) != undefined
 }
 
-export function removeUser(id: AuthId, name: string) {
-    if (map.get(id)?.name === name)
-        map.delete(id)
+export function removeUser(id: AuthId) {
+    map.delete(id)
 }
