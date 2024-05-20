@@ -2,7 +2,8 @@
   "name": "catan",
   "version": "1.0.0",
   "scripts": {
-    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\""
+    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\"",
+    "prod": "concurrently \"cd server && npm run prod\" \"cd client && npm run prod\""
   },
   "dependencies": {
     "concurrently": "^8.2.2"

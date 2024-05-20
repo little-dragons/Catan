@@ -4,11 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" --",
-    "preview": "vite preview",
-    "build-only": "vite build",
-    "type-check": "vue-tsc --build --force"
+    "dev": "NODE_ENV=development vite",
+    "prod": "NODE_ENV=production vite"
   },
   "dependencies": {
     "d3": "^7.9.0",
