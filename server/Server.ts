@@ -10,8 +10,8 @@ if (process.env.NODE_ENV == 'development')
     httpsServer = createServer()
 else if (process.env.NODE_ENV == 'production')
     httpsServer = createServer({
-        key: readFileSync(`${process.env.SSL_DIR}/priv.key`),
-        cert: readFileSync(`${process.env.SSL_DIR}/ssl/cert.cer`)
+        key: readFileSync(`${process.env.SSL_DIR}/privkey.pem`),
+        cert: readFileSync(`${process.env.SSL_DIR}/cert.pem`)
     })
 else
     console.error('NO ENVIRONMENT WAS GIVEN, CANNOT PROCEED')

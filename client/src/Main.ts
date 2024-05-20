@@ -11,8 +11,15 @@ const app = createApp(App)
 
 app.use(router)
 
+let address: string = undefined!
+if (process.env.NODE_ENV == 'development')
+    address = `http://localhost:${SocketPort}`
+else if (process.env.NODE_ENV == 'production')
+    address = `https://ichigancs.com:${SocketPort}`
+else
+    console.error('NO ENVIRONMENT WAS GIVEN, CANNOT PROCEED')
 
-const socket = io(`ws://localhost:${SocketPort}`, {
+const socket = io(address, {
 }) as Socket<ClientEventMap, ServerEventMap>
 
 app.provide(SocketKey, socket)
