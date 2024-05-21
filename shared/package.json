@@ -2,16 +2,12 @@
   "name": "shared",
   "version": "1.0.0",
   "scripts": {
-    "build": "tsup index.ts --format cjs,esm --dts"
   },
   "devDependencies": {
-    "@types/jsonwebtoken": "^9.0.6",
     "@types/seedrandom": "^3.0.8",
-    "tsup": "^8.0.2",
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "jsonwebtoken": "^9.0.2",
     "seedrandom": "^3.0.5"
   }
 }

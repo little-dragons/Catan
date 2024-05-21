@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "NODE_ENV=development ts-node-dev --respawn Server.ts",
-    "prod": "NODE_ENV=production SSL_DIR=\"/home/catan/ssl\" ts-node Server.ts"
+    "build": "tsc --build",
+    "prod": "NODE_ENV=production SSL_DIR=\"/home/catan/ssl/letsencrypt\" ts-node Server.ts"
   },
   "devDependencies": {
     "ts-node-dev": "^2.0.0"

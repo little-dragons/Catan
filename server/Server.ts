@@ -1,4 +1,4 @@
-import { BuildingType, ClientEventMap, Color, ConnectionError, GuestLogin, MemberLogin, ServerEventMap, SocketPort, UserWithAuth, defaultBoard } from "shared"
+import { BuildingType, ClientEventMap, Color, ServerEventMap, SocketPort, UserWithAuth, defaultBoard } from "shared"
 import { Server } from "socket.io"
 import { addGuest, checkUser, removeUser } from "./authentication/AuthIdMap"
 import { createServer, Server as HttpsServer } from 'https'
@@ -11,7 +11,7 @@ if (process.env.NODE_ENV == 'development')
 else if (process.env.NODE_ENV == 'production')
     httpsServer = createServer({
         key: readFileSync(`${process.env.SSL_DIR}/privkey.pem`),
-        cert: readFileSync(`${process.env.SSL_DIR}/cert.pem`)
+        cert: readFileSync(`${process.env.SSL_DIR}/fullchain.pem`)
     })
 else
     console.error('NO ENVIRONMENT WAS GIVEN, CANNOT PROCEED')
@@ -24,7 +24,10 @@ const io = new Server<ServerEventMap, ClientEventMap, {}, UserWithAuth | 'anonym
     
 })
 
-io.listen(SocketPort)
+if (process.env.NODE_ENV == 'development')
+    io.listen(SocketPort)
+else if (process.env.NODE_ENV == 'production')
+    httpsServer.listen(SocketPort)
 
 console.log('Server is listening.')
 
