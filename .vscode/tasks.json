@@ -1,0 +1,17 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Copy dist to server",
+            "command": "scp",
+            "type": "shell",
+            "args": [
+                "-r",
+                "dist/",
+                "catan@ichigancs.com:/home/catan/"
+            ],
+            "group": "none",
+            "problemMatcher": []
+        }
+    ]
+}

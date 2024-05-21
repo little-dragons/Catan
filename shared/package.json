@@ -1,13 +1,14 @@
 {
   "name": "shared",
   "version": "1.0.0",
-  "scripts": {
-  },
+  "scripts": {},
   "devDependencies": {
     "@types/seedrandom": "^3.0.8",
+    "@types/uuid": "^9.0.8",
     "typescript": "^5.4.5"
   },
   "dependencies": {
-    "seedrandom": "^3.0.5"
+    "seedrandom": "^3.0.5",
+    "uuid": "^9.0.1"
   }
 }
