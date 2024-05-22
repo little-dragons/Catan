@@ -2,14 +2,16 @@ import type { AnyLogin, AuthUser, LoginError } from "shared"
 import { ref, readonly, computed } from "vue"
 import { loginSocket } from "./Socket"
 
-export type RejectedLogin = [AnyLogin, LoginError]
 export type CurrentUser = 
     {
         status: 'logged in',
         user: AuthUser
     } | {
         status: 'anonymous',
-        lastRejectedLogin?: RejectedLogin
+        lastRejectedLogin?: {
+            request: AnyLogin,
+            error: LoginError
+        }
     } | {
         status: 'pending',
         login: AnyLogin
@@ -43,12 +45,12 @@ loginSocket.on('loggedIn', user => {
     currentUserBacking.value = { status: 'logged in', user }
 })
 
-loginSocket.on('rejectLogin', err => {
+loginSocket.on('rejectLogin', error => {
     if (currentUserBacking.value.status != 'pending') {
         console.warn('Received that login was rejected while no login was pending. Discarding this data.')
         return
     }
-    currentUserBacking.value = { status: 'anonymous', lastRejectedLogin: [currentUserBacking.value.login, err] }
+    currentUserBacking.value = { status: 'anonymous', lastRejectedLogin: { request: currentUserBacking.value.login, error } }
 })
 
 export function sendLogout() {

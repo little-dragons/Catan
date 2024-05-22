@@ -21,11 +21,6 @@ watch(currentAuthUser, () => {
         gameSocket.emit('stateRequest', currentAuthUser.value.authToken)
 }, { immediate: true })
 
-// onMounted(() => {
-    // renderer.value!.setInteractionPoints([[[300, 300], 'test']], x => console.log(x[1]))    
-// })
-
-
 </script>
 
 <template>

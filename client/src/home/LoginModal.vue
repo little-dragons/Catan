@@ -17,8 +17,8 @@ watch(currentUser, newVal => {
         emit('close')
 
     else if (newVal.status == 'anonymous' && newVal.lastRejectedLogin != undefined) {
-        const request = newVal.lastRejectedLogin[0]
-        const err = newVal.lastRejectedLogin[1]
+        const request = newVal.lastRejectedLogin.request
+        const err = newVal.lastRejectedLogin.error
 
         if (err == 'invalid auth object' || err == 'not implemented')
             alert('Mistake by developers')
