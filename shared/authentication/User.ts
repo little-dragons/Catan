@@ -5,7 +5,7 @@ export type User = {
     name: string
 }
 
-export type UserWithAuth = User & { authToken: AuthToken }
+export type AuthUser = User & { authToken: AuthToken }
 
 export function validUsername(name: string): boolean {
     return name.match(/^[A-Za-z0-9\-\_]+$/) != null

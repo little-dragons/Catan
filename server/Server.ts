@@ -1,4 +1,4 @@
-import { BuildingType, ClientEventMap, Color, ServerEventMap, SocketPort, UserWithAuth, defaultBoard } from "shared"
+import { BuildingType, ClientEventMap, Color, ServerEventMap, SocketPort, AuthUser, defaultBoard } from "shared"
 import { Server } from "socket.io"
 import { addGuest, checkUser, removeUser } from "./authentication/AuthTokenMap"
 import { createServer, Server as HttpsServer } from 'https'
@@ -16,7 +16,7 @@ else if (process.env.NODE_ENV == 'production')
 else
     console.error('NO ENVIRONMENT WAS GIVEN, CANNOT PROCEED')
 
-const io = new Server<ServerEventMap, ClientEventMap, {}, UserWithAuth | 'anonymous'>(httpsServer, {
+const io = new Server<ServerEventMap, ClientEventMap, {}, AuthUser | 'anonymous'>(httpsServer, {
     cors: {
         origin: '*',
         allowedHeaders: ['Access-Control-Allow-Origin']
@@ -43,7 +43,7 @@ io
             if (token == undefined)
                 socket.emit('rejectLogin', 'name in use')
             else {
-                const user: UserWithAuth = { isGuest: true, name: request.name, authToken: token }
+                const user: AuthUser = { isGuest: true, name: request.name, authToken: token }
                 socket.data = user
                 socket.emit('loggedIn', user)
             }

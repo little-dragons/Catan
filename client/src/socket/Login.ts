@@ -1,4 +1,4 @@
-import type { AnyLogin, LoginError, UserWithAuth } from "shared"
+import type { AnyLogin, AuthUser, LoginError } from "shared"
 import { ref, readonly, computed } from "vue"
 import { loginSocket } from "./Socket"
 
@@ -6,7 +6,7 @@ export type RejectedLogin = [AnyLogin, LoginError]
 export type CurrentUser = 
     {
         status: 'logged in',
-        user: UserWithAuth
+        user: AuthUser
     } | {
         status: 'anonymous',
         lastRejectedLogin?: RejectedLogin
