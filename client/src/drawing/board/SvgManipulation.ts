@@ -1,6 +1,6 @@
 import { type PortTile, type ResourceTile, stringColor, Resource } from "shared"
 import * as d3 from "d3"
-import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius, tileCenter, robberWidth, robberHeight, crossingPosition, buildingWidth, buildingHeight, tilePortIconSize } from "./Layout"
+import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius, tileCenter, robberWidth, robberHeight, crossingPosition, buildingWidth, buildingHeight, tilePortIconSize, tilePortPosition } from "./Layout"
 import robber from '@/assets/board/robber.svg'
 import building from '@/assets/board/house.svg'
 import type { BoardRenderInfo, InteractionPoint } from "./Renderer.vue"
@@ -96,8 +96,8 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
     enter
       .filter(x => (x[0] as PortTile).orientation != undefined)
       .append('image')
-      .attr('x', x => tileCenter(x[1], info.tileRadius)[0] - tilePortIconSize(info.tileRadius)[0]/2)
-      .attr('y', x => tileCenter(x[1], info.tileRadius)[1] - tilePortIconSize(info.tileRadius)[1]/2)
+      .attr('x', x => tilePortPosition(x[1], info.tileRadius)[0])
+      .attr('y', x => tilePortPosition(x[1], info.tileRadius)[1])
       .attr('width', tilePortIconSize(info.tileRadius)[0])
       .attr('height', tilePortIconSize(info.tileRadius)[1])
       .attr('href', x => portToIcon(x[0] as PortTile))

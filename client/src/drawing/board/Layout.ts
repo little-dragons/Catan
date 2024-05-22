@@ -34,11 +34,6 @@ export function tileResourceIconSize(tileRadius: number): [number, number] {
     return [0.6 * tileRadius, 0.5 * tileRadius]
 }
 
-export function tilePortIconSize(tileRadius: number): [number, number] {
-    return [0.8 * tileRadius, tileRadius]
-}
-
-
 export function tileResourceIconPosition(coord: Coordinate, tileRadius: number) : [number, number] {
     const center = tileCenter(coord, tileRadius)
     const size = tileResourceIconSize(tileRadius)
@@ -46,6 +41,20 @@ export function tileResourceIconPosition(coord: Coordinate, tileRadius: number) 
 
     return [center[0] - size[0] / 2, center[1] - size[1] / 2 + heightOffset]
 }
+
+
+export function tilePortIconSize(tileRadius: number): [number, number] {
+    return [0.7 * tileRadius, tileRadius]
+}
+
+export function tilePortPosition(coord: Coordinate, tileRadius: number): [number, number] { 
+    const center = tileCenter(coord, tileRadius)
+    const size = tilePortIconSize(tileRadius)
+    const widthOffset = 0.05 * size[0]
+
+    return [center[0] - size[0] / 2 + widthOffset, center[1] - size[1] / 2]
+}
+
 
 export function tileNumberFontSize(number: number, tileRadius: number): number | undefined {
     let factor = undefined
