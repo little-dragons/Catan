@@ -1,49 +1,39 @@
 <script setup lang="ts">
-import { SocketKey, UserLoginStatusKey } from '@/InjectionKeys';
-import type { GuestLogin } from 'shared';
-import { inject, onMounted, ref, shallowRef, watch, watchEffect } from 'vue';
+import type { GuestLogin, MemberLogin } from 'shared';
+import { ref, watch } from 'vue';
 import UsernameInput from '@/ui/UsernameInput.vue';
 import PasswordInput from '@/ui/PasswordInput.vue';
+import { sendLogin, currentUser } from '@/socket/Login';
 
 const emit = defineEmits(['close'])
-
-const socket = inject(SocketKey)!
-const userLoginStatus = inject(UserLoginStatusKey)!
-
 
 const password = ref(null as null | string)
 const guestnameInput = ref<null | InstanceType<typeof UsernameInput>>(null)
 const membernameInput = ref<null | InstanceType<typeof UsernameInput>>(null)
 const passwordInput = ref(null as null)
 
-socket.on('loggedIn', user => {
-    if (userLoginStatus.value[0] != 'pending') {
-        console.log('Received valid login, but no login was pending. Discarding this.')
-        return
+watch(currentUser, newVal => {
+    if (newVal.status == 'logged in')
+        emit('close')
+
+    else if (newVal.status == 'anonymous' && newVal.lastRejectedLogin != undefined) {
+        const request = newVal.lastRejectedLogin[0]
+        const err = newVal.lastRejectedLogin[1]
+
+        if (err == 'invalid auth object' || err == 'not implemented')
+            alert('Mistake by developers')
+        else if (err == 'name in use') {
+            if (request.type == 'guest')
+                guestnameInput.value?.nameInUse(request.name)
+            if (request.type == 'member')
+                membernameInput.value?.nameInUse(request.name)
+        }
+        else if (err == 'password invalid')
+            membernameInput.value
     }
-
-    userLoginStatus.value = ['logged in', user]
-    emit('close')
-})
-
-socket.on('rejectLogin', err => {
-    if (userLoginStatus.value[0] != 'pending') {
-        console.log('Received that login was rejected, but no login was pending.')
-        return
+    else if (newVal.status == 'anonymous' && newVal.lastRejectedLogin == undefined) {
+        console.warn('User login status changed to anonymous in login modal, but without rejection reason? Triggered logout?')
     }
-
-    if (err == 'invalid auth object' || err == 'not implemented')
-        alert('Mistake by developers')
-    else if (err == 'name in use') {
-        if (userLoginStatus.value[1].type == 'guest')
-            guestnameInput.value?.nameInUse(userLoginStatus.value[1].name)
-        if (userLoginStatus.value[1].type == 'member')
-            membernameInput.value?.nameInUse(userLoginStatus.value[1].name)
-    }
-    else if (err == 'password invalid')
-        membernameInput.value
-
-    userLoginStatus.value = ['anonymous']
 })
 
 function triggerGuestLogin() {
@@ -55,8 +45,7 @@ function triggerGuestLogin() {
         name: guestnameInput.value.result
     }
 
-    userLoginStatus.value = ['pending', login]
-    socket.emit('login', login)
+    sendLogin(login)
 }
 
 </script>
@@ -71,7 +60,7 @@ function triggerGuestLogin() {
                 </div>
                 <p>Please login with your account or create a temporary guest account.</p>
                 <p>Kindly observe that member logins are to be done on the left side while guest logins are done on the right.</p>
-                <div class="content">
+                <div class="forms">
                     <form class="member-login">
                         <label for="membername">
                             <span>Member name:</span>
@@ -144,7 +133,7 @@ p {
     cursor: pointer;
 }
 
-.content {
+.forms {
     display: flex;
     flex-direction: row;
     justify-content: space-between;

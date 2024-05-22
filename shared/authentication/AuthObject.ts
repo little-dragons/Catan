@@ -8,3 +8,5 @@ export type MemberLogin = {
     name: string
     passwordHash: never
 }
+
+export type AnyLogin = GuestLogin | MemberLogin

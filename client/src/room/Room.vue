@@ -2,25 +2,23 @@
 import { type Board } from 'shared';
 import BoardRenderer, { type BoardRendererExposes } from '../drawing/board/Renderer.vue'
 import { minimalFillingTileRadius } from '../drawing/board/Layout';
-import { inject, onMounted, ref, watch, type Ref } from 'vue';
-import { UserKey, SocketKey, UserLoginStatusKey } from '@/InjectionKeys';
-import router from '@/Router';
+import { ref, watch, type Ref } from 'vue';
+import router from '@/misc/Router';
+import { currentAuthUser, currentUser } from '@/socket/Login';
+import { gameSocket } from '@/socket/Socket';
 
 const board = ref(null) as Ref<null | Board>
 const renderer = ref(null) as Ref<null | (HTMLElement & BoardRendererExposes<string>)>
 
-const socket = inject(SocketKey)!
-const user = inject(UserKey)!
-const userLoginStatus = inject(UserLoginStatusKey)!
 
-if (userLoginStatus.value[0] == 'anonymous')
+if (currentUser.value.status == 'anonymous')
     router.push({ name: 'home' })
 
 
-socket.on('state', st => board.value = st.board)
-watch(user, () => {
-    if (user.value != undefined)
-        socket.emit('stateRequest', user.value.authId)
+gameSocket.on('state', st => board.value = st.board)
+watch(currentAuthUser, () => {
+    if (currentAuthUser.value != undefined)
+        gameSocket.emit('stateRequest', currentAuthUser.value.authToken)
 }, { immediate: true })
 
 // onMounted(() => {
@@ -33,4 +31,6 @@ watch(user, () => {
 <template>
     <BoardRenderer v-if="board != null" ref="renderer" :board="board" :tile-radius="minimalFillingTileRadius(board, 500, 500)" />
     <p v-else>Loading...</p>
-</template>
+</template>import { userLoginStatus, user } from '@/socket/User';
+import { userLoginStatus, user } from '@/socket/User';
+

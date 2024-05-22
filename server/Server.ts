@@ -1,6 +1,6 @@
 import { BuildingType, ClientEventMap, Color, ServerEventMap, SocketPort, UserWithAuth, defaultBoard } from "shared"
 import { Server } from "socket.io"
-import { addGuest, checkUser, removeUser } from "./authentication/AuthIdMap"
+import { addGuest, checkUser, removeUser } from "./authentication/AuthTokenMap"
 import { createServer, Server as HttpsServer } from 'https'
 import { readFileSync } from  'fs'
 
@@ -39,11 +39,11 @@ io
 .on('connection', socket => {
     socket.on('login', request => {
         if (request.type == 'guest') {
-            const id = addGuest(request)
-            if (id == undefined)
+            const token = addGuest(request)
+            if (token == undefined)
                 socket.emit('rejectLogin', 'name in use')
             else {
-                const user: UserWithAuth = { isGuest: true, name: request.name, authId: id }
+                const user: UserWithAuth = { isGuest: true, name: request.name, authToken: token }
                 socket.data = user
                 socket.emit('loggedIn', user)
             }
@@ -69,6 +69,6 @@ io
 
     socket.on('disconnect', (reason, desc) => {
         if (socket.data != 'anonymous')
-            removeUser(socket.data.authId)
+            removeUser(socket.data.authToken)
     })
 })

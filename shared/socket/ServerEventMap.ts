@@ -1,8 +1,13 @@
-import { AuthId } from "../authentication/AuthId"
-import { GuestLogin, MemberLogin } from "../authentication/AuthObject"
+import { AuthToken } from "../authentication/AuthToken"
+import { AnyLogin } from "../authentication/AuthObject"
 
-export type ServerEventMap = {
-    stateRequest: (id: AuthId) => void
-    login: (data: MemberLogin | GuestLogin) => void
-    logout: (id: AuthId) => void
+export type ServerEventMap = GameServerEventMap & LoginServerEventMap
+
+export type GameServerEventMap = {
+    stateRequest: (id: AuthToken) => void
+}
+
+export type LoginServerEventMap = {
+    login: (data: AnyLogin) => void
+    logout: (id: AuthToken) => void
 }
