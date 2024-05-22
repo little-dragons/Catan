@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=development vite",
+    "dev": "NODE_ENV=development vite -c vite.config.dev.ts",
     "build": "NODE_ENV=production vite build",
-    "prod": "NODE_ENV=production vite --host"
+    "prod": "NODE_ENV=production SSL_DIR=\"/home/catan/ssl/letsencrypt\" vite --host -c vite.config.prod.ts"
   },
   "dependencies": {
     "d3": "^7.9.0",
