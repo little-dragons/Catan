@@ -1,9 +1,9 @@
 import type { Color } from "./Player"
-import type { Coordinate, CoordinateMap } from "./Coordinate"
 import type { Orientation } from "./Orientation"
 import type { Resource } from "./Resource"
 import type { BuildingType } from "./Buildings"
 
+export type Coordinate = [number, number]
 
 export type PortTile = {
     resource: Resource | 'General'

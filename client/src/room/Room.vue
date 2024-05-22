@@ -26,6 +26,5 @@ watch(currentAuthUser, () => {
 <template>
     <BoardRenderer v-if="board != null" ref="renderer" :board="board" :tile-radius="minimalFillingTileRadius(board, 500, 500)" />
     <p v-else>Loading...</p>
-</template>import { userLoginStatus, user } from '@/socket/User';
-import { userLoginStatus, user } from '@/socket/User';
+</template>
 

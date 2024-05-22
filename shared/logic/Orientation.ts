@@ -1,4 +1,4 @@
-import type { Coordinate } from "./Coordinate"
+import type { Coordinate } from "./Board"
 
 export enum Orientation {
     LeftDown,

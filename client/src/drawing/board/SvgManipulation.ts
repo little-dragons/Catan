@@ -1,4 +1,4 @@
-import { allCoordinates, type PortTile, type ResourceTile, type Tile, type Coordinate, stringColor, Resource } from "shared"
+import { type PortTile, type ResourceTile, stringColor, Resource } from "shared"
 import * as d3 from "d3"
 import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius, tileCenter, robberWidth, robberHeight, crossingPosition, buildingWidth, buildingHeight, tilePortIconSize } from "./Layout"
 import robber from '@/assets/board/robber.svg'

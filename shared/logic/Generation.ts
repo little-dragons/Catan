@@ -1,5 +1,4 @@
-import { type Board, type Tile } from "./Board";
-import { CoordinateMap, type Coordinate } from "./Coordinate";
+import { type Board, type Tile, type Coordinate } from "./Board";
 import { allOrientations, clockwise, counterclockwise, neighborTile, opposite } from "./Orientation";
 import { Resource, allResources } from "./Resource";
 import seedrandom from 'seedrandom'
