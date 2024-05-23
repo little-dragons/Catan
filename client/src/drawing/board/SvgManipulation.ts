@@ -1,9 +1,9 @@
-import { type PortTile, type ResourceTile, stringColor, Resource } from "shared"
+import { type PortTile, type ResourceTile, stringColor, Resource, type Board } from "shared"
 import * as d3 from "d3"
 import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius, tileCenter, robberWidth, robberHeight, crossingPosition, buildingWidth, buildingHeight, tilePortIconSize, tilePortPosition } from "./Layout"
 import robber from '@/assets/board/robber.svg'
 import building from '@/assets/board/house.svg'
-import type { BoardRenderInfo, InteractionPoint } from "./Renderer.vue"
+import type { InteractionPoint } from "./Renderer.vue"
 import './Styling.css'
 import brick from '@/assets/resources/brick.svg'
 import grain from '@/assets/resources/grain.svg'
@@ -69,7 +69,7 @@ function tileColor(resource: Resource): string {
 }
 
 
-export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInfo) {
+export function renderTiles(html: HTMLElement & SVGElement, board: Board, tileRadius: number) {
     // clean previous group
     d3.select(html)
       .select('#board')
@@ -81,12 +81,12 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
             .attr('id', 'board')
             .classed('tiles', true)
           .selectAll()
-            .data(info.board.tiles)
+            .data(board.tiles)
             .enter()
     
     enter
       .append('path')
-        .attr('d', x => d3.line()(tileHexagon(x[1], info.tileRadius)))
+        .attr('d', x => d3.line()(tileHexagon(x[1], tileRadius)))
         .attr('fill', x => 
             x[0] == 'Desert' ? 'gold' : 
             (x[0] == 'Ocean' || (x[0] as PortTile).orientation != undefined ? 'royalblue' : 
@@ -96,42 +96,41 @@ export function renderTiles(html: HTMLElement & SVGElement, info: BoardRenderInf
     enter
       .filter(x => (x[0] as PortTile).orientation != undefined)
       .append('image')
-      .attr('x', x => tilePortPosition(x[1], info.tileRadius)[0])
-      .attr('y', x => tilePortPosition(x[1], info.tileRadius)[1])
-      .attr('width', tilePortIconSize(info.tileRadius)[0])
-      .attr('height', tilePortIconSize(info.tileRadius)[1])
+      .attr('x', x => tilePortPosition(x[1], tileRadius)[0])
+      .attr('y', x => tilePortPosition(x[1], tileRadius)[1])
+      .attr('width', tilePortIconSize(tileRadius)[0])
+      .attr('height', tilePortIconSize(tileRadius)[1])
       .attr('href', x => portToIcon(x[0] as PortTile))
 
     enter
       .filter(x => (x[0] as ResourceTile).number != undefined)
       .append('image')
-        .attr('x', x => tileResourceIconPosition(x[1], info.tileRadius)[0])
-        .attr('y', x => tileResourceIconPosition(x[1], info.tileRadius)[1])
-        .attr('width', tileResourceIconSize(info.tileRadius)[0])
-        .attr('height', tileResourceIconSize(info.tileRadius)[1])
+        .attr('x', x => tileResourceIconPosition(x[1], tileRadius)[0])
+        .attr('y', x => tileResourceIconPosition(x[1], tileRadius)[1])
+        .attr('width', tileResourceIconSize(tileRadius)[0])
+        .attr('height', tileResourceIconSize(tileRadius)[1])
         .attr('href', x => resourceToIcon((x[0] as ResourceTile).resource))
 
     enter
       .filter(x => (x[0] as ResourceTile).number != undefined)
       .append('text')
-        .attr('x', x => tileNumberPosition(x[1], (x[0] as ResourceTile).number, info.tileRadius)![0])
-        .attr('y', x => tileNumberPosition(x[1], (x[0] as ResourceTile).number, info.tileRadius)![1])
-        .attr('font-size', x => `${tileNumberFontSize((x[0] as ResourceTile).number, info.tileRadius)!}px`)
+        .attr('x', x => tileNumberPosition(x[1], (x[0] as ResourceTile).number, tileRadius)![0])
+        .attr('y', x => tileNumberPosition(x[1], (x[0] as ResourceTile).number, tileRadius)![1])
+        .attr('font-size', x => `${tileNumberFontSize((x[0] as ResourceTile).number, tileRadius)!}px`)
         .text(x => (x[0] as ResourceTile).number.toString())
     
     enter
       .filter(x => x[0] == 'Desert')
       .append('image')
-        .attr('x', x => tileResourceIconPosition(x[1], info.tileRadius)[0])
-        .attr('y', x => tileResourceIconPosition(x[1], info.tileRadius)[1])
-        .attr('width', tileResourceIconSize(info.tileRadius)[0])
-        .attr('height', tileResourceIconSize(info.tileRadius)[1])
+        .attr('x', x => tileResourceIconPosition(x[1], tileRadius)[0])
+        .attr('y', x => tileResourceIconPosition(x[1], tileRadius)[1])
+        .attr('width', tileResourceIconSize(tileRadius)[0])
+        .attr('height', tileResourceIconSize(tileRadius)[1])
         .attr('href', desert)
   
 }
 
-
-export function renderRoads(html: HTMLElement & SVGElement, info: BoardRenderInfo) {
+export function renderRoads(html: HTMLElement & SVGElement, board: Board, tileRadius: number) {
     d3.select(html)
       .select('#roads')
       .remove()
@@ -142,21 +141,21 @@ export function renderRoads(html: HTMLElement & SVGElement, info: BoardRenderInf
             .attr('id', 'roads')
             .classed('roads', true)
           .selectAll()
-            .data(info.board.roads)
+            .data(board.roads)
             .enter()
     
     enter
       .append('path')
-        .attr('d', x => d3.line()(roadCorners(x[1], x[2], info.tileRadius)))
+        .attr('d', x => d3.line()(roadCorners(x[1], x[2], tileRadius)))
         .attr('fill', x => stringColor(x[0]))
     
 }
 
-
 export function renderInteractionPoints<T>(
     html: HTMLElement & SVGElement, 
-    info: BoardRenderInfo, 
-    interactionPoints: InteractionPoint<T>[]) {
+    board: Board, 
+    interactionPoints: InteractionPoint<T>[],
+    tileRadius: number) {
 
     d3.select(html)
       .select('#interaction')
@@ -175,35 +174,38 @@ export function renderInteractionPoints<T>(
       .append('circle')
         .attr('cx', x => x[0][0])
         .attr('cy', x => x[0][1])
-        .attr('r', interactionPointRadius(info.tileRadius))
+        .attr('r', interactionPointRadius(tileRadius))
     
 }
 
+
 export function renderRobber(
     html: HTMLElement & SVGElement, 
-    info: BoardRenderInfo) {
+    board: Board, 
+    tileRadius: number) {
     
     d3.select(html)
       .select('#robber')
       .remove()
 
-    const robberCoord = info.board.robber
+    const robberCoord = board.robber
 
     d3.select(html)
       .append('g')
         .attr('id', 'robber')
         .classed('robber', true)
       .append('image')
-        .attr('x', tileCenter(robberCoord, info.tileRadius)[0] - robberWidth(info.tileRadius) / 2)
-        .attr('y', tileCenter(robberCoord, info.tileRadius)[1] - robberHeight(info.tileRadius) / 2)
-        .attr('width', robberWidth(info.tileRadius))
-        .attr('height', robberHeight(info.tileRadius))
+        .attr('x', tileCenter(robberCoord, tileRadius)[0] - robberWidth(tileRadius) / 2)
+        .attr('y', tileCenter(robberCoord, tileRadius)[1] - robberHeight(tileRadius) / 2)
+        .attr('width', robberWidth(tileRadius))
+        .attr('height', robberHeight(tileRadius))
         .attr('href', robber)
 }
 
 export function renderBuildings(
     html: HTMLElement & SVGElement, 
-    info: BoardRenderInfo
+    board: Board, 
+    tileRadius: number
 ) {
     d3.select(html)
       .select('#buildings')
@@ -215,16 +217,16 @@ export function renderBuildings(
             .attr('id', 'buildings')
             .classed('buildings', true)
         .selectAll()
-            .data(info.board.buildings)
+            .data(board.buildings)
             .enter()
 
 
     enter
       .append('image')
-        .attr('x', x => crossingPosition(x[1], info.tileRadius)[0] - buildingWidth(info.tileRadius) / 2)
-        .attr('y', x => crossingPosition(x[1], info.tileRadius)[1] - buildingHeight(info.tileRadius) / 2)
-        .attr('width', buildingWidth(info.tileRadius))
-        .attr('height', buildingHeight(info.tileRadius))
+        .attr('x', x => crossingPosition(x[1], tileRadius)[0] - buildingWidth(tileRadius) / 2)
+        .attr('y', x => crossingPosition(x[1], tileRadius)[1] - buildingHeight(tileRadius) / 2)
+        .attr('width', buildingWidth(tileRadius))
+        .attr('height', buildingHeight(tileRadius))
         // .style('filter', x => 'opacity(100%) brightness(0) saturate(100%) ' + filterColor(x[0]))
         .style('background-color', x => stringColor(x[0]))
         .attr('href', building)

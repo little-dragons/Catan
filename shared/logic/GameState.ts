@@ -6,20 +6,23 @@ export type PublicGameState = {
     board: Board,
     currentPlayer: Color,
     players: PublicPlayer[],
+    dice: [number, number]
 }
 
 export type PrivateGameState = {
     board: Board,
     currentPlayer: Color,
     players: PrivatePlayer[],
-    userMapping: [Color, User][]
+    userMapping: [Color, User][],
+    dice: [number, number]
 }
 
 export function redactGameState(state: PrivateGameState): PublicGameState {
     return {
         board: state.board,
         currentPlayer: state.currentPlayer,
-        players: state.players.map(redactPlayer)
+        players: state.players.map(redactPlayer),
+        dice: state.dice
     }
 }
 

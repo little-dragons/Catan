@@ -1,30 +1,38 @@
 <script setup lang="ts">
-import { type Board } from 'shared';
-import BoardRenderer, { type BoardRendererExposes } from '../drawing/board/Renderer.vue'
-import { minimalFillingTileRadius } from '../drawing/board/Layout';
-import { ref, watch, type Ref } from 'vue';
-import router from '@/misc/Router';
-import { currentAuthUser, currentUser } from '@/socket/Login';
+import { Color, defaultBoard, type RedactedGameState } from 'shared';
+import { ref, type Ref } from 'vue';
+import { currentAuthUser } from '@/socket/Login';
 import { gameSocket } from '@/socket/Socket';
+import StateRenderer from '@/drawing/StateRenderer.vue';
+import { currentRoom } from '@/socket/Room';
 
-const board = ref(null) as Ref<null | Board>
-const renderer = ref(null) as Ref<null | (HTMLElement & BoardRendererExposes<string>)>
+const state = ref(
+    {
+        board: defaultBoard(0),
+        dice: [1, 2],
+        players: [],
+        currentPlayer: Color.Blue,
+        self: {
+            color: Color.Blue,
+            name: 'name',
+            isGuest: true,
+            handCards: [],
+        },
+    } as RedactedGameState
+) as Ref<null | RedactedGameState>
 
 
-if (currentUser.value.status == 'anonymous')
-    router.push({ name: 'home' })
+gameSocket.on('gameEvent', async () => {
+    const res = await gameSocket.emitWithAck('gameState', currentRoom.value!.id, currentAuthUser.value!.authToken)
+    state.value = res as RedactedGameState
+})
 
 
-gameSocket.on('state', st => board.value = st.board)
-watch(currentAuthUser, () => {
-    if (currentAuthUser.value != undefined)
-        gameSocket.emit('stateRequest', currentAuthUser.value.authToken)
-}, { immediate: true })
 
 </script>
 
 <template>
-    <BoardRenderer v-if="board != null" ref="renderer" :board="board" :tile-radius="minimalFillingTileRadius(board, 500, 500)" />
+    <StateRenderer v-if="state != null" v-bind="state" />
     <p v-else>Loading...</p>
 </template>
 

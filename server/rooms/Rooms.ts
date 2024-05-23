@@ -1,9 +1,7 @@
-import { RoomServerEventMap, Room, RoomClientEventMap } from 'shared';
+import { RoomServerEventMap, Room, RoomClientEventMap, newRandomRoomId } from 'shared';
 import { type Socket } from 'socket.io'
 import { getUser } from '../authentication/AuthTokenMap';
 import { initializeGame } from './Games';
-import { v4 as uuidv4 } from 'uuid';
-
 
 const rooms = [] as Room[]
 
@@ -19,11 +17,12 @@ export function acceptRoomEvents(socket: Socket<RoomServerEventMap, RoomClientEv
         }
         const room: Room = {
             name: name,
-            id: uuidv4(),
+            id: newRandomRoomId(),
             users: [user],
             owner: user
         }
         rooms.push(room)
+        socket.join(room.id)
         cb(room)
     })
     socket.on('join', (roomId, userToken, cb) => {

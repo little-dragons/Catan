@@ -1,34 +1,28 @@
 <script setup lang="ts">
-import { onMounted, ref, type Ref } from 'vue';
+import { computed, onMounted, ref, watch, type Ref } from 'vue';
 import { renderBuildings, renderInteractionPoints, renderRoads, renderRobber, renderTiles } from './SvgManipulation';
 import type { Board } from 'shared';
 import { distance } from '../Vector';
-import { interactionPointRadius } from './Layout';
+import { interactionPointRadius, minimalFillingTileRadius } from './Layout';
 
-export type BoardRenderInfo = {
-    board: Board
-    tileRadius: number
-}
-export type BoardRendererExposes<T> = {
-    setInteractionPoints: (points: InteractionPoint<T>[], clicked: ((point: InteractionPoint<T>) => void) | undefined) => void
-}
-
-const props = defineProps<BoardRenderInfo>()
-
-const boardSvg = ref(null) as Ref<null | HTMLElement & SVGElement>
+const props = defineProps<{
+    board: Ref<Board>
+}>()
+const tileRadius = computed(() => minimalFillingTileRadius(props.board.value, 1000, 1000))
+const boardSvg = ref<null | HTMLElement & SVGElement>(null)
 
 function renderEverything() {
-    renderTiles(boardSvg.value!, props)
-    renderRoads(boardSvg.value!, props)
-    renderRobber(boardSvg.value!, props)
-    renderBuildings(boardSvg.value!, props)
+    renderTiles(boardSvg.value!, props.board.value, tileRadius.value)
+    renderRoads(boardSvg.value!, props.board.value, tileRadius.value)
+    renderRobber(boardSvg.value!, props.board.value, tileRadius.value)
+    renderBuildings(boardSvg.value!, props.board.value, tileRadius.value)
 }
 
 export type InteractionPoint<T> = [[number, number], T]
 
 let activeClickHandler = (_: MouseEvent) => {}
 function setInteractionPoints<T>(points: InteractionPoint<T>[], clicked: ((point: InteractionPoint<T>) => void) | undefined) {
-    renderInteractionPoints(boardSvg.value!, props, points)
+    renderInteractionPoints(boardSvg.value!, props.board.value, points, tileRadius.value)
 
     if (clicked == undefined)
         activeClickHandler = _ => {}
@@ -38,25 +32,18 @@ function setInteractionPoints<T>(points: InteractionPoint<T>[], clicked: ((point
                 return
 
             for (const p of points) {
-                if (distance([ev.offsetX, ev.offsetY], p[0]) < interactionPointRadius(props.tileRadius))
+                if (distance([ev.offsetX, ev.offsetY], p[0]) < interactionPointRadius(tileRadius.value))
                     clicked(p)
             }
         }
 }
 
 defineExpose({ setInteractionPoints })
-
+watch(props.board, () => renderEverything())
 onMounted(renderEverything)
 </script>
 
 <template>
-    <svg ref="boardSvg" @click="activeClickHandler"/>
+    <svg viewBox= "0 0 1000 1000" ref="boardSvg" @click="activeClickHandler"/>
 </template>
-
-<style scoped>
-svg {
-    width: 100%;
-    height: 100%;
-}
-</style>
 

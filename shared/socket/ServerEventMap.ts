@@ -9,6 +9,7 @@ export type Callback<T> = (arg: T) => void
 
 export type GameServerEventMap = {
     gameState: (room: RoomId, token: AuthToken, cb: Callback<RedactedGameState | 'invalid token' | 'invalid room id'>) => void
+    rollDice: (room: RoomId, token: AuthToken, cb: Callback<[number, number] | 'invalid token' | 'invalid room id'>) => void
 }
 
 export type RoomServerEventMap = {

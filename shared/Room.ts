@@ -3,6 +3,7 @@ import { User } from './authentication/User';
 import { PublicGameState } from './logic/GameState';
 
 export type RoomId = string
+
 export function newRandomRoomId(): RoomId {
     return uuidv4()
 }

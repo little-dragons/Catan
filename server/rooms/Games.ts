@@ -18,7 +18,8 @@ export function initializeGame(room: Room) {
         currentPlayer: mapping[0][0].color,
         players: mapping.map(pair => pair[0]),
         userMapping: mapping.map(pair => [pair[0].color, pair[1]]),
-        roomId: room.id
+        roomId: room.id,
+        dice: [1, 2],
     }
     games.push(game)
 }
@@ -44,5 +45,33 @@ export function acceptGameEvents(socket: Socket<GameServerEventMap, GameClientEv
         }
 
         cb(redactGameStateFor(game, userMappingSearch[0]))
+    })
+
+    socket.on('rollDice', (room, token, cb) => {
+        if (!checkUser(token)) {
+            cb('invalid token')
+            return
+        }
+
+        const game = games.find(game => game.roomId == room)
+        if (game == undefined) {
+            cb('invalid room id')
+            return
+        }
+
+        const userMappingSearch = game.userMapping.find(pair => checkRealUser(token, pair[1]))
+        if (userMappingSearch == undefined) {
+            cb('invalid room id')
+            return
+        }
+
+        const dice1 = Math.floor(Math.random() * 6) + 1
+        const dice2 = Math.floor(Math.random() * 6) + 1
+        game.dice = [dice1, dice2]
+
+        socket.emit('gameEvent')
+        socket.to(room).emit('gameEvent')
+
+        cb(game.dice)
     })
 }
