@@ -25,6 +25,13 @@ export function addMember(member: MemberLogin): AuthToken | undefined {
 export function checkUser(id: AuthToken): boolean {
     return map.get(id) != undefined
 }
+export function getUser(id: AuthToken): User | undefined {
+    return map.get(id)
+}
+
+export function checkRealUser(id: AuthToken, user: User) {
+    return map.get(id) == user
+}
 
 export function removeUser(id: AuthToken) {
     map.delete(id)

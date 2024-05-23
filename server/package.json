@@ -7,9 +7,11 @@
     "prod": "NODE_ENV=production SSL_DIR=\"/home/catan/ssl/letsencrypt\" ts-node Server.ts"
   },
   "devDependencies": {
+    "@types/uuid": "^9.0.8",
     "ts-node-dev": "^2.0.0"
   },
   "dependencies": {
-    "shared": "^1.0.0"
+    "shared": "^1.0.0",
+    "uuid": "^9.0.1"
   }
 }

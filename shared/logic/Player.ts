@@ -1,6 +1,29 @@
+import { User } from "../authentication/User"
+import { Resource } from "./Resource"
+
+export type PublicPlayer = User & {
+    color: Color,
+    handCardsCount: number,
+}
+
+export type PrivatePlayer = User & {
+    color: Color,
+    handCards: Resource[],
+}
+
+export function redactPlayer(player: PrivatePlayer): PublicPlayer {
+    return {
+        name: player.name,
+        isGuest: player.isGuest,
+        color: player.color,
+        handCardsCount: player.handCards.length,
+    }
+}
+
 export enum Color {
     Yellow, Orange, Red, Green, Blue
 }
+export const allColors: readonly Color[] = [Color.Yellow, Color.Orange, Color.Red, Color.Green, Color.Blue]
 
 export function stringColor(c: Color) {
     switch (c) {

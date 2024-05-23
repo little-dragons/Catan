@@ -3,6 +3,8 @@ import { Server } from "socket.io"
 import { addGuest, checkUser, removeUser } from "./authentication/AuthTokenMap"
 import { createServer, Server as HttpsServer } from 'https'
 import { readFileSync } from  'fs'
+import { acceptRoomEvents } from "./rooms/Rooms"
+import { acceptGameEvents } from "./rooms/Games"
 
 
 let httpsServer: HttpsServer<any, any> = undefined!
@@ -29,11 +31,8 @@ if (process.env.NODE_ENV == 'development')
 else if (process.env.NODE_ENV == 'production')
     httpsServer.listen(SocketPort)
 
-console.log('Server is listening.')
+console.log(`Server is listening on port ${SocketPort}`)
 
-const board = defaultBoard(0)
-board.roads.push([Color.Red, [6,6], [7,6]])
-board.buildings.push([Color.Green, [4,4], BuildingType.Settlement])
 
 io
 .on('connection', socket => {
@@ -58,14 +57,8 @@ io
         removeUser(id)
     })
 
-    socket.on('stateRequest', id => {
-        if (!checkUser(id)) {
-            socket.emit('rejectedRequestInvalidId')
-            return
-        }
-
-        socket.emit('state', { board })
-    })
+    acceptRoomEvents(socket)
+    acceptGameEvents(socket)
 
     socket.on('disconnect', (reason, desc) => {
         if (socket.data != 'anonymous')

@@ -9,7 +9,7 @@ const child = ref<null | InstanceType<typeof CustomInput>>(null)
 
 
 const rules: ((current: string) => true | string)[] = [
-    x => 'Password are not implemented'
+    x => 'Passwords are not implemented'
 ]
 
 defineExpose({

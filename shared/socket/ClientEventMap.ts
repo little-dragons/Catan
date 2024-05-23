@@ -1,12 +1,15 @@
 import { AuthUser } from "../authentication/User"
-import { State } from "../logic/State"
+import { PublicGameState } from "../logic/GameState"
+import { RoomId } from "../Room"
 import { LoginError as LoginError } from "./ConnectionError"
 
-export type ClientEventMap = GameClientEventMap & LoginClientEventMap
+export type ClientEventMap = GameClientEventMap & LoginClientEventMap & RoomClientEventMap
 
-export type GameClientEventMap = {    
-    state: (state: State) => void
-    rejectedRequestInvalidId: () => void
+export type GameClientEventMap = {
+}
+
+export type RoomClientEventMap = {
+    gameStarted: (roomId: RoomId) => void
 }
 
 export type LoginClientEventMap = {

@@ -4,6 +4,7 @@ export * from './logic/Generation';
 export * from './logic/Orientation';
 export * from './logic/Player';
 export * from './logic/Resource';
+export * from './logic/GameState';
 
 export * from './socket/Configuration';
 export * from './socket/ClientEventMap';
@@ -13,3 +14,5 @@ export * from './socket/ConnectionError';
 export * from './authentication/AuthToken';
 export * from './authentication/AuthObject';
 export * from './authentication/User';
+
+export * from './Room';
