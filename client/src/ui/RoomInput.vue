@@ -8,17 +8,9 @@ defineProps<{
 }>()
 const child = ref<null | InstanceType<typeof CustomInput>>(null)
 
-const disallowedNames = [] as string[]
 const namesInUse = [] as string[]
 
-
-
-
 defineExpose({
-    disallowName: (name: string) => {
-        disallowedNames.push(name)
-        child.value?.reevaluate()
-    },
     nameInUse: (name: string) => {
         namesInUse.push(name)
         child.value?.reevaluate()
@@ -27,9 +19,8 @@ defineExpose({
 })
 
 const rules: ((current: string) => true | string)[] = [
-    x => validUsername(x) ? true : 'The username does not meet the criteria',
-    x => disallowedNames.includes(x) ? 'This username is not allowed' : true,
-    x => namesInUse.includes(x) ? 'This username is already in use' : true
+    x => validUsername(x) ? true : 'The room name does not meet the criteria',
+    x => namesInUse.includes(x) ? 'This room name is already in use' : true
 ]
 
 </script>

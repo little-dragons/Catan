@@ -4,6 +4,8 @@ import { ref, watch } from 'vue';
 import UsernameInput from '@/ui/UsernameInput.vue';
 import PasswordInput from '@/ui/PasswordInput.vue';
 import { sendLogin, currentUser } from '@/socket/Login';
+import Modal from '@/ui/Modal.vue'
+import LabeledInput from '@/ui/LabeledInput.vue';
 
 const emit = defineEmits(['close'])
 
@@ -52,40 +54,31 @@ function triggerGuestLogin() {
 
 
 <template>
-    <Teleport to="body">
-        <div class="all">
-            <div class="modal">
-                <div class="close">
-                    <button @click="() => $emit('close')">&times;</button>
-                </div>
-                <p>Please login with your account or create a temporary guest account.</p>
-                <p>Kindly observe that member logins are to be done on the left side while guest logins are done on the right.</p>
-                <div class="forms">
-                    <form class="member-login">
-                        <label for="membername">
-                            <span>Member name:</span>
-                            <UsernameInput ref="membernameInput" tagId="membername"/>
-                        </label>
-                        <label for="password">
-                            <span>Password:</span>
-                            <PasswordInput ref="passwordInput" tagId="password" v-model="password"/>
-                        </label>
-
-                        <input type="button" value="Login" :disabled="membernameInput?.result == null || password == null"></input>
-                    </form>
-                    <div class="vertical-line"/>
-                    <form class="guest-login">
-                        <label for="guestname">
-                            <span>Guest name:</span>
-                            <UsernameInput ref="guestnameInput" tagId="guestname"/>
-                        </label>
-                        <input type="button" value="Guest login" @click="triggerGuestLogin" :disabled="guestnameInput?.result == null"></input>
-                    </form>
-                </div>
+    <Modal @close="$emit('close')">
+        <h1>Login</h1>
+        <p>Please login with your account or create a temporary guest account.</p>
+        <p>Kindly observe that member logins are to be done on the left side while guest logins are done on the right.</p>
+        <div class="forms">
+            <form class="member-login">
+                <LabeledInput label="Member name:" type="space between">
+                    <UsernameInput ref="membernameInput"/>
+                </LabeledInput>
                 
-            </div>
-        </div>
-    </Teleport>
+                <LabeledInput label="Password:" type="space between">
+                    <PasswordInput ref="passwordInput" v-model="password"/>
+                </LabeledInput>
+
+                <input type="button" value="Login" :disabled="membernameInput?.result == null || password == null"></input>
+            </form>
+            <div class="vertical-line"/>
+            <form class="guest-login">
+                <LabeledInput label="Guest name:" type="space between">
+                    <UsernameInput ref="guestnameInput"/>
+                </LabeledInput>
+                <input type="button" value="Guest login" @click="triggerGuestLogin" :disabled="guestnameInput?.result == null"></input>
+            </form>
+        </div>                
+    </Modal>
 </template>
 
 <style scoped>
@@ -95,43 +88,10 @@ p {
     margin-bottom: 0.7rem;
 }
 
-.all {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: var(--color-background-overlay);
-}
-
-.modal {
-    max-width: min(80%, 35rem);
-    width: fit-content;
-    padding: 1rem;
-    margin: auto;
-    margin-top: 10rem;
-    border: var(--modal-border);
-    border-radius: 10px;
-    background-color: var(--modal-background-color);
-}
-
 :invalid {
     background-color: red;
 }
 
-.close {
-    width: fit-content;
-    margin-right: 0;
-    margin-left: auto;
-}
-.close > button {    
-    border-radius: 50%;
-    border-width: 1px;
-    width: 1.25rem;
-}
-.close > button:hover {
-    cursor: pointer;
-}
 
 .forms {
     display: flex;
@@ -158,20 +118,6 @@ form {
 }
 form > * {
     margin-top: 0.5rem;
-}
-
-label {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-}
-
-label > span {
-    white-space: nowrap;
-}
-
-label:deep(:not(span)) {
-    max-width: 6rem;
 }
 
 

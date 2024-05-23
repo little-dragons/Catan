@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { currentAuthUser } from '@/socket/Login';
+import { currentAuthUser, currentUser, sendLogout } from '@/socket/Login';
 import { gameSocket, roomSocket } from '@/socket/Socket';
 import type { Room } from 'shared';
+
 
 let roomId = "undefined!"
 async function startExperiment() {
@@ -41,10 +42,6 @@ async function start3Experiment() {
 
 <template>
     <h1>Home</h1>
-    <p>Hi!</p>
 
-    <RouterLink to="/room/2">Random room</RouterLink>
-    <input type="button" @click="startExperiment">Very dangerous experiment</input>
-    <input type="button" @click="startOtherExperiment">Other experiment</input>
-    <input type="button" @click="start3Experiment">Third experiment</input>
+    <button @click="sendLogout" v-if="currentUser.status == 'logged in'">Logout</button>
 </template>

@@ -3,7 +3,7 @@ import { computed, ref, type Ref } from 'vue';
 import CustomInput from './CustomInput.vue'
 
 defineProps<{
-    tagId: string
+    tagId?: string
 }>()
 const child = ref<null | InstanceType<typeof CustomInput>>(null)
 
