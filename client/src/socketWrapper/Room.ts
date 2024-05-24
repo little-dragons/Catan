@@ -1,5 +1,5 @@
 import router from "@/misc/Router"
-import type { RedactedRoom, RoomId } from "shared"
+import type { RedactedRoom, RoomClientEventMap, RoomId, RoomServerEventMap } from "shared"
 import { computed, readonly, ref } from "vue"
 import { lobbySocket, roomSocket } from "./Socket"
 import { currentAuthUser } from "./Login"
@@ -49,7 +49,7 @@ export async function joinRoomAndRedirect(roomId: RoomId) {
     }
 
     const res = await roomSocket.emitWithAck('join', roomId, currentAuthUser.value!.authToken)
-    if (res == 'invalid token' || res == 'no such room id')
+    if (res == 'invalid token' || res == 'room is ingame' || res == 'user already joined' || res == 'invalid room id')
         return res
 
     currentRoomBacking.value = res
@@ -104,4 +104,23 @@ export async function startRoom() {
         return
     }
     return res
+}
+
+export function acceptRoomEvents() {
+    roomSocket.on('userChange', newUsers => {
+        if (currentRoomBacking.value == undefined) {
+            console.warn('Received user change event, but the user is in no room. Discarding')
+            return
+        }
+
+        // dangerous unchecked conversion
+        currentRoomBacking.value.users = newUsers
+    })
+
+    roomSocket.on('closed', () => {
+        if (router.currentRoute.value.name == 'room') {
+            router.push({ name: 'home' })
+        }
+        currentRoomBacking.value = undefined
+    })
 }

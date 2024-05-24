@@ -16,8 +16,8 @@ export type GameServerEventMap = {
 export type RoomServerEventMap = {
     lobbyList: (cb: Callback<LobbyRoom[]>) => void
     createAndJoin: (roomName: string, token: AuthToken, cb: Callback<LobbyRoom | 'room name in use' | 'invalid token'>) => void
-    join: (roomId: RoomId, token: AuthToken, cb: Callback<LobbyRoom | 'no such room id' | 'invalid token'>) => void
-    leave: (roomId: RoomId, token: AuthToken, cb: Callback<true | 'invalid token'>) => void
+    join: (roomId: RoomId, token: AuthToken, cb: Callback<LobbyRoom | 'invalid room id' | 'invalid token' | 'room is ingame' | 'user already joined'>) => void
+    leave: (roomId: RoomId, token: AuthToken, cb: Callback<true | 'invalid token' | 'invalid room id'>) => void
 }
 
 export type LobbyServerEventMap = {

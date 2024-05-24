@@ -1,8 +1,21 @@
-import { AuthUser, LoginClientEventMap, LoginServerEventMap } from 'shared';
+import { AuthToken, AuthUser, LoginClientEventMap, LoginServerEventMap, RoomId } from 'shared';
 import { type Socket } from 'socket.io'
 import { addGuest, removeUser } from './AuthTokenMap';
+import { leaveRoom } from '../rooms/RoomManager';
 
-export function acceptLoginEvents(socket: Socket<LoginServerEventMap, LoginClientEventMap, {}, AuthUser | 'anonymous'>) {
+type LoginSocket = Socket<LoginServerEventMap, LoginClientEventMap, {}, { userToken?: AuthToken, roomId?: RoomId }>
+
+export function logout(socket: LoginSocket) {
+    if (socket.data.userToken == undefined)
+        return
+
+    if (socket.data.roomId != undefined)
+        leaveRoom(socket, socket.data.roomId, socket.data.userToken)
+
+    removeUser(socket.data.userToken)
+}
+
+export function acceptLoginEvents(socket: LoginSocket) {
     socket.on('login', request => {
         if (request.type == 'guest') {
             const token = addGuest(request)
@@ -10,7 +23,7 @@ export function acceptLoginEvents(socket: Socket<LoginServerEventMap, LoginClien
                 socket.emit('rejectLogin', 'name in use')
             else {
                 const user: AuthUser = { isGuest: true, name: request.name, authToken: token }
-                socket.data = user
+                socket.data.userToken = token
                 socket.emit('loggedIn', user)
             }
         }
@@ -21,7 +34,7 @@ export function acceptLoginEvents(socket: Socket<LoginServerEventMap, LoginClien
     })
 
     socket.on('logout', id => {
-        removeUser(id)
-        socket.data = 'anonymous'
+        logout(socket)
+        socket.data = { }
     })
 }

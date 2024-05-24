@@ -42,11 +42,12 @@ const showLoginModal = ref(false)
 .navbar {
     display: flex;
     flex-direction: row;
-    width: 50%;
-    padding-left: 50%;
-    justify-content: space-between;
+    gap: 4rem;
     background-color: var(--secondary-background-color);
     border-bottom: var(--mute-border);
+    justify-content: flex-end;
+    padding-right: 1rem;
+    padding-left: 1rem;
 }
 
 .navbar > div {

@@ -1,17 +1,15 @@
-import { ClientEventMap, ServerEventMap, SocketPort, AuthUser } from "shared"
+import { ClientEventMap, ServerEventMap, SocketPort, AuthUser, AuthToken, RoomId } from "shared"
 import { Server } from "socket.io"
-import { addGuest, removeUser } from "./authentication/AuthTokenMap"
+import { removeUser } from "./authentication/AuthTokenMap"
 import { createServer, Server as HttpsServer } from 'https'
 import { readFileSync } from  'fs'
 import { acceptLobbyEvents } from "./rooms/LobbyEvents"
 import { acceptGameEvents } from "./rooms/GameEvents"
-import { acceptRoomEvents } from "./rooms/RoomManager"
-import { acceptLoginEvents } from "./authentication/LoginEvents"
+import { acceptRoomEvents, leaveRoom } from "./rooms/RoomManager"
+import { acceptLoginEvents, logout } from "./authentication/LoginEvents"
 import { instrument } from "@socket.io/admin-ui"
+import { DataType, isDevelopment, isProduction } from "./Common"
 
-
-const isDevelopment = process.env.NODE_ENV == 'development'
-const isProduction = process.env.NODE_ENV == 'production'
 
 let httpsServer: HttpsServer<any, any> = undefined!
 if (isDevelopment)
@@ -21,16 +19,13 @@ else if (isProduction)
         key: readFileSync(`${process.env.SSL_DIR}/privkey.pem`),
         cert: readFileSync(`${process.env.SSL_DIR}/fullchain.pem`)
     })
-else
-    console.error('NO ENVIRONMENT WAS GIVEN, CANNOT PROCEED')
 
-const io = new Server<ServerEventMap, ClientEventMap, {}, AuthUser | 'anonymous'>(httpsServer, {
+const io = new Server<ServerEventMap, ClientEventMap, {}, DataType>(httpsServer, {
     cors: {
         origin: [ 'https://admin.socket.io', 'http://localhost:5173', 'https://ichigancs.com:5173' ],
         allowedHeaders: ['Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
         credentials: true
-    },
-    
+    }    
 })
 
 if (isDevelopment)
@@ -64,7 +59,6 @@ io.on('connection', socket => {
     acceptGameEvents(socket)
 
     socket.on('disconnect', (reason, desc) => {
-        if (socket.data != 'anonymous')
-            removeUser(socket.data.authToken)
+        logout(socket)
     })
 })

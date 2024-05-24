@@ -29,8 +29,8 @@ export function getUser(id: AuthToken): User | undefined {
     return map.get(id)
 }
 
-export function checkRealUser(id: AuthToken, user: User) {
-    return map.get(id) == user
+export function checkRealUser(id: AuthToken, name: string) {
+    return map.get(id)?.name == name
 }
 
 export function removeUser(id: AuthToken) {

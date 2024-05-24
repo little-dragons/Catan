@@ -1,6 +1,6 @@
 import { GameClientEventMap, GameServerEventMap, redactGameStateFor } from "shared";
 import { type Socket } from 'socket.io'
-import { checkRealUser, checkUser } from "../authentication/AuthTokenMap";
+import { checkRealUser as checkName, checkUser } from "../authentication/AuthTokenMap";
 import { games } from "./RoomManager";
 
 
@@ -18,7 +18,7 @@ export function acceptGameEvents(socket: Socket<GameServerEventMap, GameClientEv
             return
         }
 
-        const userMappingSearch = game.users.find(pair => checkRealUser(token, pair[0]))
+        const userMappingSearch = game.users.find(pair => checkName(token, pair[0].name))
         if (userMappingSearch == undefined) {
             cb('invalid room id')
             return
@@ -39,7 +39,7 @@ export function acceptGameEvents(socket: Socket<GameServerEventMap, GameClientEv
             return
         }
 
-        const userMappingSearch = game.users.find(pair => checkRealUser(token, pair[0]))
+        const userMappingSearch = game.users.find(pair => checkName(token, pair[0].name))
         if (userMappingSearch == undefined) {
             cb('invalid room id')
             return
@@ -67,7 +67,7 @@ export function acceptGameEvents(socket: Socket<GameServerEventMap, GameClientEv
             return
         }
 
-        const userMappingSearch = game.users.find(pair => checkRealUser(token, pair[0]))
+        const userMappingSearch = game.users.find(pair => checkName(token, pair[0].name))
         if (userMappingSearch == undefined) {
             cb('invalid room id')
             return
