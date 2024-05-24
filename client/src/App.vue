@@ -32,15 +32,32 @@ const showLoginModal = ref(false)
 </template>
 
 <style scoped>
+@import 'assets/base.css';
+
 .navbar {
     display: flex;
     flex-direction: row;
-    width: 100%;
+    width: 50%;
+    padding-left: 50%;
     justify-content: space-between;
+    background-color: var(--secondary-background-color);
+    border-bottom: var(--mute-border);
+}
+
+.navbar > div {
+    padding: 1rem 0;
+}
+.navbar > div > a {
+    color: rgb(6, 6, 141);
+    text-decoration: none;
 }
 
 p {
     margin: 0;
+}
+
+main {    
+    padding: 0 40px;
 }
 
 

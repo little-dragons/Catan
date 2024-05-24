@@ -24,7 +24,7 @@ const emit = defineEmits(['close'])
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: var(--color-background-overlay);
+    background-color: var(--modal-background-overlay);
 }
 
 .modal {

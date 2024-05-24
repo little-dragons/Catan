@@ -1,22 +1,47 @@
 :root {
-    --color-background: #ffffff;
-    --color-background-overlay: #f2f2f2af;
+    --primary-background-color: #ffffff;
+    --secondary-background-color: rgb(238, 238, 238);
 
+    --border-background-color: var(--secondary-background-color);
+    --border-background-color-hovered: rgb(207, 207, 207);
+    --border-background-color-clicked: rgb(185, 185, 185);
+
+    --outside-background-color: rgb(223, 237, 255);
+    --mute-border: 1px solid rgb(169, 169, 169);
+
+    
     --modal-background-color: #ffffff;
+    --modal-background-overlay: #f2f2f2af;
     --modal-border: 1px solid black;
-
 }
+
+.default-button-colors {
+    background-color: var(--border-background-color);
+}
+.default-button-colors:hover {
+    background-color: var(--border-background-color-hovered);
+}
+.default-button-colors:active {
+    background-color: var(--border-background-color-clicked);
+}
+
 
 @media (prefers-color-scheme: dark) {
     :root {
     }
 }
 
-
+html {
+    background-color: var(--outside-background-color);
+    height: 100%;
+}
 body {
-    max-width: min(40rem, 1200px);
+    max-width: min(60rem, 1500px);
+    height: 100%;
+    border-left: var(--mute-border);
+    border-right: var(--mute-border);
     margin: auto;
-    background: var(--color-background);
+    background: var(--primary-background-color);
     font-family:
         Inter,
         -apple-system,
