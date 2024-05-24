@@ -3,9 +3,9 @@ import type { GuestLogin, MemberLogin } from 'shared';
 import { ref, watch } from 'vue';
 import UsernameInput from '@/ui/UsernameInput.vue';
 import PasswordInput from '@/ui/PasswordInput.vue';
-import { sendLogin, currentUser } from '@/socket/Login';
 import Modal from '@/ui/Modal.vue'
 import LabeledInput from '@/ui/LabeledInput.vue';
+import { currentUser, sendLogin } from '@/socketWrapper/Login';
 
 const emit = defineEmits(['close'])
 

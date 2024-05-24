@@ -3,10 +3,10 @@ import LabeledInput from '@/ui/LabeledInput.vue';
 import RoomInput from '@/ui/RoomInput.vue';
 import Modal from '@/ui/Modal.vue'
 import { ref } from 'vue';
-import { roomSocket } from '@/socket/Socket';
-import { currentAuthUser } from '@/socket/Login';
 import router from '@/misc/Router';
-import { createAndJoinRoom, currentRoom } from '@/socket/Room';
+import { currentAuthUser } from '@/socketWrapper/Login';
+import { createRoomAndRedirect } from '@/socketWrapper/Room';
+
 
 const emit = defineEmits(['close'])
 
@@ -16,7 +16,7 @@ async function buttonClick() {
     if (roomInput.value?.result == null || currentAuthUser.value == undefined)
         return
 
-    const res = await createAndJoinRoom(roomInput.value.result, currentAuthUser.value.authToken)
+    const res = await createRoomAndRedirect(roomInput.value.result)
     if (res == 'room name in use') {
         roomInput.value.nameInUse(roomInput.value.result)
         return
@@ -26,7 +26,7 @@ async function buttonClick() {
         return
     }
 
-    router.push({ name: `room`, params: { id: res.id } })
+    router.push({ name: `room` })
     emit('close')
 }
 

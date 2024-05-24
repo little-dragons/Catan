@@ -7,9 +7,9 @@ import threeDie from '@/assets/dice/three-die.svg'
 import fourDie from '@/assets/dice/four-die.svg'
 import fiveDie from '@/assets/dice/five-die.svg'
 import sixDie from '@/assets/dice/six-die.svg'
-import { gameSocket, roomSocket } from '@/socket/Socket';
-import { currentAuthUser } from '@/socket/Login';
-import { currentRoom } from '@/socket/Room';
+import { gameSocket, lobbySocket, roomSocket } from '@/socketWrapper/Socket';
+import { currentAuthUser } from '@/socketWrapper/Login';
+import { currentRoom } from '@/socketWrapper/Room';
 
 
 function diceToIcon(die: number): string {
@@ -38,7 +38,7 @@ const svg = ref<null | HTMLElement & SVGElement>(null)
 
 async function clickHandler() {
     //TODO
-    await roomSocket.emitWithAck('startGame', currentRoom.value!.id, currentAuthUser.value!.authToken)
+    await lobbySocket.emitWithAck('startGame', currentRoom.value!.id, currentAuthUser.value!.authToken)
     await gameSocket.emitWithAck('rollDice', currentRoom.value!.id, currentAuthUser.value!.authToken)
 }
 

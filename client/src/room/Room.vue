@@ -1,38 +1,27 @@
 <script setup lang="ts">
-import { Color, defaultBoard, type RedactedGameState } from 'shared';
-import { ref, type Ref } from 'vue';
-import { currentAuthUser } from '@/socket/Login';
-import { gameSocket } from '@/socket/Socket';
+import { type RedactedGameState } from 'shared';
 import StateRenderer from '@/drawing/StateRenderer.vue';
-import { currentRoom } from '@/socket/Room';
+import { currentRoom } from '@/socketWrapper/Room';
+import router from '@/misc/Router';
+import Lobby from './Lobby.vue';
 
-const state = ref(
-    {
-        board: defaultBoard(0),
-        dice: [1, 2],
-        players: [],
-        currentPlayer: Color.Blue,
-        self: {
-            color: Color.Blue,
-            name: 'name',
-            isGuest: true,
-            handCards: [],
-        },
-    } as RedactedGameState
-) as Ref<null | RedactedGameState>
-
-
-gameSocket.on('gameEvent', async () => {
-    const res = await gameSocket.emitWithAck('gameState', currentRoom.value!.id, currentAuthUser.value!.authToken)
-    state.value = res as RedactedGameState
-})
-
-
+if (currentRoom.value == undefined) {
+    alert('you have to be in a room, to view this page, redirecting')
+    router.push({ name: 'home' })
+}
 
 </script>
 
 <template>
-    <StateRenderer v-if="state != null" v-bind="state" />
-    <p v-else>Loading...</p>
+    <div v-if="currentRoom?.type == 'lobby'">
+        <Lobby />
+    </div>
+    <div v-else-if="currentRoom?.type == 'ingame'">
+        <StateRenderer v-bind="currentRoom.state as unknown as RedactedGameState" />
+    </div>
+    <div v-else>
+        <p>This is not supposed to be shown. Try reloading the page.</p>
+    </div>
+    
 </template>
 

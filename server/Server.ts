@@ -1,16 +1,22 @@
-import { BuildingType, ClientEventMap, Color, ServerEventMap, SocketPort, AuthUser, defaultBoard } from "shared"
+import { ClientEventMap, ServerEventMap, SocketPort, AuthUser } from "shared"
 import { Server } from "socket.io"
-import { addGuest, checkUser, removeUser } from "./authentication/AuthTokenMap"
+import { addGuest, removeUser } from "./authentication/AuthTokenMap"
 import { createServer, Server as HttpsServer } from 'https'
 import { readFileSync } from  'fs'
-import { acceptRoomEvents } from "./rooms/Rooms"
-import { acceptGameEvents } from "./rooms/Games"
+import { acceptLobbyEvents } from "./rooms/LobbyEvents"
+import { acceptGameEvents } from "./rooms/GameEvents"
+import { acceptRoomEvents } from "./rooms/RoomManager"
+import { acceptLoginEvents } from "./authentication/LoginEvents"
+import { instrument } from "@socket.io/admin-ui"
 
+
+const isDevelopment = process.env.NODE_ENV == 'development'
+const isProduction = process.env.NODE_ENV == 'production'
 
 let httpsServer: HttpsServer<any, any> = undefined!
-if (process.env.NODE_ENV == 'development')
+if (isDevelopment)
     httpsServer = createServer()
-else if (process.env.NODE_ENV == 'production')
+else if (isProduction)
     httpsServer = createServer({
         key: readFileSync(`${process.env.SSL_DIR}/privkey.pem`),
         cert: readFileSync(`${process.env.SSL_DIR}/fullchain.pem`)
@@ -20,44 +26,32 @@ else
 
 const io = new Server<ServerEventMap, ClientEventMap, {}, AuthUser | 'anonymous'>(httpsServer, {
     cors: {
-        origin: '*',
-        allowedHeaders: ['Access-Control-Allow-Origin']
+        origin: [ 'https://admin.socket.io', 'http://localhost:5173' ],
+        allowedHeaders: ['Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
+        credentials: true
     },
     
 })
 
-if (process.env.NODE_ENV == 'development')
+if (isDevelopment)
+    instrument(io, {
+        auth: false,
+        mode: 'development'
+    })
+
+if (isDevelopment)
     io.listen(SocketPort)
-else if (process.env.NODE_ENV == 'production')
+else if (isProduction)
     httpsServer.listen(SocketPort)
 
 console.log(`Server is listening on port ${SocketPort}`)
 
 
-io
-.on('connection', socket => {
-    socket.on('login', request => {
-        if (request.type == 'guest') {
-            const token = addGuest(request)
-            if (token == undefined)
-                socket.emit('rejectLogin', 'name in use')
-            else {
-                const user: AuthUser = { isGuest: true, name: request.name, authToken: token }
-                socket.data = user
-                socket.emit('loggedIn', user)
-            }
-        }
-        else if (request.type == 'member')
-            socket.emit('rejectLogin', 'not implemented')
-        else 
-            socket.emit('rejectLogin', 'invalid auth object')
-    })
-
-    socket.on('logout', id => {
-        removeUser(id)
-    })
-
+io.on('connection', socket => {
+   
+    acceptLoginEvents(socket)
     acceptRoomEvents(socket)
+    acceptLobbyEvents(socket)
     acceptGameEvents(socket)
 
     socket.on('disconnect', (reason, desc) => {

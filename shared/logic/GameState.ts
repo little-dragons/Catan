@@ -1,23 +1,24 @@
-import { User } from "../authentication/User"
 import { Board } from "./Board"
-import { Color, PrivatePlayer, PublicPlayer, redactPlayer } from "./Player"
+import { Color, FullPlayer, RedactedPlayer, redactPlayer } from "./Player"
 
 export type PublicGameState = {
     board: Board,
     currentPlayer: Color,
-    players: PublicPlayer[],
+    players: RedactedPlayer[],
     dice: [number, number]
 }
+export type RedactedGameState = PublicGameState & {
+    self: FullPlayer
+}
 
-export type PrivateGameState = {
+export type FullGameState = {
     board: Board,
     currentPlayer: Color,
-    players: PrivatePlayer[],
-    userMapping: [Color, User][],
+    players: FullPlayer[],
     dice: [number, number]
 }
 
-export function redactGameState(state: PrivateGameState): PublicGameState {
+export function redactGameState(state: FullGameState): PublicGameState {
     return {
         board: state.board,
         currentPlayer: state.currentPlayer,
@@ -26,13 +27,9 @@ export function redactGameState(state: PrivateGameState): PublicGameState {
     }
 }
 
-export function redactGameStateFor(state: PrivateGameState, color: Color): RedactedGameState {
+export function redactGameStateFor(state: FullGameState, color: Color): RedactedGameState {
     return {
         ...redactGameState(state),
         self: state.players.find(player => player.color == color)!
     }
-}
-
-export type RedactedGameState = PublicGameState & {
-    self: PrivatePlayer
 }

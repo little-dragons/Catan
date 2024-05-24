@@ -1,20 +1,17 @@
-import { User } from "../authentication/User"
 import { Resource } from "./Resource"
 
-export type PublicPlayer = User & {
+export type RedactedPlayer = {
     color: Color,
     handCardsCount: number,
 }
 
-export type PrivatePlayer = User & {
+export type FullPlayer = {
     color: Color,
     handCards: Resource[],
 }
 
-export function redactPlayer(player: PrivatePlayer): PublicPlayer {
+export function redactPlayer(player: FullPlayer): RedactedPlayer {
     return {
-        name: player.name,
-        isGuest: player.isGuest,
         color: player.color,
         handCardsCount: player.handCards.length,
     }

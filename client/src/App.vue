@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import { currentUser } from './socketWrapper/Login';
+import { currentLobbyRoom, currentRoom } from './socketWrapper/Room';
+import {fetchNewState} from './socketWrapper/Game';
 import { ref } from 'vue';
-import { currentUser } from './socket/Login';
 import LoginModal from './home/LoginModal.vue'
 
 const showLoginModal = ref(false)
@@ -11,10 +13,13 @@ const showLoginModal = ref(false)
 <template>
     <div class="navbar">
         <div>
-            <RouterLink :to="{name: 'home'}">Home</RouterLink>
+            <RouterLink :to="{ name: 'home' }">Home</RouterLink>
         </div>
         <div>
-            <RouterLink :to="{name: 'roomList'}">Room List</RouterLink>
+            <RouterLink :to="{ name: 'roomList' }">Room List</RouterLink>
+        </div>
+        <div v-if="currentRoom != undefined">
+            <RouterLink :to="{ name: 'room' }">Current room</RouterLink>
         </div>
         <div>
             <p v-if="currentUser.status == 'anonymous'">Not logged in. <span @click="() => showLoginModal = true" class="login-button">Login</span></p>

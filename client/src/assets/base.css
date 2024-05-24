@@ -18,10 +18,10 @@
 .default-button-colors {
     background-color: var(--border-background-color);
 }
-.default-button-colors:hover {
+.default-button-colors:hover:enabled {
     background-color: var(--border-background-color-hovered);
 }
-.default-button-colors:active {
+.default-button-colors:active:enabled {
     background-color: var(--border-background-color-clicked);
 }
 
