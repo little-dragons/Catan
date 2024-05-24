@@ -26,7 +26,7 @@ else
 
 const io = new Server<ServerEventMap, ClientEventMap, {}, AuthUser | 'anonymous'>(httpsServer, {
     cors: {
-        origin: [ 'https://admin.socket.io', 'http://localhost:5173' ],
+        origin: [ 'https://admin.socket.io', 'http://localhost:5173', 'https://ichigancs.com:5173' ],
         allowedHeaders: ['Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
         credentials: true
     },
@@ -37,6 +37,15 @@ if (isDevelopment)
     instrument(io, {
         auth: false,
         mode: 'development'
+    })
+if (isProduction && process.env.SOCKET_ADMIN_AUTH)
+    instrument(io, {
+        auth: {
+            type: 'basic',
+            username: readFileSync(`${process.env.SOCKET_ADMIN_AUTH}/username.txt`).toString(),
+            password: readFileSync(`${process.env.SOCKET_ADMIN_AUTH}/password.txt`).toString()
+        },
+        mode: 'production'
     })
 
 if (isDevelopment)
