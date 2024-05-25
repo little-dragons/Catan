@@ -56,6 +56,5 @@ export function acceptGameEvents() {
         }
     
         currentRoomBacking.value = res
-    })
-    
+    })    
 }

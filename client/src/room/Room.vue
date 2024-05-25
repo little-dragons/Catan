@@ -13,15 +13,8 @@ if (currentRoom.value == undefined) {
 </script>
 
 <template>
-    <div v-if="currentRoom?.type == 'lobby'">
-        <Lobby />
-    </div>
-    <div v-else-if="currentRoom?.type == 'ingame'">
-        <StateRenderer v-bind="currentRoom.state as unknown as RedactedGameState" />
-    </div>
-    <div v-else>
-        <p>This is not supposed to be shown. Try reloading the page.</p>
-    </div>
-    
+    <Lobby v-if="currentRoom?.type == 'lobby'"/>
+    <StateRenderer v-else-if="currentRoom?.type == 'ingame'" v-bind="currentRoom.state as unknown as RedactedGameState" />
+    <p v-else>This is not supposed to be shown. Try reloading the page.</p>
 </template>
 

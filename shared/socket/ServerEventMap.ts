@@ -2,6 +2,7 @@ import { AuthToken } from "../authentication/AuthToken"
 import { AnyLogin } from "../authentication/AuthObject"
 import { LobbyRoom, RedactedGameRoom, RoomId } from "../Room"
 import { RedactedGameState } from "../logic/GameState"
+import { Settings } from "../logic/Settings"
 
 export type ServerEventMap = LoginServerEventMap & RoomServerEventMap & GameServerEventMap
 
@@ -22,6 +23,12 @@ export type RoomServerEventMap = {
 
 export type LobbyServerEventMap = {
     startGame: (roomId: RoomId, token: AuthToken, cb: Callback<true | 'no such room id' | 'not the owner' | 'invalid token'>) => void
+    changeSettings: <Property extends keyof Settings>(
+        roomId: RoomId, 
+        token: AuthToken, 
+        setting: Property,
+        value: Settings[Property],
+        cb: Callback<true | 'invalid room id' | 'not the owner' | 'invalid token' | 'room is ingame'>) => void
 }
 
 export type LoginServerEventMap = {

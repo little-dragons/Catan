@@ -2,9 +2,10 @@ import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, FullPlayer, User,
 import { type Socket } from 'socket.io'
 import { checkRealUser, getUser } from "../authentication/AuthTokenMap"
 import { DataType } from "../Common"
+import { defaultSettings } from "shared/logic/Settings"
 
 const rooms = [] as FullRoom[]
-export function loobies() { return rooms.filter(x => x.type == 'lobby') as LobbyRoom[] }
+export function lobbies() { return rooms.filter(x => x.type == 'lobby') as LobbyRoom[] }
 export function games() { return rooms.filter(x => x.type == 'ingame') as FullGameRoom[] }
 
 type RoomSocket = Socket<RoomServerEventMap, RoomClientEventMap, {}, DataType>
@@ -53,7 +54,8 @@ export function createRoomWithOwner(socket: RoomSocket, name: string, token: Aut
         name: name,
         id: newRandomRoomId(),
         users: [user],
-        owner: user
+        owner: user,
+        settings: defaultSettings()
     }
     rooms.push(room)
     socket.join(room.id)
@@ -132,7 +134,7 @@ export function closeRoom(socket: RoomSocket, id: RoomId) {
 
 export function acceptRoomEvents(socket: RoomSocket) {
     socket.on('lobbyList', cb => {
-        cb(loobies())
+        cb(lobbies())
     })
 
     socket.on('createAndJoin', (name, token, cb) => {

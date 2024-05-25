@@ -57,6 +57,12 @@ export async function joinRoomAndRedirect(roomId: RoomId) {
     return res
 }
 
+function redirectOutOfRoom() {
+    if (router.currentRoute.value.name == 'room') {
+        router.push({ name: 'home' })
+    }
+}
+
 export async function leaveRoomAndRedirect() {
     if (currentRoomBacking.value == undefined) {
         console.log('Tried to leave room, but the user is in no room.')
@@ -71,7 +77,7 @@ export async function leaveRoomAndRedirect() {
     if (res == true)
         currentRoomBacking.value = undefined
 
-    router.push({ name: 'home' })
+    redirectOutOfRoom()
     return res
 }
 
@@ -118,9 +124,7 @@ export function acceptRoomEvents() {
     })
 
     roomSocket.on('closed', () => {
-        if (router.currentRoute.value.name == 'room') {
-            router.push({ name: 'home' })
-        }
+        redirectOutOfRoom()
         currentRoomBacking.value = undefined
     })
 }

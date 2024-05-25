@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { currentAuthUser } from '@/socketWrapper/Login';
 import { leaveRoomAndRedirect, startRoom, currentLobbyRoom } from '@/socketWrapper/Room';
+import Setting from './Setting.vue'
 
 
 if (currentLobbyRoom.value == undefined || currentAuthUser.value == undefined)
@@ -8,10 +9,57 @@ if (currentLobbyRoom.value == undefined || currentAuthUser.value == undefined)
 </script>
 
 <template>
-    <h1>Lobby</h1>
-    <button @click="() => leaveRoomAndRedirect()">Leave room</button>
-    <button @click="() => startRoom()">Start room</button>
-    <p v-for="user in currentLobbyRoom?.users">
-        {{ user.name }}
-    </p>
+    <div v-if="currentLobbyRoom == undefined || currentAuthUser == undefined">
+        <p>Invalid config, progamming error. Please reload the page.</p>
+    </div>
+
+    <h1 v-else>Lobby - {{ currentLobbyRoom?.name }}</h1>
+    <div class="container">
+        <div class="left">            
+            <div class="default-grid-header-layout grid-columns">
+                <p>User name</p>
+            </div>
+            <div v-for="user in currentLobbyRoom?.users" class="grid-columns default-grid-layout">
+                <p>{{ user.name }}</p>
+            </div>
+        </div>
+        <div class="right">
+            <Setting name="requiredVictoryPoints" :value="currentLobbyRoom!.settings.requiredVictoryPoints" :allowChange="false"/>
+            <Setting name="longestRoadMinimum" :value="currentLobbyRoom!.settings.longestRoadMinimum" :allowChange="false"/>
+            <button @click="() => leaveRoomAndRedirect()">Leave room</button>
+            <button @click="() => startRoom()">Start room</button>
+        </div>
+    </div>
+    
 </template>
+
+<style scoped>
+@import '../assets/base.css';
+
+.container {
+    display: grid;
+    grid-template-rows: 100%;
+    grid-template-columns: 55% auto;
+    column-gap: 50px;
+    margin-top: 30px;
+}
+
+.left {
+
+}
+
+.right {
+    background-color: var(--secondary-background-color);
+    border-radius: 10px;
+    border: var(--mute-border);
+    padding: 10px;
+}
+
+.right > *:not(:first-child) {
+    margin-top: 10px;
+}
+
+.grid-columns {
+    grid-template-columns: 50% 50%;
+}
+</style>

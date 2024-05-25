@@ -13,7 +13,7 @@ function debugLogin() {
     })
 
     watch(currentAuthUser, () => {
-        createRoomAndRedirect('debugRoom${newRandomRoomId()}')
+        createRoomAndRedirect(`debugRoom${newRandomRoomId()}`)
     }, { once: true })
 }
 
