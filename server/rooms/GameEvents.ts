@@ -78,6 +78,7 @@ export function acceptGameEvents(socket: Socket<GameServerEventMap, GameClientEv
             name: game.name,
             owner: game.owner,
             users: game.users,
+            settings: game.settings,
             type: 'ingame',
             state: redactGameStateFor(game.state, userMappingSearch[1])
         })
