@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<svg width="200" height="300" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+ <defs>undefinedundefinedundefined</defs>
+ <g class="layer">
+  <title>Layer 1</title>
+  <rect fill="#800000" height="300" id="svg_1" rx="5" ry="5" stroke="#000000" stroke-linejoin="round" stroke-width="2" width="200" x="-1" y="1"/>
+  <g id="svg_127">
+   <path d="m108.96,100.98l51.92,82.38l26.58,-9.1l-52.67,-79.65l-25.83,6.37l0,0l-0.01,0l0.01,0z" fill="#963b12" id="svg_128" stroke="#000000" stroke-linejoin="round" stroke-width="2"/>
+   <path d="m109.33,101.44l-5.08,12.77l50.57,84.14c0,0 6.06,-14.91 6.06,-14.79c0,0.12 -51.56,-82.13 -51.56,-82.13l0.01,0.01z" fill="#b73333" id="svg_129" stroke="#000000" stroke-linejoin="round" stroke-width="2"/>
+   <path d="m154.45,198.11l26.08,-8.85l7.17,-15.01l-26.96,9.1l-6.3,14.76l0,0l0.01,0z" fill="#2d1600" id="svg_130" stroke="#000000" stroke-linejoin="round" stroke-width="2"/>
+   <path d="m14.28,192.73c-0.13,0.11 120.51,0.77 120.5,0.67c-0.01,-0.1 -1.11,-27.08 -1.12,-27.18c-0.01,-0.1 -119.68,1.02 -119.68,0.92c-0.01,-0.1 -0.42,24.62 -0.69,25.77l0.98,-0.19l0.01,0.01z" fill="#b73333" id="svg_131" stroke="#000000" stroke-linejoin="round" stroke-width="2"/>
+   <path d="m133.69,165.73l0.74,-0.81l-0.74,0.81z" fill="none" id="svg_132" stroke="#000000" stroke-linejoin="round" stroke-width="2"/>
+   <path d="m10.87,139.61l13.68,-13.58l84.99,-2.72c0,0 8.77,13.58 8.77,13.58c0,0 -107.44,2.72 -107.44,2.72z" fill="#963b12" id="svg_133" stroke="#000000" stroke-linejoin="round" stroke-width="2"/>
+   <path d="m12.81,168.87l-2.52,-29.36l107.44,-2.6c0,0 5.03,8.26 5.03,8.26c0,0 1.98,17.49 1.89,17.39c-0.09,-0.1 -108.61,6.4 -109.72,6.15c-1.11,-0.25 -1.1,0.17 -1.45,0.06c-0.35,-0.11 -0.17,0.24 -0.66,0.11l-0.01,-0.01z" fill="#b73333" id="svg_134" stroke="#000000" stroke-linejoin="round" stroke-width="2"/>
+   <path d="m124.63,162.3l6.46,-3.27l-8.23,-13.7l1.79,16.98l0,0l-0.01,-0.01l-0.01,0z" fill="#2d1600" id="svg_135" stroke="#000000" stroke-linejoin="round" stroke-width="2"/>
+   <path d="m51.16,166.63c5.53,-0.46 73.46,-4.21 73.37,-4.31c-0.09,-0.1 6.27,-3.32 6.18,-3.43c-0.09,-0.1 3.79,5.54 3.79,5.54c0,0 -1.13,1.93 -1.23,1.83c-0.09,-0.1 -87.65,0.83 -82.13,0.38l0,0l0.01,-0.01l0.01,0z" fill="#bf5d33" id="svg_136" stroke="#000000" stroke-linejoin="round" stroke-width="2"/>
+   <path d="m134.75,193.38c-0.18,0.03 12.98,-6.86 12.89,-6.96c-0.09,-0.1 -13.26,-21.88 -13.36,-21.98c-0.09,-0.1 -0.9,1.88 -0.99,1.77c-0.09,-0.1 1.63,27.14 1.44,27.17l0,0l0.01,0l0.01,0z" fill="#2d1600" id="svg_137" stroke="#000000" stroke-linejoin="round" stroke-width="2"/>
+  </g>
+ </g>
+</svg>
