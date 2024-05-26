@@ -4,7 +4,7 @@
  <defs>undefinedundefinedundefined</defs>
  <g class="layer">
   <title>Layer 1</title>
-  <rect fill="#f7cb2e" height="300" id="svg_1" rx="5" ry="5" stroke="#000000" stroke-linejoin="round" stroke-width="2" width="200" x="-1" y="1"/>
+  <rect fill="#f7cb2e" height="296" id="svg_1" rx="5" ry="5" stroke="#000000" stroke-linejoin="round" stroke-width="2" width="196" x="2" y="2"/>
   <g id="svg_100">
    <ellipse cx="129.17" cy="75.86" fill="#ffd800" id="svg_101" rx="4.06" ry="9.86" stroke="#000000" stroke-width="3"/>
    <ellipse cx="204.69" cy="160.3" fill="#ffd800" id="svg_102" rx="5.62" ry="12.19" stroke="#000000" stroke-width="3" transform="matrix(0.580373 0.481859 -0.430527 0.649572 84.8458 -111.4)"/>
