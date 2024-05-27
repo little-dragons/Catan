@@ -2,19 +2,25 @@
 import type { RedactedGameState } from 'shared';
 import BoardRenderer from './board/Renderer.vue';
 import DiceRenderer from './DiceRenderer.vue';
-import { toRefs, type DeepReadonly } from 'vue';
+import { ref, watch } from 'vue';
 
-const props = defineProps<RedactedGameState>()
-const refProps = toRefs(props)
+const model = defineModel<RedactedGameState>({ required: true })
 
+const dice = ref<[number, number]>([1, 1])
+watch(model, newVal => {
+    if (newVal.phase.type == 'normal' && newVal.phase.diceRolled != false)
+        dice.value = newVal.phase.diceRolled
+})
 </script>
 
 <template>
+    <p>Current phase: {{ modelValue.phase.type }}</p>
+    <p>Current player: {{ modelValue.currentPlayer }}</p>
     <div>
-        <BoardRenderer :board="refProps.board" ref="boardRenderer"/>
+        <BoardRenderer v-model="modelValue.board" ref="boardRenderer"/>
     </div>
     <div class="dice">
-        <DiceRenderer :dice="refProps.dice" ref="diceRenderer"/>
+        <DiceRenderer v-model="dice" ref="diceRenderer"/>
     </div>
 </template>
 

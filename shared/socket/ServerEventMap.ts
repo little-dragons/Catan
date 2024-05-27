@@ -3,6 +3,7 @@ import { AnyLogin } from "../authentication/AuthObject"
 import { LobbyRoom, RedactedGameRoom, RoomId } from "../Room"
 import { RedactedGameState } from "../logic/GameState"
 import { Settings } from "../logic/Settings"
+import { RequestGameAction } from "../logic/GameAction"
 
 export type ServerEventMap = LoginServerEventMap & RoomServerEventMap & GameServerEventMap
 
@@ -11,7 +12,7 @@ export type Callback<T> = (arg: T) => void
 export type GameServerEventMap = {
     fullGameRoom: (room: RoomId, token: AuthToken, cb: Callback<RedactedGameRoom | 'invalid token' | 'invalid room id'>) => void
     gameState: (room: RoomId, token: AuthToken, cb: Callback<RedactedGameState | 'invalid token' | 'invalid room id'>) => void
-    rollDice: (room: RoomId, token: AuthToken, cb: Callback<true | 'invalid token' | 'invalid room id'>) => void
+    gameAction: (room: RoomId, token: AuthToken, action: RequestGameAction, cb: Callback<true | 'invalid token' | 'invalid room id'| 'action not allowed'>) => void
 }
 
 export type RoomServerEventMap = {

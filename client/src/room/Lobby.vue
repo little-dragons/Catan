@@ -44,10 +44,6 @@ if (currentLobbyRoom.value == undefined || currentAuthUser.value == undefined)
     margin-top: 30px;
 }
 
-.left {
-
-}
-
 .right {
     background-color: var(--secondary-background-color);
     border-radius: 10px;

@@ -5,24 +5,22 @@ import type { Board } from 'shared';
 import { distance } from '../Vector';
 import { interactionPointRadius, minimalFillingTileRadius } from './Layout';
 
-const props = defineProps<{
-    board: Ref<Board>
-}>()
-const tileRadius = computed(() => minimalFillingTileRadius(props.board.value, 1000, 1000))
+const model = defineModel<Board>({ required: true })
+const tileRadius = computed(() => minimalFillingTileRadius(model.value, 1000, 1000))
 const boardSvg = ref<null | HTMLElement & SVGElement>(null)
 
 function renderEverything() {
-    renderTiles(boardSvg.value!, props.board.value, tileRadius.value)
-    renderRoads(boardSvg.value!, props.board.value, tileRadius.value)
-    renderRobber(boardSvg.value!, props.board.value, tileRadius.value)
-    renderBuildings(boardSvg.value!, props.board.value, tileRadius.value)
+    renderTiles(boardSvg.value!, model.value, tileRadius.value)
+    renderRoads(boardSvg.value!, model.value, tileRadius.value)
+    renderRobber(boardSvg.value!, model.value, tileRadius.value)
+    renderBuildings(boardSvg.value!, model.value, tileRadius.value)
 }
 
 export type InteractionPoint<T> = [[number, number], T]
 
 let activeClickHandler = (_: MouseEvent) => {}
 function setInteractionPoints<T>(points: InteractionPoint<T>[], clicked: ((point: InteractionPoint<T>) => void) | undefined) {
-    renderInteractionPoints(boardSvg.value!, props.board.value, points, tileRadius.value)
+    renderInteractionPoints(boardSvg.value!, model.value, points, tileRadius.value)
 
     if (clicked == undefined)
         activeClickHandler = _ => {}
@@ -39,7 +37,7 @@ function setInteractionPoints<T>(points: InteractionPoint<T>[], clicked: ((point
 }
 
 defineExpose({ setInteractionPoints })
-watch(props.board, () => renderEverything())
+watch(model, () => renderEverything())
 onMounted(renderEverything)
 </script>
 

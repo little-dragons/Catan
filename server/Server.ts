@@ -22,7 +22,7 @@ else if (isProduction)
 
 const io = new Server<ServerEventMap, ClientEventMap, {}, DataType>(httpsServer, {
     cors: {
-        origin: [ 'https://admin.socket.io', 'http://localhost:5173', 'https://ichigancs.com:5173' ],
+        origin: [ 'https://admin.socket.io', 'http://localhost:5173', 'https://ichigancs.com:5173', 'http://127.0.0.1:5173' ],
         allowedHeaders: ['Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
         credentials: true
     }    

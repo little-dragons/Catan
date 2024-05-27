@@ -7,9 +7,7 @@ import threeDie from '@/assets/dice/three-die.svg'
 import fourDie from '@/assets/dice/four-die.svg'
 import fiveDie from '@/assets/dice/five-die.svg'
 import sixDie from '@/assets/dice/six-die.svg'
-import { gameSocket, lobbySocket, roomSocket } from '@/socketWrapper/Socket';
-import { currentAuthUser } from '@/socketWrapper/Login';
-import { currentRoom } from '@/socketWrapper/Room';
+import { rollDice } from '@/socketWrapper/Game';
 
 
 function diceToIcon(die: number): string {
@@ -30,17 +28,10 @@ function diceToIcon(die: number): string {
     console.warn('Invalid dice number')
     return ''
 }
-const props = defineProps<{
-    dice: Ref<[number, number]>
-}>()
+
+const model = defineModel<[number, number]>({ required: true})
 
 const svg = ref<null | HTMLElement & SVGElement>(null) 
-
-async function clickHandler() {
-    //TODO
-    await lobbySocket.emitWithAck('startGame', currentRoom.value!.id, currentAuthUser.value!.authToken)
-    await gameSocket.emitWithAck('rollDice', currentRoom.value!.id, currentAuthUser.value!.authToken)
-}
 
 function drawDice() {
     const svgElement = svg.value!
@@ -55,7 +46,7 @@ function drawDice() {
             .attr('id', 'dice')
             .classed('dice', true)
         .selectAll()
-            .data(props.dice.value.map((x, i) => [x, i]))
+            .data(model.value.map((x, i) => [x, i]))
             .enter()
 
     enter
@@ -66,10 +57,10 @@ function drawDice() {
         .attr('height', 40)
     .attr('href', x => diceToIcon(x[0]))
 }
-watch(props.dice, () => drawDice())
+watch(model, () => drawDice())
 onMounted(drawDice)
 </script>
 
 <template>
-    <svg ref="svg" viewBox="0 0 80 40" @click="clickHandler"/>
+    <svg ref="svg" viewBox="0 0 80 40" @click="rollDice"/>
 </template>

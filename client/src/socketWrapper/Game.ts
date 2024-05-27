@@ -13,7 +13,19 @@ export async function rollDice() {
         return
     }
 
-    return await gameSocket.emitWithAck('rollDice', currentGameRoom.value.id, currentAuthUser.value.authToken)
+    return await gameSocket.emitWithAck('gameAction', currentGameRoom.value.id, currentAuthUser.value.authToken, { type: 'roll dice' })
+}
+export async function finishTurn() {
+    if (currentGameRoom.value == null) {
+        console.warn('Tried to roll dice, but not in a game')
+        return
+    }
+    if (currentAuthUser.value == null) {
+        console.error('User is in a game, but not logged in???')
+        return
+    }
+
+    return await gameSocket.emitWithAck('gameAction', currentGameRoom.value.id, currentAuthUser.value.authToken, { type: 'finish turn' })
 }
 
 export async function fetchNewState() {

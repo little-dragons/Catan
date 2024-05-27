@@ -1,4 +1,4 @@
-import { GameClientEventMap, GameServerEventMap, redactGameStateFor } from "shared";
+import { BuildingType, FullGameState, GameClientEventMap, GameServerEventMap, buyCity, buyRoad, buySettlement, canBuyCity, canBuyRoad, canBuySettlement, redactGameStateFor, setNextPlayer } from "shared";
 import { type Socket } from 'socket.io'
 import { checkRealUser as checkName, checkUser } from "../authentication/AuthTokenMap";
 import { games } from "./RoomManager";
@@ -27,7 +27,7 @@ export function acceptGameEvents(socket: Socket<GameServerEventMap, GameClientEv
         cb(redactGameStateFor(game.state, userMappingSearch[1]))
     })
 
-    socket.on('rollDice', (room, token, cb) => {
+    socket.on('gameAction', (room, token, action, cb) => {
         if (!checkUser(token)) {
             cb('invalid token')
             return
@@ -45,9 +45,67 @@ export function acceptGameEvents(socket: Socket<GameServerEventMap, GameClientEv
             return
         }
 
-        const dice1 = Math.floor(Math.random() * 6) + 1
-        const dice2 = Math.floor(Math.random() * 6) + 1
-        game.state.dice = [dice1, dice2]
+        if (game.state.currentPlayer != userMappingSearch[1]) {
+            cb('action not allowed')
+            return
+        }
+
+        if (action.type == 'roll dice' && game.state.phase.type == 'normal' && game.state.phase.diceRolled == false) {
+            const dice1 = Math.floor(Math.random() * 6) + 1
+            const dice2 = Math.floor(Math.random() * 6) + 1
+            game.state.phase.diceRolled = [dice1, dice2]
+        }
+
+        else if (action.type == 'place initial buildings' && game.state.phase.type == 'initial') {
+            game.state.board.buildings.push([game.state.currentPlayer, action.settlement, BuildingType.Settlement])
+            game.state.board.roads.push([game.state.currentPlayer, action.road[0], action.road[1]])
+
+            if (!game.state.phase.forward) {
+                // TODO deliver hand cards for second settlement
+            }
+
+            setNextPlayer(game.state)
+        }
+
+        else if (action.type == 'place building' && game.state.phase.type == 'normal' && game.state.phase.diceRolled) {
+
+            const currentHandCards = game.state.players.find(x => x.color == game.state.currentPlayer)!.handCards
+
+            if (action.building == 'city' && !canBuyCity(currentHandCards) ||  
+                action.building == 'settlement' && !canBuySettlement(currentHandCards) ||  
+                action.building == 'road' && !canBuyRoad(currentHandCards)) { 
+                cb('action not allowed')
+                return
+            }
+            
+            // remove hand cards
+            if (action.building == 'city') { 
+                buyCity(currentHandCards)
+            }
+            else if (action.building == 'settlement') {
+                buySettlement(currentHandCards)
+            }
+            else if (action.building == 'road') {
+                buyRoad(currentHandCards)
+            }
+
+            if(action.building == 'city') 
+                game.state.board.buildings.push([game.state.currentPlayer, action.coordinate, BuildingType.City])
+            else if(action.building == 'settlement')
+                game.state.board.buildings.push([game.state.currentPlayer, action.coordinate, BuildingType.Settlement])
+            else if (action.building == 'road')
+                game.state.board.roads.push([game.state.currentPlayer, action.coordinates[0], action.coordinates[1]])
+        }
+
+        else if (action.type == 'finish turn' && game.state.phase.type == 'normal' && game.state.phase.diceRolled != false) {
+            setNextPlayer(game.state)
+        }
+
+        else {
+            cb('action not allowed')
+            return
+        }
+
 
         socket.emit('gameEvent')
         socket.to(room).emit('gameEvent')

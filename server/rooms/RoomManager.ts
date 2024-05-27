@@ -36,9 +36,14 @@ export function initializeGame(room: LobbyRoom) {
         board: defaultBoard(0),
         currentPlayer: mapping[0][1].color,
         players: mapping.map(pair => pair[1]),
-        dice: [1, 2],
+        phase: {
+            type: 'initial',
+            forward: true,
+        },
     }
     game.users = mapping.map(x => [x[0], x[1].color])
+
+    
 }
 
 export function createRoomWithOwner(socket: RoomSocket, name: string, token: AuthToken) {
