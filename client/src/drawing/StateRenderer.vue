@@ -1,16 +1,24 @@
 <script setup lang="ts">
 import type { RedactedGameState } from 'shared';
-import BoardRenderer from './board/Renderer.vue';
+import BoardRenderer, { type InteractionPoints } from './board/Renderer.vue';
 import DiceRenderer from './DiceRenderer.vue';
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
+
+defineEmits([ 'diceClicked' ])
 
 const model = defineModel<RedactedGameState>({ required: true })
+const boardRenderer = ref<null | InstanceType<typeof BoardRenderer>>(null)
 
 const dice = ref<[number, number]>([1, 1])
 watch(model, newVal => {
     if (newVal.phase.type == 'normal' && newVal.phase.diceRolled != false)
         dice.value = newVal.phase.diceRolled
 })
+
+function setInteractionPoints<Points extends InteractionPoints<any>>(points: Points, clicked: ((point: Points['data'][number]) => void)) {
+    boardRenderer.value!.setInteractionPoints(points, clicked)
+}
+defineExpose({ setInteractionPoints })
 </script>
 
 <template>
@@ -20,7 +28,7 @@ watch(model, newVal => {
         <BoardRenderer v-model="modelValue.board" ref="boardRenderer"/>
     </div>
     <div class="dice">
-        <DiceRenderer v-model="dice" ref="diceRenderer"/>
+        <DiceRenderer v-model="dice" ref="diceRenderer" @dice-clicked="() => $emit('diceClicked')"/>
     </div>
 </template>
 

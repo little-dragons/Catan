@@ -1,10 +1,11 @@
-import { type PortTile, type ResourceTile, stringColor, Resource, type Board } from "shared"
+import { type PortTile, type ResourceTile, stringColor, Resource, type Board, Color, BuildingType } from "shared"
 import * as d3 from "d3"
-import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius, tileCenter, robberWidth, robberHeight, crossingPosition, buildingWidth, buildingHeight, tilePortIconSize, tilePortPosition } from "./Layout"
+import { tileHexagon, tileNumberPosition, tileNumberFontSize, tileResourceIconPosition, tileResourceIconSize, roadPosition as roadCorners, interactionPointRadius, tileCenter, robberWidth, robberHeight, crossingPosition, buildingWidth, buildingHeight, tilePortIconSize, tilePortPosition, roadPosition, roadCenter } from "./Layout"
 import robber from '@/assets/board/robber.svg'
-import building from '@/assets/board/house.svg'
-import type { InteractionPoint } from "./Renderer.vue"
+import type { InteractionPoints } from "./Renderer.vue"
+
 import './Styling.css'
+
 import brick from '@/assets/resources/brick.svg'
 import grain from '@/assets/resources/grain.svg'
 import lumber from '@/assets/resources/lumber.svg'
@@ -19,7 +20,16 @@ import orePort from '@/assets/board/ore-port.svg'
 import woolPort from '@/assets/board/wool-port.svg'
 import generalPort from '@/assets/board/general-port.svg'
 
-
+import blueCity from '@/assets/buildings/blue-city.svg'
+import blueSettlement from '@/assets/buildings/blue-settlement.svg'
+import greenCity from '@/assets/buildings/green-city.svg'
+import greenSettlement from '@/assets/buildings/green-settlement.svg'
+import orangeCity from '@/assets/buildings/orange-city.svg'
+import orangeSettlement from '@/assets/buildings/orange-settlement.svg'
+import redCity from '@/assets/buildings/red-city.svg'
+import redSettlement from '@/assets/buildings/red-settlement.svg'
+import yellowCity from '@/assets/buildings/yellow-city.svg'
+import yellowSettlement from '@/assets/buildings/yellow-settlement.svg'
 
 function resourceToIcon(resource: Resource): string {
     switch (resource) {
@@ -48,7 +58,7 @@ function portToIcon(port: PortTile): string {
         return orePort
     case Resource.Wool:
         return woolPort
-    case 'General':
+    case 'general':
         return generalPort
   }
 }
@@ -68,15 +78,38 @@ function tileColor(resource: Resource): string {
     }
 }
 
+function buildingForColor(color: Color, type: BuildingType): string {
+    if (type == BuildingType.City) {
+        switch (color) {
+            case Color.Yellow: return yellowCity
+            case Color.Orange: return orangeCity
+            case Color.Red: return redCity
+            case Color.Green: return greenCity
+            case Color.Blue: return blueCity
+        }
+    }
+    else if (type == BuildingType.Settlement) {
+        switch (color) {
+            case Color.Yellow: return yellowSettlement
+            case Color.Orange: return orangeSettlement
+            case Color.Red: return redSettlement
+            case Color.Green: return greenSettlement
+            case Color.Blue: return blueSettlement
+        }
+    }
+    console.warn(`Unknown combination of building and color: ${color}, ${type}`)
+    return ''
+}
 
-export function renderTiles(html: HTMLElement & SVGElement, board: Board, tileRadius: number) {
+
+export function renderTiles(svg: SVGElement, board: Board, tileRadius: number) {
     // clean previous group
-    d3.select(html)
+    d3.select(svg)
       .select('#board')
       .remove()
 
     const enter =
-        d3.select(html)
+        d3.select(svg)
           .append('g')
             .attr('id', 'board')
             .classed('tiles', true)
@@ -88,13 +121,13 @@ export function renderTiles(html: HTMLElement & SVGElement, board: Board, tileRa
       .append('path')
         .attr('d', x => d3.line()(tileHexagon(x[1], tileRadius)))
         .attr('fill', x => 
-            x[0] == 'Desert' ? 'gold' : 
-            (x[0] == 'Ocean' || (x[0] as PortTile).orientation != undefined ? 'royalblue' : 
-            (x[0] as ResourceTile).resource != undefined ? tileColor((x[0] as ResourceTile).resource) : ''
-          ))
+            x[0].type == 'desert' ? 'gold' : 
+            x[0].type == 'ocean' || x[0].type == 'port' ? 'royalblue' : 
+            x[0].type == 'resource' ? tileColor((x[0] as ResourceTile).resource) : '')
+          
     
     enter
-      .filter(x => (x[0] as PortTile).orientation != undefined)
+      .filter(x => x[0].type == 'port')
       .append('image')
       .attr('x', x => tilePortPosition(x[1], tileRadius)[0])
       .attr('y', x => tilePortPosition(x[1], tileRadius)[1])
@@ -103,7 +136,7 @@ export function renderTiles(html: HTMLElement & SVGElement, board: Board, tileRa
       .attr('href', x => portToIcon(x[0] as PortTile))
 
     enter
-      .filter(x => (x[0] as ResourceTile).number != undefined)
+      .filter(x => x[0].type == 'resource')
       .append('image')
         .attr('x', x => tileResourceIconPosition(x[1], tileRadius)[0])
         .attr('y', x => tileResourceIconPosition(x[1], tileRadius)[1])
@@ -112,7 +145,7 @@ export function renderTiles(html: HTMLElement & SVGElement, board: Board, tileRa
         .attr('href', x => resourceToIcon((x[0] as ResourceTile).resource))
 
     enter
-      .filter(x => (x[0] as ResourceTile).number != undefined)
+      .filter(x => x[0].type == 'resource')
       .append('text')
         .attr('x', x => tileNumberPosition(x[1], (x[0] as ResourceTile).number, tileRadius)![0])
         .attr('y', x => tileNumberPosition(x[1], (x[0] as ResourceTile).number, tileRadius)![1])
@@ -120,7 +153,7 @@ export function renderTiles(html: HTMLElement & SVGElement, board: Board, tileRa
         .text(x => (x[0] as ResourceTile).number.toString())
     
     enter
-      .filter(x => x[0] == 'Desert')
+      .filter(x => x[0].type == 'desert')
       .append('image')
         .attr('x', x => tileResourceIconPosition(x[1], tileRadius)[0])
         .attr('y', x => tileResourceIconPosition(x[1], tileRadius)[1])
@@ -130,13 +163,13 @@ export function renderTiles(html: HTMLElement & SVGElement, board: Board, tileRa
   
 }
 
-export function renderRoads(html: HTMLElement & SVGElement, board: Board, tileRadius: number) {
-    d3.select(html)
+export function renderRoads(svg: SVGElement, board: Board, tileRadius: number) {
+    d3.select(svg)
       .select('#roads')
       .remove()
 
     const enter =
-        d3.select(html)
+        d3.select(svg)
           .append('g')
             .attr('id', 'roads')
             .classed('roads', true)
@@ -152,45 +185,56 @@ export function renderRoads(html: HTMLElement & SVGElement, board: Board, tileRa
 }
 
 export function renderInteractionPoints<T>(
-    html: HTMLElement & SVGElement, 
+    svg: SVGElement, 
     board: Board, 
-    interactionPoints: InteractionPoint<T>[],
+    points: InteractionPoints<T>,
     tileRadius: number) {
 
-    d3.select(html)
+    d3.select(svg)
       .select('#interaction')
       .remove()
 
-    const enter =
-        d3.select(html)
-          .append('g')
+    if (points.type == 'settlement') {
+        d3.select(svg)
+        .append('g')
             .attr('id', 'interaction')
             .classed('interaction-points', true)
-          .selectAll()
-            .data(interactionPoints)
+        .selectAll()
+            .data(points.data)
             .enter()
-    
-    enter
-      .append('circle')
-        .attr('cx', x => x[0][0])
-        .attr('cy', x => x[0][1])
-        .attr('r', interactionPointRadius(tileRadius))
+        .append('circle')
+            .attr('cx', x => crossingPosition(x[0], tileRadius)[0])
+            .attr('cy', x => crossingPosition(x[0], tileRadius)[1])
+            .attr('r', interactionPointRadius(tileRadius))
+    }
+    else if (points.type == 'road') {
+        d3.select(svg)
+        .append('g')
+            .attr('id', 'interaction')
+            .classed('interaction-points', true)
+        .selectAll()
+            .data(points.data)
+            .enter()
+        .append('circle')
+            .attr('cx', x => roadCenter(x[0][0], x[0][1], tileRadius)[0])
+            .attr('cy', x => roadCenter(x[0][0], x[0][1], tileRadius)[1])
+            .attr('r', interactionPointRadius(tileRadius))
+    }
     
 }
 
-
 export function renderRobber(
-    html: HTMLElement & SVGElement, 
+    svg: SVGElement, 
     board: Board, 
     tileRadius: number) {
     
-    d3.select(html)
+    d3.select(svg)
       .select('#robber')
       .remove()
 
     const robberCoord = board.robber
 
-    d3.select(html)
+    d3.select(svg)
       .append('g')
         .attr('id', 'robber')
         .classed('robber', true)
@@ -203,16 +247,16 @@ export function renderRobber(
 }
 
 export function renderBuildings(
-    html: HTMLElement & SVGElement, 
+    svg: SVGElement, 
     board: Board, 
     tileRadius: number
 ) {
-    d3.select(html)
+    d3.select(svg)
       .select('#buildings')
       .remove()
     
     const enter =
-        d3.select(html)
+        d3.select(svg)
         .append('g')
             .attr('id', 'buildings')
             .classed('buildings', true)
@@ -227,8 +271,6 @@ export function renderBuildings(
         .attr('y', x => crossingPosition(x[1], tileRadius)[1] - buildingHeight(tileRadius) / 2)
         .attr('width', buildingWidth(tileRadius))
         .attr('height', buildingHeight(tileRadius))
-        // .style('filter', x => 'opacity(100%) brightness(0) saturate(100%) ' + filterColor(x[0]))
-        .style('background-color', x => stringColor(x[0]))
-        .attr('href', building)
+        .attr('href', x => buildingForColor(x[0], x[2]))
 }
 

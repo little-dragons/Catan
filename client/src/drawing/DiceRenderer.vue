@@ -9,7 +9,6 @@ import fiveDie from '@/assets/dice/five-die.svg'
 import sixDie from '@/assets/dice/six-die.svg'
 import { rollDice } from '@/socketWrapper/Game';
 
-
 function diceToIcon(die: number): string {
     switch (die) {
         case 1:
@@ -29,9 +28,11 @@ function diceToIcon(die: number): string {
     return ''
 }
 
+defineEmits(['diceClicked'])
+
 const model = defineModel<[number, number]>({ required: true})
 
-const svg = ref<null | HTMLElement & SVGElement>(null) 
+const svg = ref<null | SVGElement>(null) 
 
 function drawDice() {
     const svgElement = svg.value!
@@ -62,5 +63,5 @@ onMounted(drawDice)
 </script>
 
 <template>
-    <svg ref="svg" viewBox="0 0 80 40" @click="rollDice"/>
+    <svg ref="svg" viewBox="0 0 80 40" @click="() => $emit('diceClicked')"/>
 </template>

@@ -6,15 +6,18 @@ import type { BuildingType } from "./Buildings"
 export type Coordinate = [number, number]
 
 export type PortTile = {
-    resource: Resource | 'General'
+    type: 'port'
+    resource: Resource | 'general'
     orientation: Orientation
 }
 export type ResourceTile = {
+    type: 'resource'
     resource: Resource
     number: number
 }
 
-export type Tile = ResourceTile | PortTile | 'Desert' | 'Ocean'
+
+export type Tile = ResourceTile | PortTile | { type: 'desert' | 'ocean' }
 
 export interface Board {
     rowCount: number

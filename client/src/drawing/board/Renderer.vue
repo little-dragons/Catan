@@ -1,39 +1,56 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch, type Ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { renderBuildings, renderInteractionPoints, renderRoads, renderRobber, renderTiles } from './SvgManipulation';
-import type { Board } from 'shared';
+import type { Board, Coordinate } from 'shared';
 import { distance } from '../Vector';
-import { interactionPointRadius, minimalFillingTileRadius } from './Layout';
+import { crossingPosition, interactionPointRadius, roadCenter } from './Layout';
 
 const model = defineModel<Board>({ required: true })
-const tileRadius = computed(() => minimalFillingTileRadius(model.value, 1000, 1000))
-const boardSvg = ref<null | HTMLElement & SVGElement>(null)
+const tileRadius = 100
+const viewboxWidth = tileRadius * 2 * (model.value.columnCount + 0.5) * Math.cos(30 / 180 * Math.PI)
+const viewboxHeight = tileRadius * (model.value.rowCount * 1.5 + 0.5)
+
+const boardSvg = ref<null | SVGElement>(null)
 
 function renderEverything() {
-    renderTiles(boardSvg.value!, model.value, tileRadius.value)
-    renderRoads(boardSvg.value!, model.value, tileRadius.value)
-    renderRobber(boardSvg.value!, model.value, tileRadius.value)
-    renderBuildings(boardSvg.value!, model.value, tileRadius.value)
+    renderTiles(boardSvg.value!, model.value, tileRadius)
+    renderRoads(boardSvg.value!, model.value, tileRadius)
+    renderRobber(boardSvg.value!, model.value, tileRadius)
+    renderBuildings(boardSvg.value!, model.value, tileRadius)
 }
 
-export type InteractionPoint<T> = [[number, number], T]
+export type InteractionPoints<Payload> = {
+    type: 'settlement'
+    data: [Coordinate, Payload][]
+} | {
+    type: 'road'
+    data: [[Coordinate, Coordinate], Payload][]
+}
+
 
 let activeClickHandler = (_: MouseEvent) => {}
-function setInteractionPoints<T>(points: InteractionPoint<T>[], clicked: ((point: InteractionPoint<T>) => void) | undefined) {
-    renderInteractionPoints(boardSvg.value!, model.value, points, tileRadius.value)
+function setInteractionPoints<Points extends InteractionPoints<any>>(points: Points, clicked: ((point: Points['data'][number]) => void)) {
+    renderInteractionPoints(boardSvg.value!, model.value, points, tileRadius)
 
-    if (clicked == undefined)
-        activeClickHandler = _ => {}
-    else
-        activeClickHandler = (ev: MouseEvent) => {
-            if (points.length == 0 || activeClickHandler == undefined)
-                return
+    activeClickHandler = (ev: MouseEvent) => {
+        // this is because of the viewbox property of the svg
+        // only works if the svg element has the same aspect ratio as the viewbox
+        const clickedPosition = [
+            viewboxWidth / boardSvg.value!.clientWidth * ev.offsetX,
+            viewboxHeight / boardSvg.value!.clientHeight * ev.offsetY
+        ] as [number, number]
 
-            for (const p of points) {
-                if (distance([ev.offsetX, ev.offsetY], p[0]) < interactionPointRadius(tileRadius.value))
+        if (points.type == 'settlement') {
+            for (const p of points.data)
+                if (distance(clickedPosition, crossingPosition(p[0], tileRadius)) < interactionPointRadius(tileRadius))
                     clicked(p)
-            }
         }
+        else if (points.type == 'road') {
+            for (const p of points.data)
+                if (distance(clickedPosition, roadCenter(p[0][0], p[0][1], tileRadius)) < interactionPointRadius(tileRadius))
+                    clicked(p)
+        }
+    }
 }
 
 defineExpose({ setInteractionPoints })
@@ -42,6 +59,9 @@ onMounted(renderEverything)
 </script>
 
 <template>
-    <svg viewBox= "0 0 1000 1000" ref="boardSvg" @click="activeClickHandler"/>
+    <svg :viewBox="`0 0 ${viewboxWidth} ${viewboxHeight}`" ref="boardSvg" @click="activeClickHandler">
+    </svg>
 </template>
+
+
 

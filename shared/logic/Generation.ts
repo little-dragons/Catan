@@ -17,25 +17,26 @@ export function defaultBoard(seed: number): Board {
     let landTiles: Tile[] = []
     for (let i = 0; i < 18; i++) {
         landTiles.push({
+            type: 'resource',
             resource: resourcesStack[i],
             number: numbersForTiles[i]
         })
     }
 
     const desertLoc = Math.floor(18 * rand())
-    landTiles.splice(desertLoc, 0, 'Desert')
+    landTiles.splice(desertLoc, 0, { type: 'desert' })
 
-    let oceanTiles: (Resource | 'General' | 'Ocean')[] = []
-    let portTiles: ('General' | Resource)[] = allResources.slice()
+    let oceanTiles: (Resource | 'general' | 'ocean')[] = []
+    let portTiles: ('general' | Resource)[] = allResources.slice()
     for (let i = 0; i < 4; i++)
-            portTiles.push('General')
+            portTiles.push('general')
 
     for (let i = 0; i < 9; i++) {
         oceanTiles.push(portTiles.splice(Math.floor(rand() * portTiles.length), 1)[0])
         if (i < 8 || (i == 8 && rand() > 0.5))
-            oceanTiles.push('Ocean')
+            oceanTiles.push('ocean')
         else if (i == 8)
-            oceanTiles.unshift('Ocean')
+            oceanTiles.unshift('ocean')
     }
 
     
@@ -81,14 +82,14 @@ export function defaultBoard(seed: number): Board {
         const pop = oceanTiles.pop()
         if (pop == undefined)
             return undefined
-        if (pop == 'Ocean')
-            return 'Ocean'
+        if (pop == 'ocean')
+            return { type: 'ocean' }
         
         // we have a port and need to figure out an orientation
         // a port may turned to every land tile
         const possibleOrientations = allOrientations.filter(o => {
             const neighbor = getTile(neighborTile(coord, o))
-            return neighbor != undefined && neighbor != 'Ocean'
+            return neighbor != undefined && neighbor.type != 'ocean'
         })
 
         if (possibleOrientations.length == 0) {
@@ -97,6 +98,7 @@ export function defaultBoard(seed: number): Board {
         }
 
         return {
+            type: 'port',
             resource: pop,
             orientation: possibleOrientations[Math.floor(rand() * possibleOrientations.length)]
         }
@@ -124,7 +126,8 @@ export function defaultBoard(seed: number): Board {
         rowCount: 7,
         tiles: tiles,
         roads: [],
-        robber: [2,2],
+        //TODO
+        robber: [2, 2],
         buildings: []
     }
 }

@@ -1,4 +1,4 @@
-import { BuildingType, FullGameState, GameClientEventMap, GameServerEventMap, buyCity, buyRoad, buySettlement, canBuyCity, canBuyRoad, canBuySettlement, redactGameStateFor, setNextPlayer } from "shared";
+import { BuildingType, FullGameState, GameClientEventMap, GameServerEventMap, buyCity, buyRoad, buySettlement, canBuyCity, canBuyRoad, canBuySettlement, isAvailableBuildingPosition, redactGameStateFor, setNextPlayer } from "shared";
 import { type Socket } from 'socket.io'
 import { checkRealUser as checkName, checkUser } from "../authentication/AuthTokenMap";
 import { games } from "./RoomManager";
@@ -57,6 +57,11 @@ export function acceptGameEvents(socket: Socket<GameServerEventMap, GameClientEv
         }
 
         else if (action.type == 'place initial buildings' && game.state.phase.type == 'initial') {
+            if (!isAvailableBuildingPosition(action.settlement, game.state.board, userMappingSearch[1])) {
+                cb('action not allowed')
+                return
+            }
+            
             game.state.board.buildings.push([game.state.currentPlayer, action.settlement, BuildingType.Settlement])
             game.state.board.roads.push([game.state.currentPlayer, action.road[0], action.road[1]])
 

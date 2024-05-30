@@ -1,6 +1,8 @@
 import type { Board, Coordinate } from "shared"
 import { add, middlepoint, opposite, perpendicular, withLength } from "../Vector"
 
+type Pixel = [number, number]
+
 export function minimalFillingTileRadius(board: Board, width: number, height: number): number {
     return Math.min(width / (2 * (board.columnCount + 0.5) * Math.cos(30 / 180 * Math.PI)), height / (board.rowCount * 1.5 + 0.5))
 }
@@ -9,7 +11,7 @@ function tileWidth(radius: number): number {
     const halfTileWidth = radius * Math.cos(30 / 180 * Math.PI)
     return 2 * halfTileWidth
 }
-export function tileCenter(coord: Coordinate, radius: number): [number, number] {
+export function tileCenter(coord: Coordinate, radius: number): Pixel {
     const fullTileWidth = tileWidth(radius)
     const halfTileWidth = fullTileWidth / 2
     const firstMiddlePointInRowOffset = coord[1] % 2 == 0 ? halfTileWidth : fullTileWidth
@@ -19,9 +21,9 @@ export function tileCenter(coord: Coordinate, radius: number): [number, number] 
 
 
 
-export function tileHexagon(coord: Coordinate, tileRadius: number): [number, number][] {
+export function tileHexagon(coord: Coordinate, tileRadius: number): Pixel[] {
     const center = tileCenter(coord, tileRadius)
-    let points: [number, number][] = []
+    let points: Pixel[] = []
     for (let corner = 0; corner < 6; corner++) {
         const angle = (corner / 6) * 2 * Math.PI
         points.push([Math.sin(angle) * tileRadius + center[0], Math.cos(angle) * tileRadius + center[1]])
@@ -34,7 +36,7 @@ export function tileResourceIconSize(tileRadius: number): [number, number] {
     return [0.6 * tileRadius, 0.5 * tileRadius]
 }
 
-export function tileResourceIconPosition(coord: Coordinate, tileRadius: number) : [number, number] {
+export function tileResourceIconPosition(coord: Coordinate, tileRadius: number) : Pixel {
     const center = tileCenter(coord, tileRadius)
     const size = tileResourceIconSize(tileRadius)
     const heightOffset = -0.4 * tileRadius
@@ -47,7 +49,7 @@ export function tilePortIconSize(tileRadius: number): [number, number] {
     return [0.7 * tileRadius, tileRadius]
 }
 
-export function tilePortPosition(coord: Coordinate, tileRadius: number): [number, number] { 
+export function tilePortPosition(coord: Coordinate, tileRadius: number): Pixel { 
     const center = tileCenter(coord, tileRadius)
     const size = tilePortIconSize(tileRadius)
     const widthOffset = 0.05 * size[0]
@@ -76,7 +78,7 @@ export function tileNumberFontSize(number: number, tileRadius: number): number |
         return factor * tileRadius
 }
 
-export function tileNumberPosition(coord: Coordinate, number: number, tileRadius: number): [number, number] | undefined {
+export function tileNumberPosition(coord: Coordinate, number: number, tileRadius: number): Pixel | undefined {
     const center = tileCenter(coord, tileRadius)
     const size = tileNumberFontSize(number, tileRadius)
 
@@ -88,13 +90,19 @@ export function tileNumberPosition(coord: Coordinate, number: number, tileRadius
     return [center[0], center[1] + size / 2 + heightOffset]
 }
 
-export function crossingPosition(coord: Coordinate, radius: number): [number, number] {
+export function crossingPosition(coord: Coordinate, radius: number): Pixel {
     const yBaseline = (coord[1] * 1.5 + (coord[1] % 2 == 1 ? 0.5 : 0)) * radius
     const yOffset = coord[0] % 2 == 1 ? 0 : (coord[1] % 2 == 1 ? -radius / 2 : radius / 2)
     return [tileWidth(radius) / 2 * coord[0], yBaseline + yOffset]
 }
 
-export function roadPosition(coord1: Coordinate, coord2: Coordinate, radius: number): [number, number][] {
+export function roadCenter(coord1: Coordinate, coord2: Coordinate, radius: number): Pixel {
+    const cross1 = crossingPosition(coord1, radius)
+    const cross2 = crossingPosition(coord2, radius)
+    return middlepoint(cross1, cross2)
+}
+
+export function roadPosition(coord1: Coordinate, coord2: Coordinate, radius: number): Pixel[] {
     const roadLength = 0.8 * radius
     const roadWidth = 0.1 * radius
 
