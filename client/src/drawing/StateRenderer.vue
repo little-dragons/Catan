@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type RedactedGameState, Resource } from 'shared';
+import { type RedactedGameState, Resource, type Board } from 'shared';
 import BoardRenderer, { type InteractionPoints } from './board/Renderer.vue';
 import DiceRenderer from './DiceRenderer.vue';
 import { onMounted, ref, watch } from 'vue';
@@ -7,19 +7,14 @@ import CardRenderer from './CardRenderer.vue';
 
 defineEmits([ 'diceClicked' ])
 
-const model = defineModel<RedactedGameState>({ required: true })
 const props = defineProps<{
     stockedCards: Resource[]
     offeredCards: Resource[]
+    board: Board
+    dice: [number, number] | undefined
 }>()
 
 const boardRenderer = ref<null | InstanceType<typeof BoardRenderer>>(null)
-
-const dice = ref<[number, number]>([1, 1])
-watch(model, newVal => {
-    if (newVal.phase.type == 'normal' && newVal.phase.diceRolled != false)
-        dice.value = newVal.phase.diceRolled
-})
 
 function setInteractionPoints<Points extends InteractionPoints<any>>(points: Points, clicked: ((point: Points['data'][number]) => void)) {
     boardRenderer.value!.setInteractionPoints(points, clicked)
@@ -32,11 +27,11 @@ defineExpose({ setInteractionPoints, clearInteractionPoints })
 
 <template>
     <div>
-        <BoardRenderer v-model="modelValue.board" ref="boardRenderer"/>
+        <BoardRenderer :board="board" ref="boardRenderer"/>
     </div>
     <div class="below">
-        <div class="dice">
-            <DiceRenderer v-model="dice" ref="diceRenderer" @dice-clicked="() => $emit('diceClicked')"/>
+        <div class="dice" v-if="dice != undefined">
+            <DiceRenderer :dice="dice" ref="diceRenderer" @dice-clicked="() => $emit('diceClicked')"/>
         </div>
         <div class="cards">
             <CardRenderer :cards="stockedCards"/>

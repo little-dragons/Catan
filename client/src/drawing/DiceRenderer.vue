@@ -30,7 +30,7 @@ function diceToIcon(die: number): string {
 
 defineEmits(['diceClicked'])
 
-const model = defineModel<[number, number]>({ required: true})
+const props = defineProps<{ dice: [number, number] }>()
 
 const svg = ref<null | SVGElement>(null) 
 
@@ -47,7 +47,7 @@ function drawDice() {
             .attr('id', 'dice')
             .classed('dice', true)
         .selectAll()
-            .data(model.value.map((x, i) => [x, i]))
+            .data(props.dice.map((x, i) => [x, i]))
             .enter()
 
     enter
@@ -58,7 +58,7 @@ function drawDice() {
         .attr('height', 40)
     .attr('href', x => diceToIcon(x[0]))
 }
-watch(model, () => drawDice())
+watch(props, () => drawDice())
 onMounted(drawDice)
 </script>
 

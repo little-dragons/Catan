@@ -76,6 +76,16 @@ async function rollDice() {
     handleGameActionResult(res)
 }
 
+const lastDice = ref<undefined | [number, number]>(undefined)
+watchEffect(() => {
+    if (currentState.value?.phase.type == 'normal' && currentState.value.phase.diceRolled != false)
+        lastDice.value = currentState.value.phase.diceRolled
+
+    if (currentState.value?.phase.type == 'normal' && lastDice.value == undefined)
+        // this is to show the dice once the user is first required to roll them
+        lastDice.value = [3, 3]
+})
+
 const canFinishMyTurn = computed(() => {
     // TODO
     // robber?
@@ -98,7 +108,12 @@ async function finishTurn() {
     <div v-if="currentState != undefined" class="container">
         <div class="board">            
             <p v-if="myTurn">It's your turn.</p>
-            <StateRenderer ref="renderer" v-model="currentState" :stocked-cards="currentState.self.handCards" :offered-cards="[]" @dice-clicked="rollDice"/>
+            <StateRenderer ref="renderer" 
+                :board="currentState.board" 
+                :dice="lastDice" 
+                :stocked-cards="currentState.self.handCards" 
+                :offered-cards="[]" 
+                @dice-clicked="rollDice"/>
         </div>
         <div class="others">
             <div v-if="others != undefined" v-for="other in others">
