@@ -1,11 +1,19 @@
 <script setup lang="ts">
 import { currentGameRoom, currentRoom } from '@/socketWrapper/Room';
-import { adjacentRoads, availableBuildingPositions, type Coordinate, type RedactedGameState } from 'shared';
+import { adjacentRoads, availableBuildingPositions, type Coordinate, type RedactedGameState, type RedactedPlayer, type User } from 'shared';
 import { computed, ref, watch, watchEffect } from 'vue';
 import { currentAuthUser } from '@/socketWrapper/Login';
 import { gameSocket } from '@/socketWrapper/Socket';
 import StateRenderer from '@/drawing/StateRenderer.vue';
-import { finishTurn, rollDice } from '@/socketWrapper/Game';
+
+const renderer = ref<null | InstanceType<typeof StateRenderer>>(null)
+
+function handleGameActionResult(res: true | 'invalid token' | 'invalid room id'| 'action not allowed') {
+    if (res == true)
+        return
+
+    console.warn(`Game action did not complete correctly: ${res}`)
+}
 
 const currentState = computed(() => {
     if (currentGameRoom.value?.state != undefined)
@@ -13,7 +21,6 @@ const currentState = computed(() => {
     else
         return undefined
 })
-const renderer = ref<null | InstanceType<typeof StateRenderer>>(null)
 
 const myColor = computed(() => {
     if (currentAuthUser.value == undefined || currentGameRoom.value == undefined) {
@@ -22,6 +29,13 @@ const myColor = computed(() => {
     }
 
     return currentGameRoom.value.users.filter(x => x[0].name == currentAuthUser.value!.name)[0][1]
+})
+const others = computed(() => {
+    if (currentState.value == undefined || currentGameRoom.value == undefined || currentAuthUser.value == undefined)
+        return undefined
+    
+    const otherUsers = currentGameRoom.value.users.filter(x => x[0].name != currentAuthUser.value!.name)
+    return otherUsers.map(user => [user[0], currentState.value?.players.find(player => player.color == user[1])!] as [User, RedactedPlayer])
 })
 
 const myTurn = computed(() => {
@@ -32,6 +46,7 @@ const myTurnForInitialPlacement = computed(() => {
     return myTurn.value && currentState.value?.phase.type == 'initial'
 })
 
+// set interaction points for initial placements
 watchEffect(() => {
     if (myTurnForInitialPlacement.value != true || renderer.value == null)
         return
@@ -44,51 +59,66 @@ watchEffect(() => {
             const res = 
                 await gameSocket.emitWithAck('gameAction', currentRoom.value!.id, currentAuthUser.value!.authToken, 
                 { type: 'place initial buildings', road: finalRoad[0], settlement: finalSettlement[0] })
-            console.log(res)
+            handleGameActionResult(res)
+            renderer.value!.clearInteractionPoints()
         })
     })
 })
 
-async function place1() {
-    const res = 
-        await gameSocket.emitWithAck('gameAction', currentRoom.value!.id, currentAuthUser.value!.authToken, 
-        { type: 'place initial buildings', road: [[5,6], [5,5]], settlement: [5, 6]})
-    console.log(res)
-}
-async function place2() {
-    const res = 
-        await gameSocket.emitWithAck('gameAction', currentRoom.value!.id, currentAuthUser.value!.authToken, 
-        { type: 'place initial buildings', road: [[3,4], [4,4]], settlement: [4, 4]})
-    console.log(res)
-}
-async function place3() {
-    const res = 
-        await gameSocket.emitWithAck('gameAction', currentRoom.value!.id, currentAuthUser.value!.authToken, 
-        { type: 'place initial buildings', road: [[9,2], [10,2]], settlement: [10, 2]})
-    console.log(res)
-}
-async function place4() {
-    const res = 
-        await gameSocket.emitWithAck('gameAction', currentRoom.value!.id, currentAuthUser.value!.authToken, 
-        { type: 'place initial buildings', road: [[7,4], [8,4]], settlement: [8, 4]})
-    console.log(res)
+const myTurnToRollDice = computed(() => {
+    return myTurn && currentState.value?.phase.type == 'normal' && currentState.value.phase.diceRolled == false
+})
+async function rollDice() {
+    if (!myTurnToRollDice.value)
+        return
+
+    const res = await gameSocket.emitWithAck('gameAction', currentGameRoom.value!.id, currentAuthUser.value!.authToken, { type: 'roll dice' })
+    handleGameActionResult(res)
 }
 
-function throwDice() {
-    console.log('throw dice')
-    rollDice()
-} 
+const canFinishMyTurn = computed(() => {
+    // TODO
+    // robber?
+    return myTurn.value && currentState.value?.phase.type == 'normal' && currentState.value.phase.diceRolled != false
+})
+
+async function finishTurn() {
+    if (!canFinishMyTurn)
+        return
+
+    handleGameActionResult(
+        await gameSocket.emitWithAck('gameAction', currentGameRoom.value!.id, currentAuthUser.value!.authToken, { type: 'finish turn' })
+    )
+}
+
 </script>
 
-<template>    
-    <div v-if="currentState != undefined">
-        <p v-if="myTurn">It's your turn.</p>
-        <button @click="place1">Place at 1</button>
-        <button @click="place2">Place at 2</button>
-        <button @click="place3">Place at 3</button>
-        <button @click="place4">Place at 4</button>
-        <button @click="finishTurn">Finish turn</button>
-        <StateRenderer ref="renderer" v-model="currentState" @dice-clicked="rollDice"/>
+<template>
+    <button :disabled="!canFinishMyTurn" @click="finishTurn">Finish turn</button>
+    <div v-if="currentState != undefined" class="container">
+        <div class="board">            
+            <p v-if="myTurn">It's your turn.</p>
+            <StateRenderer ref="renderer" v-model="currentState" :stocked-cards="currentState.self.handCards" :offered-cards="[]" @dice-clicked="rollDice"/>
+        </div>
+        <div class="others">
+            <div v-if="others != undefined" v-for="other in others">
+                <p>{{ other[0].name }}</p>
+            </div>
+        </div>
     </div>
 </template>
+
+<style scoped>
+.container {
+    width: calc(100vw - 100px);
+    display: flex;
+    flex-direction: row;
+}
+
+.board {
+    width: 50rem;
+}
+
+
+</style>
 

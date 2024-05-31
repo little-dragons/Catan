@@ -43,7 +43,6 @@ const showCreateRoomsModal = ref(false)
 </template>
 
 <style scoped>
-@import '../assets/base.css';
 
 .grid-columns {
     grid-template-columns: 55% 15% 20% 10%;
@@ -56,6 +55,10 @@ const showCreateRoomsModal = ref(false)
     border: var(--mute-border);
     height: 2rem;
 }
+
+/* input {
+    width: 10rem;
+} */
 
 .heading {
     margin-top: 50px;

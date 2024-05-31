@@ -1,4 +1,4 @@
-import { BuildingType, FullGameState, GameClientEventMap, GameServerEventMap, buyCity, buyRoad, buySettlement, canBuyCity, canBuyRoad, canBuySettlement, isAvailableBuildingPosition, redactGameStateFor, setNextPlayer } from "shared";
+import { BuildingType, FullGameState, GameClientEventMap, GameServerEventMap, adjacentResourceTiles, buyCity, buyRoad, buySettlement, canBuyCity, canBuyRoad, canBuySettlement, isAvailableBuildingPosition, redactGameStateFor, setNextPlayer } from "shared";
 import { type Socket } from 'socket.io'
 import { checkRealUser as checkName, checkUser } from "../authentication/AuthTokenMap";
 import { games } from "./RoomManager";
@@ -49,11 +49,26 @@ export function acceptGameEvents(socket: Socket<GameServerEventMap, GameClientEv
             cb('action not allowed')
             return
         }
+        const currentPlayer = game.state.players.find(x => x.color == game.state.currentPlayer)!
 
         if (action.type == 'roll dice' && game.state.phase.type == 'normal' && game.state.phase.diceRolled == false) {
             const dice1 = Math.floor(Math.random() * 6) + 1
             const dice2 = Math.floor(Math.random() * 6) + 1
             game.state.phase.diceRolled = [dice1, dice2]
+
+            const sum  = dice1 + dice2
+            for (const building of game.state.board.buildings) {
+                const resources = adjacentResourceTiles(building[1], game.state.board, sum)
+                const player = game.state.players.find(x => x.color == building[0])
+                for (const res of resources) {
+                    if (building[2] == BuildingType.Settlement)
+                        player?.handCards.push(res)
+                    else if (building[2] == BuildingType.City) {
+                        player?.handCards.push(res)
+                        player?.handCards.push(res)
+                    }
+                }
+            }
         }
 
         else if (action.type == 'place initial buildings' && game.state.phase.type == 'initial') {
@@ -66,7 +81,9 @@ export function acceptGameEvents(socket: Socket<GameServerEventMap, GameClientEv
             game.state.board.roads.push([game.state.currentPlayer, action.road[0], action.road[1]])
 
             if (!game.state.phase.forward) {
-                // TODO deliver hand cards for second settlement
+                const resources = adjacentResourceTiles(action.settlement, game.state.board, undefined)
+                for (const res of resources)
+                    currentPlayer.handCards.push(res)
             }
 
             setNextPlayer(game.state)

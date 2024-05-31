@@ -45,7 +45,7 @@ const showLoginModal = ref(false)
     gap: 4rem;
     background-color: var(--secondary-background-color);
     border-bottom: var(--mute-border);
-    justify-content: flex-end;
+    justify-content: center;
     padding-right: 1rem;
     padding-left: 1rem;
 }
@@ -63,6 +63,8 @@ p {
 }
 
 main {    
+    margin: auto;
+    width: fit-content;
     padding: 0 40px;
 }
 

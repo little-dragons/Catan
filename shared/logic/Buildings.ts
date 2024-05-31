@@ -1,40 +1,8 @@
-import { Board, Coordinate } from "./Board";
+import { Board, Coordinate, adjacentCrossings, crossingAdjacentToLand} from "./Board";
 import { Color } from "./Player";
 
 export enum BuildingType {
     Settlement, City
-}
-
-
-function crossingAdjacentToTile(crossing: Coordinate, tile: Coordinate): boolean {
-    const xCorrection = tile[1] % 2 == 0 ? 0 : 1
-    const xBase = tile[0] * 2 + xCorrection
-    const allowedX = [xBase, xBase + 1, xBase + 2]
-    const allowedY = [tile[1], tile[1] + 1]
-    return allowedX.includes(crossing[0]) && allowedY.includes(crossing[1])
-}
-
-function crossingAdjacentToLand(crossing: Coordinate, board: Board): boolean {
-    return board.tiles.filter(x => x[0].type == 'desert' || x[0].type == 'resource').some(x => crossingAdjacentToTile(crossing, x[1]))
-}
-
-
-
-function adjacentCrossings(crossing: Coordinate): Coordinate[] {
-    //TODO generated positions may be negative or otherwise out of bounds
-    const left: Coordinate = [crossing[0] - 1, crossing[1]]
-    const right: Coordinate = [crossing[0] + 1, crossing[1]]
-
-    function logicalXor(a: boolean, b: boolean) {
-        return a && !b || b && !a
-    }
-    const goingUp = logicalXor(crossing[0] % 2 == 0, crossing[1] % 2 == 0)
-    const vertical: Coordinate = [crossing[0], crossing[1] + (goingUp ? -1 : 1)]
-    return [left, right, vertical]
-}
-
-export function adjacentRoads(crossing: Coordinate): [Coordinate, Coordinate][] {
-    return adjacentCrossings(crossing).map(other => [crossing, other])
 }
 
 function crossingHasRequiredDistanceToAll(crossing: Coordinate, board: Board): boolean {
