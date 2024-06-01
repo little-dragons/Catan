@@ -65,7 +65,6 @@ html {
 
 
 body {
-    width: fit-content;
     min-height: 100%;
     border-left: var(--mute-border);
     border-right: var(--mute-border);

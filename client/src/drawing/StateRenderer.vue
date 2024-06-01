@@ -6,15 +6,17 @@ import { onMounted, ref, watch } from 'vue';
 import CardRenderer from './CardRenderer.vue';
 
 defineEmits<{
-    diceClicked: [],
+    diceClicked: []
     resourceClicked: [resource: Resource]
+    endTurnClicked: []
 }>()
 
-const props = defineProps<{
+defineProps<{
     stockedCards: Resource[]
     offeredCards: Resource[]
     board: Board
     dice: [number, number] | undefined
+    canEndTurn: boolean
 }>()
 
 const boardRenderer = ref<null | InstanceType<typeof BoardRenderer>>(null)
@@ -35,6 +37,9 @@ defineExpose({ setInteractionPoints })
         </div>
         <div class="cards">
             <CardRenderer :cards="stockedCards" @resource-clicked="res => $emit('resourceClicked', res)"/>
+        </div>
+        <div class="buttons">
+            <button @click="() => $emit('endTurnClicked')" :disabled="!canEndTurn">Finish turn</button>
         </div>
     </div>
 </template>

@@ -95,14 +95,14 @@ watchEffect(() => {
         lastDice.value = [3, 3]
 })
 
-const canFinishMyTurn = computed(() => {
+const canEndMyTurn = computed(() => {
     // TODO
     // robber?
     return myTurn.value && currentState.value?.phase.type == 'normal' && currentState.value.phase.diceRolled != false
 })
 
-async function finishTurn() {
-    if (!canFinishMyTurn)
+async function endTurn() {
+    if (!canEndMyTurn)
         return
 
     handleGameActionResult(
@@ -117,7 +117,6 @@ function resourceClicked(res: Resource) {
 </script>
 
 <template>
-    <button :disabled="!canFinishMyTurn" @click="finishTurn">Finish turn</button>
     <div v-if="currentState != undefined" class="container">
         <div class="board">            
             <p v-if="myTurn">It's your turn.</p>
@@ -125,14 +124,19 @@ function resourceClicked(res: Resource) {
                 :board="currentState.board" 
                 :dice="lastDice" 
                 :stocked-cards="currentState.self.handCards" 
-                :offered-cards="[]" 
+                :offered-cards="[]"
+                :can-end-turn="canEndMyTurn"
                 @dice-clicked="rollDice"
-                @resource-clicked="resourceClicked"/>
+                @resource-clicked="resourceClicked"
+                @end-turn-clicked="endTurn"/>
         </div>
         <div class="others">
             <div v-if="others != undefined" v-for="other in others">
                 <p>{{ other[0].name }}</p>
             </div>
+            <div><p>test</p></div>
+            <div><p>test</p></div>
+            <div><p>test</p></div>
         </div>
     </div>
 </template>
@@ -142,10 +146,15 @@ function resourceClicked(res: Resource) {
     width: calc(100vw - 100px);
     display: flex;
     flex-direction: row;
+    max-height: 80vh;
 }
 
 .board {
     width: 50rem;
+}
+
+.board> p {
+    position: absolute;
 }
 
 

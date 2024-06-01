@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { currentUser } from './socketWrapper/Login';
-import { currentLobbyRoom, currentRoom } from './socketWrapper/Room';
-import {fetchNewState} from './socketWrapper/Game';
+import { currentRoom } from './socketWrapper/Room';
 import { ref } from 'vue';
 import LoginModal from './home/LoginModal.vue'
 
@@ -15,12 +14,15 @@ const showLoginModal = ref(false)
         <div>
             <RouterLink :to="{ name: 'home' }">Home</RouterLink>
         </div>
+        <div class="empty"/>
         <div>
             <RouterLink :to="{ name: 'roomList' }">Room List</RouterLink>
         </div>
+        <div class="empty"/>
         <div v-if="currentRoom != undefined">
             <RouterLink :to="{ name: 'room' }">Current room</RouterLink>
         </div>
+        <div v-if="currentRoom != undefined" class="empty"/>
         <div>
             <p v-if="currentUser.status == 'anonymous'">Not logged in. <span @click="() => showLoginModal = true" class="login-button">Login</span></p>
             <p v-else-if="currentUser.status == 'pending'">Pending login...</p>
@@ -42,7 +44,6 @@ const showLoginModal = ref(false)
 .navbar {
     display: flex;
     flex-direction: row;
-    gap: 4rem;
     background-color: var(--secondary-background-color);
     border-bottom: var(--mute-border);
     justify-content: center;
@@ -51,14 +52,23 @@ const showLoginModal = ref(false)
 }
 
 .navbar > div {
-    padding: 1rem 0;
+    padding: 0.8rem 0;
+    max-width: 15rem;
 }
 .navbar > div > a {
     color: rgb(6, 6, 141);
     text-decoration: none;
 }
 
-p {
+.empty {
+    width: 4rem;
+    min-width: 1rem;
+}
+
+.navbar > div > * {    
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
     margin: 0;
 }
 
