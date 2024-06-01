@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Resource } from 'shared';
-import { computed, ref, watch } from 'vue';
 
 import brickCard from '@/assets/resource-cards/brick-card.svg'
 import grainCard from '@/assets/resource-cards/grain-card.svg'
@@ -21,25 +20,14 @@ function imageForResource(res: Resource): string {
 defineEmits<{
     resourceClicked: [res: Resource]
 }>()
-const props = defineProps<{ cards: Resource[] }>()
-
-const counted = ref<Map<Resource, number>>(undefined!)
-watch(props, ({ cards }) => {
-    const map = new Map<Resource, number>()
-    for (const card of cards)
-        map.set(card, (map.get(card) ?? 0) + 1)
-    counted.value = map
-}, { immediate: true })
-
+defineProps<{ cards: Resource[] }>()
 </script>
 
 <template>
     <div class="container">
         <div v-for="resource in [Resource.Lumber, Resource.Brick, Resource.Wool, Resource.Grain, Resource.Ore]" class="stack" @click="() => $emit('resourceClicked', resource)">
-            <img 
-                v-for="i in Array($props.cards.filter(x => x == resource).length).keys()" 
-                :src="imageForResource(resource)"
-                />
+            <img v-for="_ in Array($props.cards.filter(x => x == resource).length).keys()" 
+                :src="imageForResource(resource)"/>
         </div>
     </div>
 </template>
@@ -70,14 +58,13 @@ img {
     position: relative;
     user-select: none;
 }
-
+img:not(:first-child) {
+    margin-right: -1.9rem;
+}
 img:hover {
     cursor: pointer;
 }
 
-img:not(:first-child) {
-    margin-right: -1.9rem;
-}
 
 
 </style>
