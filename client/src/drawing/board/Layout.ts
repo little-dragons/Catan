@@ -1,4 +1,4 @@
-import type { Board, Coordinate } from "shared"
+import type { Board, Coordinate, Road } from "shared"
 import { add, middlepoint, opposite, perpendicular, withLength } from "../Vector"
 
 type Pixel = [number, number]
@@ -96,18 +96,18 @@ export function crossingPosition(coord: Coordinate, radius: number): Pixel {
     return [tileWidth(radius) / 2 * coord[0], yBaseline + yOffset]
 }
 
-export function roadCenter(coord1: Coordinate, coord2: Coordinate, radius: number): Pixel {
-    const cross1 = crossingPosition(coord1, radius)
-    const cross2 = crossingPosition(coord2, radius)
+export function roadCenter(road: Road, radius: number): Pixel {
+    const cross1 = crossingPosition(road[0], radius)
+    const cross2 = crossingPosition(road[1], radius)
     return middlepoint(cross1, cross2)
 }
 
-export function roadPosition(coord1: Coordinate, coord2: Coordinate, radius: number): Pixel[] {
+export function roadPosition(road: Road, radius: number): Pixel[] {
     const roadLength = 0.8 * radius
     const roadWidth = 0.1 * radius
 
-    const cross1 = crossingPosition(coord1, radius)
-    const cross2 = crossingPosition(coord2, radius)
+    const cross1 = crossingPosition(road[0], radius)
+    const cross2 = crossingPosition(road[1], radius)
     const midpoint = middlepoint(cross1, cross2)
     const lengthVector = withLength([cross1[0] - midpoint[0], cross1[1] - midpoint[1]], roadLength / 2)
     const widthVector =  withLength(perpendicular(lengthVector), roadWidth / 2)

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
 import { renderBuildings, renderInteractionPoints, renderRoads, renderRobber, renderTiles } from './SvgManipulation';
-import type { Board, Coordinate } from 'shared';
+import type { Board, Coordinate, Road } from 'shared';
 import { distance } from '../Vector';
 import { crossingPosition, interactionPointRadius, roadCenter } from './Layout';
 
@@ -24,7 +24,7 @@ export type InteractionPoints<Payload> = {
     data: [Coordinate, Payload][]
 } | {
     type: 'road'
-    data: [[Coordinate, Coordinate], Payload][]
+    data: [Road, Payload][]
 }
 
 
@@ -47,13 +47,16 @@ function setInteractionPoints<Points extends InteractionPoints<any>>(points: Poi
         }
         else if (points.type == 'road') {
             for (const p of points.data)
-                if (distance(clickedPosition, roadCenter(p[0][0], p[0][1], tileRadius)) < interactionPointRadius(tileRadius))
+                if (distance(clickedPosition, roadCenter(p[0], tileRadius)) < interactionPointRadius(tileRadius))
                     clicked(p)
         }
     }
 }
+function clearInteractionPoints() {
+    activeClickHandler = () => {}
+}
 
-defineExpose({ setInteractionPoints })
+defineExpose({ setInteractionPoints, clearInteractionPoints })
 watch(props, () => renderEverything())
 onMounted(renderEverything)
 </script>

@@ -56,9 +56,6 @@ const showCreateRoomsModal = ref(false)
     height: 2rem;
 }
 
-/* input {
-    width: 10rem;
-} */
 
 .heading {
     margin-top: 50px;

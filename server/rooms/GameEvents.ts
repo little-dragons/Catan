@@ -72,13 +72,13 @@ export function acceptGameEvents(socket: Socket<GameServerEventMap, GameClientEv
         }
 
         else if (action.type == 'place initial buildings' && game.state.phase.type == 'initial') {
-            if (!isAvailableBuildingPosition(action.settlement, game.state.board, userMappingSearch[1])) {
+            if (!isAvailableBuildingPosition(action.settlement, game.state.board, undefined)) {
                 cb('action not allowed')
                 return
             }
             
             game.state.board.buildings.push([game.state.currentPlayer, action.settlement, BuildingType.Settlement])
-            game.state.board.roads.push([game.state.currentPlayer, action.road[0], action.road[1]])
+            game.state.board.roads.push([game.state.currentPlayer, action.road])
 
             if (!game.state.phase.forward) {
                 const resources = adjacentResourceTiles(action.settlement, game.state.board, undefined)
@@ -90,7 +90,11 @@ export function acceptGameEvents(socket: Socket<GameServerEventMap, GameClientEv
         }
 
         else if (action.type == 'place building' && game.state.phase.type == 'normal' && game.state.phase.diceRolled) {
-
+            // if (!isAvailableBuildingPosition(action.settlement, game.state.board, game.state.currentPlayer)) {
+            //     cb('action not allowed')
+            //     return
+            // }
+            
             const currentHandCards = game.state.players.find(x => x.color == game.state.currentPlayer)!.handCards
 
             if (action.building == 'city' && !canBuyCity(currentHandCards) ||  
@@ -116,7 +120,7 @@ export function acceptGameEvents(socket: Socket<GameServerEventMap, GameClientEv
             else if(action.building == 'settlement')
                 game.state.board.buildings.push([game.state.currentPlayer, action.coordinate, BuildingType.Settlement])
             else if (action.building == 'road')
-                game.state.board.roads.push([game.state.currentPlayer, action.coordinates[0], action.coordinates[1]])
+                game.state.board.roads.push([game.state.currentPlayer, action.coordinates])
         }
 
         else if (action.type == 'finish turn' && game.state.phase.type == 'normal' && game.state.phase.diceRolled != false) {
@@ -128,7 +132,8 @@ export function acceptGameEvents(socket: Socket<GameServerEventMap, GameClientEv
             return
         }
 
-
+        console.log(action)
+        console.log(game.state.board.roads)
         socket.emit('gameEvent')
         socket.to(room).emit('gameEvent')
 

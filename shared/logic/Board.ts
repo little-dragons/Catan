@@ -4,6 +4,13 @@ import type { Resource } from "./Resource"
 import type { BuildingType } from "./Buildings"
 
 export type Coordinate = [number, number]
+export function sameCoordinate(c1: Coordinate, c2: Coordinate) {
+    return c1[0] == c2[0] && c1[1] == c2[1]
+}
+export type Road = [Coordinate, Coordinate]
+export function sameRoad(r1: Road, r2: Road) {
+    return sameCoordinate(r1[0], r2[0]) && sameCoordinate(r1[1], r2[1]) || sameCoordinate(r1[0], r2[1]) && sameCoordinate(r1[1], r2[0])
+}
 
 export type PortTile = {
     type: 'port'
@@ -23,7 +30,7 @@ export interface Board {
     rowCount: number
     columnCount: number
     tiles: [Tile, Coordinate][]
-    roads: [Color, Coordinate, Coordinate][] 
+    roads: [Color, Road][] 
     robber: Coordinate
     buildings: [Color, Coordinate, BuildingType][]
 }
@@ -40,6 +47,7 @@ function crossingAdjacentToTile(crossing: Coordinate, tile: Coordinate): boolean
 export function crossingAdjacentToLand(crossing: Coordinate, board: Board): boolean {
     return board.tiles.filter(x => x[0].type == 'desert' || x[0].type == 'resource').some(x => crossingAdjacentToTile(crossing, x[1]))
 }
+
 
 function isCrossingWithRoadUp(crossing: Coordinate): boolean {
     function logicalXor(a: boolean, b: boolean) {
@@ -59,7 +67,7 @@ export function adjacentCrossings(crossing: Coordinate): Coordinate[] {
     return [left, right, vertical]
 }
 
-export function adjacentRoads(crossing: Coordinate): [Coordinate, Coordinate][] {
+export function adjacentRoads(crossing: Coordinate): Road[] {
     return adjacentCrossings(crossing).map(other => [crossing, other])
 }
 
@@ -68,6 +76,7 @@ export function adjacentRoads(crossing: Coordinate): [Coordinate, Coordinate][] 
 
 function adjacentTiles(cross: Coordinate): Coordinate[] {
     // draw it out to understand it
+    //TODO generated positions may be negative or otherwise out of bounds
 
     const oneTileAbove = !isCrossingWithRoadUp(cross)
     if (oneTileAbove) {
@@ -115,15 +124,15 @@ function mapFind<T, R>(array: T[], finder: ((item: T) => R |  undefined)): R | u
         if (mapped != undefined)
             return mapped
     }
-} 
+}
+
 export function adjacentResourceTiles(cross: Coordinate, board: Board, number: number | undefined): Resource[] {
     return mapFilter(
         adjacentTiles(cross), 
         coord => 
             mapFind(
                 board.tiles, 
-                tile => tile[1][0] == coord[0] && 
-                tile[1][1] == coord[1] &&
+                tile => sameCoordinate(tile[1], coord) &&
                 tile[0].type == 'resource' &&
                 (number != undefined ? tile[0].number == number : true) ? tile[0] : undefined)
             ?.resource

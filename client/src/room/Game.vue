@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { currentGameRoom, currentRoom } from '@/socketWrapper/Room';
-import { adjacentRoads, availableBuildingPositions, type Coordinate, type RedactedGameState, type RedactedPlayer, type User } from 'shared';
-import { computed, ref, watch, watchEffect } from 'vue';
+import { Resource, adjacentRoads, availableBuildingPositions, type Coordinate, type RedactedGameState, type RedactedPlayer, type Road, type User } from 'shared';
+import { computed, ref, shallowRef, triggerRef, watch, watchEffect } from 'vue';
 import { currentAuthUser } from '@/socketWrapper/Login';
 import { gameSocket } from '@/socketWrapper/Socket';
 import StateRenderer from '@/drawing/StateRenderer.vue';
@@ -12,10 +12,19 @@ function handleGameActionResult(res: true | 'invalid token' | 'invalid room id'|
     if (res == true)
         return
 
-    console.warn(`Game action did not complete correctly: ${res}`)
+    console.warn(`Game action did not complete correctly: ${res}, triggering state again`)
+    // TODO handle errors elegantly. An idea is given below
+    // potentially, if a action is rejected, the state may be completely wrong. Probably, triggering the state 
+    // again will not destroy it further, only potentially help
+
+    triggerRef(recompute)
 }
 
+const recompute = shallowRef(undefined)
 const currentState = computed(() => {
+    // when recompute is triggered, this function is recomputed
+    recompute.value
+
     if (currentGameRoom.value?.state != undefined)
         return currentGameRoom.value.state as unknown as RedactedGameState
     else
@@ -54,7 +63,7 @@ watchEffect(() => {
     const freeSettlements = availableBuildingPositions(currentState.value!.board, undefined)
     const mapping = freeSettlements.map(coord => [coord, 'test'] as [Coordinate, string])
     renderer.value.setInteractionPoints({ type: 'settlement', data: mapping }, finalSettlement => {
-        const chosenRoads = adjacentRoads(finalSettlement[0]).map(x => [x, false] as [[Coordinate, Coordinate], boolean])
+        const chosenRoads = adjacentRoads(finalSettlement[0]).map(x => [x, false] as [Road, boolean])
         renderer.value!.setInteractionPoints({ type: 'road', data: chosenRoads}, async finalRoad => {
             const res = 
                 await gameSocket.emitWithAck('gameAction', currentRoom.value!.id, currentAuthUser.value!.authToken, 
@@ -101,6 +110,10 @@ async function finishTurn() {
     )
 }
 
+function resourceClicked(res: Resource) {
+    //TODO
+}
+
 </script>
 
 <template>
@@ -113,7 +126,8 @@ async function finishTurn() {
                 :dice="lastDice" 
                 :stocked-cards="currentState.self.handCards" 
                 :offered-cards="[]" 
-                @dice-clicked="rollDice"/>
+                @dice-clicked="rollDice"
+                @resource-clicked="resourceClicked"/>
         </div>
         <div class="others">
             <div v-if="others != undefined" v-for="other in others">

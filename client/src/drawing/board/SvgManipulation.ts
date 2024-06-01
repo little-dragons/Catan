@@ -179,7 +179,7 @@ export function renderRoads(svg: SVGElement, board: Board, tileRadius: number) {
     
     enter
       .append('path')
-        .attr('d', x => d3.line()(roadCorners(x[1], x[2], tileRadius)))
+        .attr('d', x => d3.line()(roadCorners(x[1], tileRadius)))
         .attr('fill', x => stringColor(x[0]))
     
 }
@@ -216,8 +216,8 @@ export function renderInteractionPoints<T>(
             .data(points.data)
             .enter()
         .append('circle')
-            .attr('cx', x => roadCenter(x[0][0], x[0][1], tileRadius)[0])
-            .attr('cy', x => roadCenter(x[0][0], x[0][1], tileRadius)[1])
+            .attr('cx', x => roadCenter(x[0], tileRadius)[0])
+            .attr('cy', x => roadCenter(x[0], tileRadius)[1])
             .attr('r', interactionPointRadius(tileRadius))
     }
     

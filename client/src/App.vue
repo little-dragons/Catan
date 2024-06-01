@@ -65,7 +65,7 @@ p {
 main {    
     margin: auto;
     width: fit-content;
-    padding: 0 40px;
+    padding: 0 var(--main-side-padding);
 }
 
 

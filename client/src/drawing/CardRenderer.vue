@@ -18,7 +18,11 @@ function imageForResource(res: Resource): string {
     }
 }
 
+defineEmits<{
+    resourceClicked: [res: Resource]
+}>()
 const props = defineProps<{ cards: Resource[] }>()
+
 const counted = ref<Map<Resource, number>>(undefined!)
 watch(props, ({ cards }) => {
     const map = new Map<Resource, number>()
@@ -31,7 +35,7 @@ watch(props, ({ cards }) => {
 
 <template>
     <div class="container">
-        <div v-for="resource in [Resource.Lumber, Resource.Brick, Resource.Wool, Resource.Grain, Resource.Ore]" class="stack">
+        <div v-for="resource in [Resource.Lumber, Resource.Brick, Resource.Wool, Resource.Grain, Resource.Ore]" class="stack" @click="() => $emit('resourceClicked', resource)">
             <img 
                 v-for="i in Array($props.cards.filter(x => x == resource).length).keys()" 
                 :src="imageForResource(resource)"
@@ -54,19 +58,23 @@ watch(props, ({ cards }) => {
 .stack {
     position: relative;
     height: 4rem;
+    margin-left: 5px;
     display: flex;
     flex-direction: row-reverse;
 }
 
-.stack > img {
+img {
     height: inherit;
     position: relative;
+    user-select: none;
 }
-.stack > img:last-child {
-    margin-left: 5px;
+
+img:hover {
+    cursor: pointer;
 }
-.stack > img:not(:first-child) {
-    margin-right: -20px;
+
+img:not(:first-child) {
+    margin-right: -1.9rem;
 }
 
 

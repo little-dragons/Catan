@@ -1,4 +1,4 @@
-import { Board, Coordinate, adjacentCrossings, crossingAdjacentToLand} from "./Board";
+import { Board, Coordinate, adjacentCrossings, adjacentRoads, crossingAdjacentToLand, sameRoad} from "./Board";
 import { Color } from "./Player";
 
 export enum BuildingType {
@@ -13,8 +13,11 @@ function crossingHasRequiredDistanceToAll(crossing: Coordinate, board: Board): b
 }
 
 export function isAvailableBuildingPosition(crossing: Coordinate, board: Board, forPlayer: Color | undefined): boolean {
-    return crossingAdjacentToLand(crossing, board) && crossingHasRequiredDistanceToAll(crossing, board)
-    // TODO road connection, initial placement ?
+    const freeSpots = crossingAdjacentToLand(crossing, board) && crossingHasRequiredDistanceToAll(crossing, board)
+    if (forPlayer == undefined)
+        return freeSpots
+    
+    return adjacentRoads(crossing).some(road => board.roads.some(built => sameRoad(road, built[1]) && built[0] == forPlayer))
 }
 
 export function availableBuildingPositions(board: Board, forPlayer: Color | undefined) {

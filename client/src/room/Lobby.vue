@@ -26,8 +26,9 @@ if (currentLobbyRoom.value == undefined || currentAuthUser.value == undefined)
         <div class="right">
             <Setting name="requiredVictoryPoints" :value="currentLobbyRoom!.settings.requiredVictoryPoints" :allowChange="false"/>
             <Setting name="longestRoadMinimum" :value="currentLobbyRoom!.settings.longestRoadMinimum" :allowChange="false"/>
-            <button @click="() => leaveRoomAndRedirect()">Leave room</button>
-            <button @click="() => startRoom()">Start room</button>
+            <Setting name="seed" :value="currentLobbyRoom!.settings.seed" :allowChange="false"/>
+            <button @click="leaveRoomAndRedirect">Leave room</button>
+            <button @click="startRoom">Start room</button>
         </div>
     </div>
     

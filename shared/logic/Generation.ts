@@ -1,10 +1,16 @@
-import { type Board, type Tile, type Coordinate } from "./Board";
+import { v4 } from "uuid";
+import { type Board, type Tile, type Coordinate, sameCoordinate } from "./Board";
 import { allOrientations, clockwise, counterclockwise, neighborTile, opposite } from "./Orientation";
 import { Resource, allResources } from "./Resource";
 import seedrandom from 'seedrandom'
 
-export function defaultBoard(seed: number): Board {
-    const rand = seedrandom(seed.toString())
+export type BoardSeed = string
+export function randomBoardSeed() {
+    return v4()
+}
+
+export function defaultBoard(seed: BoardSeed): Board {
+    const rand = seedrandom(seed)
 
     let resourcesStack : Resource[] = []
     for (const res of allResources)
@@ -42,7 +48,7 @@ export function defaultBoard(seed: number): Board {
     
     const tiles: [Tile, Coordinate][] = []
     function getTile(coord: Coordinate): Tile | undefined{
-        const tile = tiles.find(([_, c]) => c[0] == coord[0] && c[1] == coord[1])
+        const tile = tiles.find(([_, c]) => sameCoordinate(c, coord))
         if (tile == undefined)
             return undefined
         return tile[0]
@@ -126,8 +132,7 @@ export function defaultBoard(seed: number): Board {
         rowCount: 7,
         tiles: tiles,
         roads: [],
-        //TODO
-        robber: [2, 2],
+        robber: tiles.find(x => x[0].type == 'desert')![1],
         buildings: []
     }
 }

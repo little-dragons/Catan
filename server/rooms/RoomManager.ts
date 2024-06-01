@@ -33,7 +33,7 @@ export function initializeGame(room: LobbyRoom) {
     const game = room as unknown as FullGameRoom
     game.type = 'ingame'
     game.state = {
-        board: defaultBoard(0),
+        board: defaultBoard(room.settings.seed),
         currentPlayer: mapping[0][1].color,
         players: mapping.map(pair => pair[1]),
         phase: {

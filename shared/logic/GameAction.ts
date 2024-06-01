@@ -1,4 +1,4 @@
-import { Coordinate } from "./Board"
+import { Coordinate, Road } from "./Board"
 import { Color } from "./Player"
 import { Resource } from "./Resource"
 
@@ -30,7 +30,7 @@ export type RequestGameAction = {
 } | {
     type: 'place building'
     building: 'road'
-    coordinates: [Coordinate, Coordinate]
+    coordinates: Road
 } | {
     type: 'trade offer'
     tradePartner: 'bank' | 'player'
@@ -39,7 +39,7 @@ export type RequestGameAction = {
 } | {
     type: 'place initial buildings'
     settlement: Coordinate
-    road: [Coordinate, Coordinate]
+    road: Road
 } | {
     type: 'finish turn'
 }

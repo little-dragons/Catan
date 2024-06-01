@@ -5,7 +5,10 @@ import DiceRenderer from './DiceRenderer.vue';
 import { onMounted, ref, watch } from 'vue';
 import CardRenderer from './CardRenderer.vue';
 
-defineEmits([ 'diceClicked' ])
+defineEmits<{
+    diceClicked: [],
+    resourceClicked: [resource: Resource]
+}>()
 
 const props = defineProps<{
     stockedCards: Resource[]
@@ -20,7 +23,7 @@ function setInteractionPoints<Points extends InteractionPoints<any>>(points: Poi
     boardRenderer.value!.setInteractionPoints(points, clicked)
 }
 function clearInteractionPoints() {
-    // TODO
+    boardRenderer.value!.clearInteractionPoints()
 }
 defineExpose({ setInteractionPoints, clearInteractionPoints })
 </script>
@@ -34,7 +37,7 @@ defineExpose({ setInteractionPoints, clearInteractionPoints })
             <DiceRenderer :dice="dice" ref="diceRenderer" @dice-clicked="() => $emit('diceClicked')"/>
         </div>
         <div class="cards">
-            <CardRenderer :cards="stockedCards"/>
+            <CardRenderer :cards="stockedCards" @resource-clicked="res => $emit('resourceClicked', res)"/>
         </div>
     </div>
 </template>
