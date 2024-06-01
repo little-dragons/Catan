@@ -39,14 +39,20 @@ defineExpose({ setInteractionPoints })
             <CardRenderer :cards="stockedCards" @resource-clicked="res => $emit('resourceClicked', res)"/>
         </div>
         <div class="buttons">
-            <button @click="() => $emit('endTurnClicked')" :disabled="!canEndTurn">Finish turn</button>
+            <button class="default-button-colors" @click="() => $emit('endTurnClicked')" :disabled="!canEndTurn">Finish turn</button>
         </div>
     </div>
 </template>
 
 <style scoped>
 .below {
+    padding-top: 10px;
     position: relative;
+    display: grid;
+    grid-template-rows: 100%;
+    grid-template-columns: 70% auto auto auto;
+    gap: 10px;
+    flex-direction: row;
 }
 
 .dice {
@@ -60,8 +66,19 @@ defineExpose({ setInteractionPoints })
 }
 
 .cards {
-    padding-top: 10px;
-    max-width: 30rem;
+}
+
+.buttons > button {
+    height: 100%;
+    border: 1px solid black;
+    border-radius: 10px;
+}
+
+.buttons > button:hover:enabled {
+    cursor: pointer;
+}
+.buttons > button:hover:not(:enabled) {
+    cursor: not-allowed;
 }
 
 </style>
