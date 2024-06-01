@@ -58,9 +58,11 @@ watch(props, ({ cards }) => {
 .stack {
     position: relative;
     height: 4rem;
-    margin-left: 5px;
     display: flex;
     flex-direction: row-reverse;
+}
+.stack:not(:empty) {
+    margin-left: 5px;
 }
 
 img {
