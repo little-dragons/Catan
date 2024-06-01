@@ -132,8 +132,6 @@ export function acceptGameEvents(socket: Socket<GameServerEventMap, GameClientEv
             return
         }
 
-        console.log(action)
-        console.log(game.state.board.roads)
         socket.emit('gameEvent')
         socket.to(room).emit('gameEvent')
 

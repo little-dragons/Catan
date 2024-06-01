@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import * as d3 from 'd3';
-import { onMounted, ref, watch, type Ref } from 'vue';
 import oneDie from '@/assets/dice/one-die.svg'
 import twoDie from '@/assets/dice/two-die.svg'
 import threeDie from '@/assets/dice/three-die.svg'
 import fourDie from '@/assets/dice/four-die.svg'
 import fiveDie from '@/assets/dice/five-die.svg'
 import sixDie from '@/assets/dice/six-die.svg'
-import { rollDice } from '@/socketWrapper/Game';
 
 function diceToIcon(die: number): string {
     switch (die) {
@@ -30,38 +27,22 @@ function diceToIcon(die: number): string {
 
 defineEmits(['diceClicked'])
 
-const props = defineProps<{ dice: [number, number] }>()
-
-const svg = ref<null | SVGElement>(null) 
-
-function drawDice() {
-    const svgElement = svg.value!
-
-    d3.select(svgElement)
-    .select('#dice')
-    .remove()
-
-    const enter =
-        d3.select(svgElement)
-        .append('g')
-            .attr('id', 'dice')
-            .classed('dice', true)
-        .selectAll()
-            .data(props.dice.map((x, i) => [x, i]))
-            .enter()
-
-    enter
-    .append('image')
-        .attr('x', x => x[1] * 40)
-        .attr('y', 0)
-        .attr('width', 40)
-        .attr('height', 40)
-    .attr('href', x => diceToIcon(x[0]))
-}
-watch(props, () => drawDice())
-onMounted(drawDice)
+defineProps<{ dice: [number, number] }>()
 </script>
 
 <template>
-    <svg ref="svg" viewBox="0 0 80 40" @click="() => $emit('diceClicked')"/>
+    <svg ref="svg" viewBox="0 0 80 40" @click="() => $emit('diceClicked')">
+        <image
+            x="0"
+            y="0"
+            width="40"
+            height="40"
+            :href="diceToIcon(dice[0])"/>
+        <image
+            x="40"
+            y="0"
+            width="40"
+            height="40"
+            :href="diceToIcon(dice[1])"/>
+    </svg>
 </template>

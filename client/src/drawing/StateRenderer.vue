@@ -19,13 +19,10 @@ const props = defineProps<{
 
 const boardRenderer = ref<null | InstanceType<typeof BoardRenderer>>(null)
 
-function setInteractionPoints<Points extends InteractionPoints<any>>(points: Points, clicked: ((point: Points['data'][number]) => void)) {
-    boardRenderer.value!.setInteractionPoints(points, clicked)
+function setInteractionPoints<T>(points: InteractionPoints<T> | undefined) {
+    boardRenderer.value!.setInteractionPoints(points)
 }
-function clearInteractionPoints() {
-    boardRenderer.value!.clearInteractionPoints()
-}
-defineExpose({ setInteractionPoints, clearInteractionPoints })
+defineExpose({ setInteractionPoints })
 </script>
 
 <template>

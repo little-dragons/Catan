@@ -32,6 +32,7 @@ export function tileHexagon(coord: Coordinate, tileRadius: number): Pixel[] {
     return points
 }
 
+
 export function tileResourceIconSize(tileRadius: number): [number, number] {
     return [0.6 * tileRadius, 0.5 * tileRadius]
 }
@@ -102,7 +103,7 @@ export function roadCenter(road: Road, radius: number): Pixel {
     return middlepoint(cross1, cross2)
 }
 
-export function roadPosition(road: Road, radius: number): Pixel[] {
+export function roadCorners(road: Road, radius: number): Pixel[] {
     const roadLength = 0.8 * radius
     const roadWidth = 0.1 * radius
 

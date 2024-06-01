@@ -62,16 +62,16 @@ watchEffect(() => {
 
     const freeSettlements = availableBuildingPositions(currentState.value!.board, undefined)
     const mapping = freeSettlements.map(coord => [coord, 'test'] as [Coordinate, string])
-    renderer.value.setInteractionPoints({ type: 'settlement', data: mapping }, finalSettlement => {
-        const chosenRoads = adjacentRoads(finalSettlement[0]).map(x => [x, false] as [Road, boolean])
-        renderer.value!.setInteractionPoints({ type: 'road', data: chosenRoads}, async finalRoad => {
+    renderer.value.setInteractionPoints({ type: 'settlement', data: mapping, callback([finalSettlement, _]) {
+        const chosenRoads = adjacentRoads(finalSettlement).map(x => [x, false] as [Road, boolean])
+        renderer.value!.setInteractionPoints({ type: 'road', data: chosenRoads, async callback([finalRoad, _]) {
             const res = 
                 await gameSocket.emitWithAck('gameAction', currentRoom.value!.id, currentAuthUser.value!.authToken, 
-                { type: 'place initial buildings', road: finalRoad[0], settlement: finalSettlement[0] })
+                { type: 'place initial buildings', road: finalRoad, settlement: finalSettlement })
             handleGameActionResult(res)
-            renderer.value!.clearInteractionPoints()
-        })
-    })
+            renderer.value!.setInteractionPoints(undefined)
+        }})
+    }})
 })
 
 const myTurnToRollDice = computed(() => {
