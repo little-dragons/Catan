@@ -27,8 +27,10 @@ if (currentLobbyRoom.value == undefined || currentAuthUser.value == undefined)
             <Setting name="requiredVictoryPoints" :value="currentLobbyRoom!.settings.requiredVictoryPoints" :allowChange="false"/>
             <Setting name="longestRoadMinimum" :value="currentLobbyRoom!.settings.longestRoadMinimum" :allowChange="false"/>
             <Setting name="seed" :value="currentLobbyRoom!.settings.seed" :allowChange="false"/>
-            <button @click="leaveRoomAndRedirect">Leave room</button>
-            <button @click="startRoom">Start room</button>
+            <div class="buttons">
+                <button @click="leaveRoomAndRedirect">Leave room</button>
+                <button @click="startRoom">Start room</button>
+            </div>
         </div>
     </div>
     
@@ -40,8 +42,8 @@ if (currentLobbyRoom.value == undefined || currentAuthUser.value == undefined)
 .container {
     display: grid;
     grid-template-rows: 100%;
-    grid-template-columns: 55% auto;
-    column-gap: 50px;
+    grid-template-columns: 55% 38%;
+    column-gap: 7%;
     margin-top: 30px;
 }
 
@@ -49,14 +51,22 @@ if (currentLobbyRoom.value == undefined || currentAuthUser.value == undefined)
     background-color: var(--secondary-background-color);
     border-radius: 10px;
     border: var(--mute-border);
-    padding: 10px;
+    padding: 18px;
+    width: calc(100% - 36px);
 }
 
 .right > *:not(:first-child) {
-    margin-top: 10px;
+    margin-top: 15px;
 }
 
 .grid-columns {
     grid-template-columns: 50% 50%;
+}
+
+.buttons {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    justify-content: space-between;
 }
 </style>

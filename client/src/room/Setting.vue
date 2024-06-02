@@ -1,6 +1,5 @@
 <script setup lang="ts" generic="SettingsKey extends keyof Settings">
 import type { Settings } from 'shared/logic/Settings';
-import type { DeepReadonly, Ref } from 'vue';
 
 const props = defineProps<{
     name: SettingsKey
@@ -10,15 +9,16 @@ const props = defineProps<{
 
 const displayName = 
     props.name == 'requiredVictoryPoints' ? 'Required victory points' :
-    props.name == 'longestRoadMinimum' ? 'Minimum roads for longest road' :
+    props.name == 'longestRoadMinimum' ? 'Minimal longest road' :
+    props.name == 'seed' ? 'Seed' :
     undefined!
 
 </script>
 
 <template>
     <div>
-        <span>{{ displayName }}:</span>
-        <span>{{ value }}</span>
+        <span class="descriptor">{{ displayName }}:</span>
+        <span class="value">{{ value }}</span>
     </div>
 </template>
 
@@ -28,9 +28,23 @@ div {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    gap: 1rem;
 }
 
-div:last-child {
+span {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+.descriptor {
+    min-width: 5rem;
+}
+.value {
     justify-self: end;
+    max-width: 100%;
+    min-width: 1.6rem;
+    text-align: end;
 }
 </style>

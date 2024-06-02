@@ -2,6 +2,7 @@ import type { Color } from "./Player"
 import type { Orientation } from "./Orientation"
 import type { Resource } from "./Resource"
 import type { BuildingType } from "./Buildings"
+import { v4 } from "uuid"
 
 export type Coordinate = [number, number]
 export function sameCoordinate(c1: Coordinate, c2: Coordinate) {
@@ -25,6 +26,11 @@ export type ResourceTile = {
 
 
 export type Tile = ResourceTile | PortTile | { type: 'desert' | 'ocean' }
+
+export type BoardSeed = string
+export function randomBoardSeed() {
+    return v4()
+}
 
 export interface Board {
     rowCount: number

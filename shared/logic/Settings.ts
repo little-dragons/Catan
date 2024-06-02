@@ -1,4 +1,4 @@
-import { BoardSeed, randomBoardSeed } from "./Generation"
+import { BoardSeed, randomBoardSeed } from "./Board"
 
 export type Settings = {
     requiredVictoryPoints: number

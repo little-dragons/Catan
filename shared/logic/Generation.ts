@@ -1,13 +1,7 @@
-import { v4 } from "uuid";
-import { type Board, type Tile, type Coordinate, sameCoordinate } from "./Board";
+import { type Board, type Tile, type Coordinate, sameCoordinate, BoardSeed } from "./Board";
 import { allOrientations, clockwise, counterclockwise, neighborTile, opposite } from "./Orientation";
 import { Resource, allResources } from "./Resource";
 import seedrandom from 'seedrandom'
-
-export type BoardSeed = string
-export function randomBoardSeed() {
-    return v4()
-}
 
 export function defaultBoard(seed: BoardSeed): Board {
     const rand = seedrandom(seed)

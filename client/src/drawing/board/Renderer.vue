@@ -208,8 +208,7 @@ defineExpose({ setInteractionPoints })
             :y="tileCenter(board.robber, tileRadius)[1] - robberHeight(tileRadius) / 2"
             :width="robberWidth(tileRadius)"
             :height="robberHeight(tileRadius)"
-            :href="robber"
-        />
+            :href="robber"/>
         <g id="buildings">
             <image v-for="building in board.buildings" 
                 :x="crossingPosition(building[1], tileRadius)[0] - buildingWidth(tileRadius) / 2"
@@ -237,6 +236,7 @@ defineExpose({ setInteractionPoints })
 #tiles > g >  text {
     text-anchor: middle;
     user-select: none;
+    text-shadow: 1px 1px rgba(0, 0, 0, 0.18);
 }
 
 #interaction-points > circle {    

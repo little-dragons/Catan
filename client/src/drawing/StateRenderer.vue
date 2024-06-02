@@ -28,9 +28,7 @@ defineExpose({ setInteractionPoints })
 </script>
 
 <template>
-    <div>
-        <BoardRenderer :board="board" ref="boardRenderer"/>
-    </div>
+    <BoardRenderer :board="board" ref="boardRenderer"/>
     <div class="below">
         <div class="dice" v-if="dice != undefined">
             <DiceRenderer :dice="dice" ref="diceRenderer" @dice-clicked="() => $emit('diceClicked')"/>

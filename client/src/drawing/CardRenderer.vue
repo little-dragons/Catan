@@ -39,7 +39,7 @@ function count(res: Resource) {
             <img v-if="count(resource) >= 8" class="tighter" :src="imageForResource(resource)"/>
             <img v-if="count(resource) >= 8" class="tighter" :src="imageForResource(resource)"/>
             <img v-if="count(resource) >= 8" class="tighter" :src="imageForResource(resource)"/>
-            <div v-if="count(resource) >= 8" class="card-counter">{{ count(resource) }}</div>
+            <div v-if="count(resource) >= 8" class="card-counter"><span>{{ count(resource) }}</span></div>
         </div>
     </div>
 </template>
@@ -92,6 +92,10 @@ img:hover {
     width: 100%;
     height: 100%;
     margin: auto;
+}
+span {
+    position: relative;
+    top: 0.5rem;
 }
 .card-counter:hover {
     cursor: pointer;
