@@ -14,11 +14,15 @@ export function defaultBoard(seed: BoardSeed): Board {
 
     let resourcesStack : Resource[] = []
     for (const res of allResources)
-        for (let i = 0; i < 4; i++)
+        for (let i = 0; i < 3; i++)
             resourcesStack.push(res)
 
-    resourcesStack.sort((a, b) => 0.5 - rand())
-    resourcesStack = resourcesStack.slice(0, 18)
+    const toAdd = allResources.slice().sort(() => 0.5 - rand()).slice(0, 3)
+    for (const res of toAdd)
+        resourcesStack.push(res)
+
+    resourcesStack.sort(() => 0.5 - rand())
+
     const numbersForTiles = [ 5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11 ]
     let landTiles: Tile[] = []
     for (let i = 0; i < 18; i++) {
