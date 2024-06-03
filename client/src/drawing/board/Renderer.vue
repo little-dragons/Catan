@@ -134,7 +134,7 @@ export type InteractionPoints<Payload> = {
 } | {
     type: 'tile'
     data: [Coordinate, Payload][]
-    callback: (item: [Coordinate, Payload[]]) => void
+    callback: (item: [Coordinate, Payload]) => void
 }
 
 
