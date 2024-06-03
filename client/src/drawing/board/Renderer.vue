@@ -131,6 +131,10 @@ export type InteractionPoints<Payload> = {
     type: 'road'
     data: [Road, Payload][]
     callback: (item: [Road, Payload]) => void
+} | {
+    type: 'tile'
+    data: [Coordinate, Payload][]
+    callback: (item: [Coordinate, Payload[]]) => void
 }
 
 
@@ -154,6 +158,11 @@ function interactionPointClickHandler(ev: MouseEvent) {
     else if (interactionPoints.value.type == 'road') {
         for (const p of interactionPoints.value.data)
             if (distance(clickedPosition, roadCenter(p[0], tileRadius)) < interactionPointRadius(tileRadius))
+                interactionPoints.value.callback(p)
+    }
+    else if (interactionPoints.value.type == 'tile') {
+        for (const p of interactionPoints.value.data)
+            if (distance(clickedPosition, tileCenter(p[0], tileRadius)) < interactionPointRadius(tileRadius))
                 interactionPoints.value.callback(p)
     }
 }
@@ -212,7 +221,7 @@ defineExpose({ setInteractionPoints })
         <g id="buildings">
             <image v-for="building in board.buildings" 
                 :x="crossingPosition(building[1], tileRadius)[0] - buildingWidth(tileRadius) / 2"
-                :y="crossingPosition(building[1], tileRadius)[1] - buildingWidth(tileRadius) / 2"
+                :y="crossingPosition(building[1], tileRadius)[1] - buildingHeight(tileRadius) / 2"
                 :width="buildingWidth(tileRadius)"
                 :height="buildingHeight(tileRadius)"
                 :href="buildingForColor(building[0], building[2])"/>
@@ -225,6 +234,10 @@ defineExpose({ setInteractionPoints })
             <circle v-if="interactionPoints.type == 'road'" v-for="point in interactionPoints.data" 
                 :cx="roadCenter(point[0], tileRadius)[0]"
                 :cy="roadCenter(point[0], tileRadius)[1]"
+                :r="interactionPointRadius(tileRadius)"/>
+            <circle v-if="interactionPoints.type == 'tile'" v-for="point in interactionPoints.data" 
+                :cx="tileCenter(point[0], tileRadius)[0]"
+                :cy="tileCenter(point[0], tileRadius)[1]"
                 :r="interactionPointRadius(tileRadius)"/>
         </g>
     </svg>
