@@ -117,7 +117,12 @@ function svgPath(pixels: [number, number][]): string {
 
 const props = defineProps<{ board: Board }>()
 const tileRadius = 100
-const viewboxWidth = tileRadius * 2 * (props.board.columnCount + 0.5) * Math.cos(30 / 180 * Math.PI)
+
+// TODO this is not ideally implemented, but it works. It is supposed to keep the viewbox fitting to the content if
+// the leftmost row does not contain elements in uneven rows: because then, all tiles in the first row do not start
+// at 0, but rather have an offset into the x-axis.
+const viewboxStartX = props.board.tiles.some(x => x[1][0] == 0 && x[1][1] % 2 == 0) ? 0 : tileRadius * Math.cos(30 / 180 * Math.PI)
+const viewboxWidth = tileRadius * 2 * (props.board.columnCount + 0.5) * Math.cos(30 / 180 * Math.PI) - viewboxStartX
 const viewboxHeight = tileRadius * (props.board.rowCount * 1.5 + 0.5)
 
 const boardSvg = ref<null | SVGElement>(null)
@@ -140,14 +145,34 @@ export type InteractionPoints<Payload> = {
 
 const interactionPoints = ref<InteractionPoints<any> | undefined>(undefined)
 function interactionPointClickHandler(ev: MouseEvent) {
-    if (interactionPoints.value == undefined)
+    if (interactionPoints.value == undefined || boardSvg.value == undefined)
         return
     
-    // this is because of the viewbox property of the svg
-    // only works if the svg element has the same aspect ratio as the viewbox
+    // the idea is to find the coordinate of the click into the svg viewbox
+    // however, there may be blank space in the y-dimension (we assume the svg is centered vertically then)
+    // this increases the size of the svg element, which is not a problem in itself, but we need
+    // to consider it when converting the coordinates
+    // we don't need to handle the width case, as the svg always fits in the x-dimension
+
+    // the height of the blank space above (or below) the svg
+    let clientYOffset = 0
+    // the height of the actual content of the svg, e.g. the space we're interested in
+    let actualClientHeight = boardSvg.value.clientHeight
+
+    const clientAspectRatio = boardSvg.value.clientWidth / boardSvg.value.clientHeight
+    const viewboxAspectRatio = viewboxWidth / viewboxHeight
+
+    // only if there is vertically empty space, we consider the case
+    // the opposite case does not exist because of margin: auto
+    if (clientAspectRatio < viewboxAspectRatio) {
+        const clientUnnecessary = boardSvg.value.clientHeight - boardSvg.value.clientWidth / viewboxAspectRatio
+        clientYOffset = clientUnnecessary / 2
+        actualClientHeight = boardSvg.value.clientWidth / viewboxAspectRatio
+    }
+
     const clickedPosition = [
-        viewboxWidth / boardSvg.value!.clientWidth * ev.offsetX,
-        viewboxHeight / boardSvg.value!.clientHeight * ev.offsetY
+        viewboxWidth / boardSvg.value.clientWidth * ev.offsetX + viewboxStartX,
+        viewboxHeight / actualClientHeight * (ev.offsetY - clientYOffset)
     ] as [number, number]
 
     if (interactionPoints.value.type == 'settlement') {
@@ -167,15 +192,16 @@ function interactionPointClickHandler(ev: MouseEvent) {
     }
 }
 
+
+
 function setInteractionPoints<T>(points: InteractionPoints<T> | undefined) {
     interactionPoints.value = points
 }
-
 defineExpose({ setInteractionPoints })
 </script>
 
 <template>
-    <svg :viewBox="`0 0 ${viewboxWidth} ${viewboxHeight}`" ref="boardSvg" @click="interactionPointClickHandler">
+    <svg :viewBox="`${viewboxStartX} 0 ${viewboxWidth} ${viewboxHeight}`" ref="boardSvg" @click="interactionPointClickHandler">
         <g id="tiles">
             <g v-for="tile in board.tiles">
                 <path
@@ -246,6 +272,16 @@ defineExpose({ setInteractionPoints })
 
 
 <style scoped>
+svg {
+    /* 
+        Change this only when checking the interaction. 
+        Also consider that the svg has to be centered vertically
+        when there is empty space in the y-axis. 
+    */
+    max-height: 100%;
+    max-width: 100%;
+    margin: auto;
+}
 #tiles > g >  text {
     text-anchor: middle;
     user-select: none;

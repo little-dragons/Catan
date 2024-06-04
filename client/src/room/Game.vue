@@ -4,9 +4,9 @@ import { Resource, adjacentRoads, availableBuildingPositions, type Coordinate, t
 import { computed, ref, shallowRef, triggerRef, watch, watchEffect } from 'vue';
 import { currentAuthUser } from '@/socketWrapper/Login';
 import { gameSocket } from '@/socketWrapper/Socket';
-import StateRenderer from '@/drawing/StateRenderer.vue';
+import GameRenderer from './gameDrawing/GameRenderer.vue';
 
-const renderer = ref<null | InstanceType<typeof StateRenderer>>(null)
+const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
 
 function handleGameActionResult(res: true | 'invalid token' | 'invalid room id'| 'action not allowed') {
     if (res == true)
@@ -75,7 +75,7 @@ watchEffect(() => {
 })
 
 const myTurnToRollDice = computed(() => {
-    return myTurn && currentState.value?.phase.type == 'normal' && currentState.value.phase.diceRolled == false
+    return myTurn.value && currentState.value?.phase.type == 'normal' && currentState.value.phase.diceRolled == false
 })
 async function rollDice() {
     if (!myTurnToRollDice.value)
@@ -102,7 +102,7 @@ const canEndMyTurn = computed(() => {
 })
 
 async function endTurn() {
-    if (!canEndMyTurn)
+    if (!canEndMyTurn.value)
         return
 
     handleGameActionResult(
@@ -118,45 +118,27 @@ function resourceClicked(res: Resource) {
 
 <template>
     <div v-if="currentState != undefined" class="container">
-        <div class="board">            
-            <p v-if="myTurn">It's your turn.</p>
-            <StateRenderer ref="renderer" 
-                :board="currentState.board" 
-                :dice="lastDice" 
-                :stocked-cards="currentState.self.handCards" 
-                :offered-cards="[]"
-                :can-end-turn="canEndMyTurn"
-                @dice-clicked="rollDice"
-                @resource-clicked="resourceClicked"
-                @end-turn-clicked="endTurn"/>
-        </div>
-        <div class="others">
-            <div v-if="others != undefined" v-for="other in others">
-                <p>{{ other[0].name }}</p>
-            </div>
-            <div><p>test</p></div>
-            <div><p>test</p></div>
-            <div><p>test</p></div>
-        </div>
+        <GameRenderer ref="renderer" 
+            :board="currentState.board" 
+            :dice="lastDice" 
+            :stocked-cards="currentState.self.handCards" 
+            :offered-cards="[]"
+            :is-my-turn="myTurn"
+            :can-end-turn="canEndMyTurn"
+            :other-players="[]"
+            @dice-clicked="rollDice"
+            @resource-clicked="resourceClicked"
+            @end-turn-clicked="endTurn"/>
     </div>
 </template>
 
 <style scoped>
 .container {
-    width: calc(100vw - 100px);
+    width: max(min(calc(100vw - 200px), 1500px), 400px);
     display: flex;
     flex-direction: row;
-    max-height: 80vh;
+    height: 90vh;
 }
-
-.board {
-    width: 50rem;
-}
-
-.board> p {
-    position: absolute;
-}
-
 
 </style>
 

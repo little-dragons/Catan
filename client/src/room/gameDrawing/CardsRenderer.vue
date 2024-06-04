@@ -45,7 +45,7 @@ function count(res: Resource) {
 </template>
 
 <style scoped>
-@import '../assets/base.css';
+@import '../../assets/base.css';
 
 .container {
     border: 1px solid black;
@@ -53,6 +53,7 @@ function count(res: Resource) {
     display: flex;
     flex-direction: row;
     padding: 5px;
+    height: fit-content;
 }
 
 .stack {
