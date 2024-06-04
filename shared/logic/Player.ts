@@ -33,7 +33,7 @@ export function stringColor(c: Color) {
         case Color.Green: 
             return 'Green'
         case Color.Blue: 
-            return 'Blue'
+            return 'Cornflowerblue'
     }
 }
 

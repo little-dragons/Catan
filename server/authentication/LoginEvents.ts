@@ -1,4 +1,4 @@
-import { AuthToken, AuthUser, LoginClientEventMap, LoginServerEventMap, RoomId } from 'shared';
+import { AuthToken, AuthUser, LoginClientEventMap, LoginServerEventMap, RoomId, validUsername } from 'shared';
 import { type Socket } from 'socket.io'
 import { addGuest, removeUser } from './AuthTokenMap';
 import { leaveRoom } from '../rooms/RoomManager';
@@ -18,6 +18,10 @@ export function logout(socket: LoginSocket) {
 export function acceptLoginEvents(socket: LoginSocket) {
     socket.on('login', request => {
         if (request.type == 'guest') {
+            if (validUsername(request.name) != true) {
+                socket.emit('rejectLogin', 'name not allowed')
+                return
+            }
             const token = addGuest(request)
             if (token == undefined)
                 socket.emit('rejectLogin', 'name in use')

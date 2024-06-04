@@ -5,6 +5,7 @@ import { computed, ref, shallowRef, triggerRef, watch, watchEffect } from 'vue';
 import { currentAuthUser } from '@/socketWrapper/Login';
 import { gameSocket } from '@/socketWrapper/Socket';
 import GameRenderer from './gameDrawing/GameRenderer.vue';
+import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vue';
 
 const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
 
@@ -45,6 +46,21 @@ const others = computed(() => {
     
     const otherUsers = currentGameRoom.value.users.filter(x => x[0].name != currentAuthUser.value!.name)
     return otherUsers.map(user => [user[0], currentState.value?.players.find(player => player.color == user[1])!] as [User, RedactedPlayer])
+})
+const othersOverview = computed(() => {
+    if (others.value == undefined)
+        return []
+
+    return others.value.map<PlayerOverviewData>(
+        ([user, player]) => {  
+            return {
+                name: user.name,
+                isGuest: user.isGuest,
+                color: player.color,
+                // TODO
+                victoryPoints: 4,
+            }
+        })
 })
 
 const myTurn = computed(() => {
@@ -125,7 +141,7 @@ function resourceClicked(res: Resource) {
             :offered-cards="[]"
             :is-my-turn="myTurn"
             :can-end-turn="canEndMyTurn"
-            :other-players="[]"
+            :other-players="othersOverview"
             @dice-clicked="rollDice"
             @resource-clicked="resourceClicked"
             @end-turn-clicked="endTurn"/>

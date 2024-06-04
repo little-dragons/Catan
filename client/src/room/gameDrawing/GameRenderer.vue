@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { type RedactedGameState, Resource, type Board, Color } from 'shared';
+import { Resource, type Board } from 'shared';
 import BoardRenderer, { type InteractionPoints } from './board/Renderer.vue';
 import DiceRenderer from './DiceRenderer.vue';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref } from 'vue';
 import CardsRenderer from './CardsRenderer.vue';
-import PlayerOverviewRenderer from './PlayerOverviewRenderer.vue';
+import PlayerOverviewRenderer, { type PlayerOverviewData } from './PlayerOverviewRenderer.vue';
 
 defineEmits<{
     diceClicked: []
@@ -12,11 +12,6 @@ defineEmits<{
     endTurnClicked: []
 }>()
 
-type PublicPlayerData = {
-    name: string
-    color: Color
-    victoryPoints: number
-}
 defineProps<{
     stockedCards: Resource[]
     offeredCards: Resource[]
@@ -24,7 +19,7 @@ defineProps<{
     isMyTurn: boolean
     dice: [number, number] | undefined
     canEndTurn: boolean
-    otherPlayers: PublicPlayerData[]
+    otherPlayers: PlayerOverviewData[]
 }>()
 
 const boardContainer = ref<null | HTMLDivElement>(null)
@@ -44,10 +39,10 @@ defineExpose({ setInteractionPoints<T>(args: InteractionPoints<T> | undefined) {
 
 <template>
     <div class="other-players">
-        <PlayerOverviewRenderer class="upper-left"/>
-        <PlayerOverviewRenderer class="upper-right"/>
-        <PlayerOverviewRenderer class="middle-left"/>
-        <PlayerOverviewRenderer class="middle-right"/>
+        <PlayerOverviewRenderer class="upper-left" v-if="otherPlayers.length >= 1" v-bind="otherPlayers[0]"/>
+        <PlayerOverviewRenderer class="upper-right" v-if="otherPlayers.length >= 2" v-bind="otherPlayers[1]"/>
+        <PlayerOverviewRenderer class="middle-left" v-if="otherPlayers.length >= 3" v-bind="otherPlayers[2]"/>
+        <PlayerOverviewRenderer class="middle-right" v-if="otherPlayers.length >= 4" v-bind="otherPlayers[3]"/>
     </div>
     <div ref="boardContainer"class="main-box">   
             <BoardRenderer class="board" :board="board" ref="boardRenderer"/>

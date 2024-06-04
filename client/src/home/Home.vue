@@ -9,11 +9,11 @@ import { newRandomRoomId } from 'shared';
 function debugLogin() {
     sendLogin({
         type: 'guest',
-        name: `debugUser${newRandomRoomId()}`
+        name: `debugUser${newRandomRoomId().substring(0, 5)}`
     })
 
     watch(currentAuthUser, () => {
-        createRoomAndRedirect(`debugRoom${newRandomRoomId()}`)
+        createRoomAndRedirect(`debugRoom${newRandomRoomId().substring(0, 5)}`)
     }, { once: true })
 }
 
