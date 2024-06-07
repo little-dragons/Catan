@@ -115,7 +115,10 @@ function svgPath(pixels: [number, number][]): string {
     return res + ' Z'
 }
 
-const props = defineProps<{ board: Board }>()
+const props = defineProps<{ 
+    board: Board
+    interactionPoints: InteractionPoints<any> | undefined
+}>()
 const tileRadius = 100
 
 // TODO this is not ideally implemented, but it works. It is supposed to keep the viewbox fitting to the content if
@@ -143,9 +146,8 @@ export type InteractionPoints<Payload> = {
 }
 
 
-const interactionPoints = ref<InteractionPoints<any> | undefined>(undefined)
 function interactionPointClickHandler(ev: MouseEvent) {
-    if (interactionPoints.value == undefined || boardSvg.value == undefined)
+    if (props.interactionPoints == undefined || boardSvg.value == undefined)
         return
     
     // the idea is to find the coordinate of the click into the svg viewbox
@@ -175,29 +177,22 @@ function interactionPointClickHandler(ev: MouseEvent) {
         viewboxHeight / actualClientHeight * (ev.offsetY - clientYOffset)
     ] as [number, number]
 
-    if (interactionPoints.value.type == 'settlement') {
-        for (const p of interactionPoints.value.data)
+    if (props.interactionPoints.type == 'settlement') {
+        for (const p of props.interactionPoints.data)
             if (distance(clickedPosition, crossingPosition(p[0], tileRadius)) < interactionPointRadius(tileRadius))
-                interactionPoints.value.callback(p)
+            props.interactionPoints.callback(p)
     }
-    else if (interactionPoints.value.type == 'road') {
-        for (const p of interactionPoints.value.data)
+    else if (props.interactionPoints.type == 'road') {
+        for (const p of props.interactionPoints.data)
             if (distance(clickedPosition, roadCenter(p[0], tileRadius)) < interactionPointRadius(tileRadius))
-                interactionPoints.value.callback(p)
+            props.interactionPoints.callback(p)
     }
-    else if (interactionPoints.value.type == 'tile') {
-        for (const p of interactionPoints.value.data)
+    else if (props.interactionPoints.type == 'tile') {
+        for (const p of props.interactionPoints.data)
             if (distance(clickedPosition, tileCenter(p[0], tileRadius)) < interactionPointRadius(tileRadius))
-                interactionPoints.value.callback(p)
+            props.interactionPoints.callback(p)
     }
 }
-
-
-
-function setInteractionPoints<T>(points: InteractionPoints<T> | undefined) {
-    interactionPoints.value = points
-}
-defineExpose({ setInteractionPoints })
 </script>
 
 <template>

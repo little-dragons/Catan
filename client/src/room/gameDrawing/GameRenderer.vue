@@ -20,6 +20,8 @@ defineProps<{
     dice: [number, number] | undefined
     canEndTurn: boolean
     otherPlayers: PlayerOverviewData[]
+    otherPlayersDisplay: 'radial' | 'grid'
+    interactionPoints: InteractionPoints<any> | undefined
 }>()
 
 const boardContainer = ref<null | HTMLDivElement>(null)
@@ -33,19 +35,21 @@ onMounted(() => {
         boardWidth.value = boardContainer.value!.children[0].clientWidth
     }).observe(boardContainer.value!.children[0])
 })
-const boardRenderer = ref<null | InstanceType<typeof BoardRenderer>>(null)
-defineExpose({ setInteractionPoints<T>(args: InteractionPoints<T> | undefined) { boardRenderer.value!.setInteractionPoints(args)} })
 </script>
 
 <template>
     <div class="other-players">
-        <PlayerOverviewRenderer class="upper-left" v-if="otherPlayers.length >= 1" v-bind="otherPlayers[0]"/>
-        <PlayerOverviewRenderer class="upper-right" v-if="otherPlayers.length >= 2" v-bind="otherPlayers[1]"/>
-        <PlayerOverviewRenderer class="middle-left" v-if="otherPlayers.length >= 3" v-bind="otherPlayers[2]"/>
-        <PlayerOverviewRenderer class="middle-right" v-if="otherPlayers.length >= 4" v-bind="otherPlayers[3]"/>
+        <PlayerOverviewRenderer class="upper-left-radial" v-if="otherPlayers.length >= 1 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers[0]"/>
+        <PlayerOverviewRenderer class="upper-left-grid" v-if="otherPlayers.length >= 1 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[0]"/>
+        <PlayerOverviewRenderer class="upper-right-radial" v-if="otherPlayers.length >= 2 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers[1]"/>
+        <PlayerOverviewRenderer class="upper-right-grid" v-if="otherPlayers.length >= 2 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[1]"/>
+        <PlayerOverviewRenderer class="middle-left-radial" v-if="otherPlayers.length >= 3 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers[2]"/>
+        <PlayerOverviewRenderer class="middle-left-grid" v-if="otherPlayers.length >= 3 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[2]"/>
+        <PlayerOverviewRenderer class="middle-right-radial" v-if="otherPlayers.length >= 4 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers[3]"/>
+        <PlayerOverviewRenderer class="middle-right-grid" v-if="otherPlayers.length >= 4 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[3]"/>
     </div>
     <div ref="boardContainer"class="main-box">   
-            <BoardRenderer class="board" :board="board" ref="boardRenderer"/>
+            <BoardRenderer class="board" :board="board" :interaction-points="interactionPoints"/>
         <div class="below">
             <DiceRenderer class="dice" v-if="dice != undefined" :dice="dice" ref="diceRenderer" @dice-clicked="() => $emit('diceClicked')"/>
             <CardsRenderer :cards="stockedCards" @resource-clicked="res => $emit('resourceClicked', res)"/>
@@ -66,29 +70,42 @@ defineExpose({ setInteractionPoints<T>(args: InteractionPoints<T> | undefined) {
     --radius: calc(100px + 1px * var(--board-width) / 2);
     --upper-rotate-angle: 45deg;
     --middle-rotate-angle: 15deg;
+
+    --grid-x-offset: calc(100px + 1px * var(--board-width) / 2);
+    --upper-y-offset: -350px;
+    --middle-y-offset: -150px;
+}
+.other-players > * {
+    position: absolute;
+    top: 0;
 }
 
 
-.middle-left {
-    position: absolute;
-    top: 0;
+.middle-left-radial {
     transform: rotate(var(--middle-rotate-angle)) translateX(calc(-1 * var(--radius))) rotate(calc(-1 * var(--middle-rotate-angle))) translateX(-50%);
 }
-.middle-right {
-    position: absolute;
-    top: 0;
+.middle-right-radial {
     transform: rotate(calc(-1 * var(--middle-rotate-angle))) translateX(var(--radius)) rotate(var(--middle-rotate-angle)) translateX(-50%);
 }
-
-.upper-left {
-    position: absolute;
-    top: 0;
+.upper-left-radial {
     transform: rotate(var(--upper-rotate-angle)) translateX(calc(-1 * var(--radius))) rotate(calc(-1 * var(--upper-rotate-angle))) translateX(-50%);
 }
-.upper-right {
-    position: absolute;
-    top: 0;
+.upper-right-radial {
     transform: rotate(calc(-1 * var(--upper-rotate-angle))) translateX(var(--radius)) rotate(var(--upper-rotate-angle)) translateX(-50%);
+}
+
+
+.middle-left-grid {
+    transform: translateX(calc(-1 * var(--grid-x-offset))) translateY(var(--middle-y-offset)) translateX(-50%);
+}
+.middle-right-grid {
+    transform: translateX(var(--grid-x-offset)) translateY(var(--middle-y-offset)) translateX(-50%);
+}
+.upper-left-grid {
+    transform: translateX(calc(-1 * var(--grid-x-offset))) translateY(var(--upper-y-offset)) translateX(-50%);
+}
+.upper-right-grid {
+    transform: translateX(var(--grid-x-offset)) translateY(var(--upper-y-offset)) translateX(-50%);
 }
 
 

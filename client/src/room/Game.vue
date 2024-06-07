@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { currentGameRoom, currentRoom } from '@/socketWrapper/Room';
 import { Resource, adjacentRoads, availableBuildingPositions, type Coordinate, type RedactedGameState, type RedactedPlayer, type Road, type User } from 'shared';
-import { computed, ref, shallowRef, triggerRef, watch, watchEffect } from 'vue';
+import { computed, ref, shallowRef, triggerRef, watchEffect } from 'vue';
 import { currentAuthUser } from '@/socketWrapper/Login';
 import { gameSocket } from '@/socketWrapper/Socket';
 import GameRenderer from './gameDrawing/GameRenderer.vue';
 import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vue';
+import { type InteractionPoints } from './gameDrawing/board/Renderer.vue';
 
 const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
 
@@ -71,6 +72,7 @@ const myTurnForInitialPlacement = computed(() => {
     return myTurn.value && currentState.value?.phase.type == 'initial'
 })
 
+const interactionPoints = ref<InteractionPoints<any> | undefined>(undefined)
 // set interaction points for initial placements
 watchEffect(() => {
     if (myTurnForInitialPlacement.value != true || renderer.value == null)
@@ -78,16 +80,16 @@ watchEffect(() => {
 
     const freeSettlements = availableBuildingPositions(currentState.value!.board, undefined)
     const mapping = freeSettlements.map(coord => [coord, 'test'] as [Coordinate, string])
-    renderer.value.setInteractionPoints({ type: 'settlement', data: mapping, callback([finalSettlement, _]) {
+    interactionPoints.value = { type: 'settlement', data: mapping, callback([finalSettlement, _]) {
         const chosenRoads = adjacentRoads(finalSettlement).map(x => [x, false] as [Road, boolean])
-        renderer.value!.setInteractionPoints({ type: 'road', data: chosenRoads, async callback([finalRoad, _]) {
+        interactionPoints.value = { type: 'road', data: chosenRoads, async callback([finalRoad, _]) {
             const res = 
                 await gameSocket.emitWithAck('gameAction', currentRoom.value!.id, currentAuthUser.value!.authToken, 
                 { type: 'place initial buildings', road: finalRoad, settlement: finalSettlement })
             handleGameActionResult(res)
-            renderer.value!.setInteractionPoints(undefined)
-        }})
-    }})
+            interactionPoints.value = undefined
+        }}
+    }}
 })
 
 const myTurnToRollDice = computed(() => {
@@ -141,7 +143,9 @@ function resourceClicked(res: Resource) {
             :offered-cards="[]"
             :is-my-turn="myTurn"
             :can-end-turn="canEndMyTurn"
-            :other-players="othersOverview"
+            :other-players="othersOverview"            
+            other-players-display="radial"
+            :interaction-points="interactionPoints"
             @dice-clicked="rollDice"
             @resource-clicked="resourceClicked"
             @end-turn-clicked="endTurn"/>
