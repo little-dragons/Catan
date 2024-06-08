@@ -1,51 +1,62 @@
 import * as path from 'path'
 import { promises as fs } from 'fs'
-import { Database as DbTypes } from './types/Database'
 import {
-  Kysely,
-  Migrator,
-  FileMigrationProvider,
-  SqliteDialect,
+    Migrator,
+    FileMigrationProvider,
 } from 'kysely'
-import Database from 'better-sqlite3'
+import { db } from './Connection'
+import { isProduction } from '../Common'
 
 export async function migrateDbToLatest() {
-  const db = new Kysely<DbTypes>({
-    dialect: new SqliteDialect({
-        database: new Database(process.env.DATABASE_URL)
-    }),
-  })
+    const migrator = new Migrator({
+        db,
+        provider: new FileMigrationProvider({
+            fs,
+            path,
+            // This needs to be an absolute path.
+            migrationFolder: path.join(__dirname, 'migrations/'),
+        }),
+    })
 
-  const migrator = new Migrator({
-    db,
-    provider: new FileMigrationProvider({
-      fs,
-      path,
-      // This needs to be an absolute path.
-      migrationFolder: path.join(__dirname, 'migrations/'),
-    }),
-  })
+    if (process.argv.includes('-remigrate')) {
+        if (!isProduction) {
+            await migrator.migrateDown()
+        }
+        else {
+            console.warn('\x1b[31m\x1b[40m%s\x1b[0m', 
+                '\nYOU ARE ABOUT TO MIGRATE THE PRODUCTION DATABASE DOWN\n' +
+                'THIS POTENTIALLY WIPES ENITRE TABLES\n' +
+                'SLEEPING FOR 15 SECONDS...\n\n' +
+                'IF UNINTENTIONAL OR UNSURE, ABORT WITH CTRL+C\n' +
+                'IF YOU ARE SURE AND THIS IS INTENTIONAL, CHECK THAT THE MIGRATION TO REDO IS ALSO PRESENT ON THE SERVER\N' +
+                'E.G. MAKE SURE YOU HAVE RUN GIT PULL\n')
 
-  const { error, results } = await migrator.migrateToLatest()
-
-  results?.forEach((it) => {
-    if (it.status === 'Success') {
-      console.log(`migration "${it.migrationName}" was executed successfully`)
-    } else if (it.status === 'Error') {
-      console.error(`failed to execute migration "${it.migrationName}"`)
+            await new Promise((resolve) => setTimeout(resolve, 15000))
+            console.log('proceeding with down migration')
+            await migrator.migrateDown()
+        }
     }
-  })
 
-  if (results?.length ?? 0 == 0)
-    console.log('No Migrations were executed.')
+    const { error, results } = await migrator.migrateToLatest()
 
-  if (error) {
-    console.error('failed to migrate')
-    console.error(error)
-    process.exit(1)
-  }
+    results?.forEach((it) => {
+        if (it.status === 'Success') {
+            console.log(`migration "${it.migrationName}" was executed successfully`)
+        } else if (it.status === 'Error') {
+            console.error(`failed to execute migration "${it.migrationName}"`)
+        }
+    })
 
-  await db.destroy()
+    if ((results?.length ?? 0) == 0)
+        console.log('no migrations were executed.')
+
+    if (error) {
+        console.error('failed to migrate')
+        console.error(error)
+        process.exit(1)
+    }
+
+    await db.destroy()
 }
 
 migrateDbToLatest()

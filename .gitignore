@@ -2,3 +2,4 @@
 node_modules
 dist
 server/database/CatanDebug.sqlite3
+.env.*.local

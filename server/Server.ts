@@ -9,6 +9,7 @@ import { acceptRoomEvents, leaveRoom } from "./rooms/RoomManager"
 import { acceptLoginEvents, logout } from "./authentication/LoginEvents"
 import { instrument } from "@socket.io/admin-ui"
 import { DataType, isDevelopment, isProduction } from "./Common"
+import { db } from "./database/Connection"
 
 
 let httpsServer: HttpsServer<any, any> = undefined!
@@ -49,7 +50,11 @@ else if (isProduction)
     httpsServer.listen(SocketPort)
 
 console.log(`Server is listening on port ${SocketPort}`)
-
+async function printMemberCount() {
+    const promise = await db.selectFrom('members').select(({ fn }) => fn.countAll().as("total_count")).execute()
+    console.log(`Currently with ${promise[0].total_count} member(s)`)
+}
+printMemberCount()
 
 io.on('connection', socket => {
    

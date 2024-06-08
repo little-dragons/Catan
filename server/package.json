@@ -2,11 +2,19 @@
   "name": "server",
   "version": "1.0.0",
   "scripts": {
-    "dev": "NODE_ENV=development DATABASE_URL=\"database/CatanDebug.sqlite3\" ts-node-dev --respawn Server.ts",
-    "migrate-dev": "DATABASE_URL=\"database/CatanDebug.sqlite3\" ts-node database/MigrationsExecutor.ts",
-    "migrate-prod": "DATABASE_URL=\"/home/catan/db/CatanProd.sqlite3\" ts-node database/MigrationsExecutor.ts",
-    "build": "tsc --build",
-    "prod": "NODE_ENV=production SSL_DIR=\"/home/catan/ssl/letsencrypt\" DATABASE_URL=\"/home/catan/db/CatanProd.sqlite3\" ts-node Server.ts"
+    "dev": "dotenvx run -f .env.development -- ts-node-dev --respawn Server.ts",
+    "prod": "dotenvx run -f .env.production -- ts-node Server.ts",
+
+    "migrate-dev": "dotenvx run -f .env.development -- ts-node database/MigrationsExecutor.ts && npm run generate-types-dev",
+    "migrate-prod": "dotenvx run -f .env.production -- ts-node database/MigrationsExecutor.ts && npm run generate-types-prod",
+    
+    "remigrate-dev": "dotenvx run -f .env.development -- ts-node database/MigrationsExecutor.ts -remigrate && npm run generate-types-dev",
+    "force-remigrate-prod": "dotenvx run -f .env.production -- ts-node database/MigrationsExecutor.ts -remigrate && npm run generate-types-prod",
+
+    "generate-types-dev": "dotenvx run -f .env.development -- kysely-codegen --dialect sqlite --out-file database/DBTypes.d.ts",
+    "generate-types-prod": "dotenvx run -f .env.production -- kysely-codegen --dialect sqlite --out-file database/DBTypes.d.ts",
+
+    "build": "dotenvx run -f .env.production -- tsc --build"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.10",
@@ -15,6 +23,7 @@
     "ts-node-dev": "^2.0.0"
   },
   "dependencies": {
+    "@dotenvx/dotenvx": "^0.44.1",
     "@socket.io/admin-ui": "^0.5.1",
     "better-sqlite3": "^11.0.0",
     "kysely": "^0.27.3",
