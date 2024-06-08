@@ -35,8 +35,8 @@ export async function migrateDbToLatest() {
       console.error(`failed to execute migration "${it.migrationName}"`)
     }
   })
-  
-  if (results?.length ?? 0 > 0)
+
+  if (results?.length ?? 0 == 0)
     console.log('No Migrations were executed.')
 
   if (error) {
