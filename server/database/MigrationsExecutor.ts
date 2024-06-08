@@ -28,7 +28,7 @@ export async function migrateDbToLatest() {
                 'THIS POTENTIALLY WIPES ENITRE TABLES\n' +
                 'SLEEPING FOR 15 SECONDS...\n\n' +
                 'IF UNINTENTIONAL OR UNSURE, ABORT WITH CTRL+C\n' +
-                'IF YOU ARE SURE AND THIS IS INTENTIONAL, CHECK THAT THE MIGRATION TO REDO IS ALSO PRESENT ON THE SERVER\N' +
+                'IF YOU ARE SURE AND THIS IS INTENTIONAL, CHECK THAT THE MIGRATION TO REDO IS ALSO PRESENT ON THE SERVER\n' +
                 'E.G. MAKE SURE YOU HAVE RUN GIT PULL\n')
 
             await new Promise((resolve) => setTimeout(resolve, 15000))
