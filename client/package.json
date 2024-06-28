@@ -9,20 +9,18 @@
     "prod": "NODE_ENV=production SSL_DIR=\"/home/catan/ssl/letsencrypt\" vite --host -c vite.config.prod.ts"
   },
   "dependencies": {
-    "bcrypt": "^5.1.1",
     "shared": "^1.0.0",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
+    "uuid": "^10.0.0",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
-    "@types/bcrypt": "^5.0.2",
     "@types/node": "^20.12.5",
     "@vitejs/plugin-vue": "^5.0.4",
     "@vue/tsconfig": "^0.5.1",
-    "npm-run-all2": "^6.1.2",
     "typescript": "~5.4.0",
     "vite": "^5.2.8",
     "vite-plugin-vue-devtools": "^7.0.25",

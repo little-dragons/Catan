@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import UsernameInput from '@/ui/UsernameInput.vue';
 import PasswordInput from '@/ui/PasswordInput.vue';
 import Modal from '@/ui/Modal.vue'
@@ -40,6 +40,11 @@ watch(currentUser, newVal => {
         console.warn('User login status changed to anonymous in login modal, but without rejection reason? Triggered logout?')
     }
 })
+
+const pending = computed(() => currentUser.value.status == 'pending')
+// TODO having two modals is not very nice, but also kind of convenient. Maybe there is a better solution?
+
+// TODO make passwords field marked as password etc. such that browsers autofill
 </script>
 
 
@@ -51,15 +56,15 @@ watch(currentUser, newVal => {
         <div class="forms">
             <form class="member-login">
                 <LabeledInput label="Member name:" type="space between">
-                    <UsernameInput ref="membernameInput"/>
+                    <UsernameInput ref="membernameInput" :disabled="pending"/>
                 </LabeledInput>
                 
                 <LabeledInput label="Password:" type="space between">
-                    <PasswordInput ref="passwordInput"/>
+                    <PasswordInput ref="passwordInput" :disabled="pending"/>
                 </LabeledInput>
 
                 <p class="register">
-                    Want to become a member? <span @click="() => showRegister = true">Register!</span>
+                    Want to become a member? <span @click="() => { if (!pending) showRegister = true }">Register</span>
                 </p>
 
                 <input
@@ -71,14 +76,14 @@ watch(currentUser, newVal => {
             <div class="vertical-line"/>
             <form class="guest-login">
                 <LabeledInput label="Guest name:" type="space between">
-                    <UsernameInput ref="guestnameInput"/>
+                    <UsernameInput ref="guestnameInput" :disabled="pending"/>
                 </LabeledInput>
 
                 <input
                     type="button" 
                     value="Guest login" 
                     @click="() => sendGuestLogin(guestnameInput?.result!)" 
-                    :disabled="guestnameInput?.result == null"/>
+                    :disabled="pending || guestnameInput?.result == null"/>
             </form>
         </div>
     </Modal>
@@ -87,22 +92,22 @@ watch(currentUser, newVal => {
         <p>Here you may create a member account.</p>
         <form class="member-login">
             <LabeledInput label="Member name:" type="space between">
-                <UsernameInput ref="membernameInput"/>
+                <UsernameInput ref="membernameInput" :disabled="pending"/>
             </LabeledInput>
             
             <LabeledInput label="Password:" type="space between">
-                <PasswordInput ref="passwordInput"/>
+                <PasswordInput ref="passwordInput" :disabled="pending"/>
             </LabeledInput>
 
             <p class="register">
-                Already have an account? <span @click="() => showRegister = false">Login!</span>
+                Already have an account? <span @click="() => { if (!pending) showRegister = false }">Login</span>
             </p>
 
             <input
                 type="button"
                 value="Register"
                 @click="() => sendRegister(membernameInput?.result!, passwordInput?.result!)"
-                :disabled="membernameInput?.result == null || passwordInput?.result == null"/>
+                :disabled="pending || membernameInput?.result == null || passwordInput?.result == null"/>
         </form>
     </Modal>
 </template>

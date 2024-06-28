@@ -1,5 +1,4 @@
 import { Board } from "./Board"
-import { defaultBoard } from "./Generation"
 import { Color, FullPlayer, RedactedPlayer, redactPlayer } from "./Player"
 import { Resource } from "./Resource"
 

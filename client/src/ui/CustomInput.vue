@@ -3,11 +3,12 @@ import { computed, ref, triggerRef, type Ref } from 'vue';
 import error from '@/assets/ui/error.svg'
 import ok from '@/assets/ui/ok.svg'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
     tagId?: string,
     type: 'text' | 'password',
     rules: ((current: string) => true | string)[]
-}>()
+    disabled?: boolean,
+}>(), { disabled: false })
 
 const rawInput = ref("")
 
@@ -39,8 +40,8 @@ defineExpose({
 </script>
 <template>
     <div>
-        <div class="input-container">
-            <input :id="$props.tagId" :type="$props.type" v-model="rawInput" spellcheck="false"/>
+        <div class="input-container" :class="disabled ? 'disabled' : ''">
+            <input :id="$props.tagId" :type="$props.type" v-model="rawInput" spellcheck="false" :disabled="disabled"/>
             <img :src="error" v-if="validityStatus != true && validityStatus != null" :title="validityStatus">
             <img :src="ok" v-if="validityStatus == true" title="Everything is good!">
         </div>
@@ -56,6 +57,10 @@ defineExpose({
     align-self: end;
 }
 
+.disabled {
+    color: gray;
+}
+
 input:focus {
     outline: none;
 }
@@ -68,8 +73,13 @@ input {
     width: calc(100% - 1rem);
     padding-bottom: 0;
 }
+input:disabled {
+    background-color: inherit;
+    color: inherit;
+}
 
 img {
+    /* TODO make image non-draggable */
     user-select: none;
     width: 1rem;
     height: 1rem;

@@ -29,7 +29,7 @@ if (currentLobbyRoom.value == undefined || currentAuthUser.value == undefined)
             <Setting name="seed" :value="currentLobbyRoom!.settings.seed" :allowChange="false"/>
             <div class="buttons">
                 <button @click="leaveRoomAndRedirect">Leave room</button>
-                <button @click="startRoom">Start room</button>
+                <button @click="startRoom" :disabled="currentLobbyRoom?.owner.name != currentAuthUser?.name">Start room</button>
             </div>
         </div>
     </div>

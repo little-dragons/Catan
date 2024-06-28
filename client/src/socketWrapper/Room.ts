@@ -98,7 +98,7 @@ export async function startRoom() {
     const res = await lobbySocket.emitWithAck('startGame')
 
     if (res == 'invalid socket state') {
-        console.warn('Starting room request was rejected because of an invalid token?')
+        console.warn('Starting room request was rejected because of an invalid state?')
         return
     }
     if (res == 'not the owner') {

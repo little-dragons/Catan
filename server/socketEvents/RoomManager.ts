@@ -1,7 +1,8 @@
-import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, defaultBoard, RoomServerEventMap, newRandomRoomId, RoomClientEventMap, Color } from "shared"
+import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, defaultBoard, RoomServerEventMap, RoomClientEventMap, Color } from "shared"
 import { type Socket } from 'socket.io'
 import { SocketDataType, SocketServerType } from "./Common"
 import { defaultSettings } from "shared/logic/Settings"
+import { v4 } from "uuid"
 
 type ServerLobbyRoom = Omit<LobbyRoom, 'users'>
 type ServerGameRoom = Omit<FullGameRoom, 'users'>
@@ -60,7 +61,7 @@ export function createRoom(socket: RoomSocket, name: string) {
     const room: ServerLobbyRoom = {
         type: 'lobby',
         name: name,
-        id: newRandomRoomId(),
+        id: v4(),
         owner: socket.data.user,
         settings: defaultSettings()
     }

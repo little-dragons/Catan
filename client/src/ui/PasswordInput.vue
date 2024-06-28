@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, ref, type Ref } from 'vue';
+import { computed, ref } from 'vue';
 import CustomInput from './CustomInput.vue'
 import { validPassword } from 'shared';
 
-defineProps<{
+withDefaults(defineProps<{
     tagId?: string
-}>()
+    disabled?: boolean
+}>(), { disabled: false })
 
 defineExpose({
     invalidPassword: (password: string) => {
@@ -33,10 +34,8 @@ const rules: ((current: string) => true | string)[] = [
     x => invalidPasswords.includes(x) ? 'This password is invalid' : true
 ]
 
-
-
 </script>
 
 <template>
-    <CustomInput ref="child":id="$props.tagId" type="password" :rules="rules"/>
+    <CustomInput ref="child":id="$props.tagId" type="password" :rules="rules" :disabled="disabled"/>
 </template>

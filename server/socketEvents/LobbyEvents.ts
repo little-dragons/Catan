@@ -10,22 +10,21 @@ export function acceptLobbyEvents(server: SocketServerType, socket: LobbySocket)
             return cb('invalid socket state')
 
         for (const room of lobbies()) {
-            if (room.id == socket.data.room[0]) {
-                if (room.owner.name == socket.data.user.name) {
-                    initializeGame(server, room)
-                    socket.in(room.id).emit('gameStarted')
-                    socket.emit('gameStarted')
-                    cb(true)
-                    return
-                }
-                else {
-                    cb('not the owner')
-                    return
-                }
-            }
+            if (room.id != socket.data.room[0]) 
+                continue
+            
+            if (room.owner.name != socket.data.user.name)
+                return cb('not the owner') 
+            
+            initializeGame(server, room)
+            socket.in(room.id).emit('gameStarted')
+            socket.emit('gameStarted')
+            return cb(true)
         }
 
-        return
+        // room not found? Should not happen
+        console.warn(`The room ${socket.data.room[0]} was stored in a socket, but did not actually exist on the server.`)
+        return cb('invalid socket state')
     })
 
     socket.on('changeSettings', (property, value, cb) => {

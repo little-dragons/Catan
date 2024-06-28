@@ -1,8 +1,9 @@
-import { newRandomPasswordNonce, LoginClientEventMap, LoginServerEventMap, validUsername } from "shared";
+import { LoginClientEventMap, LoginServerEventMap, validUsername } from "shared";
 import { addUserToDb, getUserFromDb } from "../database/CommonQueries";
 import bcrypt from 'bcrypt'
 import { type Socket } from 'socket.io'
 import { SocketDataType, SocketServerType } from "./Common";
+import { v4 } from "uuid";
 
 
 
@@ -59,7 +60,7 @@ export function acceptLoginEvents(io: SocketServerType, socket: LoginSocket) {
             return cb('name unknown')
     
         if (socket.data.nonce == undefined)
-            socket.data.nonce = newRandomPasswordNonce()
+            socket.data.nonce = { value: v4() }
 
         return cb(socket.data.nonce)
     })

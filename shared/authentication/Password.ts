@@ -1,12 +1,4 @@
-import { v4 } from "uuid"
-import bcrypt from 'bcrypt'
-
-
 export type PasswordNonce = { value: string }
-
-export function newRandomPasswordNonce(): PasswordNonce {
-    return { value: v4() }
-}
 
 
 export function validPassword(password: string) {

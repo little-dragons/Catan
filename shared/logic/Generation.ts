@@ -17,7 +17,7 @@ export function defaultBoard(seed: BoardSeed): Board {
 
     resourcesStack.sort(() => 0.5 - rand())
 
-    const numbersForTiles = [ 5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11 ]
+    const numbersForTiles = [5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11]
     let landTiles: Tile[] = []
     for (let i = 0; i < 18; i++) {
         landTiles.push({

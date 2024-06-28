@@ -1,6 +1,7 @@
 <script setup lang="ts">
-const emit = defineEmits(['close'])
+defineEmits(['close'])
 
+// TODO better closing button
 </script>
 
 
@@ -10,7 +11,7 @@ const emit = defineEmits(['close'])
             <div class="close">
                 <button @click="() => $emit('close')">&times;</button>
             </div>
-            <slot />
+            <slot/>
         </div>
     </div>
 </template>

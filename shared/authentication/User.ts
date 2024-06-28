@@ -2,7 +2,6 @@ export type User = {
     type: 'guest' | 'member'
     name: string
 }
-export type UserType = User['type']
 
 export function validUsername(name: string) {
     if (name.length > 20)
