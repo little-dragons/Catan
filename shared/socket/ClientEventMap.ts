@@ -1,9 +1,8 @@
-import { AuthUser, User } from "../authentication/User"
+import { User } from "../authentication/User"
 import { Color } from "../logic/Player"
 import { Settings } from "../logic/Settings"
-import { LoginError as LoginError } from "./ConnectionError"
 
-export type ClientEventMap = LoginClientEventMap & GameClientEventMap & LobbyClientEventMap & RoomClientEventMap
+export type ClientEventMap = GameClientEventMap & LobbyClientEventMap & RoomClientEventMap & LoginClientEventMap
 
 export type GameClientEventMap = {
     gameEvent: () => void
@@ -11,7 +10,7 @@ export type GameClientEventMap = {
 
 export type RoomClientEventMap = {
     closed: () => void
-    userChange: (newUsers: User[] | [User, Color][]) => void
+    userChange: (newUsers: [User, Color][]) => void
 }
 
 export type LobbyClientEventMap = {
@@ -19,7 +18,6 @@ export type LobbyClientEventMap = {
     settingsChange: (settings: Settings) => void
 }
 
+type Callback<T> = (arg: T) => void
 export type LoginClientEventMap = {
-    loggedIn: (user: AuthUser) => void
-    rejectLogin: (reason: LoginError) => void
 }

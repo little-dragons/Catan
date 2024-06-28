@@ -6,7 +6,7 @@ import { loginSocket } from "./Socket"
 // this file exists to split up the circular dependency between room and login
 // which would otherwise exist
 
-export function sendLogout() {
+export async function sendLogout() {
     if (currentUserBacking.value.status != 'logged in') {
         console.warn('Cannot log out if user is not logged in. If the log in is pending, wait for it.')
         return
@@ -17,6 +17,7 @@ export function sendLogout() {
         leaveRoomAndRedirect()
     }
 
-    loginSocket.emit('logout', currentUserBacking.value.user.authToken)
+    const res  = await loginSocket.emitWithAck('logout')
+    // TODO possibly alert?
     currentUserBacking.value = { status: 'anonymous' }
 }

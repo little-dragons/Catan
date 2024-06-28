@@ -13,9 +13,9 @@ export async function fetchNewState() {
         return
     }
 
-    const newState = await gameSocket.emitWithAck('gameState', currentRoomBacking.value.id, currentAuthUser.value.authToken)
+    const newState = await gameSocket.emitWithAck('gameState')
     
-    if (newState == 'invalid room id' || newState == 'invalid token') {
+    if (newState == 'invalid socket state') {
         console.warn(`Could not fetch new game state: ${newState}`)
         return
     }
@@ -35,9 +35,9 @@ export function acceptGameEvents() {
             console.warn('In room, but user is not logged in???')
             return
         }
-        const res = await gameSocket.emitWithAck('fullGameRoom', currentRoomBacking.value.id, currentAuthUser.value.authToken)
+        const res = await gameSocket.emitWithAck('fullGameRoom')
         
-        if (res == 'invalid room id' || res == 'invalid token') {
+        if (res == 'invalid socket state') {
             console.warn(`Could not fetch new game room: ${res}`)
             return
         }

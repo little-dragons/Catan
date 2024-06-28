@@ -10,7 +10,7 @@ import { type InteractionPoints } from './gameDrawing/board/Renderer.vue';
 
 const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
 
-function handleGameActionResult(res: true | 'invalid token' | 'invalid room id'| 'action not allowed') {
+function handleGameActionResult(res: true | 'invalid socket state' | 'action not allowed') {
     if (res == true)
         return
 
@@ -56,7 +56,7 @@ const othersOverview = computed(() => {
         ([user, player]) => {  
             return {
                 name: user.name,
-                isGuest: user.isGuest,
+                isGuest: user.type == 'guest',
                 color: player.color,
                 // TODO
                 victoryPoints: 4,
@@ -84,7 +84,7 @@ watchEffect(() => {
         const chosenRoads = adjacentRoads(finalSettlement).map(x => [x, false] as [Road, boolean])
         interactionPoints.value = { type: 'road', data: chosenRoads, async callback([finalRoad, _]) {
             const res = 
-                await gameSocket.emitWithAck('gameAction', currentRoom.value!.id, currentAuthUser.value!.authToken, 
+                await gameSocket.emitWithAck('gameAction', 
                 { type: 'place initial buildings', road: finalRoad, settlement: finalSettlement })
             handleGameActionResult(res)
             interactionPoints.value = undefined
@@ -99,7 +99,7 @@ async function rollDice() {
     if (!myTurnToRollDice.value)
         return
 
-    const res = await gameSocket.emitWithAck('gameAction', currentGameRoom.value!.id, currentAuthUser.value!.authToken, { type: 'roll dice' })
+    const res = await gameSocket.emitWithAck('gameAction', { type: 'roll dice' })
     handleGameActionResult(res)
 }
 
@@ -124,7 +124,7 @@ async function endTurn() {
         return
 
     handleGameActionResult(
-        await gameSocket.emitWithAck('gameAction', currentGameRoom.value!.id, currentAuthUser.value!.authToken, { type: 'finish turn' })
+        await gameSocket.emitWithAck('gameAction', { type: 'finish turn' })
     )
 }
 

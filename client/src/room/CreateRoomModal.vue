@@ -21,7 +21,8 @@ async function buttonClick() {
         roomInput.value.nameInUse(roomInput.value.result)
         return
     }
-    if (res == 'invalid token') {
+    if (res == 'invalid socket state') {
+        // TODO
         alert('Your token is invalid. Try reloading the page.')
         return
     }

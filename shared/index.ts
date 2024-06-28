@@ -9,10 +9,8 @@ export * from './logic/GameState';
 export * from './socket/Configuration';
 export * from './socket/ClientEventMap';
 export * from './socket/ServerEventMap';
-export * from './socket/ConnectionError';
 
-export * from './authentication/AuthToken';
-export * from './authentication/AuthObject';
 export * from './authentication/User';
+export * from './authentication/Password';
 
 export * from './Room';

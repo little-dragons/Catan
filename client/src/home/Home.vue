@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { currentAuthUser, currentUser, sendLogin } from '@/socketWrapper/Login';
+import { currentAuthUser, currentUser, sendGuestLogin } from '@/socketWrapper/Login';
 import { sendLogout } from '@/socketWrapper/Logout';
 import { createRoomAndRedirect, currentRoom } from '@/socketWrapper/Room';
 import { isDevelopment } from '@/misc/Globals';
@@ -7,10 +7,7 @@ import { watch } from 'vue';
 import { newRandomRoomId } from 'shared';
 
 function debugLogin() {
-    sendLogin({
-        type: 'guest',
-        name: `debugUser${newRandomRoomId().substring(0, 5)}`
-    })
+    sendGuestLogin(`debugUser${newRandomRoomId().substring(0, 5)}`)
 
     watch(currentAuthUser, () => {
         createRoomAndRedirect(`debugRoom${newRandomRoomId().substring(0, 5)}`)

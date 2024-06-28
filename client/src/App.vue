@@ -26,7 +26,7 @@ const showLoginModal = ref(false)
         <div>
             <p v-if="currentUser.status == 'anonymous'">Not logged in. <span @click="() => showLoginModal = true" class="login-button">Login</span></p>
             <p v-else-if="currentUser.status == 'pending'">Pending login...</p>
-            <p v-else-if="currentUser.status == 'logged in'">Logged in as {{ currentUser.user.name }}<span v-if="currentUser.user.isGuest"> (Guest)</span></p>
+            <p v-else-if="currentUser.status == 'logged in'">Logged in as {{ currentUser.user.name }}<span v-if="currentUser.user.type == 'guest'"> (Guest)</span></p>
             <p v-else>Error with login!</p>
         </div>
     </div>

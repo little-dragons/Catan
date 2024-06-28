@@ -35,6 +35,8 @@ onMounted(() => {
         boardWidth.value = boardContainer.value!.children[0].clientWidth
     }).observe(boardContainer.value!.children[0])
 })
+
+
 </script>
 
 <template>

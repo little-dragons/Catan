@@ -29,8 +29,8 @@ export async function createRoomAndRedirect(name: string) {
         return
     }
 
-    const res = await roomSocket.emitWithAck('createAndJoin', name, currentAuthUser.value!.authToken)
-    if (res == 'room name in use' || res == 'invalid token') {
+    const res = await roomSocket.emitWithAck('createAndJoin', name)
+    if (res == 'room name in use' || res == 'invalid socket state') {
         return res
     }
 
@@ -48,8 +48,8 @@ export async function joinRoomAndRedirect(roomId: RoomId) {
         return
     }
 
-    const res = await roomSocket.emitWithAck('join', roomId, currentAuthUser.value!.authToken)
-    if (res == 'invalid token' || res == 'room is ingame' || res == 'user already joined' || res == 'invalid room id')
+    const res = await roomSocket.emitWithAck('join', roomId)
+    if (res == 'invalid socket state' || res == 'invalid room id')
         return res
 
     currentRoomBacking.value = res
@@ -73,7 +73,7 @@ export async function leaveRoomAndRedirect() {
         return
     }
 
-    const res = await roomSocket.emitWithAck('leave', currentRoomBacking.value.id, currentAuthUser.value.authToken)
+    const res = await roomSocket.emitWithAck('leave')
     if (res == true)
         currentRoomBacking.value = undefined
 
@@ -95,14 +95,10 @@ export async function startRoom() {
         return
     }
 
-    const res = await lobbySocket.emitWithAck('startGame', currentRoomBacking.value.id, currentAuthUser.value.authToken)
+    const res = await lobbySocket.emitWithAck('startGame')
 
-    if (res == 'invalid token') {
+    if (res == 'invalid socket state') {
         console.warn('Starting room request was rejected because of an invalid token?')
-        return
-    }
-    if (res == 'no such room id') {
-        console.warn('Starting room request was rejected because of an invalid room id?')
         return
     }
     if (res == 'not the owner') {

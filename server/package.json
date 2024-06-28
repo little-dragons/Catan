@@ -4,19 +4,16 @@
   "scripts": {
     "dev": "dotenvx run -f .env.development -- ts-node-dev --respawn Server.ts",
     "prod": "dotenvx run -f .env.production -- ts-node Server.ts",
-
     "migrate-dev": "dotenvx run -f .env.development -- ts-node database/MigrationsExecutor.ts && npm run generate-types-dev",
     "migrate-prod": "dotenvx run -f .env.production -- ts-node database/MigrationsExecutor.ts && npm run generate-types-prod",
-    
     "remigrate-dev": "dotenvx run -f .env.development -- ts-node database/MigrationsExecutor.ts -remigrate && npm run generate-types-dev",
     "force-remigrate-prod": "dotenvx run -f .env.production -- ts-node database/MigrationsExecutor.ts -remigrate && npm run generate-types-prod",
-
     "generate-types-dev": "dotenvx run -f .env.development -- kysely-codegen --dialect sqlite --out-file database/DBTypes.d.ts",
     "generate-types-prod": "dotenvx run -f .env.production -- kysely-codegen --dialect sqlite --out-file database/DBTypes.d.ts",
-
     "build": "dotenvx run -f .env.production -- tsc --build"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/better-sqlite3": "^7.6.10",
     "@types/uuid": "^9.0.8",
     "kysely-codegen": "^0.15.0",
@@ -25,6 +22,7 @@
   "dependencies": {
     "@dotenvx/dotenvx": "^0.44.1",
     "@socket.io/admin-ui": "^0.5.1",
+    "bcrypt": "^5.1.1",
     "better-sqlite3": "^11.0.0",
     "kysely": "^0.27.3",
     "shared": "^1.0.0",

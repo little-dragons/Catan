@@ -1,15 +1,14 @@
-import { ClientEventMap, ServerEventMap, SocketPort, AuthUser, AuthToken, RoomId } from "shared"
+import { ClientEventMap, ServerEventMap, SocketPort } from "shared"
 import { Server } from "socket.io"
-import { removeUser } from "./authentication/AuthTokenMap"
 import { createServer, Server as HttpsServer } from 'https'
 import { readFileSync } from  'fs'
-import { acceptLobbyEvents } from "./rooms/LobbyEvents"
-import { acceptGameEvents } from "./rooms/GameEvents"
-import { acceptRoomEvents, leaveRoom } from "./rooms/RoomManager"
-import { acceptLoginEvents, logout } from "./authentication/LoginEvents"
+import { acceptLobbyEvents } from "./socketEvents/LobbyEvents"
+import { acceptGameEvents } from "./socketEvents/GameEvents"
+import { acceptRoomEvents } from "./socketEvents/RoomManager"
 import { instrument } from "@socket.io/admin-ui"
-import { DataType, isDevelopment, isProduction } from "./Common"
+import { SocketDataType, SocketServerType, isDevelopment, isProduction } from "./socketEvents/Common"
 import { db } from "./database/Connection"
+import { acceptLoginEvents } from "./socketEvents/LoginEvents"
 
 
 let httpsServer: HttpsServer<any, any> = undefined!
@@ -21,7 +20,7 @@ else if (isProduction)
         cert: readFileSync(`${process.env.SSL_DIR}/fullchain.pem`)
     })
 
-const io = new Server<ServerEventMap, ClientEventMap, {}, DataType>(httpsServer, {
+const io: SocketServerType = new Server<ServerEventMap, ClientEventMap, {}, SocketDataType>(httpsServer, {
     cors: {
         origin: [ 'https://admin.socket.io', 'http://localhost:5173', 'https://ichigancs.com:5173', 'http://127.0.0.1:5173' ],
         allowedHeaders: ['Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
@@ -58,12 +57,14 @@ printMemberCount()
 
 io.on('connection', socket => {
    
-    acceptLoginEvents(socket)
-    acceptRoomEvents(socket)
-    acceptLobbyEvents(socket)
-    acceptGameEvents(socket)
+    acceptLoginEvents(io, socket)
+    acceptRoomEvents(io, socket)
+    acceptLobbyEvents(io, socket)
+    acceptGameEvents(io, socket)
 
     socket.on('disconnect', (reason, desc) => {
-        logout(socket)
+        // TODO potentially delete some data? leave room?
+        // maybe call the logout method?
+        socket.data = { user: undefined }
     })
 })

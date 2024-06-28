@@ -20,7 +20,7 @@ if (currentLobbyRoom.value == undefined || currentAuthUser.value == undefined)
                 <p>User name</p>
             </div>
             <div v-for="user in currentLobbyRoom?.users" class="grid-columns default-grid-layout">
-                <p>{{ user.name }}</p>
+                <p>{{ user[0].name }}</p>
             </div>
         </div>
         <div class="right">

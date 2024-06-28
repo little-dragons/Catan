@@ -1,11 +1,8 @@
-import { AuthToken } from "./AuthToken"
-
 export type User = {
-    isGuest: boolean
+    type: 'guest' | 'member'
     name: string
 }
-
-export type AuthUser = User & { authToken: AuthToken }
+export type UserType = User['type']
 
 export function validUsername(name: string) {
     if (name.length > 20)

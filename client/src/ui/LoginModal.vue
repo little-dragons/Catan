@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import type { GuestLogin, MemberLogin } from 'shared';
 import { ref, watch } from 'vue';
 import UsernameInput from '@/ui/UsernameInput.vue';
 import PasswordInput from '@/ui/PasswordInput.vue';
 import Modal from '@/ui/Modal.vue'
 import LabeledInput from '@/ui/LabeledInput.vue';
-import { currentUser, sendLogin } from '@/socketWrapper/Login';
+import { currentUser, sendGuestLogin, sendMemberLogin, sendRegister } from '@/socketWrapper/Login';
 
 const emit = defineEmits(['close'])
 
-const password = ref(null as null | string)
+const showRegister = ref(false)
+
+const passwordInput = ref<null | InstanceType<typeof PasswordInput>>(null)
 const guestnameInput = ref<null | InstanceType<typeof UsernameInput>>(null)
 const membernameInput = ref<null | InstanceType<typeof UsernameInput>>(null)
-const passwordInput = ref(null as null)
 
 watch(currentUser, newVal => {
     if (newVal.status == 'logged in')
@@ -22,39 +22,29 @@ watch(currentUser, newVal => {
         const request = newVal.lastRejectedLogin.request
         const err = newVal.lastRejectedLogin.error
 
-        if (err == 'invalid auth object' || err == 'not implemented')
-            alert('Mistake by developers')
-        else if (err == 'name in use') {
+        if (request == 'login data request')
+            return alert('Cannot ask for login data info')
+
+        if (err == 'name in use') {
             if (request.type == 'guest')
                 guestnameInput.value?.nameInUse(request.name)
             if (request.type == 'member')
                 membernameInput.value?.nameInUse(request.name)
         }
-        else if (err == 'password invalid')
-            membernameInput.value
+        else if (err == 'invalid password')
+            passwordInput.value?.invalidPassword(passwordInput.value.result!)
+        else if (err == 'name unknown')
+            membernameInput.value?.nameUnknown(request.name)
     }
     else if (newVal.status == 'anonymous' && newVal.lastRejectedLogin == undefined) {
         console.warn('User login status changed to anonymous in login modal, but without rejection reason? Triggered logout?')
     }
 })
-
-function triggerGuestLogin() {
-    if (guestnameInput.value?.result == null)
-        return
-
-    const login: GuestLogin = {
-        type: 'guest',
-        name: guestnameInput.value.result
-    }
-
-    sendLogin(login)
-}
-
 </script>
 
 
 <template>
-    <Modal @close="$emit('close')">
+    <Modal @close="$emit('close')" v-if="showRegister == false">
         <h1>Login</h1>
         <p>Please login with your account or create a temporary guest account.</p>
         <p>Kindly observe that member logins are to be done on the left side while guest logins are done on the right.</p>
@@ -65,19 +55,55 @@ function triggerGuestLogin() {
                 </LabeledInput>
                 
                 <LabeledInput label="Password:" type="space between">
-                    <PasswordInput ref="passwordInput" v-model="password"/>
+                    <PasswordInput ref="passwordInput"/>
                 </LabeledInput>
 
-                <input type="button" value="Login" :disabled="membernameInput?.result == null || password == null"></input>
+                <p class="register">
+                    Want to become a member? <span @click="() => showRegister = true">Register!</span>
+                </p>
+
+                <input
+                    type="button"
+                    value="Login"
+                    @click="() => sendMemberLogin(membernameInput?.result!, passwordInput?.result!)"
+                    :disabled="membernameInput?.result == null || passwordInput?.result == null"/>
             </form>
             <div class="vertical-line"/>
             <form class="guest-login">
                 <LabeledInput label="Guest name:" type="space between">
                     <UsernameInput ref="guestnameInput"/>
                 </LabeledInput>
-                <input type="button" value="Guest login" @click="triggerGuestLogin" :disabled="guestnameInput?.result == null"></input>
+
+                <input
+                    type="button" 
+                    value="Guest login" 
+                    @click="() => sendGuestLogin(guestnameInput?.result!)" 
+                    :disabled="guestnameInput?.result == null"/>
             </form>
-        </div>                
+        </div>
+    </Modal>
+    <Modal @close="$emit('close')" v-if="showRegister == true">
+        <h1>Register</h1>
+        <p>Here you may create a member account.</p>
+        <form class="member-login">
+            <LabeledInput label="Member name:" type="space between">
+                <UsernameInput ref="membernameInput"/>
+            </LabeledInput>
+            
+            <LabeledInput label="Password:" type="space between">
+                <PasswordInput ref="passwordInput"/>
+            </LabeledInput>
+
+            <p class="register">
+                Already have an account? <span @click="() => showRegister = false">Login!</span>
+            </p>
+
+            <input
+                type="button"
+                value="Register"
+                @click="() => sendRegister(membernameInput?.result!, passwordInput?.result!)"
+                :disabled="membernameInput?.result == null || passwordInput?.result == null"/>
+        </form>
     </Modal>
 </template>
 
@@ -92,6 +118,17 @@ p {
     background-color: red;
 }
 
+.register {
+    font-size: 9pt;
+    text-align: center;
+}
+
+.register > span {
+    color: blueviolet;
+}
+.register > span:hover {
+    cursor: pointer;
+}
 
 .forms {
     display: flex;

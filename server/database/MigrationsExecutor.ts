@@ -5,7 +5,7 @@ import {
     FileMigrationProvider,
 } from 'kysely'
 import { db } from './Connection'
-import { isProduction } from '../Common'
+import { isProduction } from '../socketEvents/Common'
 
 export async function migrateDbToLatest() {
     const migrator = new Migrator({
@@ -19,10 +19,7 @@ export async function migrateDbToLatest() {
     })
 
     if (process.argv.includes('-remigrate')) {
-        if (!isProduction) {
-            await migrator.migrateDown()
-        }
-        else {
+        if (isProduction) {
             console.warn('\x1b[31m\x1b[40m%s\x1b[0m', 
                 '\nYOU ARE ABOUT TO MIGRATE THE PRODUCTION DATABASE DOWN\n' +
                 'THIS POTENTIALLY WIPES ENITRE TABLES\n' +
@@ -31,10 +28,11 @@ export async function migrateDbToLatest() {
                 'IF YOU ARE SURE AND THIS IS INTENTIONAL, CHECK THAT THE MIGRATION TO REDO IS ALSO PRESENT ON THE SERVER\n' +
                 'E.G. MAKE SURE YOU HAVE RUN GIT PULL\n')
 
-            await new Promise((resolve) => setTimeout(resolve, 15000))
-            console.log('proceeding with down migration')
-            await migrator.migrateDown()
+            await new Promise(resolve => setTimeout(resolve, 15000))
         }
+
+        const down = await migrator.migrateDown()
+        console.log(`reverting migration ${down.results?.[0].migrationName} with ${down.results?.[0].status}`)
     }
 
     const { error, results } = await migrator.migrateToLatest()

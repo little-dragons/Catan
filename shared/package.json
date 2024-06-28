@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "scripts": {},
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
     "@types/seedrandom": "^3.0.8",
     "@types/uuid": "^9.0.8",
     "typescript": "^5.4.5"
   },
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "seedrandom": "^3.0.5",
     "uuid": "^9.0.1"
   }

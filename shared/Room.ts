@@ -14,24 +14,22 @@ type CommonRoom = {
     name: string
     id: RoomId
     owner: User
+    users: [User, Color][]
     settings: Settings
 }
 export type LobbyRoom = {
     type: 'lobby'
-    users: User[]
 } & CommonRoom
 
 
 export type RedactedGameRoom = {
     type: 'ingame'
     state: RedactedGameState
-    users: [User, Color][]
 } & CommonRoom
 
 export type FullGameRoom = {
     type: 'ingame'
     state: FullGameState
-    users: [User, Color][]
 } & CommonRoom
 
 export type RedactedRoom = LobbyRoom | RedactedGameRoom
