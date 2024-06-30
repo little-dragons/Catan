@@ -3,10 +3,9 @@ import { validUsername } from 'shared';
 import CustomInput from './CustomInput.vue'
 import { computed, ref } from 'vue';
 
-withDefaults(defineProps<{
+defineProps<{
     tagId?: string
-    disabled?: boolean
-}>(), { disabled: false })
+}>()
 const child = ref<null | InstanceType<typeof CustomInput>>(null)
 
 const disallowedNames = [] as string[]
@@ -54,5 +53,5 @@ const rules: ((current: string) => true | string)[] = [
 </script>
 
 <template>
-    <CustomInput ref="child" :tagId="$props.tagId" type="text" :rules="rules" :disabled="disabled"/>
+    <CustomInput ref="child" :tagId="$props.tagId" type="text" :rules="rules" v-bind="$attrs"/>
 </template>

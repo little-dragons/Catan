@@ -10,6 +10,10 @@ const props = withDefaults(defineProps<{
     disabled?: boolean,
 }>(), { disabled: false })
 
+defineOptions({
+    inheritAttrs: false
+})
+
 const rawInput = ref("")
 
 const validityStatus = computed(() => {
@@ -41,7 +45,7 @@ defineExpose({
 <template>
     <div>
         <div class="input-container" :class="disabled ? 'disabled' : ''">
-            <input :id="$props.tagId" :type="$props.type" v-model="rawInput" spellcheck="false" :disabled="disabled"/>
+            <input :id="$props.tagId" :type="$props.type" v-model="rawInput" spellcheck="false" :disabled="disabled" v-bind="$attrs"/>
             <img :src="error" v-if="validityStatus != true && validityStatus != null" :title="validityStatus">
             <img :src="ok" v-if="validityStatus == true" title="Everything is good!">
         </div>

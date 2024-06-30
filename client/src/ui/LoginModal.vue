@@ -43,8 +43,6 @@ watch(currentUser, newVal => {
 
 const pending = computed(() => currentUser.value.status == 'pending')
 // TODO having two modals is not very nice, but also kind of convenient. Maybe there is a better solution?
-
-// TODO make passwords field marked as password etc. such that browsers autofill
 </script>
 
 
@@ -56,11 +54,11 @@ const pending = computed(() => currentUser.value.status == 'pending')
         <div class="forms">
             <form class="member-login">
                 <LabeledInput label="Member name:" type="space between">
-                    <UsernameInput ref="membernameInput" :disabled="pending"/>
+                    <UsernameInput ref="membernameInput" :disabled="pending" autocomplete="username"/>
                 </LabeledInput>
                 
                 <LabeledInput label="Password:" type="space between">
-                    <PasswordInput ref="passwordInput" :disabled="pending"/>
+                    <PasswordInput ref="passwordInput" :disabled="pending" autocomplete="current-password"/>
                 </LabeledInput>
 
                 <p class="register">
@@ -76,7 +74,7 @@ const pending = computed(() => currentUser.value.status == 'pending')
             <div class="vertical-line"/>
             <form class="guest-login">
                 <LabeledInput label="Guest name:" type="space between">
-                    <UsernameInput ref="guestnameInput" :disabled="pending"/>
+                    <UsernameInput ref="guestnameInput" :disabled="pending" autocomplete="username"/>
                 </LabeledInput>
 
                 <input
@@ -92,11 +90,11 @@ const pending = computed(() => currentUser.value.status == 'pending')
         <p>Here you may create a member account.</p>
         <form class="member-login">
             <LabeledInput label="Member name:" type="space between">
-                <UsernameInput ref="membernameInput" :disabled="pending"/>
+                <UsernameInput ref="membernameInput" :disabled="pending" autocomplete="username"/>
             </LabeledInput>
             
             <LabeledInput label="Password:" type="space between">
-                <PasswordInput ref="passwordInput" :disabled="pending"/>
+                <PasswordInput ref="passwordInput" :disabled="pending" autocomplete="new-password"/>
             </LabeledInput>
 
             <p class="register">
