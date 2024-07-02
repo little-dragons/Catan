@@ -74,7 +74,8 @@ export async function sendMemberLogin(name: string, password: string): Promise<v
         currentUserBacking.value = { status: 'anonymous', lastRejectedLogin: { error: 'name unknown', request } }
     else if (res == 'invalid password')
         currentUserBacking.value = { status: 'anonymous', lastRejectedLogin: { error: 'invalid password', request } }
-    currentUserBacking.value = { status: 'logged in', user: request}
+    else
+        currentUserBacking.value = { status: 'logged in', user: request}
 }
 
 export async function sendRegister(name: string, password: string) {

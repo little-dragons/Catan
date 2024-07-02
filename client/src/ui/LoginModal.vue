@@ -117,9 +117,6 @@ p {
     margin-bottom: 0.7rem;
 }
 
-:invalid {
-    background-color: red;
-}
 
 .register {
     font-size: 9pt;
