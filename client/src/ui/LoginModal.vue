@@ -4,7 +4,7 @@ import UsernameInput from '@/ui/UsernameInput.vue';
 import PasswordInput from '@/ui/PasswordInput.vue';
 import Modal from '@/ui/Modal.vue'
 import LabeledInput from '@/ui/LabeledInput.vue';
-import { currentUser, sendGuestLogin, sendMemberLogin, sendRegister } from '@/socketWrapper/Login';
+import { UserStateType, userState } from '@/UserState';
 
 const emit = defineEmits(['close'])
 
@@ -14,8 +14,8 @@ const passwordInput = ref<null | InstanceType<typeof PasswordInput>>(null)
 const guestnameInput = ref<null | InstanceType<typeof UsernameInput>>(null)
 const membernameInput = ref<null | InstanceType<typeof UsernameInput>>(null)
 
-watch(currentUser, newVal => {
-    if (newVal.status == 'logged in')
+watch(userState, newVal => {
+    if (newVal.tag == UserStateType.LoggedInNoRoom)
         emit('close')
 
     else if (newVal.status == 'anonymous' && newVal.lastRejectedLogin != undefined) {
@@ -41,7 +41,14 @@ watch(currentUser, newVal => {
     }
 })
 
-const pending = computed(() => currentUser.value.status == 'pending')
+function memberLogin(name: string, password: string) {
+    if (userState.value.tag != UserStateType.Anonymous)
+        return // TODO
+
+    const res = await userState.value.val.tryMemberLogin(name, password)
+}
+
+const pending = computed(() => userState.value.tag == UserStateType.PendingLogin)
 // TODO having two modals is not very nice, but also kind of convenient. Maybe there is a better solution?
 </script>
 
@@ -68,7 +75,7 @@ const pending = computed(() => currentUser.value.status == 'pending')
                 <input
                     type="button"
                     value="Login"
-                    @click="() => sendMemberLogin(membernameInput?.result!, passwordInput?.result!)"
+                    @click="() => memberLogin(membernameInput?.result!, passwordInput?.result!)"
                     :disabled="membernameInput?.result == null || passwordInput?.result == null"/>
             </form>
             <div class="vertical-line"/>
