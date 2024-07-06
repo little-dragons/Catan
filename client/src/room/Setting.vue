@@ -4,7 +4,8 @@ import type { Settings } from 'shared/logic/Settings';
 const props = defineProps<{
     name: SettingsKey
     value: Settings[SettingsKey]
-    allowChange: false | ((newVal: Settings[SettingsKey]) => void)
+    // TODO respect true case
+    allowChange: false | ((newVal: Settings[SettingsKey]) => void) 
 }>()
 
 const displayName = 
