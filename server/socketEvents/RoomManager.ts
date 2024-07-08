@@ -1,8 +1,9 @@
-import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, defaultBoard, RoomServerEventMap, RoomClientEventMap, Color } from "shared"
+import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, defaultBoard, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType } from "shared"
 import { type Socket } from 'socket.io'
 import { SocketDataType, SocketServerType } from "./Common"
 import { defaultSettings } from "shared/logic/Settings"
 import { v4 } from "uuid"
+import { List } from "immutable"
 
 type ServerLobbyRoom = Omit<LobbyRoom, 'users'>
 type ServerGameRoom = Omit<FullGameRoom, 'users'>
@@ -27,7 +28,7 @@ export function roomFor(roomId: RoomId) {
         return rooms[idx]
 }
 export async function usersForRoom(io: SocketServerType, roomId: RoomId) {
-    return (await io.in(roomId).fetchSockets()).map(x => [x.data.user, x.data.room![1]] as [User, Color])
+    return List(await io.in(roomId).fetchSockets()).map(x => [x.data.user, x.data.room![1]] as [User, Color])
 }
 
 export async function initializeGame(io: SocketServerType, room: ServerLobbyRoom) {
@@ -41,10 +42,10 @@ export async function initializeGame(io: SocketServerType, room: ServerLobbyRoom
     game.type = 'ingame'
     game.state = {
         board: defaultBoard(room.settings.seed),
-        currentPlayer: users[0][1],
-        players: users.map(([user, color]) => { return { color, handCards: [] } }),
+        currentPlayer: users.get(0)![1],
+        players: users.map(([user, color]) => { return { color, handCards: List() } }),
         phase: {
-            type: 'initial',
+            type: GamePhaseType.Initial,
             forward: true,
         },
     }
@@ -107,7 +108,7 @@ async function leaveRoom(io: SocketServerType, socket: RoomSocket) {
     }
 
     const users = await usersForRoom(io, socket.data.room[0])
-    if (room.owner.name == socket.data.user.name || users.length <= 1) {
+    if (room.owner.name == socket.data.user.name || users.size <= 1) {
         rooms.splice(rooms.indexOf(room), 1)
 
         const sockets = await io.in(socket.data.room[0]).fetchSockets()
@@ -130,7 +131,7 @@ async function leaveRoom(io: SocketServerType, socket: RoomSocket) {
 
 export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
     socket.on('lobbyList', async cb => {
-        cb(await Promise.all(lobbies().map<Promise<LobbyRoom>>(async (x) => { return { ...x, users: await usersForRoom(io, x.id) } })))
+        cb(await Promise.all(lobbies().map(async (x) => { return { ...x, users: (await usersForRoom(io, x.id)).toArray() } })))
     })
 
     socket.on('createAndJoin', async (name, cb) => {
@@ -138,7 +139,7 @@ export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
         if (res == 'invalid socket state' || res == 'room name in use')
             return cb(res)
 
-        const users = await usersForRoom(io, res.id)
+        const users = (await usersForRoom(io, res.id)).toArray()
         cb({ ...res, users })
     })
 
@@ -147,7 +148,7 @@ export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
         if (res == 'invalid room id' || res == 'invalid socket state')
             return cb(res)
 
-        const users = await usersForRoom(io, res.id)
+        const users = (await usersForRoom(io, res.id)).toArray()
         return cb({ ...res, users })
     })
 

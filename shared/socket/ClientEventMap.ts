@@ -1,3 +1,4 @@
+import { List } from "immutable"
 import { User } from "../authentication/User"
 import { Color } from "../logic/Player"
 import { Settings } from "../logic/Settings"
@@ -10,7 +11,7 @@ export type GameClientEventMap = {
 
 export type RoomClientEventMap = {
     closed: () => void
-    userChange: (newUsers: [User, Color][]) => void
+    userChange: (newUsers: List<[User, Color]>) => void
 }
 
 export type LobbyClientEventMap = {

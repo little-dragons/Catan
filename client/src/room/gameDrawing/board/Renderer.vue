@@ -30,6 +30,7 @@ import redCity from '@/assets/buildings/red-city.svg'
 import redSettlement from '@/assets/buildings/red-settlement.svg'
 import yellowCity from '@/assets/buildings/yellow-city.svg'
 import yellowSettlement from '@/assets/buildings/yellow-settlement.svg'
+import type { List } from 'immutable';
 
 function resourceToIcon(resource: Resource): string {
     switch (resource) {
@@ -133,15 +134,15 @@ const boardSvg = ref<null | SVGElement>(null)
 
 export type InteractionPoints<Payload> = {
     type: 'settlement'
-    data: [Coordinate, Payload][]
+    data: List<[Coordinate, Payload]>
     callback: (item: [Coordinate, Payload]) => void
 } | {
     type: 'road'
-    data: [Road, Payload][]
+    data: List<[Road, Payload]>
     callback: (item: [Road, Payload]) => void
 } | {
     type: 'tile'
-    data: [Coordinate, Payload][]
+    data: List<[Coordinate, Payload]>
     callback: (item: [Coordinate, Payload]) => void
 }
 

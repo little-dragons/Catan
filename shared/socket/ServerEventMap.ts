@@ -1,9 +1,10 @@
 import { LobbyRoom, RedactedGameRoom, RoomId } from "../Room"
 import { RedactedGameState } from "../logic/GameState"
 import { Settings } from "../logic/Settings"
-import { RequestGameAction } from "../logic/GameAction"
+import { GameAction } from "../logic/GameAction"
 import { User } from "../authentication/User"
 import { PasswordNonce } from "../authentication/Password"
+import { ImmutableToNative } from "./ListWrapper"
 
 export type GuestLoginError = 'name in use' | 'name not allowed'
 export type MemberLoginError = 'invalid password' | 'name unknown' | 'already logged in'
@@ -15,15 +16,15 @@ export type ServerEventMap = LoginServerEventMap & RoomServerEventMap & GameServ
 type Callback<T> = (arg: T) => void
 
 export type GameServerEventMap = {
-    fullGameRoom: (cb: Callback<RedactedGameRoom | 'invalid socket state'>) => void
-    gameState: (cb: Callback<RedactedGameState | 'invalid socket state'>) => void
-    gameAction: (action: RequestGameAction, cb: Callback<true | 'invalid socket state' | 'action not allowed'>) => void
+    fullGameRoom: (cb: Callback<ImmutableToNative<RedactedGameRoom> | 'invalid socket state'>) => void
+    gameState: (cb: Callback<ImmutableToNative<RedactedGameState> | 'invalid socket state'>) => void
+    gameAction: (action: GameAction, cb: Callback<true | 'invalid socket state' | 'action not allowed'>) => void
 }
 
 export type RoomServerEventMap = {
-    lobbyList: (cb: Callback<LobbyRoom[]>) => void
-    createAndJoin: (roomName: string, cb: Callback<LobbyRoom | 'room name in use' | 'invalid socket state'>) => void
-    join: (roomId: RoomId, cb: Callback<LobbyRoom | 'invalid room id' | 'invalid socket state'>) => void
+    lobbyList: (cb: Callback<ImmutableToNative<LobbyRoom>[]>) => void
+    createAndJoin: (roomName: string, cb: Callback<ImmutableToNative<LobbyRoom> | 'room name in use' | 'invalid socket state'>) => void
+    join: (roomId: RoomId, cb: Callback<ImmutableToNative<LobbyRoom> | 'invalid room id' | 'invalid socket state'>) => void
     leave: (cb: Callback<true | 'invalid socket state'>) => void
 }
 

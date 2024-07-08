@@ -1,12 +1,12 @@
 import router from "@/misc/Router"
-import type { RedactedRoom, RoomClientEventMap, RoomId, RoomServerEventMap } from "shared"
+import { type RedactedRoom, type RoomId, immutableLobby } from "shared"
 import { computed, readonly, ref } from "vue"
 import { lobbySocket, roomSocket } from "./Socket"
 import { currentAuthUser } from "./Login"
 
 export const currentRoomBacking = ref<undefined | RedactedRoom>(undefined)
 
-export const currentRoom = readonly(currentRoomBacking)
+export const currentRoom = currentRoomBacking
 export const currentLobbyRoom = computed(() => {
     if (currentRoom.value?.type == 'lobby')
         return currentRoom.value
@@ -34,7 +34,7 @@ export async function createRoomAndRedirect(name: string) {
         return res
     }
 
-    currentRoomBacking.value = res
+    currentRoomBacking.value = immutableLobby(res)
     router.push({ name: 'room' })
     return res
 }
@@ -52,7 +52,7 @@ export async function joinRoomAndRedirect(roomId: RoomId) {
     if (res == 'invalid socket state' || res == 'invalid room id')
         return res
 
-    currentRoomBacking.value = res
+    currentRoomBacking.value = immutableLobby(res)
     router.push({ name: 'room' })
     return res
 }

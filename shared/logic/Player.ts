@@ -1,3 +1,4 @@
+import { List } from "immutable"
 import { Resource } from "./Resource"
 
 export type RedactedPlayer = {
@@ -7,13 +8,13 @@ export type RedactedPlayer = {
 
 export type FullPlayer = {
     color: Color,
-    handCards: Resource[],
+    handCards: List<Resource>,
 }
 
 export function redactPlayer(player: FullPlayer): RedactedPlayer {
     return {
         color: player.color,
-        handCardsCount: player.handCards.length,
+        handCardsCount: player.handCards.size,
     }
 }
 

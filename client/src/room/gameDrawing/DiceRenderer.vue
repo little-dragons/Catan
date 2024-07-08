@@ -27,11 +27,14 @@ function diceToIcon(die: number): string {
 
 defineEmits(['diceClicked'])
 
-defineProps<{ dice: [number, number] }>()
+defineProps<{ 
+    dice: [number, number]
+    animate: boolean
+}>()
 </script>
 
 <template>
-    <svg ref="svg" viewBox="0 0 80 40" @click="() => $emit('diceClicked')">
+    <svg ref="svg" viewBox="0 0 80 40" @click="() => $emit('diceClicked')" :class="animate ? 'animation' : ''">
         <image
             x="0"
             y="0"
@@ -46,3 +49,22 @@ defineProps<{ dice: [number, number] }>()
             :href="diceToIcon(dice[1])"/>
     </svg>
 </template>
+
+<style scoped>
+@keyframes resize {
+    0% { transform: scale(0.85); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(0.85); }
+}
+@keyframes setup {
+    from { transform: scale(1); }
+    to { transform: scale(0.85); }
+}
+
+.animation {
+    animation: setup 1s 1, resize 2.5s infinite 1s;
+}
+.animation:hover {
+    cursor: pointer;
+}
+</style>

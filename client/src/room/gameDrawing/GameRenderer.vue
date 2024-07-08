@@ -5,21 +5,25 @@ import DiceRenderer from './DiceRenderer.vue';
 import { onMounted, ref } from 'vue';
 import CardsRenderer from './CardsRenderer.vue';
 import PlayerOverviewRenderer, { type PlayerOverviewData } from './PlayerOverviewRenderer.vue';
+import type { GameActionAllowedMap } from 'shared/logic/GameAction';
+import type { List } from 'immutable';
 
 defineEmits<{
     diceClicked: []
     resourceClicked: [resource: Resource]
-    endTurnClicked: []
+    endTurn: []
+    buildCity: []
+    buildSettlement: []
+    buildRoad: []
 }>()
 
 defineProps<{
-    stockedCards: Resource[]
-    offeredCards: Resource[]
+    stockedCards: List<Resource>
+    offeredCards: List<Resource>
     board: Board
-    isMyTurn: boolean
     dice: [number, number] | undefined
-    canEndTurn: boolean
-    otherPlayers: PlayerOverviewData[]
+    allowedActions: GameActionAllowedMap
+    otherPlayers: List<PlayerOverviewData>
     otherPlayersDisplay: 'radial' | 'grid'
     interactionPoints: InteractionPoints<any> | undefined
 }>()
@@ -41,22 +45,30 @@ onMounted(() => {
 
 <template>
     <div class="other-players">
-        <PlayerOverviewRenderer class="upper-left-radial" v-if="otherPlayers.length >= 1 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers[0]"/>
-        <PlayerOverviewRenderer class="upper-left-grid" v-if="otherPlayers.length >= 1 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[0]"/>
-        <PlayerOverviewRenderer class="upper-right-radial" v-if="otherPlayers.length >= 2 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers[1]"/>
-        <PlayerOverviewRenderer class="upper-right-grid" v-if="otherPlayers.length >= 2 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[1]"/>
-        <PlayerOverviewRenderer class="middle-left-radial" v-if="otherPlayers.length >= 3 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers[2]"/>
-        <PlayerOverviewRenderer class="middle-left-grid" v-if="otherPlayers.length >= 3 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[2]"/>
-        <PlayerOverviewRenderer class="middle-right-radial" v-if="otherPlayers.length >= 4 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers[3]"/>
-        <PlayerOverviewRenderer class="middle-right-grid" v-if="otherPlayers.length >= 4 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[3]"/>
+        <PlayerOverviewRenderer class="upper-left-radial" v-if="otherPlayers.size >= 1 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers.get(0)!"/>
+        <PlayerOverviewRenderer class="upper-left-grid" v-if="otherPlayers.size >= 1 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers.get(0)!"/>
+        <PlayerOverviewRenderer class="upper-right-radial" v-if="otherPlayers.size >= 2 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers.get(1)!"/>
+        <PlayerOverviewRenderer class="upper-right-grid" v-if="otherPlayers.size >= 2 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers.get(1)!"/>
+        <PlayerOverviewRenderer class="middle-left-radial" v-if="otherPlayers.size >= 3 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers.get(2)!"/>
+        <PlayerOverviewRenderer class="middle-left-grid" v-if="otherPlayers.size >= 3 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers.get(2)!"/>
+        <PlayerOverviewRenderer class="middle-right-radial" v-if="otherPlayers.size >= 4 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers.get(3)!"/>
+        <PlayerOverviewRenderer class="middle-right-grid" v-if="otherPlayers.size >= 4 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers.get(3)!"/>
     </div>
     <div ref="boardContainer"class="main-box">   
             <BoardRenderer class="board" :board="board" :interaction-points="interactionPoints"/>
         <div class="below">
-            <DiceRenderer class="dice" v-if="dice != undefined" :dice="dice" ref="diceRenderer" @dice-clicked="() => $emit('diceClicked')"/>
+            <DiceRenderer 
+                v-if="dice != undefined" 
+                class="dice" 
+                :dice="dice"
+                :animate="allowedActions.rollDice"
+                @dice-clicked="() => $emit('diceClicked')"/>
             <CardsRenderer :cards="stockedCards" @resource-clicked="res => $emit('resourceClicked', res)"/>
             <div class="buttons">
-                <button class="default-button-colors" @click="() => $emit('endTurnClicked')" :disabled="!canEndTurn">Finish turn</button>
+                <button class="default-button-colors" @click="() => $emit('buildRoad')" :disabled="!allowedActions.placeRoad">Road</button>
+                <button class="default-button-colors" @click="() => $emit('buildSettlement')" :disabled="!allowedActions.placeSettlement">Settlement</button>
+                <button class="default-button-colors" @click="() => $emit('buildCity')" :disabled="!allowedActions.placeCity">City</button>
+                <button class="default-button-colors" @click="() => $emit('endTurn')" :disabled="!allowedActions.finishTurn">Finish turn</button>
             </div>
         </div>
     </div>

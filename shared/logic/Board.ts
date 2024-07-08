@@ -1,8 +1,10 @@
 import type { Color } from "./Player"
 import type { Orientation } from "./Orientation"
 import type { Resource } from "./Resource"
-import type { BuildingType } from "./Buildings"
+import { BuildingType } from "./Buildings"
 import { v4 } from "uuid"
+import { canBuyRoad } from "./GameState"
+import { List } from "immutable"
 
 export type Coordinate = [number, number]
 export function sameCoordinate(c1: Coordinate, c2: Coordinate) {
@@ -35,12 +37,21 @@ export function randomBoardSeed() {
 export interface Board {
     rowCount: number
     columnCount: number
-    tiles: [Tile, Coordinate][]
-    roads: [Color, Road][] 
+    tiles: List<[Tile, Coordinate]>
+    roads: List<[Color, Road]>
     robber: Coordinate
-    buildings: [Color, Coordinate, BuildingType][]
+    buildings: List<[Color, Coordinate, BuildingType]>
 }
 
+
+export function allCrossingPositions(board: Board) {
+    let allPositions: List<Coordinate> = List()
+    for (let col = 0; col < 2 * board.columnCount + 2; col++)
+        for (let row = 0; row < board.rowCount + 1; row++)
+            allPositions = allPositions.push([col, row])
+
+    return allPositions
+}
 
 function crossingAdjacentToTile(crossing: Coordinate, tile: Coordinate): boolean {
     const xCorrection = tile[1] % 2 == 0 ? 0 : 1
@@ -63,24 +74,61 @@ function isCrossingWithRoadUp(crossing: Coordinate): boolean {
 }
 
 
-export function adjacentCrossings(crossing: Coordinate): Coordinate[] {
+export function adjacentCrossings(crossing: Coordinate) {
     //TODO generated positions may be negative or otherwise out of bounds
     const left: Coordinate = [crossing[0] - 1, crossing[1]]
     const right: Coordinate = [crossing[0] + 1, crossing[1]]
 
     const goingUp = isCrossingWithRoadUp(crossing)
     const vertical: Coordinate = [crossing[0], crossing[1] + (goingUp ? -1 : 1)]
-    return [left, right, vertical]
+    return List([left, right, vertical])
 }
 
-export function adjacentRoads(crossing: Coordinate): Road[] {
-    return adjacentCrossings(crossing).map(other => [crossing, other])
+export function adjacentRoads(crossing: Coordinate) {
+    return adjacentCrossings(crossing).map(other => [crossing, other] as Road)
+}
+
+function crossingsForColor(board: Board, color: Color) {
+    const buildingCrossingsForColor = board.buildings.filter(x => x[0] == color).map(x => x[1])
+    const roadCrossingsForColor = board.roads.filter(x => x[0] == color).map(x => x[1])
+    const allCrossings = roadCrossingsForColor.flatMap(x => x).concat(buildingCrossingsForColor)
+    return allCrossings.filter((val, idx) => allCrossings.findIndex(x => sameCoordinate(x, val)) == idx)
+}
+
+export function availableRoadPositions(board: Board, color: Color) {
+    // this can include duplicates of the form [c1, c2], [c2, c1]
+    const allPotentialRoads: List<Road> = 
+        crossingsForColor(board, color)
+        .flatMap(crossing => adjacentCrossings(crossing).map(other => [other, crossing]))
+
+    // TODO maybe include robber?
+    return allPotentialRoads
+        // remove duplicates
+        .filter((val, idx) => allPotentialRoads.findIndex(x => sameRoad(x, val)) == idx)
+        // remove already built roads
+        .filter(road => !board.roads.some(other => sameRoad(road, other[1])))
+}
+
+export function isAvailableRoadPosition(board: Board, road: Road, color: Color) {
+    if (!adjacentCrossings(road[0]).some(x => sameCoordinate(x, road[1])))
+        return false
+
+    const allCrossings = crossingsForColor(board, color)
+    const coordinates = 
+        allCrossings.some(x => sameCoordinate(x, road[0])) ? [road[0], road[1]] :
+        allCrossings.some(x => sameCoordinate(x, road[1])) ? [road[1], road[0]] :
+        undefined
+
+    if (coordinates == undefined)
+        return false
+
+    return true
 }
 
 
 
 
-function adjacentTiles(cross: Coordinate): Coordinate[] {
+function adjacentTiles(cross: Coordinate): List<Coordinate> {
     // draw it out to understand it
     //TODO generated positions may be negative or otherwise out of bounds
 
@@ -90,13 +138,13 @@ function adjacentTiles(cross: Coordinate): Coordinate[] {
             const above: Coordinate = [cross[0] / 2 - 1, cross[1] - 1]
             const belowLeft: Coordinate = [above[0], cross[1]]
             const belowRight: Coordinate = [above[0] + 1, cross[1]]
-            return [above, belowLeft, belowRight]
+            return List([above, belowLeft, belowRight])
         }
         else {
             const above: Coordinate = [(cross[0] - 1) / 2, cross[1] - 1]
             const belowLeft: Coordinate = [above[0] - 1, cross[1]]
             const belowRight: Coordinate = [above[0], cross[1]]
-            return [above, belowLeft, belowRight]
+            return List([above, belowLeft, belowRight])
         }
     }
     else {
@@ -104,27 +152,27 @@ function adjacentTiles(cross: Coordinate): Coordinate[] {
             const below: Coordinate = [(cross[0] - 1) / 2, cross[1]]
             const aboveLeft: Coordinate = [below[0] - 1, below[1] - 1]
             const aboveRight: Coordinate = [below[0], below[1] - 1]
-            return [below, aboveLeft, aboveRight]
+            return List([below, aboveLeft, aboveRight])
         }
         else {
             const below: Coordinate = [cross[0] / 2 - 1, cross[1]]
             const aboveLeft: Coordinate = [below[0], below[1] - 1]
             const aboveRight: Coordinate = [below[0] + 1, below[1] - 1]
-            return [below, aboveLeft, aboveRight]
+            return List([below, aboveLeft, aboveRight])
         }
     }
 }
 
-function mapFilter<T, R>(array: T[], mapper: ((item: T) => R | undefined)): R[] {
-    const res: R[] = []
+function mapFilter<T, R>(array: List<T>, mapper: ((item: T) => R | undefined)): List<R> {
+    let res: List<R> = List()
     for (const item of array) {
         const mapped = mapper(item)
         if (mapped != undefined)
-            res.push(mapped)
+            res = res.push(mapped)
     }
     return res
 }
-function mapFind<T, R>(array: T[], finder: ((item: T) => R |  undefined)): R | undefined {
+function mapFind<T, R>(array: List<T>, finder: ((item: T) => R |  undefined)): R | undefined {
     for (const item of array) {
         const mapped = finder(item)
         if (mapped != undefined)
@@ -132,7 +180,7 @@ function mapFind<T, R>(array: T[], finder: ((item: T) => R |  undefined)): R | u
     }
 }
 
-export function adjacentResourceTiles(cross: Coordinate, board: Board, number: number | undefined): Resource[] {
+export function adjacentResourceTiles(cross: Coordinate, board: Board, number: number | undefined): List<Resource> {
     return mapFilter(
         adjacentTiles(cross), 
         coord => 
@@ -143,4 +191,22 @@ export function adjacentResourceTiles(cross: Coordinate, board: Board, number: n
                 (number != undefined ? tile[0].number == number : true) ? tile[0] : undefined)
             ?.resource
         )
+}
+
+export function gainedResources(board: Board, color: Color, number: number): List<Resource> {
+    let accumulated = List<Resource>()
+    for (const building of board.buildings) {
+        if (building[0] != color)
+            continue
+
+        const resources = adjacentResourceTiles(building[1], board, number)
+        if (building[2] == BuildingType.Settlement)
+            accumulated = accumulated.concat(resources)
+        if (building[2] == BuildingType.City) {
+            accumulated = accumulated.concat(resources)
+            accumulated = accumulated.concat(resources)
+        }            
+    }
+
+    return accumulated
 }

@@ -1,6 +1,7 @@
 import { gameSocket, lobbySocket } from "./Socket";
 import { currentGameRoom, currentRoomBacking } from "./Room";
 import { currentAuthUser } from "./Login";
+import { immutableGame, immutableState } from "shared";
 
 
 export async function fetchNewState() {
@@ -20,7 +21,7 @@ export async function fetchNewState() {
         return
     }
 
-    currentRoomBacking.value.state = newState
+    currentRoomBacking.value.state = immutableState(newState)
 }
 
 export function acceptGameEvents() {
@@ -42,6 +43,6 @@ export function acceptGameEvents() {
             return
         }
     
-        currentRoomBacking.value = res
+        currentRoomBacking.value = immutableGame(res)
     })    
 }

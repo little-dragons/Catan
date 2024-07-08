@@ -1,8 +1,13 @@
-import { Board, Coordinate, adjacentCrossings, adjacentRoads, crossingAdjacentToLand, sameRoad} from "./Board";
+import { List } from "immutable";
+import { Board, Coordinate, adjacentCrossings, adjacentRoads, allCrossingPositions, crossingAdjacentToLand, sameRoad} from "./Board";
 import { Color } from "./Player";
+import { Resource } from "./Resource";
 
 export enum BuildingType {
     Settlement, City
+}
+export enum ConnectionType {
+    Road
 }
 
 function crossingHasRequiredDistanceToAll(crossing: Coordinate, board: Board): boolean {
@@ -21,10 +26,22 @@ export function isAvailableBuildingPosition(crossing: Coordinate, board: Board, 
 }
 
 export function availableBuildingPositions(board: Board, forPlayer: Color | undefined) {
-    const allPositions: Coordinate[] = []
-    for (let col = 0; col < 2 * board.columnCount + 2; col++)
-        for (let row = 0; row < board.rowCount + 1; row++)
-            allPositions.push([col, row])
+    return allCrossingPositions(board).filter(x => isAvailableBuildingPosition(x, board, forPlayer))
+}
 
-    return allPositions.filter(x => isAvailableBuildingPosition(x, board, forPlayer))
+
+export const roadCost = List([Resource.Lumber, Resource.Brick])
+export const settlementCost = List([Resource.Lumber, Resource.Brick, Resource.Grain, Resource.Wool])
+export const cityCost = List([Resource.Grain, Resource.Grain, Resource.Ore, Resource.Ore, Resource.Ore])
+
+export function buildingCost(type: BuildingType) {
+    switch (type) {
+        case BuildingType.Settlement: return settlementCost
+        case BuildingType.City: return cityCost
+    }
+}
+export function connectionCost(type: ConnectionType) {
+    switch (type) {
+        case ConnectionType.Road: return roadCost
+    }
 }
