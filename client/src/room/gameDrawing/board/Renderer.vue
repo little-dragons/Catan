@@ -213,6 +213,7 @@ function getUserSelection<T extends UserSelectionType, Options extends UserSelec
                 }
             }
 
+            // TODO maybe add a proper abort button?
             if (options?.noAbort != true) {
                 resolve(undefined as UserSelectionResult<T, Options>)
                 interactionPoints.value = undefined
