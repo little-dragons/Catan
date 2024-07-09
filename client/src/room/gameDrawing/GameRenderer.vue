@@ -71,7 +71,7 @@ defineExpose({ getUserSelection })
                 :dice="dice"
                 :enabled="!interactionRunning && allowedActions.rollDice"
                 @dice-clicked="() => $emit('diceClicked')"/>
-            <CardsRenderer :cards="stockedCards" @resource-clicked="res => $emit('resourceClicked', res)"/>
+            <CardsRenderer class="cards" :cards="stockedCards" @resource-clicked="res => $emit('resourceClicked', res)"/>
             <div class="buttons">
                 <button class="default-button-colors" @click="() => $emit('buildRoad')" :disabled="interactionRunning || !allowedActions.placeRoad">Road</button>
                 <button class="default-button-colors" @click="() => $emit('buildSettlement')" :disabled="interactionRunning || !allowedActions.placeSettlement">Settlement</button>
@@ -148,28 +148,37 @@ defineExpose({ getUserSelection })
 
 .below {
     flex-shrink: 0;
-    padding-top: 10px;
+    margin-top: 10px;
     position: relative;
-    display: grid;
-    grid-template-rows: 100%;
-    grid-template-columns: 50% auto auto auto;
-    gap: 10px;
+    width: 100%;
+    height: 80px;
+    display: flex;
     flex-direction: row;
 }
 
 .dice {
     position: absolute;
     right: 0;
-    top: -50px;
+    top: -60px;
     width: 100px;
     z-index: 100;
     margin-right: 0;
     margin-left: auto;
 }
 
+.cards {
+    width: 100%;
+}
+.buttons {
+    width: max-content;
+    height: 100%;
+    flex-shrink: 0;
+}
 
 .buttons > button {
     height: 100%;
+    aspect-ratio: 1;
+    margin-left: 10px;
     border: 1px solid black;
     border-radius: 10px;
 }

@@ -53,13 +53,14 @@ function count(res: Resource) {
     border-radius: 10px;
     display: flex;
     flex-direction: row;
+    box-sizing: border-box;
     padding: 5px;
-    height: fit-content;
+    height: 100%;
 }
 
 .stack {
     position: relative;
-    height: 4rem;
+    height: 100%;
     display: flex;
     flex-direction: row-reverse;
 }
