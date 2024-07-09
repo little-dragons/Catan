@@ -29,12 +29,12 @@ defineEmits(['diceClicked'])
 
 defineProps<{ 
     dice: [number, number]
-    animate: boolean
+    enabled: boolean
 }>()
 </script>
 
 <template>
-    <svg ref="svg" viewBox="0 0 80 40" @click="() => $emit('diceClicked')" :class="animate ? 'animation' : ''">
+    <svg ref="svg" viewBox="0 0 80 40" @click="() => { if (enabled) $emit('diceClicked') }" :class="enabled ? 'animation' : ''">
         <image
             x="0"
             y="0"

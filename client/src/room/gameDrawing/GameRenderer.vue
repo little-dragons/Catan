@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Resource, type Board } from 'shared';
-import BoardRenderer, { type InteractionPoints } from './board/Renderer.vue';
+import BoardRenderer from './board/Renderer.vue';
+import { UserSelectionType, type UserSelectionDataType, type UserSelectionOptions, type UserSelectionResult } from './board/UserSelection'
 import DiceRenderer from './DiceRenderer.vue';
 import { onMounted, ref } from 'vue';
 import CardsRenderer from './CardsRenderer.vue';
@@ -25,7 +26,6 @@ defineProps<{
     allowedActions: GameActionAllowedMap
     otherPlayers: List<PlayerOverviewData>
     otherPlayersDisplay: 'radial' | 'grid'
-    interactionPoints: InteractionPoints<any> | undefined
 }>()
 
 const boardContainer = ref<null | HTMLDivElement>(null)
@@ -40,7 +40,15 @@ onMounted(() => {
     }).observe(boardContainer.value!.children[0])
 })
 
-
+const interactionRunning = ref(false)
+const boardRenderer = ref<null | InstanceType<typeof BoardRenderer>>(null)
+async function getUserSelection<T extends UserSelectionType, Options extends UserSelectionOptions | undefined>(type: T, data: List<UserSelectionDataType<T>>, options?: Options): Promise<UserSelectionResult<T, Options>> {
+    interactionRunning.value = true
+    const res = await boardRenderer.value!.getUserSelection(type, data, options)
+    interactionRunning.value = false
+    return res
+}
+defineExpose({ getUserSelection })
 </script>
 
 <template>
@@ -55,20 +63,20 @@ onMounted(() => {
         <PlayerOverviewRenderer class="middle-right-grid" v-if="otherPlayers.size >= 4 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers.get(3)!"/>
     </div>
     <div ref="boardContainer"class="main-box">   
-            <BoardRenderer class="board" :board="board" :interaction-points="interactionPoints"/>
+            <BoardRenderer class="board" :board="board" ref="boardRenderer"/>
         <div class="below">
             <DiceRenderer 
                 v-if="dice != undefined" 
                 class="dice" 
                 :dice="dice"
-                :animate="allowedActions.rollDice"
+                :enabled="!interactionRunning && allowedActions.rollDice"
                 @dice-clicked="() => $emit('diceClicked')"/>
             <CardsRenderer :cards="stockedCards" @resource-clicked="res => $emit('resourceClicked', res)"/>
             <div class="buttons">
-                <button class="default-button-colors" @click="() => $emit('buildRoad')" :disabled="!allowedActions.placeRoad">Road</button>
-                <button class="default-button-colors" @click="() => $emit('buildSettlement')" :disabled="!allowedActions.placeSettlement">Settlement</button>
-                <button class="default-button-colors" @click="() => $emit('buildCity')" :disabled="!allowedActions.placeCity">City</button>
-                <button class="default-button-colors" @click="() => $emit('endTurn')" :disabled="!allowedActions.finishTurn">Finish turn</button>
+                <button class="default-button-colors" @click="() => $emit('buildRoad')" :disabled="interactionRunning || !allowedActions.placeRoad">Road</button>
+                <button class="default-button-colors" @click="() => $emit('buildSettlement')" :disabled="interactionRunning || !allowedActions.placeSettlement">Settlement</button>
+                <button class="default-button-colors" @click="() => $emit('buildCity')" :disabled="interactionRunning || !allowedActions.placeCity">City</button>
+                <button class="default-button-colors" @click="() => $emit('endTurn')" :disabled="interactionRunning || !allowedActions.finishTurn">Finish turn</button>
             </div>
         </div>
     </div>
