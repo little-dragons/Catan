@@ -1,5 +1,5 @@
 import { List } from "immutable";
-import { Board, Coordinate, adjacentCrossings, adjacentRoads, allCrossingPositions, crossingAdjacentToLand, sameRoad} from "./Board";
+import { Board, Coordinate, adjacentCrossings, adjacentRoads, allCrossingPositions, crossingAdjacentToLand, sameCoordinate, sameRoad} from "./Board";
 import { Color } from "./Player";
 import { Resource } from "./Resource";
 
@@ -12,15 +12,19 @@ export enum ConnectionType {
 
 function crossingHasRequiredDistanceToAll(crossing: Coordinate, board: Board): boolean {
     function hasBuildingAt(coord: Coordinate) {
-        return board.buildings.some(x => x[1][0] == coord[0] && x[1][1] == coord[1])
+        return board.buildings.some(x => sameCoordinate(x[1], coord))
     }
     return !hasBuildingAt(crossing) && adjacentCrossings(crossing).every(cross => !hasBuildingAt(cross))
 }
 
 export function isAvailableBuildingPosition(crossing: Coordinate, board: Board, forPlayer: Color | undefined): boolean {
-    const freeSpots = crossingAdjacentToLand(crossing, board) && crossingHasRequiredDistanceToAll(crossing, board)
+    const isFree = crossingAdjacentToLand(crossing, board) && crossingHasRequiredDistanceToAll(crossing, board)
+
+    if (!isFree)
+        return false
+
     if (forPlayer == undefined)
-        return freeSpots
+        return true
     
     return adjacentRoads(crossing).some(road => board.roads.some(built => sameRoad(road, built[1]) && built[0] == forPlayer))
 }

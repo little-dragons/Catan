@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { currentGameRoom } from '@/socketWrapper/Room';
-import { Color, GamePhaseType, Resource, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, type Coordinate, type RedactedGameState, type RedactedPlayer, type Road, type User } from 'shared';
+import { BuildingType, Color, GamePhaseType, Resource, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, type Coordinate, type RedactedGameState, type RedactedPlayer, type Road, type User } from 'shared';
 import { computed, ref, shallowRef, triggerRef, watchEffect } from 'vue';
 import { gameSocket } from '@/socketWrapper/Socket';
 import GameRenderer from './gameDrawing/GameRenderer.vue';
@@ -110,8 +110,22 @@ async function endTurn() {
 function resourceClicked(res: Resource) {
     //TODO
 }
-function buildCity() {
-    // TODO
+async function buildCity() {
+    if (currentAllowedActions.value?.placeCity != true || renderer.value == null || currentState.value == undefined)
+        return
+
+    const possiblePositions = 
+        currentState.value.board.buildings
+            .filter(([color, coord, type]) => 
+                color == currentState.value!.self.color &&
+                type == BuildingType.Settlement)
+            .map(x => x[1])
+
+
+    const settlement = await renderer.value.getUserSelection(UserSelectionType.Crossing, possiblePositions)
+
+    if (settlement != undefined)
+        sendAction({ type: GameActionType.PlaceCity, coordinate: settlement })
 }
 async function buildRoad() {
     if (currentAllowedActions.value?.placeRoad != true || renderer.value == null || currentState.value == undefined)
@@ -125,8 +139,17 @@ async function buildRoad() {
     if (road != undefined)
         sendAction({ type: GameActionType.PlaceRoad, coordinates: road })
 }
-function buildSettlement() {
-    // TODO
+async function buildSettlement() {
+    if (currentAllowedActions.value?.placeSettlement != true || renderer.value == null || currentState.value == undefined)
+        return
+
+    const possiblePositions = 
+        availableBuildingPositions(currentState.value.board, currentState.value.self.color)
+
+    const settlement = await renderer.value.getUserSelection(UserSelectionType.Crossing, possiblePositions)
+
+    if (settlement != undefined)
+        sendAction({ type: GameActionType.PlaceSettlement, coordinate: settlement })
 }
 
 </script>

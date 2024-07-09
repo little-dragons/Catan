@@ -1,5 +1,5 @@
 import { List } from "immutable"
-import { adjacentResourceTiles, availableRoadPositions, Board, Coordinate, gainedResources, isAvailableRoadPosition, Road } from "./Board"
+import { adjacentResourceTiles, availableRoadPositions, Board, Coordinate, gainedResources, isAvailableRoadPosition, Road, sameCoordinate } from "./Board"
 import { BuildingType, ConnectionType, availableBuildingPositions, buildingCost, connectionCost, isAvailableBuildingPosition } from "./Buildings"
 import { RedactedGameState, FullGameState, nextTurn, GamePhaseType, MinimalGameState } from "./GameState"
 import { Color } from "./Player"
@@ -89,7 +89,7 @@ export function allowedActionsFor(state: MinimalGameState, player: { color: Colo
     const hasSettlements = state.board.buildings.some(x => x[0] == myColor && x[2] == BuildingType.Settlement)
     const canPlaceCity = hasSettlements && tryBuyBuilding(player.handCards, BuildingType.City) != undefined
 
-    const hasSettlementSpots = availableBuildingPositions(state.board, myColor)
+    const hasSettlementSpots = availableBuildingPositions(state.board, myColor).size > 0
     const canPlaceSettlement = hasSettlementSpots && tryBuyBuilding(player.handCards, BuildingType.Settlement) != undefined
 
     const hasRoadSpots = availableRoadPositions(state.board, myColor).size > 0
@@ -206,6 +206,56 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                 board: {
                     ...state.board,
                     roads: state.board.roads.push([executor, action.coordinates])
+                }
+            }
+        }
+        else if (action.type == GameActionType.PlaceSettlement) {
+            if (state.phase.diceRolled == false)
+                return undefined
+
+            if (!isAvailableBuildingPosition(action.coordinate, state.board, executor))
+                return undefined
+
+            const newCards = tryBuyBuilding(state.players.get(executorIdx)!.handCards, BuildingType.Settlement)
+            if (newCards == undefined)
+                return undefined
+
+            const newPlayers = state.players.set(executorIdx, { color: executor, handCards: newCards })
+
+            return {
+                ...state,
+                players: newPlayers,
+                board: {
+                    ...state.board,
+                    buildings: state.board.buildings.push([executor, action.coordinate, BuildingType.Settlement])
+                }
+            }
+        }
+        else if (action.type == GameActionType.PlaceCity) {
+            if (state.phase.diceRolled == false)
+                return undefined
+
+            const validSettlementIdx = 
+                state.board.buildings.findIndex(([color, coord, type]) => 
+                    sameCoordinate(action.coordinate, coord) && 
+                    type == BuildingType.Settlement && 
+                    color == executor)
+
+            if (validSettlementIdx < 0)
+                return undefined
+
+            const newCards = tryBuyBuilding(state.players.get(executorIdx)!.handCards, BuildingType.City)
+            if (newCards == undefined)
+                return undefined
+
+            const newPlayers = state.players.set(executorIdx, { color: executor, handCards: newCards })
+
+            return {
+                ...state,
+                players: newPlayers,
+                board: {
+                    ...state.board,
+                    buildings: state.board.buildings.set(validSettlementIdx, [executor, action.coordinate, BuildingType.City])
                 }
             }
         }
