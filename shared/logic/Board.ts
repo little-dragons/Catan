@@ -3,7 +3,6 @@ import type { Orientation } from "./Orientation"
 import type { Resource } from "./Resource"
 import { BuildingType } from "./Buildings"
 import { v4 } from "uuid"
-import { canBuyRoad } from "./GameState"
 import { List } from "immutable"
 
 export type Coordinate = [number, number]

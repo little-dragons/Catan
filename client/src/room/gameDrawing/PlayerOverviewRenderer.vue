@@ -19,7 +19,7 @@ defineProps<PlayerOverviewData>()
         <div class="box">
             <div class="username">{{ name }}</div>
             <div class="grid">
-
+                <div>{{ victoryPoints }} vp</div>
             </div>
         </div>
     </div>
@@ -52,7 +52,7 @@ defineProps<PlayerOverviewData>()
 .username {
     padding-left: 40px;
     background-color: white;
-    border: 1px rgb(160, 160, 160) solid;
+    border: var(--mute-border);
     border-radius: 3px;
     font-family: "Sedan SC", serif;
 }
@@ -65,6 +65,20 @@ defineProps<PlayerOverviewData>()
 
 .grid {
     display: grid;
+    margin-top: 5px;
+    margin-left: 25px;
     height: 45px;
+    column-gap: 5px;
+    row-gap: 3px;
+    grid-template-columns: 33% 33% 33%;
+    grid-template-rows: 50% 50%;
+}
+
+.grid > * {
+    font-family: "Sedan SC", serif;
+    text-align: end;
+    border: var(--mute-border);
+    border-radius: 2px;
+    background-color: rgba(255, 255, 255, 0.62);
 }
 </style>

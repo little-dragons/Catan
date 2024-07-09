@@ -1,5 +1,5 @@
 import { List } from "immutable"
-import { adjacentResourceTiles, availableRoadPositions, Board, Coordinate, gainedResources, isAvailableRoadPosition, Road, sameCoordinate } from "./Board"
+import { adjacentResourceTiles, adjacentRoads, availableRoadPositions, Board, Coordinate, gainedResources, isAvailableRoadPosition, Road, sameCoordinate, sameRoad } from "./Board"
 import { BuildingType, ConnectionType, availableBuildingPositions, buildingCost, connectionCost, isAvailableBuildingPosition } from "./Buildings"
 import { RedactedGameState, FullGameState, nextTurn, GamePhaseType, MinimalGameState } from "./GameState"
 import { Color } from "./Player"
@@ -15,6 +15,7 @@ export enum GameActionType {
     TradeOffer,
     FinishTurn
 }
+
 export type GameActionAllowedMap = {
     [Name in Uncapitalize<keyof typeof GameActionType>]: boolean
 }
@@ -48,6 +49,7 @@ export function allowedActionsForMe(state: RedactedGameState): GameActionAllowed
     return allowedActionsFor(state, state.self)
 }
 
+// mainly used in client to enable or disable buttons
 export function allowedActionsFor(state: MinimalGameState, player: { color: Color, handCards: List<Resource> }): GameActionAllowedMap {
     const myColor = player.color
     const myTurn = state.currentPlayer == myColor
@@ -108,6 +110,7 @@ export function allowedActionsFor(state: MinimalGameState, player: { color: Colo
     }
 }
 
+// mainly used in server to advance server state
 export function tryDoAction(state: FullGameState, executor: Color, action: GameAction): FullGameState | undefined {
     // TODO trading
     if (executor != state.currentPlayer)
@@ -122,6 +125,9 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
             if (!isAvailableBuildingPosition(action.settlement, state.board, undefined))
                 return undefined
 
+            if (!adjacentRoads(action.settlement).some(x => sameRoad(x, action.road)))
+                return undefined
+            
             const newCards = 
                 state.phase.forward ? List([]) :
                 adjacentResourceTiles(action.settlement, state.board, undefined)
@@ -132,6 +138,7 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                     return { color, handCards }
             })
 
+            
             const [nextColor, nextPhase] = nextTurn(state)
             const newBoard: Board = { 
                 ...state.board,

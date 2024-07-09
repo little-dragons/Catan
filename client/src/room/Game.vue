@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { currentGameRoom } from '@/socketWrapper/Room';
-import { BuildingType, Color, GamePhaseType, Resource, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, type Coordinate, type RedactedGameState, type RedactedPlayer, type Road, type User } from 'shared';
+import { BuildingType, Color, GamePhaseType, Resource, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, victoryPointsFromRedacted, type Coordinate, type RedactedGameState, type RedactedPlayer, type Road, type User } from 'shared';
 import { computed, ref, shallowRef, triggerRef, watchEffect } from 'vue';
 import { gameSocket } from '@/socketWrapper/Socket';
 import GameRenderer from './gameDrawing/GameRenderer.vue';
@@ -55,8 +55,7 @@ const othersOverview = computed(() => {
                 name: user.name,
                 isGuest: user.type == 'guest',
                 color: player.color,
-                // TODO
-                victoryPoints: 4,
+                victoryPoints: victoryPointsFromRedacted(currentState.value!, player.color),
             }
         })
 })

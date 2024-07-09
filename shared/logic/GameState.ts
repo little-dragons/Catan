@@ -2,6 +2,7 @@ import { List } from "immutable"
 import { Board } from "./Board"
 import { Color, FullPlayer, RedactedPlayer, redactPlayer } from "./Player"
 import { Resource } from "./Resource"
+import { BuildingType } from "./Buildings"
 
 export enum GamePhaseType {
     Initial,
@@ -75,38 +76,28 @@ export function nextTurn(state: MinimalGameState): [Color, GamePhase] {
 }
 
 
-
-export function canBuySettlement(cards: Resource[]): boolean {
-    return cards.includes(Resource.Brick) && cards.includes(Resource.Lumber) && cards.includes(Resource.Grain) && cards.includes(Resource.Wool)
+export function victoryPointsForBuildingType(buildingType: BuildingType): number {
+    switch (buildingType) {
+        case BuildingType.Settlement: return 1
+        case BuildingType.City: return 2
+    }
+}
+export function victoryPointsFromBuildings(state: MinimalGameState, color: Color): number {
+    return state.board.buildings.reduce((current, [buildColor, _, type]) => buildColor == color ? current + victoryPointsForBuildingType(type) : current, 0)
 }
 
-export function canBuyCity(cards: Resource[]): boolean {
+export function victoryPointsFromFull(state: FullGameState, color: Color): number {
+    // TODO longest road, knights, hidden dev cards
 
-    return cards.filter(x => x == Resource.Grain).length >= 2 && cards.filter(x => x == Resource.Ore).length >= 3
+    return victoryPointsFromBuildings(state, color)
 }
 
-export function canBuyRoad(cards: Resource[]): boolean {
-    return cards.includes(Resource.Lumber) && cards.includes(Resource.Brick) 
+export function victoryPointsFromRedacted(state: RedactedGameState, color: Color): number {
+    // TODO longest road, knights
+
+    return victoryPointsFromBuildings(state, color)
+
+    if (state.self.color == color) {
+        // TODO hidden devcards
+    }
 }
-
-export function buySettlement(cards: Resource[]): void {
-    cards.splice(cards.findIndex(x => x == Resource.Grain), 1)
-    cards.splice(cards.findIndex(x => x == Resource.Lumber), 1)
-    cards.splice(cards.findIndex(x => x == Resource.Brick), 1)
-    cards.splice(cards.findIndex(x => x == Resource.Wool), 1)
-}
-
-export function buyCity(cards: Resource[]): void {
-    cards.splice(cards.findIndex(x => x == Resource.Grain), 1)
-    cards.splice(cards.findIndex(x => x == Resource.Grain), 1)
-    cards.splice(cards.findIndex(x => x == Resource.Ore), 1)
-    cards.splice(cards.findIndex(x => x == Resource.Ore), 1)
-    cards.splice(cards.findIndex(x => x == Resource.Ore), 1)
-}
-
-export function buyRoad(cards: Resource[]): void {
-    cards.splice(cards.findIndex(x => x == Resource.Lumber), 1)
-    cards.splice(cards.findIndex(x => x == Resource.Brick), 1)
-}
-
-
