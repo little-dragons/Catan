@@ -3,6 +3,7 @@ import { type RedactedRoom, type RoomId, immutableLobby } from "shared"
 import { computed, readonly, ref } from "vue"
 import { lobbySocket, roomSocket } from "./Socket"
 import { currentAuthUser } from "./Login"
+import { List } from "immutable"
 
 export const currentRoomBacking = ref<undefined | RedactedRoom>(undefined)
 
@@ -116,7 +117,7 @@ export function acceptRoomEvents() {
         }
 
         // dangerous unchecked conversion
-        currentRoomBacking.value.users = newUsers
+        currentRoomBacking.value.users = List(newUsers)
     })
 
     roomSocket.on('closed', () => {

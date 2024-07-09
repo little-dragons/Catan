@@ -11,8 +11,7 @@ export type GameClientEventMap = {
 
 export type RoomClientEventMap = {
     closed: () => void
-    // TODO this might not work - use native lists
-    userChange: (newUsers: List<[User, Color]>) => void
+    userChange: (newUsers: [User, Color][]) => void
 }
 
 export type LobbyClientEventMap = {

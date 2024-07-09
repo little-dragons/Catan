@@ -89,7 +89,7 @@ async function joinRoom(io: SocketServerType, socket: RoomSocket, id: RoomId) {
     socket.data.room = [id, remainingColors[Math.floor(Math.random() * remainingColors.length)]]
     socket.join(id)
     // this excludes the current socket instance, which is logical
-    socket.in(id).emit('userChange', await usersForRoom(io, id))
+    socket.in(id).emit('userChange', (await usersForRoom(io, id)).toArray())
 
     return room as ServerLobbyRoom
 }
@@ -121,7 +121,7 @@ async function leaveRoom(io: SocketServerType, socket: RoomSocket) {
     else {
         socket.leave(socket.data.room[0])
         const otherUsers = await usersForRoom(io, socket.data.room[0])
-        io.in(socket.data.room[0]).emit('userChange', otherUsers)
+        io.in(socket.data.room[0]).emit('userChange', otherUsers.toArray())
         socket.data.room = undefined
     }
 
