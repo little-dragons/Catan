@@ -1,10 +1,16 @@
 import { List } from 'immutable';
-import { User } from './authentication/User';
-import { FullGameState, RedactedGameState } from './logic/GameState';
-import { Color } from './logic/Player';
-import { Settings } from './logic/Settings';
+import { User } from '../authentication/User';
+import { FullGameState, RedactedGameState } from './GameState';
+import { Color } from './Player';
+import { Settings } from './Settings';
+import { Statistics } from './History';
 
 export type RoomId = string
+export enum RoomType {
+    Lobby,
+    InGame,
+    PostGame
+}
 
 type CommonRoom = {
     name: string
@@ -14,20 +20,24 @@ type CommonRoom = {
     settings: Settings
 }
 export type LobbyRoom = {
-    type: 'lobby'
+    type: RoomType.Lobby
 } & CommonRoom
 
 
 export type RedactedGameRoom = {
-    type: 'ingame'
+    type: RoomType.InGame
     state: RedactedGameState
 } & CommonRoom
 
 export type FullGameRoom = {
-    type: 'ingame'
+    type: RoomType.InGame
     state: FullGameState
 } & CommonRoom
 
+export type PostGameRoom = {
+    type: RoomType.PostGame
+    statistics: Statistics
+}
+
 export type RedactedRoom = LobbyRoom | RedactedGameRoom
 export type FullRoom = LobbyRoom | FullGameRoom
-

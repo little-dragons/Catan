@@ -1,5 +1,5 @@
 import router from "@/misc/Router"
-import { type RedactedRoom, type RoomId, immutableLobby } from "shared"
+import { type RedactedRoom, type RoomId, RoomType, immutableLobby } from "shared"
 import { computed, readonly, ref } from "vue"
 import { lobbySocket, roomSocket } from "./Socket"
 import { currentAuthUser } from "./Login"
@@ -9,13 +9,13 @@ export const currentRoomBacking = ref<undefined | RedactedRoom>(undefined)
 
 export const currentRoom = currentRoomBacking
 export const currentLobbyRoom = computed(() => {
-    if (currentRoom.value?.type == 'lobby')
+    if (currentRoom.value?.type == RoomType.Lobby)
         return currentRoom.value
     else
         return undefined
 })
 export const currentGameRoom = computed(() => {
-    if (currentRoom.value?.type == 'ingame')
+    if (currentRoom.value?.type == RoomType.InGame)
         return currentRoom.value
     else
         return undefined

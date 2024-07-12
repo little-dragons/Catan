@@ -1,4 +1,4 @@
-import { LobbyRoom, RedactedGameRoom, RoomId } from "../Room"
+import { LobbyRoom, RedactedGameRoom, RoomId } from "../logic/Room"
 import { RedactedGameState } from "../logic/GameState"
 import { Settings } from "../logic/Settings"
 import { GameAction } from "../logic/GameAction"

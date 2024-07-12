@@ -1,4 +1,4 @@
-import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, defaultBoard, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType } from "shared"
+import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, defaultBoard, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType } from "shared"
 import { type Socket } from 'socket.io'
 import { SocketDataType, SocketServerType } from "./Common"
 import { defaultSettings } from "shared/logic/Settings"
@@ -11,8 +11,16 @@ type ServerRoom = Omit<FullRoom, 'users'>
 
 const rooms = [] as ServerRoom[]
 
-export function lobbies() { return rooms.filter(x => x.type == 'lobby') as ServerLobbyRoom[] }
-export function games() { return rooms.filter(x => x.type == 'ingame') as ServerGameRoom[] }
+
+function isLobby(room: ServerRoom): room is ServerLobbyRoom {
+    return room.type == RoomType.Lobby
+}
+function isGame(room: ServerRoom): room is ServerGameRoom {
+    return room.type == RoomType.InGame
+}
+
+export function lobbies() { return rooms.filter(isLobby) }
+export function games() { return rooms.filter(isGame) }
 
 type RoomSocket = Socket<RoomServerEventMap, RoomClientEventMap, {}, SocketDataType>
 
@@ -39,7 +47,7 @@ export async function initializeGame(io: SocketServerType, room: ServerLobbyRoom
 
     const users = await usersForRoom(io, room.id)
     const game = room as unknown as ServerGameRoom
-    game.type = 'ingame'
+    game.type = RoomType.InGame
     game.state = {
         board: defaultBoard(room.settings.seed),
         currentPlayer: users.get(0)![1],
@@ -60,7 +68,7 @@ export function createRoom(socket: RoomSocket, name: string) {
 
     const color = allColors[Math.floor(Math.random() * allColors.length)]
     const room: ServerLobbyRoom = {
-        type: 'lobby',
+        type: RoomType.Lobby,
         name: name,
         id: v4(),
         owner: socket.data.user,
@@ -78,7 +86,7 @@ async function joinRoom(io: SocketServerType, socket: RoomSocket, id: RoomId) {
         return 'invalid socket state'
 
     const room = rooms.find(x => x.id == id)
-    if (room == undefined || room.type == 'ingame') {
+    if (room == undefined || room.type != RoomType.Lobby) {
         return 'invalid room id'
     }
 

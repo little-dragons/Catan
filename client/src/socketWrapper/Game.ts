@@ -1,11 +1,11 @@
 import { gameSocket, lobbySocket } from "./Socket";
 import { currentGameRoom, currentRoomBacking } from "./Room";
 import { currentAuthUser } from "./Login";
-import { immutableGame, immutableState } from "shared";
+import { immutableGame, immutableState, RoomType } from "shared";
 
 
 export async function fetchNewState() {
-    if (currentRoomBacking.value == undefined || currentRoomBacking.value.type != 'ingame') {
+    if (currentRoomBacking.value == undefined || currentRoomBacking.value.type != RoomType.InGame) {
         console.warn('Received game event, but not in active game.')
         return
     }

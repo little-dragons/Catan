@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { roomSocket } from '@/socketWrapper/Socket';
-import type { LobbyRoom } from 'shared';
+import { immutableLobby, type LobbyRoom } from 'shared';
 import { canJoinNewRoom, joinRoomAndRedirect } from '@/socketWrapper/Room';
 import { ref } from 'vue';
 import CreateRoomModal from './CreateRoomModal.vue';
@@ -8,7 +8,7 @@ import CreateRoomModal from './CreateRoomModal.vue';
 const rooms = ref<LobbyRoom[]>([])
 
 async function fetchRooms() {
-    rooms.value = await roomSocket.emitWithAck('lobbyList')
+    rooms.value = (await roomSocket.emitWithAck('lobbyList')).map(immutableLobby)
 }
 fetchRooms()
 
@@ -28,7 +28,7 @@ const showCreateRoomsModal = ref(false)
     </div>
     <div v-for="room in rooms" class="grid-columns default-grid-layout">
         <p>{{ room.name }}</p>
-        <p>{{ room.users.length }} / ?</p>
+        <p>{{ room.users.size }} / ?</p>
         <p>{{ room.owner.name }}</p>
         <button
             class="default-button-colors"

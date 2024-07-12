@@ -1,6 +1,6 @@
 import { List } from "immutable"
 import { RedactedGameState } from "../logic/GameState"
-import { LobbyRoom, RedactedGameRoom } from "../Room"
+import { LobbyRoom, RedactedGameRoom } from "../logic/Room"
 
 type ReplaceList<ObjectProp> = 
     ObjectProp extends List<infer R> ? R[] : 
