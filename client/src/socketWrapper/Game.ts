@@ -1,7 +1,7 @@
 import { gameSocket, lobbySocket } from "./Socket";
 import { currentGameRoom, currentRoomBacking } from "./Room";
 import { currentAuthUser } from "./Login";
-import { immutableGame, immutableState, RoomType } from "shared";
+import { immutableGame, immutableState, registerClientListener, RoomType, type GameClientEventMap, type SocketImplementation } from "shared";
 
 
 export async function fetchNewState() {
@@ -25,7 +25,13 @@ export async function fetchNewState() {
 }
 
 export function acceptGameEvents() {
-    gameSocket.on('gameEvent', fetchNewState)
+    const listener : SocketImplementation<GameClientEventMap> = {
+        gameEvent: [false, fetchNewState],
+        gameOver: [false, (statistics) => {
+            // TODO
+        }]
+    }
+    registerClientListener(gameSocket, listener)
     
     lobbySocket.on('gameStarted', async() => {
         if (currentRoomBacking.value == undefined) {

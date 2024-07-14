@@ -1,4 +1,4 @@
-import { LoginClientEventMap, LoginServerEventMap, validUsername } from "shared";
+import { LoginClientEventMap, LoginServerEventMap, registerServerListener, SocketImplementation, validUsername } from "shared";
 import { addUserToDb, getUserFromDb } from "../database/CommonQueries";
 import bcrypt from 'bcrypt'
 import { type Socket } from 'socket.io'
@@ -23,75 +23,88 @@ async function nameAllowed(io: SocketServerType, name: string) {
 
 type LoginSocket = Socket<LoginServerEventMap, LoginClientEventMap, {}, SocketDataType>
 export function acceptLoginEvents(io: SocketServerType, socket: LoginSocket) {
-    socket.on('guestLogin', async (name, cb) => {
-        if (socket.data.user != undefined)
-            return cb('invalid socket state')
+    const listener: SocketImplementation<LoginServerEventMap> = {
+        guestLogin: [true, 
+            async (name) => {
+                if (socket.data.user != undefined)
+                    return 'invalid socket state'
+        
+                const nameRes = await nameAllowed(io, name)
+                if (nameRes != true)
+                    return nameRes
+        
+                socket.data = { user: { type: 'guest', name } }
+                return true
+            }
+        ],
+        registerMember: [true,
+            async (name, password) => {
+                if (socket.data.user != undefined)
+                    return 'invalid socket state'
+        
+                const nameRes = await nameAllowed(io, name)
+                if (nameRes != true)
+                    return nameRes
+        
+                const hashed = await bcrypt.hash(password, 12)
+                const dbRes = await addUserToDb(name, hashed)
+                // TODO check result
+        
+                socket.data = { user: { type: 'member', name } }
+                return true
+            }
+        ],
+        requestMemberLoginData: [true,
+            async (name) => {
+                if (socket.data.user != undefined)
+                    return 'invalid socket state'
+        
+                const dbUser = await getUserFromDb(name)
+                if (dbUser == undefined)            
+                    return 'name unknown'
+            
+                if (socket.data.nonce == undefined)
+                    socket.data.nonce = { value: v4() }
+        
+                return socket.data.nonce
+            }
+        ],
+        memberLogin: [true,
+            async (name, password, nonce) => {
+                if (socket.data.user != undefined)
+                    return 'invalid socket state'
+        
+                const dbUser = await getUserFromDb(name)
+                if (dbUser == undefined)            
+                    return 'name unknown'
+            
+                if (socket.data.nonce == undefined)
+                    return 'invalid socket state'
+        
+                if (socket.data.nonce.value != nonce.value)
+                    return 'invalid nonce'
+            
+                if (!await bcrypt.compare(password, dbUser.password_hash))
+                    return 'invalid password'
+            
+                socket.data = { user: { type: 'member', name }}
+                return true
+            }
+        ],
+        logout: [true,
+            async () => {
+                if (socket.data.user == undefined)
+                    return 'invalid socket state'
+        
+                // TODO potentially delete some data? leave room?
+                socket.data = { user: undefined }
+                return true
+            }
+        ],
+        socketState: [true,
+            () => socket.data
+        ]
+    }
 
-        const nameRes = await nameAllowed(io, name)
-        if (nameRes != true)
-            return cb(nameRes)
-
-        socket.data = { user: { type: 'guest', name } }
-        return cb(true)
-    })
-
-    socket.on('registerMember', async (name, password, cb) => {
-        if (socket.data.user != undefined)
-            return cb('invalid socket state')
-
-        const nameRes = await nameAllowed(io, name)
-        if (nameRes != true)
-            return cb(nameRes)
-
-        const hashed = await bcrypt.hash(password, 12)
-        const dbRes = await addUserToDb(name, hashed)
-        // TODO check result
-
-        socket.data = { user: { type: 'member', name } }
-        return cb(true)
-    })
-
-    socket.on('requestMemberLoginData', async (name, cb) => {
-        if (socket.data.user != undefined)
-            return cb('invalid socket state')
-
-        const dbUser = await getUserFromDb(name)
-        if (dbUser == undefined)            
-            return cb('name unknown')
-    
-        if (socket.data.nonce == undefined)
-            socket.data.nonce = { value: v4() }
-
-        return cb(socket.data.nonce)
-    })
-
-    socket.on('memberLogin', async (name, password, nonce, cb) => {
-        if (socket.data.user != undefined)
-            return cb('invalid socket state')
-
-        const dbUser = await getUserFromDb(name)
-        if (dbUser == undefined)            
-            return cb('name unknown')
-    
-        if (socket.data.nonce == undefined)
-            return cb('invalid socket state')
-
-        if (socket.data.nonce.value != nonce.value)
-            return cb('invalid nonce')
-    
-        if (!await bcrypt.compare(password, dbUser.password_hash))
-            return cb('invalid password')
-    
-        socket.data = { user: { type: 'member', name }}
-        return cb(true)
-    })
-
-    socket.on('logout', cb => {
-        if (socket.data.user == undefined)
-            return cb('invalid socket state')
-
-        // TODO potentially delete some data? leave room?
-        socket.data = { user: undefined }
-        return cb(true)
-    })
+    registerServerListener(socket, listener)
 }

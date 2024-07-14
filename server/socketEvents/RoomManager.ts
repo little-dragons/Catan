@@ -1,4 +1,4 @@
-import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, defaultBoard, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType } from "shared"
+import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, defaultBoard, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType, SocketImplementation, registerServerListener } from "shared"
 import { type Socket } from 'socket.io'
 import { SocketDataType, SocketServerType } from "./Common"
 import { defaultSettings } from "shared/logic/Settings"
@@ -138,29 +138,35 @@ async function leaveRoom(io: SocketServerType, socket: RoomSocket) {
 
 
 export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
-    socket.on('lobbyList', async cb => {
-        cb(await Promise.all(lobbies().map(async (x) => { return { ...x, users: (await usersForRoom(io, x.id)).toArray() } })))
-    })
-
-    socket.on('createAndJoin', async (name, cb) => {
-        const res = createRoom(socket, name)
-        if (res == 'invalid socket state' || res == 'room name in use')
-            return cb(res)
-
-        const users = (await usersForRoom(io, res.id)).toArray()
-        cb({ ...res, users })
-    })
-
-    socket.on('join', async (roomId, cb) => {
-        const res = await joinRoom(io, socket, roomId)
-        if (res == 'invalid room id' || res == 'invalid socket state')
-            return cb(res)
-
-        const users = (await usersForRoom(io, res.id)).toArray()
-        return cb({ ...res, users })
-    })
-
-    socket.on('leave', async cb => {
-        cb(await leaveRoom(io, socket))
-    })
+    const listenerObject: SocketImplementation<RoomServerEventMap> = {
+        lobbyList: [true, 
+            async () => await Promise.all(lobbies().map(async (x) => { return { ...x, users: (await usersForRoom(io, x.id)).toArray() } }))],
+        createAndJoin: [true, 
+            async (name) => {
+                const res = createRoom(socket, name)
+                if (res == 'invalid socket state' || res == 'room name in use')
+                    return res
+        
+                const users = (await usersForRoom(io, res.id)).toArray()
+                return { ...res, users }
+            }
+        ],
+        join: [true, 
+            async (roomId) => {
+                const res = await joinRoom(io, socket, roomId)
+                if (res == 'invalid room id' || res == 'invalid socket state')
+                    return res
+        
+                const users = (await usersForRoom(io, res.id)).toArray()
+                return { ...res, users }
+            }
+        ],
+        leave: [true, 
+            async () => {
+                return await leaveRoom(io, socket)
+            }
+        ]
+    }
+    
+    registerServerListener(socket, listenerObject)
 }
