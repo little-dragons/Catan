@@ -12,8 +12,10 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
             return cb('invalid socket state')
 
         const room = games().find(x => x.id == socket.data.room![0])
-        if (room == undefined)
-            return console.error(`Socket had access to deleted room ${socket.data}`)
+        if (room == undefined) {
+            console.error(`Socket had access to deleted room ${socket.data}`)
+            return cb('invalid socket state')
+        }
 
         cb(nativeState(redactGameStateFor(room.state, socket.data.room[1])))
     })
@@ -23,8 +25,10 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
             return cb('invalid socket state')
 
         const room = games().find(x => x.id == socket.data.room![0])
-        if (room == undefined)
-            return console.error(`Socket had access to deleted room ${socket.data}`)
+        if (room == undefined) {
+            console.error(`Socket had access to deleted room ${socket.data}`)
+            return cb('invalid socket state')
+        }
         
         const nextState = tryDoAction(room.state, socket.data.room[1], action)
         if (nextState == undefined)
@@ -43,8 +47,10 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
             return cb('invalid socket state')
 
         const room = games().find(x => x.id == socket.data.room![0])
-        if (room == undefined)
-            return console.error(`Socket had access to deleted room ${socket.data}`)
+        if (room == undefined) {
+            console.error(`Socket had access to deleted room ${socket.data}`)
+            return cb('invalid socket state')
+        }
         
         const users = await usersForRoom(io, socket.data.room[0])
         cb({

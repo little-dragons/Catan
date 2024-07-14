@@ -94,4 +94,6 @@ export function acceptLoginEvents(io: SocketServerType, socket: LoginSocket) {
         socket.data = { user: undefined }
         return cb(true)
     })
+
+    socket.on('socketState', cb => cb(socket.data))
 }

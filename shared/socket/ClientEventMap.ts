@@ -1,13 +1,13 @@
 import { User } from "../authentication/User"
 import { Color } from "../logic/Player"
 import { Settings } from "../logic/Settings"
-import { Statistics } from "../logic/History"
+import { History } from "../logic/History"
 
 export type ClientEventMap = GameClientEventMap & LobbyClientEventMap & RoomClientEventMap & LoginClientEventMap
 
 export type GameClientEventMap = {
     gameEvent: () => void
-    gameOver: (statistics: Statistics) => void
+    gameOver: (history: History) => void
 }
 
 export type RoomClientEventMap = {

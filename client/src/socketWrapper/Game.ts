@@ -44,5 +44,9 @@ export function acceptGameEvents() {
         }
     
         currentRoomBacking.value = immutableGame(res)
-    })    
+    })
+
+    gameSocket.on('gameOver', history => {
+        // TODO
+    })
 }

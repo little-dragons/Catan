@@ -32,8 +32,10 @@ export function acceptLobbyEvents(server: SocketServerType, socket: LobbySocket)
             return cb('invalid socket state')
 
         const room = lobbies().find(x => x.id == socket.data.room![0])
-        if (room == undefined)
-            return console.error(`invalid room: ${socket.data.room} from user ${socket.data.user}`)
+        if (room == undefined) {
+            console.error(`invalid room: ${socket.data.room} from user ${socket.data.user}`)
+            return cb('invalid socket state')
+        }
 
         if (socket.data.user?.name != room.owner.name)
             return cb('not the owner')
