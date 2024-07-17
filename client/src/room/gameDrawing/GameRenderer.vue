@@ -7,7 +7,6 @@ import { onMounted, ref } from 'vue';
 import CardsRenderer from './CardsRenderer.vue';
 import PlayerOverviewRenderer, { type PlayerOverviewData } from './PlayerOverviewRenderer.vue';
 import type { GameActionAllowedMap } from 'shared/logic/GameAction';
-import type { List } from 'immutable';
 
 defineEmits<{
     diceClicked: []
@@ -19,12 +18,12 @@ defineEmits<{
 }>()
 
 defineProps<{
-    stockedCards: List<Resource>
-    offeredCards: List<Resource>
+    stockedCards: readonly Resource[]
+    offeredCards: readonly Resource[]
     board: Board
-    dice: [number, number] | undefined
+    dice: readonly [number, number] | undefined
     allowedActions: GameActionAllowedMap
-    otherPlayers: List<PlayerOverviewData>
+    otherPlayers: readonly PlayerOverviewData[]
     otherPlayersDisplay: 'radial' | 'grid'
 }>()
 
@@ -42,7 +41,7 @@ onMounted(() => {
 
 const interactionRunning = ref(false)
 const boardRenderer = ref<null | InstanceType<typeof BoardRenderer>>(null)
-async function getUserSelection<T extends UserSelectionType, Options extends UserSelectionOptions | undefined>(type: T, data: List<UserSelectionDataType<T>>, options?: Options): Promise<UserSelectionResult<T, Options>> {
+async function getUserSelection<T extends UserSelectionType, Options extends UserSelectionOptions | undefined>(type: T, data: UserSelectionDataType<T>[], options?: Options): Promise<UserSelectionResult<T, Options>> {
     interactionRunning.value = true
     const res = await boardRenderer.value!.getUserSelection(type, data, options)
     interactionRunning.value = false
@@ -53,14 +52,14 @@ defineExpose({ getUserSelection })
 
 <template>
     <div class="other-players">
-        <PlayerOverviewRenderer class="upper-left-radial" v-if="otherPlayers.size >= 1 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers.get(0)!"/>
-        <PlayerOverviewRenderer class="upper-left-grid" v-if="otherPlayers.size >= 1 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers.get(0)!"/>
-        <PlayerOverviewRenderer class="upper-right-radial" v-if="otherPlayers.size >= 2 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers.get(1)!"/>
-        <PlayerOverviewRenderer class="upper-right-grid" v-if="otherPlayers.size >= 2 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers.get(1)!"/>
-        <PlayerOverviewRenderer class="middle-left-radial" v-if="otherPlayers.size >= 3 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers.get(2)!"/>
-        <PlayerOverviewRenderer class="middle-left-grid" v-if="otherPlayers.size >= 3 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers.get(2)!"/>
-        <PlayerOverviewRenderer class="middle-right-radial" v-if="otherPlayers.size >= 4 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers.get(3)!"/>
-        <PlayerOverviewRenderer class="middle-right-grid" v-if="otherPlayers.size >= 4 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers.get(3)!"/>
+        <PlayerOverviewRenderer class="upper-left-radial" v-if="otherPlayers.length >= 1 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers[0]!"/>
+        <PlayerOverviewRenderer class="upper-left-grid" v-if="otherPlayers.length >= 1 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[0]!"/>
+        <PlayerOverviewRenderer class="upper-right-radial" v-if="otherPlayers.length >= 2 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers[1]!"/>
+        <PlayerOverviewRenderer class="upper-right-grid" v-if="otherPlayers.length >= 2 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[1]!"/>
+        <PlayerOverviewRenderer class="middle-left-radial" v-if="otherPlayers.length >= 3 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers[2]!"/>
+        <PlayerOverviewRenderer class="middle-left-grid" v-if="otherPlayers.length >= 3 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[2]!"/>
+        <PlayerOverviewRenderer class="middle-right-radial" v-if="otherPlayers.length >= 4 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers[3]!"/>
+        <PlayerOverviewRenderer class="middle-right-grid" v-if="otherPlayers.length >= 4 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[3]!"/>
     </div>
     <div ref="boardContainer"class="main-box">   
             <BoardRenderer class="board" :board="board" ref="boardRenderer"/>

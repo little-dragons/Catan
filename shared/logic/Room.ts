@@ -1,4 +1,3 @@
-import { List } from 'immutable';
 import { User } from '../authentication/User';
 import { FullGameState, RedactedGameState } from './GameState';
 import { Color } from './Player';
@@ -16,7 +15,7 @@ type CommonRoom = {
     name: string
     id: RoomId
     owner: User
-    users: List<[User, Color]>
+    users: [User, Color][]
     settings: Settings
 }
 export type LobbyRoom = {

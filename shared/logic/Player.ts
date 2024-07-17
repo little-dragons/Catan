@@ -1,20 +1,20 @@
-import { List } from "immutable"
+import { Pure } from "../purify/Pure"
 import { Resource } from "./Resource"
 
-export type RedactedPlayer = {
+export type RedactedPlayer = Pure<{
     color: Color,
     handCardsCount: number,
-}
+}>
 
-export type FullPlayer = {
+export type FullPlayer = Pure<{
     color: Color,
-    handCards: List<Resource>,
-}
+    handCards: Resource[],
+}>
 
 export function redactPlayer(player: FullPlayer): RedactedPlayer {
     return {
         color: player.color,
-        handCardsCount: player.handCards.size,
+        handCardsCount: player.handCards.length,
     }
 }
 

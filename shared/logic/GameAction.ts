@@ -1,9 +1,10 @@
-import { List } from "immutable"
 import { adjacentResourceTiles, adjacentRoads, availableRoadPositions, Board, Coordinate, gainedResources, isAvailableRoadPosition, Road, sameCoordinate, sameRoad } from "./Board"
 import { BuildingType, ConnectionType, availableBuildingPositions, buildingCost, connectionCost, isAvailableBuildingPosition } from "./Buildings"
 import { RedactedGameState, FullGameState, nextTurn, GamePhaseType, MinimalGameState } from "./GameState"
-import { Color } from "./Player"
+import { Color, FullPlayer } from "./Player"
 import { Resource } from "./Resource"
+import { refine } from "../purify/Refine"
+import { dirty } from "../purify/Pure"
 
 
 export enum GameActionType {
@@ -50,7 +51,7 @@ export function allowedActionsForMe(state: RedactedGameState): GameActionAllowed
 }
 
 // mainly used in client to enable or disable buttons
-export function allowedActionsFor(state: MinimalGameState, player: { color: Color, handCards: List<Resource> }): GameActionAllowedMap {
+export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): GameActionAllowedMap {
     const myColor = player.color
     const myTurn = state.currentPlayer == myColor
 
@@ -91,10 +92,10 @@ export function allowedActionsFor(state: MinimalGameState, player: { color: Colo
     const hasSettlements = state.board.buildings.some(x => x[0] == myColor && x[2] == BuildingType.Settlement)
     const canPlaceCity = hasSettlements && tryBuyBuilding(player.handCards, BuildingType.City) != undefined
 
-    const hasSettlementSpots = availableBuildingPositions(state.board, myColor).size > 0
+    const hasSettlementSpots = availableBuildingPositions(state.board, myColor).length > 0
     const canPlaceSettlement = hasSettlementSpots && tryBuyBuilding(player.handCards, BuildingType.Settlement) != undefined
 
-    const hasRoadSpots = availableRoadPositions(state.board, myColor).size > 0
+    const hasRoadSpots = availableRoadPositions(state.board, myColor).length > 0
     const canPlaceRoad = hasRoadSpots && tryBuyConnection(player.handCards, ConnectionType.Road) != undefined
 
     
@@ -129,7 +130,7 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                 return undefined
             
             const newCards = 
-                state.phase.forward ? List([]) :
+                state.phase.forward ? [] :
                 adjacentResourceTiles(action.settlement, state.board, undefined)
             const newPlayers = state.players.map(({ color, handCards }) => {
                 if (color == executor)
@@ -140,11 +141,11 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
 
             
             const [nextColor, nextPhase] = nextTurn(state)
-            const newBoard: Board = { 
-                ...state.board,
-                buildings: state.board.buildings.push([executor, action.settlement, BuildingType.Settlement]),
-                roads: state.board.roads.push([executor, action.road])
-            }
+            const newBoard = refine(state.board, board => {
+                board.buildings.push([executor, dirty(action.settlement), BuildingType.Settlement])
+                board.roads.push([executor, dirty(action.road)])
+                return board
+            })
             return {
                 currentPlayer: nextColor,
                 phase: nextPhase,
@@ -201,20 +202,15 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                 return undefined
 
 
-            const newCards = tryBuyConnection(state.players.get(executorIdx)!.handCards, ConnectionType.Road)
+            const newCards = tryBuyConnection(state.players[executorIdx]!.handCards, ConnectionType.Road)
             if (newCards == undefined)
                 return undefined
 
-            const newPlayers = state.players.set(executorIdx, { color: executor, handCards: newCards })
 
-            return {
-                ...state,
-                players: newPlayers,
-                board: {
-                    ...state.board,
-                    roads: state.board.roads.push([executor, action.coordinates])
-                }
-            }
+            return refine<FullGameState>(state, newState => {
+                newState.players[executorIdx] = { color: executor, handCards: newCards }
+                newState.board.roads.push([executor, dirty(action.coordinates)])
+            })
         }
         else if (action.type == GameActionType.PlaceSettlement) {
             if (state.phase.diceRolled == false)
@@ -223,20 +219,15 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
             if (!isAvailableBuildingPosition(action.coordinate, state.board, executor))
                 return undefined
 
-            const newCards = tryBuyBuilding(state.players.get(executorIdx)!.handCards, BuildingType.Settlement)
+            const newCards = tryBuyBuilding(state.players[executorIdx]!.handCards, BuildingType.Settlement)
             if (newCards == undefined)
                 return undefined
 
-            const newPlayers = state.players.set(executorIdx, { color: executor, handCards: newCards })
-
-            return {
-                ...state,
-                players: newPlayers,
-                board: {
-                    ...state.board,
-                    buildings: state.board.buildings.push([executor, action.coordinate, BuildingType.Settlement])
-                }
-            }
+            return refine(state, newState => {
+                newState.players[executorIdx] = { color: executor, handCards: newCards }
+                newState.board.buildings.push([executor, dirty(action.coordinate), BuildingType.Settlement])
+                return newState
+            })
         }
         else if (action.type == GameActionType.PlaceCity) {
             if (state.phase.diceRolled == false)
@@ -251,20 +242,14 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
             if (validSettlementIdx < 0)
                 return undefined
 
-            const newCards = tryBuyBuilding(state.players.get(executorIdx)!.handCards, BuildingType.City)
+            const newCards = tryBuyBuilding(state.players[executorIdx]!.handCards, BuildingType.City)
             if (newCards == undefined)
                 return undefined
 
-            const newPlayers = state.players.set(executorIdx, { color: executor, handCards: newCards })
-
-            return {
-                ...state,
-                players: newPlayers,
-                board: {
-                    ...state.board,
-                    buildings: state.board.buildings.set(validSettlementIdx, [executor, action.coordinate, BuildingType.City])
-                }
-            }
+            return refine(state, newState => {
+                newState.players[executorIdx] = { color: executor, handCards: newCards }
+                newState.board.buildings[validSettlementIdx] = [executor, dirty(action.coordinate), BuildingType.City]
+            })
         }
     }
     return undefined
@@ -272,29 +257,29 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
 
 
 
-function tryBuyBuilding(cards: List<Resource>, type: BuildingType) {
+function tryBuyBuilding(cards: readonly Resource[], type: BuildingType) {
     const cost = buildingCost(type)
 
-    let result = cards
+    let result = [...cards]
     for (const res of cost) {
         const idx = result.indexOf(res)
         if (idx < 0)
             return undefined
         else
-            result = result.remove(idx)
+            result.splice(idx, 1)
     }
     return result
 }
-function tryBuyConnection(cards: List<Resource>, type: ConnectionType) {
+function tryBuyConnection(cards: readonly Resource[], type: ConnectionType) {
     const cost = connectionCost(type)
 
-    let result = cards
+    let result = [...cards]
     for (const res of cost) {
         const idx = result.indexOf(res)
         if (idx < 0)
             return undefined
         else
-            result = result.remove(idx)
+        result.splice(idx, 1)
     }
     return result
 }

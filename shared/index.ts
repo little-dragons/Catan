@@ -12,7 +12,6 @@ export * from './logic/History';
 export * from './socket/Configuration';
 export * from './socket/ClientEventMap';
 export * from './socket/ServerEventMap';
-export * from './socket/ListWrapper';
 
 export * from './authentication/User';
 export * from './authentication/Password';

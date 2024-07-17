@@ -1,4 +1,4 @@
-import { GameClientEventMap, GameServerEventMap, nativeGame, nativeState, redactGameStateFor, RoomType } from "shared";
+import { GameClientEventMap, GameServerEventMap, redactGameStateFor, RoomType } from "shared";
 import { type Socket } from 'socket.io'
 import { games, usersForRoom } from "./RoomManager";
 import { SocketDataType, SocketServerType } from "./Common";
@@ -17,7 +17,7 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
             return cb('invalid socket state')
         }
 
-        cb(nativeState(redactGameStateFor(room.state, socket.data.room[1])))
+        cb(redactGameStateFor(room.state, socket.data.room[1]))
     })
 
     socket.on('gameAction', (action, cb) => {
@@ -58,9 +58,9 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
             name: room.name,
             owner: room.owner,
             settings: room.settings,
-            users: users.toArray(),
+            users: users,
             type: RoomType.InGame,
-            state: nativeState(redactGameStateFor(room.state, socket.data.room[1]))
+            state: redactGameStateFor(room.state, socket.data.room[1])
         })
     })
 }

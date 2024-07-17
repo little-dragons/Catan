@@ -1,4 +1,3 @@
-import { List } from "immutable";
 import { type Board, type Tile, type Coordinate, sameCoordinate, BoardSeed } from "./Board";
 import { allOrientations, clockwise, counterclockwise, neighborTile, opposite } from "./Orientation";
 import { Resource, allResources } from "./Resource";
@@ -129,10 +128,9 @@ export function defaultBoard(seed: BoardSeed): Board {
     return {
         columnCount: 7,
         rowCount: 7,
-        // TODO make this use more immutable structures
-        tiles: List(tiles),
-        roads: List(),
+        tiles: tiles,
+        roads: [],
         robber: tiles.find(x => x[0].type == 'desert')![1],
-        buildings: List()
+        buildings: []
     }
 }

@@ -7,7 +7,6 @@ import GameRenderer from './gameDrawing/GameRenderer.vue';
 import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vue';
 import { UserSelectionType } from './gameDrawing/board/UserSelection';
 import { type GameAction, GameActionType } from 'shared/logic/GameAction';
-import { List } from 'immutable';
 
 const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
 
@@ -40,11 +39,11 @@ const currentAllowedActions = computed(() => {
         return allowedActionsForMe(currentState.value)
 })
 
-const others = computed<List<[User, RedactedPlayer]>>(() => {
+const others = computed<[User, RedactedPlayer][]>(() => {
     if (currentState.value == undefined || currentGameRoom.value == undefined)
-        return List()
+        return []
 
-    const otherUsers: List<[User, Color]> = currentGameRoom.value.users.filter(x => x[1] != currentState.value?.self.color)
+    const otherUsers: [User, Color][] = currentGameRoom.value.users.filter(x => x[1] != currentState.value?.self.color)
     return otherUsers.map(user => [user[0], currentState.value?.players.find(player => player.color == user[1])!] as [User, RedactedPlayer])
 })
 
@@ -89,7 +88,7 @@ async function rollDice() {
     sendAction({ type: GameActionType.RollDice })
 }
 
-const lastDice = ref<undefined | [number, number]>(undefined)
+const lastDice = ref<undefined | readonly [number, number]>(undefined)
 watchEffect(() => {
     if (currentState.value?.phase.type == GamePhaseType.Normal && currentState.value.phase.diceRolled != false)
         lastDice.value = currentState.value.phase.diceRolled
@@ -159,7 +158,7 @@ async function buildSettlement() {
             :board="currentState.board" 
             :dice="lastDice" 
             :stocked-cards="currentState.self.handCards" 
-            :offered-cards="List()"
+            :offered-cards="[]"
             :allowed-actions="currentAllowedActions!"
             :other-players="othersOverview"            
             other-players-display="radial"

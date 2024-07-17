@@ -31,7 +31,6 @@ import redCity from '@/assets/buildings/red-city.svg'
 import redSettlement from '@/assets/buildings/red-settlement.svg'
 import yellowCity from '@/assets/buildings/yellow-city.svg'
 import yellowSettlement from '@/assets/buildings/yellow-settlement.svg'
-import { List } from 'immutable';
 
 function resourceToIcon(resource: Resource): string {
     switch (resource) {
@@ -170,14 +169,14 @@ function translateClick(ev: MouseEvent) {
 // but the interface is - and that's always the more important part
 type InteractionPoints<T extends UserSelectionType> = {
     type: T,
-    data: List<UserSelectionDataType<T>>
+    data: UserSelectionDataType<T>[]
 }
 const interactionPoints = ref<InteractionPoints<any> | undefined>(undefined)
 const clickHandler = ref<((ev: MouseEvent) => void) | undefined>(undefined)
 
 
 defineExpose({ getUserSelection })
-function getUserSelection<T extends UserSelectionType, Options extends UserSelectionOptions | undefined>(type: T, data: List<UserSelectionDataType<T>>, options?: Options): Promise<UserSelectionResult<T, Options>> {
+function getUserSelection<T extends UserSelectionType, Options extends UserSelectionOptions | undefined>(type: T, data: UserSelectionDataType<T>[], options?: Options): Promise<UserSelectionResult<T, Options>> {
     return new Promise(resolve => {
         interactionPoints.value = { type, data }
         clickHandler.value = ev => {

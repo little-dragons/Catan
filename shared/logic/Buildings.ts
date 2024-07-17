@@ -1,4 +1,3 @@
-import { List } from "immutable";
 import { Board, Coordinate, adjacentCrossings, adjacentRoads, allCrossingPositions, crossingAdjacentToLand, sameCoordinate, sameRoad} from "./Board";
 import { Color } from "./Player";
 import { Resource } from "./Resource";
@@ -34,9 +33,9 @@ export function availableBuildingPositions(board: Board, forPlayer: Color | unde
 }
 
 
-export const roadCost = List([Resource.Lumber, Resource.Brick])
-export const settlementCost = List([Resource.Lumber, Resource.Brick, Resource.Grain, Resource.Wool])
-export const cityCost = List([Resource.Grain, Resource.Grain, Resource.Ore, Resource.Ore, Resource.Ore])
+export const roadCost: readonly Resource[] = [Resource.Lumber, Resource.Brick]
+export const settlementCost: readonly Resource[] = [Resource.Lumber, Resource.Brick, Resource.Grain, Resource.Wool]
+export const cityCost: readonly Resource[] = [Resource.Grain, Resource.Grain, Resource.Ore, Resource.Ore, Resource.Ore]
 
 export function buildingCost(type: BuildingType) {
     switch (type) {

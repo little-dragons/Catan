@@ -1,37 +1,36 @@
-import { List } from "immutable"
 import { Board } from "./Board"
 import { Color, FullPlayer, RedactedPlayer, redactPlayer } from "./Player"
-import { Resource } from "./Resource"
 import { BuildingType } from "./Buildings"
+import { Pure } from "../purify/Pure"
 
 export enum GamePhaseType {
     Initial,
     Normal
 }
-export type GamePhase = {
+export type GamePhase = Pure<{
     type: GamePhaseType.Initial
     forward: boolean
 } | {
     type: GamePhaseType.Normal
     diceRolled: false | [number, number]
-}
+}>
 
-export type PublicGameState = {
+export type PublicGameState = Pure<{
     phase: GamePhase
     board: Board
     currentPlayer: Color
-    players: List<RedactedPlayer>
-}
-export type RedactedGameState = PublicGameState & {
+    players: RedactedPlayer[]
+}>
+export type RedactedGameState = Pure<PublicGameState & {
     self: FullPlayer
-}
+}>
 
-export type FullGameState = {
+export type FullGameState = Pure<{
     phase: GamePhase,
     board: Board
     currentPlayer: Color
-    players: List<FullPlayer>
-}
+    players: FullPlayer[]
+}>
 
 export type MinimalGameState = PublicGameState | RedactedGameState | FullGameState
 
@@ -57,22 +56,22 @@ export function nextTurn(state: MinimalGameState): [Color, GamePhase] {
 
     if (state.phase.type == GamePhaseType.Initial) {
         if (currentIdx == 0 && !state.phase.forward)
-            return [state.players.get(currentIdx)!.color, { type: GamePhaseType.Normal, diceRolled: false }]
-        else if (currentIdx == state.players.size - 1) {
+            return [state.players[currentIdx]!.color, { type: GamePhaseType.Normal, diceRolled: false }]
+        else if (currentIdx == state.players.length - 1) {
             if (state.phase.forward)
-                return [state.players.get(currentIdx)!.color, { type: GamePhaseType.Initial, forward: false }]
+                return [state.players[currentIdx]!.color, { type: GamePhaseType.Initial, forward: false }]
             else
-                return [state.players.get(currentIdx - 1)!.color, { type: GamePhaseType.Initial, forward: false }]
+                return [state.players[currentIdx - 1]!.color, { type: GamePhaseType.Initial, forward: false }]
         }
         else {
             if (state.phase.forward)
-                return [state.players.get(currentIdx + 1)!.color, { type: GamePhaseType.Initial, forward: true }]
+                return [state.players[currentIdx + 1]!.color, { type: GamePhaseType.Initial, forward: true }]
             else
-                return [state.players.get(currentIdx - 1)!.color, { type: GamePhaseType.Initial, forward: false }]
+                return [state.players[currentIdx - 1]!.color, { type: GamePhaseType.Initial, forward: false }]
         }
     }
 
-    return [state.players.get((currentIdx + 1) % state.players.size)!.color, { type: GamePhaseType.Normal, diceRolled: false }]
+    return [state.players[(currentIdx + 1) % state.players.length]!.color, { type: GamePhaseType.Normal, diceRolled: false }]
 }
 
 

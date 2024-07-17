@@ -6,7 +6,6 @@ import grainCard from '@/assets/resource-cards/grain-card.svg'
 import lumberCard from '@/assets/resource-cards/lumber-card.svg'
 import oreCard from '@/assets/resource-cards/ore-card.svg'
 import woolCard from '@/assets/resource-cards/wool-card.svg'
-import type { List } from 'immutable';
 
 function imageForResource(res: Resource): string {
     switch (res) {
@@ -21,10 +20,10 @@ function imageForResource(res: Resource): string {
 defineEmits<{
     resourceClicked: [res: Resource]
 }>()
-const props = defineProps<{ cards: List<Resource> }>()
+const props = defineProps<{ cards: readonly Resource[] }>()
 
 function count(res: Resource) {
-    return props.cards.filter(x => x == res).size
+    return props.cards.filter(x => x == res).length
 }
 
 </script>

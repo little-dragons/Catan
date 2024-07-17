@@ -28,7 +28,7 @@ function diceToIcon(die: number): string {
 defineEmits(['diceClicked'])
 
 defineProps<{ 
-    dice: [number, number]
+    dice: readonly [number, number]
     enabled: boolean
 }>()
 </script>
