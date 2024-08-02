@@ -1,6 +1,6 @@
-import { type Board, type Tile, type Coordinate, sameCoordinate, BoardSeed } from "./Board";
-import { allOrientations, clockwise, counterclockwise, neighborTile, opposite } from "./Orientation";
-import { Resource, allResources } from "./Resource";
+import { type Board, type Tile, type Coordinate, sameCoordinate, BoardSeed } from "./Board.js";
+import { allOrientations, clockwise, counterclockwise, neighborTile, opposite } from "./Orientation.js";
+import { Resource, allResources } from "./Resource.js";
 import seedrandom from 'seedrandom'
 
 export function defaultBoard(seed: BoardSeed): Board {

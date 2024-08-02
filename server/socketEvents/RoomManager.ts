@@ -1,7 +1,7 @@
 import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, defaultBoard, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType } from "shared"
 import { type Socket } from 'socket.io'
-import { SocketDataType, SocketServerType } from "./Common"
-import { defaultSettings } from "shared/logic/Settings"
+import { SocketDataType, SocketServerType } from "./Common.js"
+import { defaultSettings } from "shared/logic/Settings.js"
 import { v4 } from "uuid"
 
 type ServerLobbyRoom = Omit<LobbyRoom, 'users'>

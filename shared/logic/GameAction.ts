@@ -1,10 +1,9 @@
-import { adjacentResourceTiles, adjacentRoads, availableRoadPositions, Board, Coordinate, gainedResources, isAvailableRoadPosition, Road, sameCoordinate, sameRoad } from "./Board"
-import { BuildingType, ConnectionType, availableBuildingPositions, buildingCost, connectionCost, isAvailableBuildingPosition } from "./Buildings"
-import { RedactedGameState, FullGameState, nextTurn, GamePhaseType, MinimalGameState } from "./GameState"
-import { Color, FullPlayer } from "./Player"
-import { Resource } from "./Resource"
-import { refine } from "../purify/Refine"
-import { dirty } from "../purify/Pure"
+import { produce, unfreeze } from "structurajs"
+import { adjacentResourceTiles, adjacentRoads, availableRoadPositions, Board, Coordinate, gainedResources, isAvailableRoadPosition, Road, sameCoordinate, sameRoad } from "./Board.js"
+import { BuildingType, ConnectionType, availableBuildingPositions, buildingCost, connectionCost, isAvailableBuildingPosition } from "./Buildings.js"
+import { RedactedGameState, FullGameState, nextTurn, GamePhaseType, MinimalGameState } from "./GameState.js"
+import { Color, FullPlayer } from "./Player.js"
+import { Resource } from "./Resource.js"
 
 
 export enum GameActionType {
@@ -141,9 +140,9 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
 
             
             const [nextColor, nextPhase] = nextTurn(state)
-            const newBoard = refine(state.board, board => {
-                board.buildings.push([executor, dirty(action.settlement), BuildingType.Settlement])
-                board.roads.push([executor, dirty(action.road)])
+            const newBoard = produce(state.board, board => {
+                board.buildings.push([executor, unfreeze(action.settlement), BuildingType.Settlement])
+                board.roads.push([executor, unfreeze(action.road)])
                 return board
             })
             return {
@@ -207,9 +206,9 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                 return undefined
 
 
-            return refine<FullGameState>(state, newState => {
+            return produce(state, newState => {
                 newState.players[executorIdx] = { color: executor, handCards: newCards }
-                newState.board.roads.push([executor, dirty(action.coordinates)])
+                newState.board.roads.push([executor, unfreeze(action.coordinates)])
             })
         }
         else if (action.type == GameActionType.PlaceSettlement) {
@@ -223,9 +222,9 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
             if (newCards == undefined)
                 return undefined
 
-            return refine(state, newState => {
+            return produce(state, newState => {
                 newState.players[executorIdx] = { color: executor, handCards: newCards }
-                newState.board.buildings.push([executor, dirty(action.coordinate), BuildingType.Settlement])
+                newState.board.buildings.push([executor, unfreeze(action.coordinate), BuildingType.Settlement])
                 return newState
             })
         }
@@ -246,9 +245,9 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
             if (newCards == undefined)
                 return undefined
 
-            return refine(state, newState => {
+            return produce(state, newState => {
                 newState.players[executorIdx] = { color: executor, handCards: newCards }
-                newState.board.buildings[validSettlementIdx] = [executor, dirty(action.coordinate), BuildingType.City]
+                newState.board.buildings[validSettlementIdx] = [executor, unfreeze(action.coordinate), BuildingType.City]
             })
         }
     }

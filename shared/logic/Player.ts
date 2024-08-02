@@ -1,12 +1,12 @@
-import { Pure } from "../purify/Pure"
-import { Resource } from "./Resource"
+import { Freeze } from "structurajs"
+import { Resource } from "./Resource.js"
 
-export type RedactedPlayer = Pure<{
+export type RedactedPlayer = Freeze<{
     color: Color,
     handCardsCount: number,
 }>
 
-export type FullPlayer = Pure<{
+export type FullPlayer = Freeze<{
     color: Color,
     handCards: Resource[],
 }>

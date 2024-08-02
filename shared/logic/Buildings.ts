@@ -1,6 +1,6 @@
-import { Board, Coordinate, adjacentCrossings, adjacentRoads, allCrossingPositions, crossingAdjacentToLand, sameCoordinate, sameRoad} from "./Board";
-import { Color } from "./Player";
-import { Resource } from "./Resource";
+import { Board, Coordinate, adjacentCrossings, adjacentRoads, allCrossingPositions, crossingAdjacentToLand, sameCoordinate, sameRoad} from "./Board.js";
+import { Color } from "./Player.js";
+import { Resource } from "./Resource.js";
 
 export enum BuildingType {
     Settlement, City

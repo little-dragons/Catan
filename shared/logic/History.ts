@@ -1,4 +1,4 @@
-import { FullGameState } from "./GameState"
+import { FullGameState } from "./GameState.js"
 
 export type Statistics = {
 

@@ -2,13 +2,13 @@ import { ClientEventMap, ServerEventMap, SocketPort } from "shared"
 import { Server } from "socket.io"
 import { createServer, Server as HttpsServer } from 'https'
 import { readFileSync } from  'fs'
-import { acceptLobbyEvents } from "./socketEvents/LobbyEvents"
-import { acceptGameEvents } from "./socketEvents/GameEvents"
-import { acceptRoomEvents } from "./socketEvents/RoomManager"
+import { acceptLobbyEvents } from "./socketEvents/LobbyEvents.js"
+import { acceptGameEvents } from "./socketEvents/GameEvents.js"
+import { acceptRoomEvents } from "./socketEvents/RoomManager.js"
 import { instrument } from "@socket.io/admin-ui"
-import { SocketDataType, SocketServerType, isDevelopment, isProduction } from "./socketEvents/Common"
-import { db } from "./database/Connection"
-import { acceptLoginEvents } from "./socketEvents/LoginEvents"
+import { SocketDataType, SocketServerType, isDevelopment, isProduction } from "./socketEvents/Common.js"
+import { db } from "./database/Connection.js"
+import { acceptLoginEvents } from "./socketEvents/LoginEvents.js"
 
 
 let httpsServer: HttpsServer<any, any> = undefined!

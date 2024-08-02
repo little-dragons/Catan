@@ -1,8 +1,8 @@
-import { User } from '../authentication/User';
-import { FullGameState, RedactedGameState } from './GameState';
-import { Color } from './Player';
-import { Settings } from './Settings';
-import { Statistics } from './History';
+import { User } from '../authentication/User.js';
+import { FullGameState, RedactedGameState } from './GameState.js';
+import { Color } from './Player.js';
+import { Settings } from './Settings.js';
+import { Statistics } from './History.js';
 
 export type RoomId = string
 export enum RoomType {

@@ -1,13 +1,13 @@
-import { Board } from "./Board"
-import { Color, FullPlayer, RedactedPlayer, redactPlayer } from "./Player"
-import { BuildingType } from "./Buildings"
-import { Pure } from "../purify/Pure"
+import { Board } from "./Board.js"
+import { Color, FullPlayer, RedactedPlayer, redactPlayer } from "./Player.js"
+import { BuildingType } from "./Buildings.js"
+import { type Freeze } from "structurajs"
 
 export enum GamePhaseType {
     Initial,
     Normal
 }
-export type GamePhase = Pure<{
+export type GamePhase = Freeze<{
     type: GamePhaseType.Initial
     forward: boolean
 } | {
@@ -15,17 +15,17 @@ export type GamePhase = Pure<{
     diceRolled: false | [number, number]
 }>
 
-export type PublicGameState = Pure<{
+export type PublicGameState = Freeze<{
     phase: GamePhase
     board: Board
     currentPlayer: Color
     players: RedactedPlayer[]
 }>
-export type RedactedGameState = Pure<PublicGameState & {
+export type RedactedGameState = Freeze<PublicGameState & {
     self: FullPlayer
 }>
 
-export type FullGameState = Pure<{
+export type FullGameState = Freeze<{
     phase: GamePhase,
     board: Board
     currentPlayer: Color

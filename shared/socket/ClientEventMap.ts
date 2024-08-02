@@ -1,7 +1,7 @@
-import { User } from "../authentication/User"
-import { Color } from "../logic/Player"
-import { Settings } from "../logic/Settings"
-import { History } from "../logic/History"
+import { User } from "../authentication/User.js"
+import { Color } from "../logic/Player.js"
+import { Settings } from "../logic/Settings.js"
+import { History } from "../logic/History.js"
 
 export type ClientEventMap = GameClientEventMap & LobbyClientEventMap & RoomClientEventMap & LoginClientEventMap
 

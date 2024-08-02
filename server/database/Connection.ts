@@ -1,5 +1,5 @@
 import { Kysely, SqliteDialect } from "kysely";
-import { DB } from "./DBTypes";
+import { DB } from "./DBTypes.js";
 import Database from "better-sqlite3";
 
 export const db = new Kysely<DB>({

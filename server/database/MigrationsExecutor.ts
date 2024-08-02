@@ -4,8 +4,8 @@ import {
     Migrator,
     FileMigrationProvider,
 } from 'kysely'
-import { db } from './Connection'
-import { isProduction } from '../socketEvents/Common'
+import { db } from './Connection.js'
+import { isProduction } from '../socketEvents/Common.js'
 
 export async function migrateDbToLatest() {
     const migrator = new Migrator({

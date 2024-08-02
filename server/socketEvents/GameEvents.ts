@@ -1,8 +1,8 @@
 import { GameClientEventMap, GameServerEventMap, redactGameStateFor, RoomType } from "shared";
 import { type Socket } from 'socket.io'
-import { games, usersForRoom } from "./RoomManager";
-import { SocketDataType, SocketServerType } from "./Common";
-import { tryDoAction } from "shared/logic/GameAction";
+import { games, usersForRoom } from "./RoomManager.js";
+import { SocketDataType, SocketServerType } from "./Common.js";
+import { tryDoAction } from "shared/logic/GameAction.js";
 
 
 export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServerEventMap, GameClientEventMap, {}, SocketDataType>) {

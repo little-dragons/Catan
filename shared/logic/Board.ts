@@ -1,17 +1,16 @@
-import type { Color } from "./Player"
-import type { Orientation } from "./Orientation"
-import type { Resource } from "./Resource"
-import { BuildingType } from "./Buildings"
+import type { Color } from "./Player.js"
+import type { Orientation } from "./Orientation.js"
+import type { Resource } from "./Resource.js"
+import { BuildingType } from "./Buildings.js"
 import { v4 } from "uuid"
-import { Pure } from "../purify/Pure"
-import { mapFilter, mapFind } from "../purify/PureArray"
+import { type Freeze } from "structurajs"
 
 
-export type Coordinate = Pure<[number, number]>
+export type Coordinate = Freeze<[number, number]>
 export function sameCoordinate(c1: Coordinate, c2: Coordinate) {
     return c1[0] == c2[0] && c1[1] == c2[1]
 }
-export type Road = Pure<[Coordinate, Coordinate]>
+export type Road = Freeze<[Coordinate, Coordinate]>
 export function sameRoad(r1: Road, r2: Road) {
     return sameCoordinate(r1[0], r2[0]) && sameCoordinate(r1[1], r2[1]) || sameCoordinate(r1[0], r2[1]) && sameCoordinate(r1[1], r2[0])
 }
@@ -36,7 +35,7 @@ export function randomBoardSeed() {
 }
 
 
-export type Board = Pure<{
+export type Board = Freeze<{
     rowCount: number
     columnCount: number
     tiles: [Tile, Coordinate][]
@@ -165,7 +164,23 @@ function adjacentTiles(cross: Coordinate): readonly Coordinate[] {
     }
 }
 
+export function mapFilter<T, R>(array: Freeze<T[]>, mapper: ((item: Freeze<T>) => Freeze<R | undefined>)): Freeze<R[]> {
+    let res: Freeze<R[]> = []
+    for (const item of array) {
+        const mapped = mapper(item)
+        if (mapped != undefined)
+            res = [...res, mapped]
+    }
+    return res
+}
 
+export function mapFind<T, R>(array: Freeze<T[]>, finder: ((item: Freeze<T>) => Freeze<R |  undefined>)): Freeze<R | undefined> {
+    for (const item of array) {
+        const mapped = finder(item)
+        if (mapped != undefined)
+            return mapped
+    }
+}
 
 export function adjacentResourceTiles(cross: Coordinate, board: Board, number: number | undefined): readonly Resource[] {
     return mapFilter(

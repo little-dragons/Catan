@@ -1,7 +1,7 @@
 import { LobbyClientEventMap, LobbyServerEventMap, RoomId } from 'shared';
 import { type Socket } from 'socket.io'
-import { initializeGame, lobbies } from './RoomManager';
-import { SocketDataType, SocketServerType } from './Common';
+import { initializeGame, lobbies } from './RoomManager.js';
+import { SocketDataType, SocketServerType } from './Common.js';
 
 type LobbySocket = Socket<LobbyServerEventMap, LobbyClientEventMap, {}, SocketDataType>
 export function acceptLobbyEvents(server: SocketServerType, socket: LobbySocket) {
