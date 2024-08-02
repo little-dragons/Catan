@@ -14,7 +14,7 @@ export async function migrateDbToLatest() {
             fs,
             path,
             // This needs to be an absolute path.
-            migrationFolder: path.join(__dirname, 'migrations/'),
+            migrationFolder: path.join(import.meta.dirname, 'migrations/'),
         }),
     })
 
