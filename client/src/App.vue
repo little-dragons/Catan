@@ -3,7 +3,7 @@ import { RouterView } from 'vue-router'
 import { currentUser } from './socketWrapper/Login';
 import { currentRoom } from './socketWrapper/Room';
 import { ref } from 'vue';
-import LoginModal from './ui/LoginModal.vue'
+import LoginModal from './inputs/LoginModal.vue'
 
 const showLoginModal = ref(false)
 

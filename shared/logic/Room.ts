@@ -2,7 +2,7 @@ import { User } from '../authentication/User.js';
 import { FullGameState, RedactedGameState } from './GameState.js';
 import { Color } from './Player.js';
 import { Settings } from './Settings.js';
-import { Statistics } from './History.js';
+import { History, Statistics } from './History.js';
 
 export type RoomId = string
 export enum RoomType {
@@ -35,8 +35,8 @@ export type FullGameRoom = {
 
 export type PostGameRoom = {
     type: RoomType.PostGame
-    statistics: Statistics
-}
+    history: History
+} & CommonRoom
 
-export type RedactedRoom = LobbyRoom | RedactedGameRoom
-export type FullRoom = LobbyRoom | FullGameRoom
+export type RedactedRoom = LobbyRoom | RedactedGameRoom | PostGameRoom
+export type FullRoom = LobbyRoom | FullGameRoom | PostGameRoom

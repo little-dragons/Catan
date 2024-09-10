@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import UsernameInput from '@/ui/UsernameInput.vue';
-import PasswordInput from '@/ui/PasswordInput.vue';
-import Modal from '@/ui/Modal.vue'
-import LabeledInput from '@/ui/LabeledInput.vue';
+import UsernameInput from '@/inputs/UsernameInput.vue';
+import PasswordInput from '@/inputs/PasswordInput.vue';
+import Modal from '@/misc/Modal.vue'
+import LabeledInput from '@/inputs/LabeledInput.vue';
 import { currentUser, sendGuestLogin, sendMemberLogin, sendRegister } from '@/socketWrapper/Login';
 
 const emit = defineEmits(['close'])

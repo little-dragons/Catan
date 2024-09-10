@@ -3,7 +3,7 @@ import { roomSocket } from '@/socketWrapper/Socket';
 import { type LobbyRoom } from 'shared';
 import { canJoinNewRoom, joinRoomAndRedirect } from '@/socketWrapper/Room';
 import { ref } from 'vue';
-import CreateRoomModal from './CreateRoomModal.vue';
+import CreateRoomModal from '../inputs/CreateRoomModal.vue';
 
 const rooms = ref<LobbyRoom[]>([])
 

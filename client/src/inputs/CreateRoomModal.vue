@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import LabeledInput from '@/ui/LabeledInput.vue';
-import RoomInput from '@/ui/RoomInput.vue';
-import Modal from '@/ui/Modal.vue'
+import LabeledInput from '@/inputs/LabeledInput.vue';
+import RoomInput from '@/inputs/RoomInput.vue';
+import Modal from '@/misc/Modal.vue'
 import { ref } from 'vue';
 import router from '@/misc/Router';
 import { currentAuthUser } from '@/socketWrapper/Login';

@@ -3,8 +3,10 @@ import { currentAuthUser, currentUser, sendGuestLogin } from '@/socketWrapper/Lo
 import { sendLogout } from '@/socketWrapper/Logout';
 import { createRoomAndRedirect, currentRoom } from '@/socketWrapper/Room';
 import { isDevelopment } from '@/misc/Globals';
-import { watch } from 'vue';
+import { ref, watch } from 'vue';
 import { v4 } from 'uuid';
+import { Color, defaultBoard, GamePhaseType, Resource, type History } from 'shared';
+import HistoryComponent from '@/game/History.vue';
 
 function debugLogin() {
     sendGuestLogin(`debugUser${v4().substring(0, 5)}`)
@@ -14,6 +16,20 @@ function debugLogin() {
     }, { once: true })
 }
 
+const exampleHistory: History = {
+    lastState: {
+        board: defaultBoard('default'),
+        currentPlayer: Color.Blue,
+        phase: {
+            diceRolled: [5, 5],
+            type: GamePhaseType.Normal,
+        },
+        players: [ 
+            { color: Color.Blue, handCards: [Resource.Brick, Resource.Grain] }, 
+            { color: Color.Green, handCards: [Resource.Grain, Resource.Grain] } ]
+    }
+}
+const showHistory = ref(false)
 </script>
 
 
@@ -24,4 +40,8 @@ function debugLogin() {
     <button v-if="isDevelopment" @click="debugLogin" :disabled="currentAuthUser != undefined || currentRoom != undefined">
         Login and create debug room
     </button>
+    <button v-if="isDevelopment" @click="() => showHistory = !showHistory">
+        Visit example history page.
+    </button>
+    <HistoryComponent v-if="showHistory" :history="exampleHistory" />
 </template>
