@@ -10,7 +10,7 @@
     "compilerOptions": {
         "target": "ESNext",
         "module": "ESNext",
-        "moduleResolution": "Node10",
+        "moduleResolution": "Bundler",
         "outDir": "../dist/server/",
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
