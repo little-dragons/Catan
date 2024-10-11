@@ -3,10 +3,11 @@ import { currentAuthUser, currentUser, sendGuestLogin } from '@/socketWrapper/Lo
 import { sendLogout } from '@/socketWrapper/Logout';
 import { createRoomAndRedirect, currentRoom } from '@/socketWrapper/Room';
 import { isDevelopment } from '@/misc/Globals';
-import { ref, watch } from 'vue';
+import { inject, ref, watch } from 'vue';
 import { v4 } from 'uuid';
 import { Color, defaultBoard, GamePhaseType, Resource, type History } from 'shared';
 import HistoryComponent from '@/game/History.vue';
+import { usePopups, PopupSeverity } from '@/popup/Popup';
 
 function debugLogin() {
     sendGuestLogin(`debugUser${v4().substring(0, 5)}`)
@@ -14,6 +15,17 @@ function debugLogin() {
     watch(currentAuthUser, () => {
         createRoomAndRedirect(`debugRoom${v4().substring(0, 5)}`)
     }, { once: true })
+}
+
+const { insert: insertPopup } = usePopups()
+
+function triggerNotification() {
+    insertPopup({
+        message: 'testsetst',
+        severity: PopupSeverity.Error,
+        title: 'Title',
+        autoCloses: true
+    })
 }
 
 const exampleHistory: History = {
@@ -42,6 +54,9 @@ const showHistory = ref(false)
     </button>
     <button v-if="isDevelopment" @click="() => showHistory = !showHistory">
         Visit example history page.
+    </button>
+    <button v-if="isDevelopment" @click="triggerNotification">
+        Send test notification
     </button>
     <HistoryComponent v-if="showHistory" :history="exampleHistory" />
 </template>

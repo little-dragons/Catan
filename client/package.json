@@ -9,6 +9,7 @@
     "prod": "NODE_ENV=production SSL_DIR=\"/home/catan/ssl/letsencrypt\" vite --host -c vite.config.prod.ts"
   },
   "dependencies": {
+    "pinia": "^2.2.4",
     "shared": "^1.0.0",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",

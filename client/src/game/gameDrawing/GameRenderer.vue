@@ -62,7 +62,7 @@ defineExpose({ getUserSelection })
         <PlayerOverviewRenderer class="middle-right-grid" v-if="otherPlayers.length >= 4 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[3]!"/>
     </div>
     <div ref="boardContainer"class="main-box">   
-            <BoardRenderer class="board" :board="board" ref="boardRenderer"/>
+        <BoardRenderer class="board" :board="board" ref="boardRenderer"/>
         <div class="below">
             <DiceRenderer 
                 v-if="dice != undefined" 

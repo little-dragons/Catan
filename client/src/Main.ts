@@ -7,8 +7,12 @@ import { acceptGameEvents } from './socketWrapper/Game'
 // import { acceptLoginEvents } from './socketWrapper/Login'
 import { acceptRoomEvents } from './socketWrapper/Room'
 import { acceptLobbyEvents } from './socketWrapper/Lobby'
+import { createPinia } from 'pinia'
 
+const pinia = createPinia()
 const app = createApp(App)
+
+app.use(pinia)
 app.use(router)
 app.mount('#app')
 

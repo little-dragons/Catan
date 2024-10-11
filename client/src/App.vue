@@ -2,11 +2,12 @@
 import { RouterView } from 'vue-router'
 import { currentUser } from './socketWrapper/Login';
 import { currentRoom } from './socketWrapper/Room';
-import { ref } from 'vue';
+import { provide, ref } from 'vue';
 import LoginModal from './inputs/LoginModal.vue'
+import Popups from './popup/Popups.vue';
+
 
 const showLoginModal = ref(false)
-
 </script>
 
 <template>
@@ -32,6 +33,7 @@ const showLoginModal = ref(false)
     </div>
 
     <LoginModal v-if="showLoginModal" @close="() => showLoginModal = false"/>
+    <Popups/>
 
     <main>
         <RouterView/>
@@ -40,6 +42,7 @@ const showLoginModal = ref(false)
 
 <style scoped>
 @import 'assets/base.css';
+
 
 .navbar {
     display: flex;

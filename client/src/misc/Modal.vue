@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import Close from '@/assets/ui/close.svg'
 defineEmits(['close'])
 
-// TODO better closing button
 </script>
 
 
@@ -9,7 +9,7 @@ defineEmits(['close'])
     <div class="all">
         <div class="modal">
             <div class="close">
-                <button @click="() => $emit('close')">&times;</button>
+                <img :src="Close" @click="() => $emit('close')"/>
             </div>
             <slot/>
         </div>
@@ -54,13 +54,11 @@ defineEmits(['close'])
     margin-left: auto;
 }
 
-.close>button {
-    border-radius: 50%;
-    border-width: 1px;
+.close>img {
     width: 1.25rem;
 }
 
-.close>button:hover {
+.close>img:hover {
     cursor: pointer;
 }
 </style>

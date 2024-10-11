@@ -316,4 +316,4 @@ svg {
     fill: lightgray;
     opacity: .25;
 }
-</style>import { UserSelectionType, type UserSelectionDataType } from './UserSelection';
+</style>
