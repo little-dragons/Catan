@@ -21,10 +21,16 @@ const { insert: insertPopup } = usePopups()
 
 function triggerNotification() {
     insertPopup({
-        message: 'testsetst',
-        severity: PopupSeverity.Error,
+        message: 'This popup should automatically close',
+        severity: PopupSeverity.Warning,
         title: 'Title',
         autoCloses: true
+    })
+    insertPopup({
+        message: 'This popup should NOT automatically close',
+        severity: PopupSeverity.Error,
+        title: 'Title2',
+        autoCloses: false
     })
 }
 
