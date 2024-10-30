@@ -32,17 +32,16 @@ defineExpose({
 })
 
 function uiMessageValidUsername(name: string) {
-    const res = validUsername(name)
-    if (res == 'invalid tokens')
-        return 'The name contains invalid tokens'
-    else if (res == 'name too long')
-        return 'The name is too long'
-    else if (res == true)
-        return true
-    
-    console.warn('Unhandled case in checking the username')
-    return true
+    switch (validUsername(name)) {
+        case 'invalid tokens':
+            return 'The name contains invalid tokens'
+        case 'name too long':
+            return 'The name is too long'
+        case true:
+            return true
+    }
 }
+
 const rules: ((current: string) => true | string)[] = [
     x => uiMessageValidUsername(x),
     x => disallowedNames.includes(x) ? 'This username is not allowed' : true,

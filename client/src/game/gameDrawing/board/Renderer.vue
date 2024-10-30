@@ -87,27 +87,27 @@ function portToIcon(port: PortTile): string {
   }
 }
 function buildingForColor(color: Color, type: BuildingType): string {
-    if (type == BuildingType.City) {
-        switch (color) {
-            case Color.Yellow: return yellowCity
-            case Color.Orange: return orangeCity
-            case Color.Red: return redCity
-            case Color.Green: return greenCity
-            case Color.Blue: return blueCity
-        }
+    switch (type) {
+        case BuildingType.City:
+            switch (color) {
+                case Color.Yellow: return yellowCity
+                case Color.Orange: return orangeCity
+                case Color.Red: return redCity
+                case Color.Green: return greenCity
+                case Color.Blue: return blueCity
+            }
+        
+        case BuildingType.Settlement:
+            switch (color) {
+                case Color.Yellow: return yellowSettlement
+                case Color.Orange: return orangeSettlement
+                case Color.Red: return redSettlement
+                case Color.Green: return greenSettlement
+                case Color.Blue: return blueSettlement
+            }
     }
-    else if (type == BuildingType.Settlement) {
-        switch (color) {
-            case Color.Yellow: return yellowSettlement
-            case Color.Orange: return orangeSettlement
-            case Color.Red: return redSettlement
-            case Color.Green: return greenSettlement
-            case Color.Blue: return blueSettlement
-        }
-    }
-    console.warn(`Unknown combination of building and color: ${color}, ${type}`)
-    return ''
 }
+
 function svgPath(pixels: [number, number][]): string {
     let res = `M ${pixels[0][0]} ${pixels[0][1]}`
     for (let corner = 1; corner < pixels.length; corner++)

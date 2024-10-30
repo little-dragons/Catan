@@ -5,8 +5,10 @@ import PasswordInput from '@/inputs/PasswordInput.vue';
 import Modal from '@/misc/Modal.vue'
 import LabeledInput from '@/inputs/LabeledInput.vue';
 import { currentUser, sendGuestLogin, sendMemberLogin, sendRegister } from '@/socketWrapper/Login';
+import { PopupSeverity, usePopups } from '@/popup/Popup';
 
 const emit = defineEmits(['close'])
+const { insert: insertPopup } = usePopups()
 
 const showRegister = ref(false)
 
@@ -37,7 +39,12 @@ watch(currentUser, newVal => {
             membernameInput.value?.nameUnknown(request.name)
     }
     else if (newVal.status == 'anonymous' && newVal.lastRejectedLogin == undefined) {
-        console.warn('User login status changed to anonymous in login modal, but without rejection reason? Triggered logout?')
+        insertPopup({ 
+            title: 'Unexpected logout',
+            message: `User login status changed to anonymous in login modal, but without rejection reason? Triggered logout elsewhere?`,
+            severity: PopupSeverity.Info,
+            autoCloses: true,
+        })
     }
 })
 

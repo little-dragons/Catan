@@ -5,8 +5,9 @@ import threeDie from '@/assets/dice/three-die.svg'
 import fourDie from '@/assets/dice/four-die.svg'
 import fiveDie from '@/assets/dice/five-die.svg'
 import sixDie from '@/assets/dice/six-die.svg'
+import type { DieResult } from 'shared'
 
-function diceToIcon(die: number): string {
+function diceToIcon(die: DieResult): string {
     switch (die) {
         case 1:
             return oneDie
@@ -21,14 +22,12 @@ function diceToIcon(die: number): string {
         case 6:
             return sixDie
     }
-    console.warn('Invalid dice number')
-    return ''
 }
 
 defineEmits(['diceClicked'])
 
 defineProps<{ 
-    dice: readonly [number, number]
+    dice: readonly [DieResult, DieResult]
     enabled: boolean
 }>()
 </script>

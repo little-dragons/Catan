@@ -1,21 +1,29 @@
 <script setup lang="ts">
 import { currentGameRoom } from '@/socketWrapper/Room';
-import { BuildingType, Color, GamePhaseType, Resource, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, victoryPointsFromRedacted, type Coordinate, type RedactedGameState, type RedactedPlayer, type Road, type User } from 'shared';
+import { BuildingType, Color, GamePhaseType, Resource, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedGameState, type RedactedPlayer, type Road, type User } from 'shared';
 import { computed, ref, shallowRef, triggerRef, watchEffect } from 'vue';
 import { gameSocket } from '@/socketWrapper/Socket';
 import GameRenderer from './gameDrawing/GameRenderer.vue';
 import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vue';
 import { UserSelectionType } from './gameDrawing/board/UserSelection';
 import { type GameAction, GameActionType } from 'shared/logic/GameAction';
+import { PopupSeverity, usePopups } from '@/popup/Popup';
 
 const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
+const { insert: insertPopup } = usePopups()
 
 async function sendAction(action: GameAction) {
     const response = await gameSocket.emitWithAck('gameAction', action)
     if (response == true)
         return
 
-    console.warn(`Game action did not complete correctly: ${response}, triggering state again`)
+    insertPopup({ 
+        title: 'Invalid action',
+        message: `Game action did not complete correctly: ${response}, trying to reload local state.`,
+        severity: PopupSeverity.Warning,
+        autoCloses: false,
+    })
+    
     // TODO handle errors elegantly. An idea is given below
     // potentially, if a action is rejected, the state may be completely wrong. Probably, triggering the state 
     // again will not destroy it further, only potentially help
@@ -88,7 +96,7 @@ async function rollDice() {
     sendAction({ type: GameActionType.RollDice })
 }
 
-const lastDice = ref<undefined | readonly [number, number]>(undefined)
+const lastDice = ref<undefined | readonly [DieResult, DieResult]>(undefined)
 watchEffect(() => {
     if (currentState.value?.phase.type == GamePhaseType.Normal && currentState.value.phase.diceRolled != false)
         lastDice.value = currentState.value.phase.diceRolled

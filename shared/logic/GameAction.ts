@@ -1,7 +1,7 @@
 import { produce, unfreeze } from "structurajs"
 import { adjacentResourceTiles, adjacentRoads, availableRoadPositions, Board, Coordinate, gainedResources, isAvailableRoadPosition, Road, sameCoordinate, sameRoad } from "./Board.js"
 import { BuildingType, ConnectionType, availableBuildingPositions, buildingCost, connectionCost, isAvailableBuildingPosition } from "./Buildings.js"
-import { RedactedGameState, FullGameState, nextTurn, GamePhaseType, MinimalGameState } from "./GameState.js"
+import { RedactedGameState, FullGameState, nextTurn, GamePhaseType, MinimalGameState, DieResult } from "./GameState.js"
 import { Color, FullPlayer } from "./Player.js"
 import { Resource } from "./Resource.js"
 
@@ -158,8 +158,8 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
             if (state.phase.diceRolled != false)
                 return undefined
 
-            const die1 = Math.floor(Math.random() * 6) + 1
-            const die2 = Math.floor(Math.random() * 6) + 1
+            const die1 = Math.floor(Math.random() * 6) + 1 as DieResult
+            const die2 = Math.floor(Math.random() * 6) + 1 as DieResult
 
             const sum = die1 + die2
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Resource, type Board } from 'shared';
+import { Resource, type Board, type DieResult } from 'shared';
 import BoardRenderer from './board/Renderer.vue';
 import { UserSelectionType, type UserSelectionDataType, type UserSelectionOptions, type UserSelectionResult } from './board/UserSelection'
 import DiceRenderer from './DiceRenderer.vue';
@@ -21,7 +21,7 @@ defineProps<{
     stockedCards: readonly Resource[]
     offeredCards: readonly Resource[]
     board: Board
-    dice: readonly [number, number] | undefined
+    dice: readonly [DieResult, DieResult] | undefined
     allowedActions: GameActionAllowedMap
     otherPlayers: readonly PlayerOverviewData[]
     otherPlayersDisplay: 'radial' | 'grid'

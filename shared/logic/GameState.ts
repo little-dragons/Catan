@@ -7,12 +7,15 @@ export enum GamePhaseType {
     Initial,
     Normal
 }
+
+export type DieResult = 1 | 2 | 3 | 4 | 5 | 6
+
 export type GamePhase = Freeze<{
     type: GamePhaseType.Initial
     forward: boolean
 } | {
     type: GamePhaseType.Normal
-    diceRolled: false | [number, number]
+    diceRolled: false | [DieResult, DieResult]
 }>
 
 export type PublicGameState = Freeze<{

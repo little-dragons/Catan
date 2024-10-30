@@ -30,7 +30,7 @@ export type ResourceTile = {
 export type Tile = ResourceTile | PortTile | { type: 'desert' | 'ocean' }
 
 export type BoardSeed = string
-export function randomBoardSeed() {
+export function randomBoardSeed(): BoardSeed {
     return v4()
 }
 
