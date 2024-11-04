@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { currentGameRoom } from '@/socketWrapper/Room';
-import { BuildingType, Color, GamePhaseType, Resource, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedGameState, type RedactedPlayer, type Road, type User } from 'shared';
+import { BuildingType, Color, GamePhaseType, Resource, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedGameState, type RedactedPlayer, type Road, type User } from 'shared';
 import { computed, ref, shallowRef, triggerRef, watchEffect } from 'vue';
 import { gameSocket } from '@/socketWrapper/Socket';
 import GameRenderer from './gameDrawing/GameRenderer.vue';
@@ -8,6 +8,7 @@ import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vu
 import { UserSelectionType } from './gameDrawing/board/UserSelection';
 import { type GameAction, GameActionType } from 'shared/logic/GameAction';
 import { PopupSeverity, usePopups } from '@/popup/Popup';
+import type { TradeRendererProps } from './gameDrawing/TradeRenderer.vue';
 
 const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
 const { insert: insertPopup } = usePopups()
@@ -106,6 +107,25 @@ watchEffect(() => {
         lastDice.value = [3, 3]
 })
 
+const trade = ref<undefined | {
+    // stocked cards are the cards meant to display during a trade
+    // having a variable inside trade seems like the easiest way
+    stockedCards: readonly Resource[],
+    offeredCards: readonly Resource[],
+    desiredCards: Resource[] }>(undefined)
+
+const tradeProps = computed<TradeRendererProps | undefined>(() => {
+    if (trade.value == undefined)
+        return undefined
+
+    return {
+        canTradeWithBank: canTradeWithBank(currentState.value!.board, currentState.value!.self.color, trade.value.offeredCards, trade.value.desiredCards),
+        validOffer: isValidOffer(trade.value.offeredCards, trade.value.desiredCards),
+        desiredCards: trade.value.desiredCards,
+        offeredCards: trade.value.offeredCards
+    }
+})
+
 async function endTurn() {
     if (currentAllowedActions.value?.finishTurn != true)
         return
@@ -113,9 +133,7 @@ async function endTurn() {
     sendAction({ type: GameActionType.FinishTurn })
 }
 
-function resourceClicked(res: Resource) {
-    //TODO
-}
+
 async function buildCity() {
     if (currentAllowedActions.value?.placeCity != true || renderer.value == null || currentState.value == undefined)
         return
@@ -158,6 +176,74 @@ async function buildSettlement() {
         sendAction({ type: GameActionType.PlaceSettlement, coordinate: settlement })
 }
 
+async function offerTradeWithPlayer() {
+    // TODO
+}
+async function bankTrade() {
+    if (trade.value == undefined)
+        return
+
+    sendAction({ type: GameActionType.BankTrade, offeredCards: trade.value.offeredCards, desiredCards: trade.value.desiredCards})
+    trade.value = undefined
+}
+function toggleTradeMenu() {
+    if (currentState.value == undefined)
+        return
+
+
+    if (trade.value == undefined) {
+        trade.value = {
+            stockedCards: currentState.value?.self.handCards,
+            desiredCards: [],
+            offeredCards: []
+        }
+    }
+    else {
+        trade.value = undefined
+    }
+}
+
+function addOfferedCard(res: Resource) {
+    if (trade.value == undefined)
+        return
+
+    const index = trade.value.stockedCards.indexOf(res)
+    if (index < 0)
+        return
+
+    const newCards = trade.value.stockedCards.slice()
+    newCards.splice(index, 1)
+    
+    const newOffered = trade.value.offeredCards.slice()
+    newOffered.push(res)
+
+    trade.value = {
+        stockedCards: newCards,
+        desiredCards: trade.value.desiredCards,
+        offeredCards: newOffered
+    }
+}
+function removeOfferedCard(res: Resource) {
+    if (trade.value == undefined)
+        return
+
+    const index = trade.value.offeredCards.indexOf(res)
+    if (index < 0)
+        return
+
+    const newCards = trade.value.stockedCards.slice()
+    newCards.push(res)
+
+    const newOffered = trade.value.offeredCards.slice()
+    newOffered.splice(index, 1)
+
+    trade.value = {
+        stockedCards: newCards,
+        desiredCards: trade.value.desiredCards,
+        offeredCards: newOffered
+    }
+}
+
 </script>
 
 <template>
@@ -165,17 +251,24 @@ async function buildSettlement() {
         <GameRenderer ref="renderer" 
             :board="currentState.board" 
             :dice="lastDice" 
-            :stocked-cards="currentState.self.handCards" 
-            :offered-cards="[]"
+            :stocked-cards="trade == undefined ? currentState.self.handCards : trade.stockedCards"
             :allowed-actions="currentAllowedActions!"
-            :other-players="othersOverview"            
+            :other-players="othersOverview" 
+            :trade="tradeProps"
             other-players-display="radial"
             @dice-clicked="rollDice"
-            @resource-clicked="resourceClicked"
             @build-road="buildRoad"
             @build-settlement="buildSettlement"
             @build-city="buildCity"
-            @end-turn="endTurn"/>
+            @end-turn="endTurn"
+            @trade-menu="toggleTradeMenu"
+            @trade-with-player="offerTradeWithPlayer"
+            @trade-with-bank="bankTrade"
+            @resource-clicked="addOfferedCard"
+            @add-desired-card="card => trade?.desiredCards.push(card)"
+            @remove-desired-card="card => trade?.desiredCards.splice(trade?.desiredCards.indexOf(card), 1)"
+            @remove-offered-card="removeOfferedCard"
+        />
     </div>
 </template>
 

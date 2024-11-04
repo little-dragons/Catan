@@ -55,6 +55,7 @@ export async function initializeGame(io: SocketServerType, room: ServerLobbyRoom
             type: GamePhaseType.Initial,
             forward: true,
         },
+        tradeOffer: undefined
     }
 }
 

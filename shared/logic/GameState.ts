@@ -2,6 +2,7 @@ import { Board } from "./Board.js"
 import { Color, FullPlayer, RedactedPlayer, redactPlayer } from "./Player.js"
 import { BuildingType } from "./Buildings.js"
 import { type Freeze } from "structurajs"
+import { Resource } from "./Resource.js"
 
 export enum GamePhaseType {
     Initial,
@@ -22,6 +23,7 @@ export type PublicGameState = Freeze<{
     phase: GamePhase
     board: Board
     currentPlayer: Color
+    tradeOffer: [Resource[], Resource[]] | undefined
     players: RedactedPlayer[]
 }>
 export type RedactedGameState = Freeze<PublicGameState & {
@@ -32,6 +34,7 @@ export type FullGameState = Freeze<{
     phase: GamePhase,
     board: Board
     currentPlayer: Color
+    tradeOffer: [Resource[], Resource[]] | undefined
     players: FullPlayer[]
 }>
 
@@ -42,7 +45,8 @@ export function redactGameState(state: FullGameState): PublicGameState {
         board: state.board,
         currentPlayer: state.currentPlayer,
         players: state.players.map(redactPlayer),
-        phase: state.phase
+        phase: state.phase,
+        tradeOffer: state.tradeOffer
     }
 }
 

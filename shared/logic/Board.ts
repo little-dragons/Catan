@@ -1,5 +1,5 @@
 import type { Color } from "./Player.js"
-import type { Orientation } from "./Orientation.js"
+import { neighborTile, type Orientation } from "./Orientation.js"
 import type { Resource } from "./Resource.js"
 import { BuildingType } from "./Buildings.js"
 import { v4 } from "uuid"
@@ -64,6 +64,10 @@ function crossingAdjacentToTile(crossing: Coordinate, tile: Coordinate): boolean
 
 export function crossingAdjacentToLand(crossing: Coordinate, board: Board): boolean {
     return board.tiles.filter(x => x[0].type == 'desert' || x[0].type == 'resource').some(x => crossingAdjacentToTile(crossing, x[1]))
+}
+
+function crossingAdjacentToPort(tile: PortTile, tileCoordinate: Coordinate, crossing: Coordinate) {
+    return crossingAdjacentToTile(crossing, tileCoordinate) && crossingAdjacentToTile(crossing, neighborTile(tileCoordinate, tile.orientation))
 }
 
 
@@ -211,4 +215,11 @@ export function gainedResources(board: Board, color: Color, number: number): Res
     }
 
     return accumulated
+}
+
+export function portsForColor(board: Board, color: Color): readonly (Resource | 'general')[] {
+    const ports = mapFilter(board.tiles, x => x[0].type == 'port' ? x as Freeze<[PortTile, Coordinate]> : undefined)
+    const buildingCoords = board.buildings.filter(x => x[0] == color).map(x => x[1])
+    const adjacentPorts = ports.filter(([tile, coord]) => buildingCoords.some(cross => crossingAdjacentToPort(tile, coord, cross)))
+    return adjacentPorts.map(x => x[0].resource)
 }

@@ -4,6 +4,7 @@ import { BuildingType, ConnectionType, availableBuildingPositions, buildingCost,
 import { RedactedGameState, FullGameState, nextTurn, GamePhaseType, MinimalGameState, DieResult } from "./GameState.js"
 import { Color, FullPlayer } from "./Player.js"
 import { Resource } from "./Resource.js"
+import { canTradeWithBank, isValidOffer } from "./Trade.js"
 
 
 export enum GameActionType {
@@ -12,7 +13,9 @@ export enum GameActionType {
     PlaceCity,
     PlaceRoad,
     PlaceInitial,
+    BankTrade,
     TradeOffer,
+    TradeAccept,
     FinishTurn
 }
 
@@ -32,10 +35,15 @@ export type GameAction = {
     type: GameActionType.PlaceRoad
     coordinates: Road
 } | {
+    type: GameActionType.BankTrade
+    offeredCards: readonly Resource[]
+    desiredCards: readonly Resource[]
+} | {
     type: GameActionType.TradeOffer
-    tradePartner: 'bank' | 'player'
-    givenCards: Resource[]
-    receivedCards: Resource[]
+    offeredCards: readonly Resource[]
+    desiredCards: readonly Resource[]
+} | {
+    type: GameActionType.TradeAccept
 } | {
     type: GameActionType.PlaceInitial
     settlement: Coordinate
@@ -62,7 +70,9 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
             placeRoad: false,
             placeSettlement: false,
             rollDice: false,
-            tradeOffer: false, // TODO trade offers might also be accepted if it is not my turn
+            bankTrade: false,
+            tradeAccept: true, // TODO not accurate, has cards, correct game phase?
+            tradeOffer: false
         }
 
     if (state.phase.type == GamePhaseType.Initial) 
@@ -73,7 +83,9 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
             placeRoad: false,
             placeSettlement: false,
             rollDice: false,
-            tradeOffer: false,
+            bankTrade: false,
+            tradeAccept: false,
+            tradeOffer: false
         }
 
     if (state.phase.diceRolled == false) 
@@ -84,7 +96,9 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
             placeRoad: false,
             placeSettlement: false,
             rollDice: true,
-            tradeOffer: false,
+            bankTrade: false,
+            tradeAccept: false,
+            tradeOffer: false
             // TODO with dev cards, a robber might also be played
         }
 
@@ -106,7 +120,9 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
         placeRoad: canPlaceRoad,
         placeSettlement: canPlaceSettlement,
         rollDice: false,
-        tradeOffer: true, // TODO maybe not allow trade offers if I don't have cards?
+        bankTrade: true,
+        tradeAccept: false,
+        tradeOffer: true // TODO maybe not allow trade offers if I don't have cards?
     }
 }
 
@@ -149,7 +165,8 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                 currentPlayer: nextColor,
                 phase: nextPhase,
                 players: newPlayers,
-                board: newBoard
+                board: newBoard,
+                tradeOffer: undefined
             }
         }
     }
@@ -207,7 +224,7 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
 
 
             return produce(state, newState => {
-                newState.players[executorIdx] = { color: executor, handCards: newCards }
+                newState.players[executorIdx].handCards = unfreeze(newCards)
                 newState.board.roads.push([executor, unfreeze(action.coordinates)])
             })
         }
@@ -223,7 +240,7 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                 return undefined
 
             return produce(state, newState => {
-                newState.players[executorIdx] = { color: executor, handCards: newCards }
+                newState.players[executorIdx].handCards = unfreeze(newCards)
                 newState.board.buildings.push([executor, unfreeze(action.coordinate), BuildingType.Settlement])
                 return newState
             })
@@ -246,8 +263,29 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                 return undefined
 
             return produce(state, newState => {
-                newState.players[executorIdx] = { color: executor, handCards: newCards }
+                newState.players[executorIdx].handCards = unfreeze(newCards)
                 newState.board.buildings[validSettlementIdx] = [executor, unfreeze(action.coordinate), BuildingType.City]
+            })
+        }
+        else if (action.type == GameActionType.BankTrade) {
+            if (state.phase.diceRolled == false)
+                return undefined
+
+            if (!isValidOffer(action.offeredCards, action.desiredCards))
+                return undefined
+
+            if(!canTradeWithBank(state.board, executor, action.offeredCards, action.desiredCards))
+                return undefined
+
+            const cardsAfterPayment = tryRemoveCards(state.players[executorIdx]!.handCards, action.offeredCards)
+
+            if (cardsAfterPayment == undefined)
+                return undefined
+
+            const newCards = cardsAfterPayment.concat(action.desiredCards)
+
+            return produce(state, newState => {
+                newState.players[executorIdx].handCards = newCards
             })
         }
     }
@@ -258,27 +296,21 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
 
 function tryBuyBuilding(cards: readonly Resource[], type: BuildingType) {
     const cost = buildingCost(type)
+    return tryRemoveCards(cards, cost)
+}
+function tryBuyConnection(cards: readonly Resource[], type: ConnectionType) {
+    const cost = connectionCost(type)
+    return tryRemoveCards(cards, cost)
+}
 
+function tryRemoveCards(cards: readonly Resource[], toRemove: readonly Resource[]): readonly Resource[] | undefined {
     let result = [...cards]
-    for (const res of cost) {
+    for (const res of toRemove) {
         const idx = result.indexOf(res)
         if (idx < 0)
             return undefined
         else
             result.splice(idx, 1)
-    }
-    return result
-}
-function tryBuyConnection(cards: readonly Resource[], type: ConnectionType) {
-    const cost = connectionCost(type)
-
-    let result = [...cards]
-    for (const res of cost) {
-        const idx = result.indexOf(res)
-        if (idx < 0)
-            return undefined
-        else
-        result.splice(idx, 1)
     }
     return result
 }
