@@ -1,4 +1,4 @@
-import { LoginClientEventMap, LoginServerEventMap, validUsername } from "shared";
+import { LoginClientEventMap, LoginServerEventMap, UserType, validUsername } from "shared";
 import { addUserToDb, getUserFromDb } from "../database/CommonQueries.js";
 import bcrypt from 'bcrypt'
 import { type Socket } from 'socket.io'
@@ -31,7 +31,7 @@ export function acceptLoginEvents(io: SocketServerType, socket: LoginSocket) {
         if (nameRes != true)
             return cb(nameRes)
 
-        socket.data = { user: { type: 'guest', name } }
+        socket.data = { user: { type: UserType.Guest, name } }
         return cb(true)
     })
 
@@ -47,7 +47,7 @@ export function acceptLoginEvents(io: SocketServerType, socket: LoginSocket) {
         const dbRes = await addUserToDb(name, hashed)
         // TODO check result
 
-        socket.data = { user: { type: 'member', name } }
+        socket.data = { user: { type: UserType.Member, name } }
         return cb(true)
     })
 
@@ -82,7 +82,7 @@ export function acceptLoginEvents(io: SocketServerType, socket: LoginSocket) {
         if (!await bcrypt.compare(password, dbUser.password_hash))
             return cb('invalid password')
     
-        socket.data = { user: { type: 'member', name }}
+        socket.data = { user: { type: UserType.Member, name } }
         return cb(true)
     })
 

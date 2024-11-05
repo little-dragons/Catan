@@ -1,5 +1,10 @@
+export enum UserType {
+    Guest,
+    Member,
+}
+
 export type User = {
-    type: 'guest' | 'member'
+    type: UserType
     name: string
 }
 

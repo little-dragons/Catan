@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import UsernameInput from '@/inputs/UsernameInput.vue';
 import PasswordInput from '@/inputs/PasswordInput.vue';
 import Modal from '@/misc/Modal.vue'
 import LabeledInput from '@/inputs/LabeledInput.vue';
-import { currentUser, sendGuestLogin, sendMemberLogin, sendRegister } from '@/socketWrapper/Login';
 import { PopupSeverity, usePopups } from '@/popup/Popup';
+import { useCurrentUserStore, UserOPResult, UserStatus } from '@/socket/CurrentUserStore';
 
 const emit = defineEmits(['close'])
-const { insert: insertPopup } = usePopups()
+const popups = usePopups()
+const currentUser = useCurrentUserStore()
 
 const showRegister = ref(false)
 
@@ -16,39 +17,103 @@ const passwordInput = ref<null | InstanceType<typeof PasswordInput>>(null)
 const guestnameInput = ref<null | InstanceType<typeof UsernameInput>>(null)
 const membernameInput = ref<null | InstanceType<typeof UsernameInput>>(null)
 
-watch(currentUser, newVal => {
-    if (newVal.status == 'logged in')
-        emit('close')
 
-    else if (newVal.status == 'anonymous' && newVal.lastRejectedLogin != undefined) {
-        const request = newVal.lastRejectedLogin.request
-        const err = newVal.lastRejectedLogin.error
+async function memberLogin() {
+    if (membernameInput.value?.result == null || passwordInput.value?.result == null)
+        return
 
-        if (request == 'login data request')
-            return alert('Cannot ask for login data info')
-
-        if (err == 'name in use') {
-            if (request.type == 'guest')
-                guestnameInput.value?.nameInUse(request.name)
-            if (request.type == 'member')
-                membernameInput.value?.nameInUse(request.name)
-        }
-        else if (err == 'invalid password')
-            passwordInput.value?.invalidPassword(passwordInput.value.result!)
-        else if (err == 'name unknown')
-            membernameInput.value?.nameUnknown(request.name)
+    const result = await currentUser.tryMemberLogin(membernameInput.value.result, passwordInput.value.result)
+    switch (result) {
+        case UserOPResult.Success:
+            emit('close')
+            return
+        case UserOPResult.ServerDeniedLoginData:
+        case UserOPResult.ServerError:
+            popups.insert({
+                title: 'Server error',
+                message: 'The server responded incorrectly to a login attempt. Cause unclear.',
+                autoCloses: false,
+                severity: PopupSeverity.Warning
+            })
+            return
+        case UserOPResult.NotAnonymous:
+            popups.insert({
+                title: 'Already logged in',
+                message: 'You cannot login as you are already logged in or attempt tp.',
+                autoCloses: true,
+                severity: PopupSeverity.Warning
+            })
+            return
+        case UserOPResult.InvalidPassword:
+            passwordInput.value.invalidPassword(passwordInput.value.result)
+            return
+        case UserOPResult.UnknownUsername:
+            membernameInput.value.disallowName(membernameInput.value.result)
+            return
     }
-    else if (newVal.status == 'anonymous' && newVal.lastRejectedLogin == undefined) {
-        insertPopup({ 
-            title: 'Unexpected logout',
-            message: `User login status changed to anonymous in login modal, but without rejection reason? Triggered logout elsewhere?`,
-            severity: PopupSeverity.Info,
-            autoCloses: true,
-        })
-    }
-})
+}
 
-const pending = computed(() => currentUser.value.status == 'pending')
+async function guestLogin() {
+    if (guestnameInput.value?.result == null)
+        return
+
+    const result = await currentUser.tryGuestLogin(guestnameInput.value.result)
+    switch (result) {
+        case UserOPResult.Success:
+            emit('close')
+            return
+
+        case UserOPResult.NotAnonymous:
+            popups.insert({
+                title: 'Already logged in',
+                message: 'You cannot login as you are already logged in or attempt to.',
+                autoCloses: true,
+                severity: PopupSeverity.Warning
+            })
+            return
+
+        case UserOPResult.ForbiddenUsername:
+            guestnameInput.value.disallowName(guestnameInput.value.result)
+            return
+            
+        case UserOPResult.ServerError:
+            popups.insert({
+                title: 'Server error',
+                message: 'The server responded incorrectly to a login attempt. Cause unclear.',
+                autoCloses: false,
+                severity: PopupSeverity.Warning
+            })
+            return
+    }
+}
+
+async function register() {
+    if (membernameInput.value?.result == undefined || passwordInput.value?.result == undefined)
+        return
+
+    const result = await currentUser.tryRegister(membernameInput.value.result, passwordInput.value.result)
+    switch (result) {
+        case UserOPResult.Success:
+            emit('close')
+            return
+
+        case UserOPResult.NotAnonymous:
+            popups.insert({
+                title: 'Already logged in',
+                message: 'You cannot login as you are already logged in or attempt to.',
+                autoCloses: true,
+                severity: PopupSeverity.Warning
+            })
+            return
+
+        case UserOPResult.ForbiddenUsername:
+            membernameInput.value.disallowName(membernameInput.value.result)
+            return
+        case UserOPResult.ServerError:
+    }
+}
+
+const pending = computed(() => currentUser.info.status == UserStatus.Pending)
 // TODO having two modals is not very nice, but also kind of convenient. Maybe there is a better solution?
 </script>
 
@@ -75,7 +140,7 @@ const pending = computed(() => currentUser.value.status == 'pending')
                 <input
                     type="button"
                     value="Login"
-                    @click="() => sendMemberLogin(membernameInput?.result!, passwordInput?.result!)"
+                    @click="memberLogin"
                     :disabled="membernameInput?.result == null || passwordInput?.result == null"/>
             </form>
             <div class="vertical-line"/>
@@ -87,7 +152,7 @@ const pending = computed(() => currentUser.value.status == 'pending')
                 <input
                     type="button" 
                     value="Guest login" 
-                    @click="() => sendGuestLogin(guestnameInput?.result!)" 
+                    @click="guestLogin" 
                     :disabled="pending || guestnameInput?.result == null"/>
             </form>
         </div>
@@ -111,7 +176,7 @@ const pending = computed(() => currentUser.value.status == 'pending')
             <input
                 type="button"
                 value="Register"
-                @click="() => sendRegister(membernameInput?.result!, passwordInput?.result!)"
+                @click="register"
                 :disabled="pending || membernameInput?.result == null || passwordInput?.result == null"/>
         </form>
     </Modal>

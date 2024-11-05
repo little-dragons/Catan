@@ -18,14 +18,16 @@ defineExpose({
 const child = ref<null | InstanceType<typeof CustomInput>>(null)
 
 const invalidPasswords = [] as string[]
-function uiMessageValidPassword(password: string) {
-    const res = validPassword(password)
-    if (res == 'contains invalid characters')
-        return 'Some characters are not allowed' // TODO
-    if (res == 'password too short')
-        return 'The password is too short'
 
-    return true
+function uiMessageValidPassword(password: string) {
+    switch (validPassword(password)) {
+        case 'contains invalid characters':
+            return 'Some characters are not allowed' // TODO
+        case 'password too short':
+            return 'The password is too short'
+        case true:
+            return true
+    }
 }
 
 const rules: ((current: string) => true | string)[] = [

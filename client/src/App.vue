@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
-import { currentUser } from './socketWrapper/Login';
-import { currentRoom } from './socketWrapper/Room';
-import { provide, ref } from 'vue';
+import { ref } from 'vue';
 import LoginModal from './inputs/LoginModal.vue'
 import Popups from './popup/Popups.vue';
-
+import { UserType } from 'shared';
+import { useCurrentRoomStore } from './socket/CurrentRoomStore';
+import { useCurrentUserStore, UserStatus } from './socket/CurrentUserStore';
 
 const showLoginModal = ref(false)
+
+const currentRoom = useCurrentRoomStore()
+const currentUser = useCurrentUserStore()
 </script>
 
 <template>
@@ -20,14 +23,14 @@ const showLoginModal = ref(false)
             <RouterLink :to="{ name: 'roomList' }">Room List</RouterLink>
         </div>
         <div class="empty"/>
-        <div v-if="currentRoom != undefined">
+        <div v-if="currentRoom.info != undefined">
             <RouterLink :to="{ name: 'room' }">Current room</RouterLink>
         </div>
-        <div v-if="currentRoom != undefined" class="empty"/>
+        <div v-if="currentRoom.info != undefined" class="empty"/>
         <div>
-            <p v-if="currentUser.status == 'anonymous'">Not logged in. <span @click="() => showLoginModal = true" class="login-button">Login</span></p>
-            <p v-else-if="currentUser.status == 'pending'">Pending login...</p>
-            <p v-else-if="currentUser.status == 'logged in'">Logged in as {{ currentUser.user.name }}<span v-if="currentUser.user.type == 'guest'"> (Guest)</span></p>
+            <p v-if="currentUser.info.status == UserStatus.Anonymous">Not logged in. <span @click="() => showLoginModal = true" class="login-button">Login</span></p>
+            <p v-else-if="currentUser.info.status == UserStatus.Pending">Pending login...</p>
+            <p v-else-if="currentUser.info.status == UserStatus.LoggedIn">Logged in as {{ currentUser.info.user.name }}<span v-if="currentUser.info.user.type == UserType.Guest"> (Guest)</span></p>
             <p v-else>Error with login!</p>
         </div>
     </div>

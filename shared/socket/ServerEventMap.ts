@@ -10,7 +10,7 @@ export type MemberLoginError = 'invalid password' | 'name unknown' | 'already lo
 export type LoginError = 
     GuestLoginError | MemberLoginError | 'invalid socket state'
 
-export type ServerEventMap = LoginServerEventMap & RoomServerEventMap & GameServerEventMap
+export type ServerEventMap = LoginServerEventMap & RoomServerEventMap & GameServerEventMap & LobbyServerEventMap
 
 type Callback<T> = (arg: T) => void
 

@@ -1,35 +1,39 @@
 <script setup lang="ts">
-import { currentAuthUser } from '@/socketWrapper/Login';
-import { leaveRoomAndRedirect, startRoom, currentLobbyRoom } from '@/socketWrapper/Room';
 import Setting from './Setting.vue'
+import { watchEffect } from 'vue';
+import { PopupSeverity, usePopups } from '@/popup/Popup';
+import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
+import { useCurrentUserStore } from '@/socket/CurrentUserStore';
+import router from '@/misc/Router';
 
+const currentUser = useCurrentUserStore()
+const currentRoom = useCurrentRoomStore()
 
-if (currentLobbyRoom.value == undefined || currentAuthUser.value == undefined)
-    alert('Invalid config')
+async function tryStart() {
+    const result = await currentRoom.tryStart()
+    // TODO
+    console.log(result)
+}
 </script>
 
 <template>
-    <div v-if="currentLobbyRoom == undefined || currentAuthUser == undefined">
-        <p>Invalid config, progamming error. Please reload the page.</p>
-    </div>
-
-    <h1 v-else>Lobby - {{ currentLobbyRoom?.name }}</h1>
+    <h1>Lobby - {{ currentRoom.info!.name }}</h1>
     <div class="container">
         <div class="left">            
             <div class="default-grid-header-layout grid-columns">
                 <p>User name</p>
             </div>
-            <div v-for="user in currentLobbyRoom?.users" class="grid-columns default-grid-layout">
+            <div v-for="user in currentRoom.info?.users" class="grid-columns default-grid-layout">
                 <p>{{ user[0].name }}</p>
             </div>
         </div>
         <div class="right">
-            <Setting name="requiredVictoryPoints" :value="currentLobbyRoom!.settings.requiredVictoryPoints" :allowChange="false"/>
-            <Setting name="longestRoadMinimum" :value="currentLobbyRoom!.settings.longestRoadMinimum" :allowChange="false"/>
-            <Setting name="seed" :value="currentLobbyRoom!.settings.seed" :allowChange="false"/>
+            <Setting name="requiredVictoryPoints" :value="currentRoom.info!.settings.requiredVictoryPoints" :allowChange="false"/>
+            <Setting name="longestRoadMinimum" :value="currentRoom.info!.settings.longestRoadMinimum" :allowChange="false"/>
+            <Setting name="seed" :value="currentRoom.info!.settings.seed" :allowChange="false"/>
             <div class="buttons">
-                <button @click="leaveRoomAndRedirect">Leave room</button>
-                <button @click="startRoom" :disabled="currentLobbyRoom?.owner.name != currentAuthUser?.name">Start room</button>
+                <button @click="() => { router.push('/').then(currentRoom.tryLeave) }">Leave room</button>
+                <button @click="tryStart" :disabled="currentRoom.info!.owner.name != currentUser.loggedInInfo!.name">Start room</button>
             </div>
         </div>
     </div>

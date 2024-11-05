@@ -1,24 +1,26 @@
 <script setup lang="ts">
-import { currentGameRoom } from '@/socketWrapper/Room';
-import { BuildingType, Color, GamePhaseType, Resource, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedGameState, type RedactedPlayer, type Road, type User } from 'shared';
-import { computed, ref, shallowRef, triggerRef, watchEffect } from 'vue';
-import { gameSocket } from '@/socketWrapper/Socket';
+import { BuildingType, Color, GamePhaseType, Resource, RoomType, UserType, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type User } from 'shared';
+import { computed, ref, watchEffect } from 'vue';
 import GameRenderer from './gameDrawing/GameRenderer.vue';
 import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vue';
 import { UserSelectionType } from './gameDrawing/board/UserSelection';
 import { type GameAction, GameActionType } from 'shared/logic/GameAction';
 import { PopupSeverity, usePopups } from '@/popup/Popup';
 import type { TradeRendererProps } from './gameDrawing/TradeRenderer.vue';
+import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 
 const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
-const { insert: insertPopup } = usePopups()
+
+const popups = usePopups()
+const room = useCurrentRoomStore()
+const state = computed(() => room.info?.type == RoomType.InGame ? room.info.state : undefined)
 
 async function sendAction(action: GameAction) {
-    const response = await gameSocket.emitWithAck('gameAction', action)
+    const response = await room.trySendAction(action)
     if (response == true)
         return
 
-    insertPopup({ 
+    popups.insert({ 
         title: 'Invalid action',
         message: `Game action did not complete correctly: ${response}, trying to reload local state.`,
         severity: PopupSeverity.Warning,
@@ -28,32 +30,21 @@ async function sendAction(action: GameAction) {
     // TODO handle errors elegantly. An idea is given below
     // potentially, if a action is rejected, the state may be completely wrong. Probably, triggering the state 
     // again will not destroy it further, only potentially help
-
-    triggerRef(recompute)
 }
-const recompute = shallowRef(undefined)
-const currentState = computed(() => {
-    // when recompute is triggered, this function is recomputed
-    recompute.value
 
-    if (currentGameRoom.value?.state != undefined)
-        return currentGameRoom.value.state as unknown as RedactedGameState
-    else
-        return undefined
-})
 const currentAllowedActions = computed(() => {
-    if (currentState.value == undefined)
+    if (state.value == undefined)
         return undefined
     else
-        return allowedActionsForMe(currentState.value)
+        return allowedActionsForMe(state.value)
 })
 
 const others = computed<[User, RedactedPlayer][]>(() => {
-    if (currentState.value == undefined || currentGameRoom.value == undefined)
+    if (state.value == undefined || room.info == undefined)
         return []
 
-    const otherUsers: [User, Color][] = currentGameRoom.value.users.filter(x => x[1] != currentState.value?.self.color)
-    return otherUsers.map(user => [user[0], currentState.value?.players.find(player => player.color == user[1])!] as [User, RedactedPlayer])
+    const otherUsers: [User, Color][] = room.info.users.filter(x => x[1] != state.value?.self.color)
+    return otherUsers.map(user => [user[0], state.value?.players.find(player => player.color == user[1])!] as [User, RedactedPlayer])
 })
 
 const othersOverview = computed(() => {
@@ -61,19 +52,19 @@ const othersOverview = computed(() => {
         ([user, player]) => {  
             return {
                 name: user.name,
-                isGuest: user.type == 'guest',
+                isGuest: user.type == UserType.Guest,
                 color: player.color,
-                victoryPoints: victoryPointsFromRedacted(currentState.value!, player.color),
+                victoryPoints: victoryPointsFromRedacted(state.value!, player.color),
             }
         })
 })
 
 // set interaction points for initial placements
 watchEffect(async () => {
-    if (currentAllowedActions.value?.placeInitial != true || renderer.value == null)
+    if (currentAllowedActions.value?.placeInitial != true || renderer.value == null || state.value == undefined)
         return
 
-    const freeSettlements = availableBuildingPositions(currentState.value!.board, undefined)
+    const freeSettlements = availableBuildingPositions(state.value.board, undefined)
 
     let settlement: Coordinate | undefined = undefined
     let road: Road | undefined = undefined
@@ -99,10 +90,10 @@ async function rollDice() {
 
 const lastDice = ref<undefined | readonly [DieResult, DieResult]>(undefined)
 watchEffect(() => {
-    if (currentState.value?.phase.type == GamePhaseType.Normal && currentState.value.phase.diceRolled != false)
-        lastDice.value = currentState.value.phase.diceRolled
+    if (state.value?.phase.type == GamePhaseType.Normal && state.value.phase.diceRolled != false)
+        lastDice.value = state.value.phase.diceRolled
 
-    if (currentState.value?.phase.type == GamePhaseType.Normal && lastDice.value == undefined)
+    if (state.value?.phase.type == GamePhaseType.Normal && lastDice.value == undefined)
         // this is to show the dice once the user is first required to roll them
         lastDice.value = [3, 3]
 })
@@ -119,7 +110,7 @@ const tradeProps = computed<TradeRendererProps | undefined>(() => {
         return undefined
 
     return {
-        canTradeWithBank: canTradeWithBank(currentState.value!.board, currentState.value!.self.color, trade.value.offeredCards, trade.value.desiredCards),
+        canTradeWithBank: canTradeWithBank(state.value!.board, state.value!.self.color, trade.value.offeredCards, trade.value.desiredCards),
         validOffer: isValidOffer(trade.value.offeredCards, trade.value.desiredCards),
         desiredCards: trade.value.desiredCards,
         offeredCards: trade.value.offeredCards
@@ -135,13 +126,13 @@ async function endTurn() {
 
 
 async function buildCity() {
-    if (currentAllowedActions.value?.placeCity != true || renderer.value == null || currentState.value == undefined)
+    if (currentAllowedActions.value?.placeCity != true || renderer.value == null || state.value == undefined)
         return
 
     const possiblePositions = 
-        currentState.value.board.buildings
+        state.value.board.buildings
             .filter(([color, coord, type]) => 
-                color == currentState.value!.self.color &&
+                color == state.value!.self.color &&
                 type == BuildingType.Settlement)
             .map(x => x[1])
 
@@ -152,11 +143,11 @@ async function buildCity() {
         sendAction({ type: GameActionType.PlaceCity, coordinate: settlement })
 }
 async function buildRoad() {
-    if (currentAllowedActions.value?.placeRoad != true || renderer.value == null || currentState.value == undefined)
+    if (currentAllowedActions.value?.placeRoad != true || renderer.value == null || state.value == undefined)
         return
 
     const data = 
-        availableRoadPositions(currentState.value.board, currentState.value.self.color)
+        availableRoadPositions(state.value.board, state.value.self.color)
 
     const road = await renderer.value.getUserSelection(UserSelectionType.Connection, data)
 
@@ -164,11 +155,11 @@ async function buildRoad() {
         sendAction({ type: GameActionType.PlaceRoad, coordinates: road })
 }
 async function buildSettlement() {
-    if (currentAllowedActions.value?.placeSettlement != true || renderer.value == null || currentState.value == undefined)
+    if (currentAllowedActions.value?.placeSettlement != true || renderer.value == null || state.value == undefined)
         return
 
     const possiblePositions = 
-        availableBuildingPositions(currentState.value.board, currentState.value.self.color)
+        availableBuildingPositions(state.value.board, state.value.self.color)
 
     const settlement = await renderer.value.getUserSelection(UserSelectionType.Crossing, possiblePositions)
 
@@ -187,13 +178,13 @@ async function bankTrade() {
     trade.value = undefined
 }
 function toggleTradeMenu() {
-    if (currentState.value == undefined)
+    if (state.value == undefined)
         return
 
 
     if (trade.value == undefined) {
         trade.value = {
-            stockedCards: currentState.value?.self.handCards,
+            stockedCards: state.value?.self.handCards,
             desiredCards: [],
             offeredCards: []
         }
@@ -247,11 +238,11 @@ function removeOfferedCard(res: Resource) {
 </script>
 
 <template>
-    <div v-if="currentState != undefined" class="container">
+    <div v-if="state != undefined" class="container">
         <GameRenderer ref="renderer" 
-            :board="currentState.board" 
+            :board="state.board" 
             :dice="lastDice" 
-            :stocked-cards="trade == undefined ? currentState.self.handCards : trade.stockedCards"
+            :stocked-cards="trade == undefined ? state.self.handCards : trade.stockedCards"
             :allowed-actions="currentAllowedActions!"
             :other-players="othersOverview" 
             :trade="tradeProps"
@@ -279,6 +270,4 @@ function removeOfferedCard(res: Resource) {
     flex-direction: row;
     height: 90vh;
 }
-
 </style>
-

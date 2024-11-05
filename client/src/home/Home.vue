@@ -1,32 +1,33 @@
 <script setup lang="ts">
-import { currentAuthUser, currentUser, sendGuestLogin } from '@/socketWrapper/Login';
-import { sendLogout } from '@/socketWrapper/Logout';
-import { createRoomAndRedirect, currentRoom } from '@/socketWrapper/Room';
 import { isDevelopment } from '@/misc/Globals';
-import { inject, ref, watch } from 'vue';
+import { ref } from 'vue';
 import { v4 } from 'uuid';
 import { Color, defaultBoard, GamePhaseType, Resource, type History } from 'shared';
 import HistoryComponent from '@/game/History.vue';
 import { usePopups, PopupSeverity } from '@/popup/Popup';
+import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
+import { useCurrentUserStore, UserStatus } from '@/socket/CurrentUserStore';
+import router from '@/misc/Router';
 
-function debugLogin() {
-    sendGuestLogin(`debugUser${v4().substring(0, 5)}`)
+const currentUser = useCurrentUserStore()
+const currentRoom = useCurrentRoomStore()
 
-    watch(currentAuthUser, () => {
-        createRoomAndRedirect(`debugRoom${v4().substring(0, 5)}`)
-    }, { once: true })
+async function debugLogin() {
+    await currentUser.tryGuestLogin(`debugUser${v4().substring(0, 5)}`)
+    await currentRoom.tryCreate(`debugRoom${v4().substring(0, 5)}`)
+    router.push({ name: 'room' })
 }
 
-const { insert: insertPopup } = usePopups()
+const popups = usePopups()
 
 function triggerNotification() {
-    insertPopup({
+    popups.insert({
         message: 'This popup should automatically close',
         severity: PopupSeverity.Warning,
         title: 'Title',
         autoCloses: true
     })
-    insertPopup({
+    popups.insert({
         message: 'This popup should NOT automatically close',
         severity: PopupSeverity.Error,
         title: 'Title2',
@@ -44,7 +45,8 @@ const exampleHistory: History = {
         },
         players: [ 
             { color: Color.Blue, handCards: [Resource.Brick, Resource.Grain] }, 
-            { color: Color.Green, handCards: [Resource.Grain, Resource.Grain] } ]
+            { color: Color.Green, handCards: [Resource.Grain, Resource.Grain] } ],
+        tradeOffer: undefined
     }
 }
 const showHistory = ref(false)
@@ -54,8 +56,8 @@ const showHistory = ref(false)
 <template>
     <h1>Home</h1>
 
-    <button @click="sendLogout" v-if="currentUser.status == 'logged in'">Logout</button>
-    <button v-if="isDevelopment" @click="debugLogin" :disabled="currentAuthUser != undefined || currentRoom != undefined">
+    <button @click="currentUser.tryLogout" v-if="currentUser.info.status == UserStatus.LoggedIn">Logout</button>
+    <button v-if="isDevelopment" @click="debugLogin" :disabled="currentUser.info.status != UserStatus.Anonymous || currentRoom.info != undefined">
         Login and create debug room
     </button>
     <button v-if="isDevelopment" @click="() => showHistory = !showHistory">
