@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import CreateRoomModal from '../inputs/CreateRoomModal.vue';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import { useRoomListStore } from '@/socket/Socket';
@@ -15,13 +15,18 @@ async function tryJoin(roomId: string) {
     // TODO
     router.push('/room')
 }
+
+onMounted(() => roomList.autoRefresh = true)
+onUnmounted(() => roomList.autoRefresh = false)
 </script>
 
 <template>
     <h1>Room list</h1>
     <input type="button" value="Create Room" @click="() => showCreateRoomsModal = true" :disabled="!currentRoom.canJoin"
         title="To create a room, you have to be logged in." />
-    <input type="button" value="Refresh" @click="roomList.update" />
+    <input type="button" value="Refresh" @click="roomList.update"/>
+    <input type="checkbox" id="autoRefresh" value="Refresh" v-model="roomList.autoRefresh"/>
+    <label for="autoRefresh">Auto refresh</label>
     <div class="grid-columns heading default-grid-header-layout">
         <p>Room name</p>
         <p>Players</p>
