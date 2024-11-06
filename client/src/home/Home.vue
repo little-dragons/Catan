@@ -42,11 +42,11 @@ const exampleHistory: History = {
         phase: {
             diceRolled: [5, 5],
             type: GamePhaseType.Normal,
+            tradeOffers: []
         },
         players: [ 
             { color: Color.Blue, handCards: [Resource.Brick, Resource.Grain] }, 
-            { color: Color.Green, handCards: [Resource.Grain, Resource.Grain] } ],
-        tradeOffer: undefined
+            { color: Color.Green, handCards: [Resource.Grain, Resource.Grain] } ]
     }
 }
 const showHistory = ref(false)

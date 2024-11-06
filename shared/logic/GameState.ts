@@ -3,6 +3,7 @@ import { Color, FullPlayer, RedactedPlayer, redactPlayer } from "./Player.js"
 import { BuildingType } from "./Buildings.js"
 import { type Freeze } from "structurajs"
 import { Resource } from "./Resource.js"
+import { OpenTradeOffer } from "./Trade.js"
 
 export enum GamePhaseType {
     Initial,
@@ -16,14 +17,17 @@ export type GamePhase = Freeze<{
     forward: boolean
 } | {
     type: GamePhaseType.Normal
-    diceRolled: false | [DieResult, DieResult]
+    diceRolled: false
+} | {
+    type: GamePhaseType.Normal
+    diceRolled: [DieResult, DieResult]
+    tradeOffers: OpenTradeOffer[]
 }>
 
 export type PublicGameState = Freeze<{
     phase: GamePhase
     board: Board
     currentPlayer: Color
-    tradeOffer: [Resource[], Resource[]] | undefined
     players: RedactedPlayer[]
 }>
 export type RedactedGameState = Freeze<PublicGameState & {
@@ -34,7 +38,6 @@ export type FullGameState = Freeze<{
     phase: GamePhase,
     board: Board
     currentPlayer: Color
-    tradeOffer: [Resource[], Resource[]] | undefined
     players: FullPlayer[]
 }>
 
@@ -46,7 +49,6 @@ export function redactGameState(state: FullGameState): PublicGameState {
         currentPlayer: state.currentPlayer,
         players: state.players.map(redactPlayer),
         phase: state.phase,
-        tradeOffer: state.tradeOffer
     }
 }
 

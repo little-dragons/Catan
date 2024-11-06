@@ -1,5 +1,5 @@
 import { Freeze } from "structurajs"
-import { Resource } from "./Resource.js"
+import { CardList } from "./Resource.js"
 
 export type RedactedPlayer = Freeze<{
     color: Color,
@@ -8,7 +8,7 @@ export type RedactedPlayer = Freeze<{
 
 export type FullPlayer = Freeze<{
     color: Color,
-    handCards: Resource[],
+    handCards: CardList,
 }>
 
 export function redactPlayer(player: FullPlayer): RedactedPlayer {
@@ -23,7 +23,7 @@ export enum Color {
 }
 export const allColors: readonly Color[] = [Color.Yellow, Color.Orange, Color.Red, Color.Green, Color.Blue]
 
-export function stringColor(c: Color) {
+export function cssColor(c: Color) {
     switch (c) {
         case Color.Yellow: 
             return 'Yellow'

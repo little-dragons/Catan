@@ -12,7 +12,6 @@ const currentRoom = useCurrentRoomStore()
 async function tryStart() {
     const result = await currentRoom.tryStart()
     // TODO
-    console.log(result)
 }
 </script>
 

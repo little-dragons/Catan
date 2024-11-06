@@ -3,8 +3,8 @@ import { adjacentResourceTiles, adjacentRoads, availableRoadPositions, Board, Co
 import { BuildingType, ConnectionType, availableBuildingPositions, buildingCost, connectionCost, isAvailableBuildingPosition } from "./Buildings.js"
 import { RedactedGameState, FullGameState, nextTurn, GamePhaseType, MinimalGameState, DieResult } from "./GameState.js"
 import { Color, FullPlayer } from "./Player.js"
-import { Resource } from "./Resource.js"
-import { canTradeWithBank, isValidOffer } from "./Trade.js"
+import { addCards, Resource, tryRemoveCards } from "./Resource.js"
+import { canTradeWithBank, FinalizedTrade, isValidOffer, OpenTradeOffer, sameTradeOffer, TradeOffer } from "./Trade.js"
 
 
 export enum GameActionType {
@@ -14,8 +14,9 @@ export enum GameActionType {
     PlaceRoad,
     PlaceInitial,
     BankTrade,
-    TradeOffer,
-    TradeAccept,
+    OfferTrade,
+    AcceptTradeOffer,
+    FinalizeTrade,
     FinishTurn
 }
 
@@ -39,11 +40,15 @@ export type GameAction = {
     offeredCards: readonly Resource[]
     desiredCards: readonly Resource[]
 } | {
-    type: GameActionType.TradeOffer
+    type: GameActionType.OfferTrade
     offeredCards: readonly Resource[]
     desiredCards: readonly Resource[]
 } | {
-    type: GameActionType.TradeAccept
+    type: GameActionType.AcceptTradeOffer
+    trade: TradeOffer
+} | {
+    type: GameActionType.FinalizeTrade
+    trade: FinalizedTrade
 } | {
     type: GameActionType.PlaceInitial
     settlement: Coordinate
@@ -71,8 +76,9 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
             placeSettlement: false,
             rollDice: false,
             bankTrade: false,
-            tradeAccept: true, // TODO not accurate, has cards, correct game phase?
-            tradeOffer: false
+            acceptTradeOffer: state.phase.type == GamePhaseType.Normal && state.phase.diceRolled != false && state.phase.tradeOffers.length > 0,
+            offerTrade: false,
+            finalizeTrade: false
         }
 
     if (state.phase.type == GamePhaseType.Initial) 
@@ -84,8 +90,9 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
             placeSettlement: false,
             rollDice: false,
             bankTrade: false,
-            tradeAccept: false,
-            tradeOffer: false
+            acceptTradeOffer: false,
+            finalizeTrade: false,
+            offerTrade: false
         }
 
     if (state.phase.diceRolled == false) 
@@ -97,8 +104,9 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
             placeSettlement: false,
             rollDice: true,
             bankTrade: false,
-            tradeAccept: false,
-            tradeOffer: false
+            acceptTradeOffer: false,
+            finalizeTrade: false,
+            offerTrade: false
             // TODO with dev cards, a robber might also be played
         }
 
@@ -121,8 +129,9 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
         placeSettlement: canPlaceSettlement,
         rollDice: false,
         bankTrade: true,
-        tradeAccept: false,
-        tradeOffer: true // TODO maybe not allow trade offers if I don't have cards?
+        acceptTradeOffer: false,
+        finalizeTrade: state.phase.tradeOffers.some(x => x.acceptingColors.length > 0),
+        offerTrade: player.handCards.length > 0
     }
 }
 
@@ -165,12 +174,13 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                 currentPlayer: nextColor,
                 phase: nextPhase,
                 players: newPlayers,
-                board: newBoard,
-                tradeOffer: undefined
+                board: newBoard
             }
         }
+        else
+            return undefined
     }
-    else if (state.phase.type == GamePhaseType.Normal) {
+    if (state.phase.type == GamePhaseType.Normal) {
         if (action.type == GameActionType.RollDice) {
             if (state.phase.diceRolled != false)
                 return undefined
@@ -185,7 +195,7 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                 ({ color, handCards: oldCards }) => {
                     return {
                         color,
-                        handCards: oldCards.concat(gainedResources(state.board, color, sum))
+                        handCards: addCards(oldCards, gainedResources(state.board, color, sum))
                     }
                 }
             )
@@ -194,15 +204,16 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                 ...state,
                 phase: {
                     type: GamePhaseType.Normal,
-                    diceRolled: [die1, die2]
+                    diceRolled: [die1, die2],
+                    tradeOffers: []
                 },
                 players: newPlayers
             }
         }
-        else if (action.type == GameActionType.FinishTurn) {
-            if (state.phase.diceRolled == false)
-                return undefined
+        if (state.phase.diceRolled == false)
+            return undefined
 
+        if (action.type == GameActionType.FinishTurn) {
             const [nextColor, nextPhase] = nextTurn(state)
             return {
                 ...state,
@@ -211,9 +222,6 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
             }
         }
         else if (action.type == GameActionType.PlaceRoad) {
-            if (state.phase.diceRolled == false)
-                return undefined
-
             if (!isAvailableRoadPosition(state.board, action.coordinates, executor))
                 return undefined
 
@@ -229,9 +237,6 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
             })
         }
         else if (action.type == GameActionType.PlaceSettlement) {
-            if (state.phase.diceRolled == false)
-                return undefined
-
             if (!isAvailableBuildingPosition(action.coordinate, state.board, executor))
                 return undefined
 
@@ -246,9 +251,6 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
             })
         }
         else if (action.type == GameActionType.PlaceCity) {
-            if (state.phase.diceRolled == false)
-                return undefined
-
             const validSettlementIdx = 
                 state.board.buildings.findIndex(([color, coord, type]) => 
                     sameCoordinate(action.coordinate, coord) && 
@@ -268,12 +270,6 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
             })
         }
         else if (action.type == GameActionType.BankTrade) {
-            if (state.phase.diceRolled == false)
-                return undefined
-
-            if (!isValidOffer(action.offeredCards, action.desiredCards))
-                return undefined
-
             if(!canTradeWithBank(state.board, executor, action.offeredCards, action.desiredCards))
                 return undefined
 
@@ -288,8 +284,81 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                 newState.players[executorIdx].handCards = newCards
             })
         }
+        else if (action.type == GameActionType.OfferTrade) {
+            if (!isValidOffer(action.offeredCards, action.desiredCards))
+                return undefined
+            if (tryRemoveCards(state.players[executorIdx].handCards, action.offeredCards) == undefined)
+                return undefined
+
+            const tradeObj: OpenTradeOffer = {
+                acceptingColors: [],
+                desiredCards: action.desiredCards,
+                offeredCards: action.offeredCards,
+                offeringColor: executor
+            }
+
+            return {
+                ...state,
+                phase: {
+                    ...state.phase,
+                    tradeOffers: [...state.phase.tradeOffers, tradeObj]
+                }
+            }
+        }
+        else if (action.type == GameActionType.AcceptTradeOffer) {
+            const partnerCards = state.players[executorIdx].handCards
+
+            if (state.phase.tradeOffers.find(x => sameTradeOffer(x, action.trade)) == undefined)
+                return undefined
+            if (tryRemoveCards(partnerCards, action.trade.desiredCards) == undefined)
+                return undefined
+
+            return {
+                ...state,
+                phase: {
+                    ...state.phase,
+                    tradeOffers: produce(state.phase.tradeOffers, to => { 
+                        to.find(x => sameTradeOffer(x, action.trade))!.acceptingColors.push(executor)
+                        return to 
+                    })
+                }
+            }
+        }
+        else if (action.type == GameActionType.FinalizeTrade) {
+            const partnerColor = action.trade.tradePartner
+            const tradeObj = state.phase.tradeOffers.find(x => sameTradeOffer(x, action.trade))
+
+            if (tradeObj == undefined)
+                return undefined
+            if (!tradeObj.acceptingColors.includes(partnerColor))
+                return undefined
+
+            const partnerCards = state.players.find(x => x.color == partnerColor)
+            if (partnerCards == undefined)
+                return undefined
+
+            const newPartnerCards = tryRemoveCards(partnerCards.handCards, tradeObj.desiredCards)
+            const newPlayerCards = tryRemoveCards(state.players[executorIdx].handCards, tradeObj.offeredCards)
+            if (newPartnerCards == undefined ||
+                newPlayerCards == undefined)
+                return undefined
+
+            return {
+                ...state,
+                players: produce(state.players, newPlayers => {
+                    newPlayers.find(x => x.color == partnerColor)!.handCards = unfreeze(newPartnerCards)
+                    newPlayers[executorIdx].handCards = unfreeze(newPlayerCards)
+                    return newPlayers
+                }),
+                phase: {
+                    ...state.phase,
+                    tradeOffers: produce(state.phase.tradeOffers, to => to.toSpliced(to.findIndex(x => sameTradeOffer(x, tradeObj)), 1))
+                }
+            }
+        }
+        else
+            return undefined
     }
-    return undefined
 }
 
 
@@ -301,16 +370,4 @@ function tryBuyBuilding(cards: readonly Resource[], type: BuildingType) {
 function tryBuyConnection(cards: readonly Resource[], type: ConnectionType) {
     const cost = connectionCost(type)
     return tryRemoveCards(cards, cost)
-}
-
-function tryRemoveCards(cards: readonly Resource[], toRemove: readonly Resource[]): readonly Resource[] | undefined {
-    let result = [...cards]
-    for (const res of toRemove) {
-        const idx = result.indexOf(res)
-        if (idx < 0)
-            return undefined
-        else
-            result.splice(idx, 1)
-    }
-    return result
 }

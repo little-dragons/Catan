@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { stringColor, BuildingType, Color, Resource, type Board, type Coordinate, type PortTile, type Road, type Tile } from 'shared';
+import { cssColor, BuildingType, Color, Resource, type Board, type Coordinate, type PortTile, type Road, type Tile } from 'shared';
 import { distance } from '../Vector';
 import { tileHexagon, buildingWidth, buildingHeight, tileCenter, robberHeight, robberWidth, roadCorners, tileNumberPosition, tileNumberFontSize, crossingPosition, interactionPointRadius, roadCenter, tilePortPosition, tilePortIconSize, tileResourceIconPosition, tileResourceIconSize } from './Layout';
 import { UserSelectionType, type UserSelectionDataType, type UserSelectionOptions, type UserSelectionResult } from './UserSelection';
@@ -259,7 +259,7 @@ function getUserSelection<T extends UserSelectionType, Options extends UserSelec
         <g id="roads">
             <path v-for="road in board.roads"
                 :d="svgPath(roadCorners(road[1], tileRadius))"
-                :fill="stringColor(road[0])"/>
+                :fill="cssColor(road[0])"/>
         </g>
         <image id="robber"
             :x="tileCenter(board.robber, tileRadius)[0] - robberWidth(tileRadius) / 2"

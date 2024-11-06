@@ -76,7 +76,6 @@ export const useCurrentRoomStore = defineStore('room', () => {
         return RoomOPResult.Success
     }
     async function tryStart() {
-        console.log('try to start with user', user, 'and room', info.value)
         if (user.info.status != UserStatus.LoggedIn)
             return RoomOPResult.NotLoggedIn
 

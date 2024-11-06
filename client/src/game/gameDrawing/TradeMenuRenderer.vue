@@ -2,13 +2,13 @@
 import { Resource } from 'shared';
 import CardsRenderer from './CardsRenderer.vue';
 
-export type TradeRendererProps = {
+export type TradeMenuRendererProps = {
     offeredCards: readonly Resource[]
     desiredCards: readonly Resource[]
     validOffer: boolean
     canTradeWithBank: boolean
 }
-defineProps<TradeRendererProps>()
+defineProps<TradeMenuRendererProps>()
 defineEmits<{
     tradeWithPlayer: []
     tradeWithBank: []

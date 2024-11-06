@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { BuildingType, Color, GamePhaseType, Resource, RoomType, UserType, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type User } from 'shared';
+import { BuildingType, Color, GamePhaseType, Resource, RoomType, UserType, addCards, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, tryRemoveCard, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type User } from 'shared';
 import { computed, ref, watchEffect } from 'vue';
 import GameRenderer from './gameDrawing/GameRenderer.vue';
 import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vue';
 import { UserSelectionType } from './gameDrawing/board/UserSelection';
 import { type GameAction, GameActionType } from 'shared/logic/GameAction';
 import { PopupSeverity, usePopups } from '@/popup/Popup';
-import type { TradeRendererProps } from './gameDrawing/TradeRenderer.vue';
+import type { TradeMenuRendererProps } from './gameDrawing/TradeMenuRenderer.vue';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 
 const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
@@ -98,22 +98,21 @@ watchEffect(() => {
         lastDice.value = [3, 3]
 })
 
-const trade = ref<undefined | {
-    // stocked cards are the cards meant to display during a trade
-    // having a variable inside trade seems like the easiest way
+const tradeMenu = ref<undefined | {
+    // stocked cards are the cards meant to display during a trade menu interaction
     stockedCards: readonly Resource[],
     offeredCards: readonly Resource[],
-    desiredCards: Resource[] }>(undefined)
+    desiredCards: readonly Resource[] }>(undefined)
 
-const tradeProps = computed<TradeRendererProps | undefined>(() => {
-    if (trade.value == undefined)
+const tradeMenuProps = computed<TradeMenuRendererProps | undefined>(() => {
+    if (tradeMenu.value == undefined)
         return undefined
 
     return {
-        canTradeWithBank: canTradeWithBank(state.value!.board, state.value!.self.color, trade.value.offeredCards, trade.value.desiredCards),
-        validOffer: isValidOffer(trade.value.offeredCards, trade.value.desiredCards),
-        desiredCards: trade.value.desiredCards,
-        offeredCards: trade.value.offeredCards
+        canTradeWithBank: canTradeWithBank(state.value!.board, state.value!.self.color, tradeMenu.value.offeredCards, tradeMenu.value.desiredCards),
+        validOffer: isValidOffer(tradeMenu.value.offeredCards, tradeMenu.value.desiredCards),
+        desiredCards: tradeMenu.value.desiredCards,
+        offeredCards: tradeMenu.value.offeredCards
     }
 })
 
@@ -168,72 +167,82 @@ async function buildSettlement() {
 }
 
 async function offerTradeWithPlayer() {
-    // TODO
-}
-async function bankTrade() {
-    if (trade.value == undefined)
+    if (tradeMenu.value == undefined)
         return
 
-    sendAction({ type: GameActionType.BankTrade, offeredCards: trade.value.offeredCards, desiredCards: trade.value.desiredCards})
-    trade.value = undefined
+    sendAction({
+        type: GameActionType.OfferTrade,
+        desiredCards: tradeMenu.value.desiredCards,
+        offeredCards: tradeMenu.value.offeredCards
+    })
+
+    tradeMenu.value = undefined
+}
+async function bankTrade() {
+    if (tradeMenu.value == undefined)
+        return
+
+    sendAction({ type: GameActionType.BankTrade, offeredCards: tradeMenu.value.offeredCards, desiredCards: tradeMenu.value.desiredCards})
+    tradeMenu.value = undefined
 }
 function toggleTradeMenu() {
     if (state.value == undefined)
         return
 
 
-    if (trade.value == undefined) {
-        trade.value = {
+    if (tradeMenu.value == undefined) {
+        tradeMenu.value = {
             stockedCards: state.value?.self.handCards,
             desiredCards: [],
             offeredCards: []
         }
     }
     else {
-        trade.value = undefined
+        tradeMenu.value = undefined
     }
 }
 
 function addOfferedCard(res: Resource) {
-    if (trade.value == undefined)
+    if (tradeMenu.value == undefined)
         return
 
-    const index = trade.value.stockedCards.indexOf(res)
-    if (index < 0)
+    const newStocked = tryRemoveCard(tradeMenu.value.stockedCards, res)
+    if (newStocked == undefined)
         return
-
-    const newCards = trade.value.stockedCards.slice()
-    newCards.splice(index, 1)
     
-    const newOffered = trade.value.offeredCards.slice()
-    newOffered.push(res)
-
-    trade.value = {
-        stockedCards: newCards,
-        desiredCards: trade.value.desiredCards,
-        offeredCards: newOffered
+    tradeMenu.value = {
+        stockedCards: newStocked,
+        desiredCards: tradeMenu.value.desiredCards,
+        offeredCards: addCards(tradeMenu.value.offeredCards, [res])
     }
 }
 function removeOfferedCard(res: Resource) {
-    if (trade.value == undefined)
+    if (tradeMenu.value == undefined)
         return
 
-    const index = trade.value.offeredCards.indexOf(res)
-    if (index < 0)
+    const newOffered = tryRemoveCard(tradeMenu.value.offeredCards, res)
+    if (newOffered == undefined)
         return
-
-    const newCards = trade.value.stockedCards.slice()
-    newCards.push(res)
-
-    const newOffered = trade.value.offeredCards.slice()
-    newOffered.splice(index, 1)
-
-    trade.value = {
-        stockedCards: newCards,
-        desiredCards: trade.value.desiredCards,
+    
+    tradeMenu.value = {
+        stockedCards: addCards(tradeMenu.value.stockedCards, [res]),
+        desiredCards: tradeMenu.value.desiredCards,
         offeredCards: newOffered
     }
 }
+
+const othersOpenTradeOffers = computed(() => {
+    if (state.value?.phase.type != GamePhaseType.Normal || state.value.phase.diceRolled == false)
+        return []
+
+    state.value.phase.tradeOffers.filter(x => x.offeringColor != state.value?.self.color)
+})
+const ownOpenTradeOffers = computed(() => {
+    if (state.value?.phase.type != GamePhaseType.Normal || state.value.phase.diceRolled == false)
+        return []
+
+    state.value.phase.tradeOffers.filter(x => x.offeringColor == state.value?.self.color)
+})
 
 </script>
 
@@ -242,10 +251,10 @@ function removeOfferedCard(res: Resource) {
         <GameRenderer ref="renderer" 
             :board="state.board" 
             :dice="lastDice" 
-            :stocked-cards="trade == undefined ? state.self.handCards : trade.stockedCards"
+            :stocked-cards="tradeMenu == undefined ? state.self.handCards : tradeMenu.stockedCards"
             :allowed-actions="currentAllowedActions!"
             :other-players="othersOverview" 
-            :trade="tradeProps"
+            :trade-menu="tradeMenuProps"
             other-players-display="radial"
             @dice-clicked="rollDice"
             @build-road="buildRoad"
@@ -256,8 +265,8 @@ function removeOfferedCard(res: Resource) {
             @trade-with-player="offerTradeWithPlayer"
             @trade-with-bank="bankTrade"
             @resource-clicked="addOfferedCard"
-            @add-desired-card="card => trade?.desiredCards.push(card)"
-            @remove-desired-card="card => trade?.desiredCards.splice(trade?.desiredCards.indexOf(card), 1)"
+            @add-desired-card="(res) => { if (tradeMenu != undefined) tradeMenu.desiredCards = addCards(tradeMenu.desiredCards, [res])}"
+            @remove-desired-card="(res) => { if (tradeMenu != undefined) tradeMenu.desiredCards = tryRemoveCard(tradeMenu.desiredCards, res) ?? tradeMenu.desiredCards}"
             @remove-offered-card="removeOfferedCard"
         />
     </div>

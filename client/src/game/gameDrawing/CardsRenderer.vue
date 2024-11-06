@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Resource } from 'shared';
+import { Resource, type CardList } from 'shared';
 
 import brickCard from '@/assets/resource-cards/brick-card.svg'
 import grainCard from '@/assets/resource-cards/grain-card.svg'
@@ -20,7 +20,7 @@ function imageForResource(res: Resource): string {
 defineEmits<{
     resourceClicked: [res: Resource]
 }>()
-const props = defineProps<{ cards: readonly Resource[] }>()
+const props = defineProps<{ cards: CardList }>()
 
 function count(res: Resource) {
     return props.cards.filter(x => x == res).length

@@ -49,6 +49,7 @@ onUnmounted(() => roomList.autoRefresh = false)
 </template>
 
 <style scoped>
+@import '../assets/base.css';
 
 .grid-columns {
     grid-template-columns: 55% 15% 20% 10%;

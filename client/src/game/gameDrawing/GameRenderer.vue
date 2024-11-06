@@ -7,7 +7,7 @@ import { onMounted, ref } from 'vue';
 import CardsRenderer from './CardsRenderer.vue';
 import PlayerOverviewRenderer, { type PlayerOverviewData } from './PlayerOverviewRenderer.vue';
 import type { GameActionAllowedMap } from 'shared/logic/GameAction';
-import TradeRenderer, { type TradeRendererProps } from './TradeRenderer.vue';
+import TradeRenderer, { type TradeMenuRendererProps } from './TradeMenuRenderer.vue';
 
 defineEmits<{
     diceClicked: []
@@ -31,7 +31,7 @@ defineProps<{
     allowedActions: GameActionAllowedMap
     otherPlayers: readonly PlayerOverviewData[]
     otherPlayersDisplay: 'radial' | 'grid'
-    trade: TradeRendererProps | undefined
+    tradeMenu: TradeMenuRendererProps | undefined
 
 }>()
 
@@ -79,8 +79,8 @@ defineExpose({ getUserSelection })
                 :enabled="!interactionRunning && allowedActions.rollDice"
                 @dice-clicked="() => $emit('diceClicked')"/>
             <TradeRenderer
-                v-if="trade != undefined"
-                v-bind="trade"
+                v-if="tradeMenu != undefined"
+                v-bind="tradeMenu"
                 @tradeWithPlayer="() => $emit('tradeWithPlayer')"
                 @tradeWithBank="() => $emit('tradeWithBank')"
                 @addDesiredCard="card => $emit('addDesiredCard', card)"
@@ -89,7 +89,7 @@ defineExpose({ getUserSelection })
             />
             <CardsRenderer class="cards" :cards="stockedCards" @resource-clicked="res => $emit('resourceClicked', res)"/>
             <div class="buttons">
-                <button class="default-button-colors" @click="() => $emit('tradeMenu')" :disabled="interactionRunning || !allowedActions.tradeOffer">Trade</button>
+                <button class="default-button-colors" @click="() => $emit('tradeMenu')" :disabled="interactionRunning || !allowedActions.offerTrade">Trade</button>
                 <button class="default-button-colors" @click="() => $emit('buildRoad')" :disabled="interactionRunning || !allowedActions.placeRoad">Road</button>
                 <button class="default-button-colors" @click="() => $emit('buildSettlement')" :disabled="interactionRunning || !allowedActions.placeSettlement">Settlement</button>
                 <button class="default-button-colors" @click="() => $emit('buildCity')" :disabled="interactionRunning || !allowedActions.placeCity">City</button>

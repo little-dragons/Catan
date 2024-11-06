@@ -1,8 +1,25 @@
 import { Board, portsForColor } from "./Board.js";
 import { Color } from "./Player.js";
-import { allResources, Resource } from "./Resource.js";
+import { allResources, CardList, Resource, sameCards } from "./Resource.js";
 
-export function isValidOffer(offered: readonly Resource[], desired: readonly Resource[]) {
+
+export type TradeOffer = {
+    offeringColor: Color
+    offeredCards: CardList
+    desiredCards: CardList
+}
+
+export type OpenTradeOffer = TradeOffer & {
+    acceptingColors: Color[]
+}
+export type FinalizedTrade = TradeOffer & {
+    tradePartner: Color
+}
+
+export function sameTradeOffer(t1: TradeOffer, t2: TradeOffer) {
+    return t1.offeringColor == t2.offeringColor && sameCards(t1.offeredCards, t2.offeredCards) && sameCards(t1.desiredCards, t2.desiredCards)
+}
+export function isValidOffer(offered: CardList, desired: CardList) {
     if (offered.length === 0)
         return false
 
@@ -15,8 +32,7 @@ export function isValidOffer(offered: readonly Resource[], desired: readonly Res
     return true
 }
 
-
-function freeResourcesBy(offered: readonly Resource[], ports: readonly (Resource | 'general')[], resource: Resource) {
+function freeResourcesBy(offered: CardList, ports: readonly (Resource | 'general')[], resource: Resource) {
     const offeredCount = offered.filter(x => x === resource).length
     const ratio = 
         ports.includes(resource) ? 2 :
@@ -29,7 +45,7 @@ function freeResourcesBy(offered: readonly Resource[], ports: readonly (Resource
     return offeredCount / ratio
 }
 
-function allFreeResources(offered: readonly Resource[], ports: readonly (Resource | 'general')[]) {
+function allFreeResources(offered: CardList, ports: readonly (Resource | 'general')[]) {
     const allResults = allResources.map(x => freeResourcesBy(offered, ports, x))
     let sum = 0
     for (const res of allResults) {
@@ -40,7 +56,7 @@ function allFreeResources(offered: readonly Resource[], ports: readonly (Resourc
     return sum
 }
 
-export function canTradeWithBank(board: Board, color: Color, offered: readonly Resource[], desired: readonly Resource[]) {
+export function canTradeWithBank(board: Board, color: Color, offered: CardList, desired: CardList) {
     if (!isValidOffer(offered, desired))
         return false
 

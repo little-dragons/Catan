@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Color } from 'shared';
-import { stringColor } from 'shared';
+import { cssColor } from 'shared';
 
 
 export type PlayerOverviewData = {
@@ -15,7 +15,7 @@ defineProps<PlayerOverviewData>()
 
 <template>
     <div class="top">
-        <img class="picture" :style="`outline-color: ${stringColor(color)};`" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Obama_family_dog_in_the_Rose_Garden_%28cropped%29.jpg/640px-Obama_family_dog_in_the_Rose_Garden_%28cropped%29.jpg"/>
+        <img class="picture" :style="`outline-color: ${cssColor(color)};`" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Obama_family_dog_in_the_Rose_Garden_%28cropped%29.jpg/640px-Obama_family_dog_in_the_Rose_Garden_%28cropped%29.jpg"/>
         <div class="box">
             <div class="username">{{ name }}</div>
             <div class="grid">
