@@ -20,6 +20,8 @@
     
     --game-ui-backgroundcolor: antiquewhite;
     --game-ui-border: 1px solid black;
+
+    --player-overview-width: 200px
 }
 
 .default-button-colors {

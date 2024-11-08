@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { BuildingType, Color, GamePhaseType, Resource, RoomType, UserType, addCards, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameTradeOffer, tryRemoveCard, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User } from 'shared';
+import { BuildingType, Color, GamePhaseType, Resource, RoomType, UserType, addCards, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User } from 'shared';
 import { computed, ref, watchEffect } from 'vue';
 import GameRenderer from './gameDrawing/GameRenderer.vue';
 import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vue';
 import { UserSelectionType } from './gameDrawing/board/UserSelection';
 import { type GameAction, GameActionType } from 'shared/logic/GameAction';
 import { PopupSeverity, usePopups } from '@/popup/Popup';
-import type { TradeMenuRendererProps } from './gameDrawing/TradeMenuRenderer.vue';
+import type { TradeMenuRendererProps } from './gameDrawing/trade/TradeMenuRenderer.vue';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 
 const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
@@ -55,8 +55,17 @@ const othersOverview = computed(() => {
                 isGuest: user.type == UserType.Guest,
                 color: player.color,
                 victoryPoints: victoryPointsFromRedacted(state.value!, player.color),
-                openTrades: state.value?.phase.type != GamePhaseType.Normal || state.value.phase.diceRolled == false ? [] :
-                    state.value.phase.tradeOffers.filter(x => x.offeringColor != state.value!.self.color)
+                openTrades: 
+                    state.value?.phase.type != GamePhaseType.Normal || 
+                    state.value.phase.diceRolled == false 
+                        ? [] 
+                        : state.value.phase.tradeOffers
+                            .filter(x => x.offeringColor != state.value!.self.color)
+                            .map(offer => { return { 
+                                offer, 
+                                canAccept: tryRemoveCards(state.value!.self.handCards, offer.desiredCards) != undefined,
+                                ownColor: state.value!.self.color } 
+                            })
             }
         })
 })
@@ -123,6 +132,7 @@ async function endTurn() {
         return
 
     sendAction({ type: GameActionType.FinishTurn })
+    tradeMenu.value = undefined
 }
 
 
@@ -242,14 +252,13 @@ async function acceptTrade(trade: TradeOffer) {
     await sendAction({ type: GameActionType.AcceptTradeOffer, trade })
 }
 async function rejectTrade(trade: TradeOffer) {
-    // TODO
-    // if (state.value?.phase.type != GamePhaseType.Normal || state.value.phase.diceRolled == false)
-    //     return
+    if (state.value?.phase.type != GamePhaseType.Normal || state.value.phase.diceRolled == false)
+        return
 
-    // if (!state.value.phase.tradeOffers.some(x => sameTradeOffer(x, trade)))
-    //     return
+    if (!state.value.phase.tradeOffers.some(x => sameTradeOffer(x, trade)))
+        return
 
-    // await sendAction({ type: GameActionType.RejectTradeOffer, trade })
+    await sendAction({ type: GameActionType.RejectTradeOffer, trade })
 }
 async function finalizeTrade(trade: TradeOffer, color: Color) {
     if (state.value?.phase.type != GamePhaseType.Normal || state.value.phase.diceRolled == false)
@@ -261,7 +270,7 @@ async function finalizeTrade(trade: TradeOffer, color: Color) {
     await sendAction({ type: GameActionType.FinalizeTrade, trade: { ...trade, tradePartner: color } })
 }
 async function abortTrade(trade: TradeOffer) {
-
+    await sendAction({ type: GameActionType.AbortTrade, trade })
 }
 
 

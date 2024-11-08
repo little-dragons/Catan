@@ -7,8 +7,8 @@ import { onMounted, ref } from 'vue';
 import CardsRenderer from './CardsRenderer.vue';
 import PlayerOverviewRenderer, { type PlayerOverviewData } from './PlayerOverviewRenderer.vue';
 import type { GameActionAllowedMap } from 'shared/logic/GameAction';
-import TradeRenderer, { type TradeMenuRendererProps } from './TradeMenuRenderer.vue';
-import OwnTradeOverview from './OwnTradeOverview.vue';
+import TradeRenderer, { type TradeMenuRendererProps } from './trade/TradeMenuRenderer.vue';
+import OwnTradeOverview from './trade/OwnTradeOverview.vue';
 
 defineEmits<{
     diceClicked: []
@@ -118,30 +118,33 @@ defineExpose({ getUserSelection })
         <BoardRenderer class="board" :board="board" ref="boardRenderer"/>
         <div class="below">
             <div class="rowAbove">
-                <DiceRenderer 
-                    v-if="dice != undefined" 
-                    class="dice" 
-                    :dice="dice"
-                    :enabled="!interactionRunning && allowedActions.rollDice"
-                    @dice-clicked="() => $emit('diceClicked')"
+                <TradeRenderer
+                    v-if="tradeMenu != undefined"
+                    v-bind="tradeMenu"
+                    class="tradeRenderer"
+                    @tradeWithPlayer="() => $emit('tradeWithPlayer')"
+                    @tradeWithBank="() => $emit('tradeWithBank')"
+                    @addDesiredCard="card => $emit('addDesiredCard', card)"
+                    @removeDesiredCard="card => $emit('removeDesiredCard', card)"
+                    @removeOfferedCard="card => $emit('removeOfferedCard', card)"
                 />
-                <div class="ownTrades">
-                    <OwnTradeOverview 
-                        v-for="trade in ownTrades" 
-                        v-bind="trade" 
-                        @abort="() => $emit('abortTrade', trade)"
-                        @accept="color => $emit('finalizeTrade', trade, color)"/>
+                <div class="rightAnchored">
+                    <div class="ownTrades">
+                        <OwnTradeOverview 
+                            v-for="trade in ownTrades" 
+                            v-bind="trade" 
+                            @abort="() => $emit('abortTrade', trade)"
+                            @accept="color => $emit('finalizeTrade', trade, color)"/>
+                    </div>
+                    <DiceRenderer 
+                        v-if="dice != undefined" 
+                        class="dice" 
+                        :dice="dice"
+                        :enabled="!interactionRunning && allowedActions.rollDice"
+                        @dice-clicked="() => $emit('diceClicked')"
+                    />
                 </div>
             </div>
-            <TradeRenderer
-                v-if="tradeMenu != undefined"
-                v-bind="tradeMenu"
-                @tradeWithPlayer="() => $emit('tradeWithPlayer')"
-                @tradeWithBank="() => $emit('tradeWithBank')"
-                @addDesiredCard="card => $emit('addDesiredCard', card)"
-                @removeDesiredCard="card => $emit('removeDesiredCard', card)"
-                @removeOfferedCard="card => $emit('removeOfferedCard', card)"
-            />
             <CardsRenderer class="cards" :cards="stockedCards" @resource-clicked="res => $emit('stockedCardClicked', res)"/>
             <div class="buttons">
                 <button class="default-button-colors" @click="() => $emit('tradeMenu')" :disabled="interactionRunning || !allowedActions.offerTrade">Trade</button>
@@ -176,30 +179,30 @@ defineExpose({ getUserSelection })
 
 
 .middle-left-radial {
-    transform: rotate(var(--middle-rotate-angle)) translateX(calc(-1 * var(--radius))) rotate(calc(-1 * var(--middle-rotate-angle))) translateX(-50%);
+    transform: rotate(var(--middle-rotate-angle)) translateX(calc(-1 * var(--radius))) rotate(calc(-1 * var(--middle-rotate-angle))) translateX(calc(-1 * var(--player-overview-width)));
 }
 .middle-right-radial {
-    transform: rotate(calc(-1 * var(--middle-rotate-angle))) translateX(var(--radius)) rotate(var(--middle-rotate-angle)) translateX(-50%);
+    transform: rotate(calc(-1 * var(--middle-rotate-angle))) translateX(var(--radius)) rotate(var(--middle-rotate-angle)) translateX(calc(-1 * var(--player-overview-width)));
 }
 .upper-left-radial {
-    transform: rotate(var(--upper-rotate-angle)) translateX(calc(-1 * var(--radius))) rotate(calc(-1 * var(--upper-rotate-angle))) translateX(-50%);
+    transform: rotate(var(--upper-rotate-angle)) translateX(calc(-1 * var(--radius))) rotate(calc(-1 * var(--upper-rotate-angle))) translateX(calc(-1 * var(--player-overview-width)));
 }
 .upper-right-radial {
-    transform: rotate(calc(-1 * var(--upper-rotate-angle))) translateX(var(--radius)) rotate(var(--upper-rotate-angle)) translateX(-50%);
+    transform: rotate(calc(-1 * var(--upper-rotate-angle))) translateX(var(--radius)) rotate(var(--upper-rotate-angle)) translateX(calc(-1 * var(--player-overview-width)));
 }
 
 
 .middle-left-grid {
-    transform: translateX(calc(-1 * var(--grid-x-offset))) translateY(var(--middle-y-offset)) translateX(-50%);
+    transform: translateX(calc(-1 * var(--grid-x-offset))) translateY(var(--middle-y-offset)) translateX(calc(-1 * var(--player-overview-width)));
 }
 .middle-right-grid {
-    transform: translateX(var(--grid-x-offset)) translateY(var(--middle-y-offset)) translateX(-50%);
+    transform: translateX(var(--grid-x-offset)) translateY(var(--middle-y-offset)) translateX(calc(-1 * var(--player-overview-width)));
 }
 .upper-left-grid {
-    transform: translateX(calc(-1 * var(--grid-x-offset))) translateY(var(--upper-y-offset)) translateX(-50%);
+    transform: translateX(calc(-1 * var(--grid-x-offset))) translateY(var(--upper-y-offset)) translateX(calc(-1 * var(--player-overview-width)));
 }
 .upper-right-grid {
-    transform: translateX(var(--grid-x-offset)) translateY(var(--upper-y-offset)) translateX(-50%);
+    transform: translateX(var(--grid-x-offset)) translateY(var(--upper-y-offset)) translateX(calc(-1 * var(--player-overview-width)));
 }
 
 
@@ -228,16 +231,35 @@ defineExpose({ getUserSelection })
     flex-direction: row;
 }
 
-.dice {
+.rowAbove {    
     position: absolute;
-    right: 0;
-    top: -60px;
-    width: 100px;
-    z-index: 100;
-    margin-right: 0;
-    margin-left: auto;
+    top: -10px;
+    width: 100%;
 }
 
+.tradeRenderer {
+    position: absolute;
+    bottom: 0;
+    height: 200px;
+}
+
+.rightAnchored {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    height: 200px;
+    flex-direction: row;
+    align-items: end;
+}
+.rightAnchored > * {
+    margin-left: 1rem;
+}
+
+.dice {
+    width: 100px;
+    z-index: 100;
+}
 .cards {
     width: 100%;
 }
@@ -262,4 +284,8 @@ defineExpose({ getUserSelection })
     cursor: not-allowed;
 }
 
+.ownTrades > * {
+    height: 100px;
+    width: 250px;
+}
 </style>

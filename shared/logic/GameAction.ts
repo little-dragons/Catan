@@ -16,7 +16,9 @@ export enum GameActionType {
     BankTrade,
     OfferTrade,
     AcceptTradeOffer,
+    RejectTradeOffer,
     FinalizeTrade,
+    AbortTrade,
     FinishTurn
 }
 
@@ -47,8 +49,14 @@ export type GameAction = {
     type: GameActionType.AcceptTradeOffer
     trade: TradeOffer
 } | {
+    type: GameActionType.RejectTradeOffer
+    trade: TradeOffer
+} | {
     type: GameActionType.FinalizeTrade
     trade: FinalizedTrade
+} | {
+    type: GameActionType.AbortTrade
+    trade: TradeOffer
 } | {
     type: GameActionType.PlaceInitial
     settlement: Coordinate
@@ -77,8 +85,10 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
             rollDice: false,
             bankTrade: false,
             acceptTradeOffer: state.phase.type == GamePhaseType.Normal && state.phase.diceRolled != false && state.phase.tradeOffers.length > 0,
+            rejectTradeOffer: state.phase.type == GamePhaseType.Normal && state.phase.diceRolled != false && state.phase.tradeOffers.length > 0,
             offerTrade: false,
-            finalizeTrade: false
+            finalizeTrade: false,
+            abortTrade: false,
         }
 
     if (state.phase.type == GamePhaseType.Initial) 
@@ -91,7 +101,9 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
             rollDice: false,
             bankTrade: false,
             acceptTradeOffer: false,
+            rejectTradeOffer: false,
             finalizeTrade: false,
+            abortTrade: false,
             offerTrade: false
         }
 
@@ -105,7 +117,9 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
             rollDice: true,
             bankTrade: false,
             acceptTradeOffer: false,
+            rejectTradeOffer: false,
             finalizeTrade: false,
+            abortTrade: false,
             offerTrade: false
             // TODO with dev cards, a robber might also be played
         }
@@ -130,7 +144,9 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
         rollDice: false,
         bankTrade: true,
         acceptTradeOffer: false,
+        rejectTradeOffer: false,
         finalizeTrade: state.phase.tradeOffers.some(x => x.otherColors.some(y => y.status == TradeStatusByColor.Accepting)),
+        abortTrade: state.phase.tradeOffers.length > 0,
         offerTrade: player.handCards.length > 0
     }
 }
@@ -138,7 +154,7 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
 // mainly used in server to advance server state
 export function tryDoAction(state: FullGameState, executor: Color, action: GameAction): FullGameState | undefined {
     // TODO trading
-    if (executor != state.currentPlayer && action.type != GameActionType.AcceptTradeOffer)
+    if (executor != state.currentPlayer && action.type != GameActionType.AcceptTradeOffer && action.type != GameActionType.RejectTradeOffer)
         return undefined
 
     const executorIdx = state.players.findIndex(x => x.color == executor)
@@ -317,7 +333,7 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                 return undefined
 
             const currentStatus = tradeOffer.otherColors.find(x => x.color == executor)?.status
-            if (currentStatus == undefined || currentStatus != TradeStatusByColor.Undecided)
+            if (currentStatus == undefined)
                 return undefined
 
             return {
@@ -330,6 +346,31 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                             .otherColors
                             .find(y => y.color == executor)!
                             .status = TradeStatusByColor.Accepting
+                        return to 
+                    })
+                }
+            }
+        }
+        else if (action.type == GameActionType.RejectTradeOffer) {
+            const tradeOffer = state.phase.tradeOffers.find(x => sameTradeOffer(x, action.trade))
+            
+            if (tradeOffer == undefined)
+                return undefined
+
+            const currentStatus = tradeOffer.otherColors.find(x => x.color == executor)?.status
+            if (currentStatus == undefined)
+                return undefined
+
+            return {
+                ...state,
+                phase: {
+                    ...state.phase,
+                    tradeOffers: produce(state.phase.tradeOffers, to => { 
+                        to
+                            .find(x => sameTradeOffer(x, action.trade))!
+                            .otherColors
+                            .find(y => y.color == executor)!
+                            .status = TradeStatusByColor.Rejecting
                         return to 
                     })
                 }
@@ -364,6 +405,20 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                 phase: {
                     ...state.phase,
                     tradeOffers: produce(state.phase.tradeOffers, to => to.toSpliced(to.findIndex(x => sameTradeOffer(x, tradeObj)), 1))
+                }
+            }
+        }
+        else if (action.type == GameActionType.AbortTrade) {
+            const tradeOffer = state.phase.tradeOffers.find(x => sameTradeOffer(x, action.trade))
+            
+            if (tradeOffer == undefined || tradeOffer.offeringColor != executor)
+                return undefined
+
+            return {
+                ...state,
+                phase: {
+                    ...state.phase,
+                    tradeOffers: produce(state.phase.tradeOffers, to => to.toSpliced(to.findIndex(x => sameTradeOffer(x, tradeOffer)), 1))
                 }
             }
         }

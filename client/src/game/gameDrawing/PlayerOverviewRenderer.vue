@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { Color, OpenTradeOffer } from 'shared';
 import { cssColor, Resource } from 'shared';
-import OtherTradeOverview from './OtherTradeOverview.vue';
+import OtherTradeOverview from './trade/OtherTradeOverview.vue';
+import PlayerIcon from './PlayerIcon.vue';
 
 
 export type PlayerOverviewData = {
@@ -9,7 +10,7 @@ export type PlayerOverviewData = {
     color: Color
     victoryPoints: number
     isGuest: boolean
-    openTrades: readonly OpenTradeOffer[]
+    openTrades: { offer: OpenTradeOffer, canAccept: boolean, ownColor: Color }[]
 }
 defineProps<PlayerOverviewData>()
 defineEmits<{
@@ -21,7 +22,7 @@ defineEmits<{
 
 <template>
     <div class="top">
-        <img class="picture" :style="`outline-color: ${cssColor(color)};`" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Obama_family_dog_in_the_Rose_Garden_%28cropped%29.jpg/640px-Obama_family_dog_in_the_Rose_Garden_%28cropped%29.jpg"/>
+        <PlayerIcon class="picture" :color="color"/>
         <div class="box default-game-ui-props">
             <div class="username">{{ name }}</div>
             <div class="grid">
@@ -32,8 +33,8 @@ defineEmits<{
             v-for="trade in openTrades" 
             class="trade" 
             v-bind="trade"
-            @accept="() => $emit('acceptTrade', trade)"
-            @reject="() => $emit('rejectTrade', trade)"/>
+            @accept="() => $emit('acceptTrade', trade.offer)"
+            @reject="() => $emit('rejectTrade', trade.offer)"/>
     </div>
 </template>
 
@@ -45,23 +46,17 @@ defineEmits<{
     position: absolute;
     width: 50px;
     height: 50px;
-    border-radius: 50%;
-    border: 2px solid white;
-    outline-style: solid;
-    outline-width: 4px;
-    object-fit: cover;
     top: -13px;
     left: -13px;
     z-index: 1;
 }
 
 .trade {
-    width: 60%;
+    height: 100px;
 }
 
 .top {
     position: relative;
-    width: 200px;
     display: flex;
     flex-direction: column;
 }
@@ -75,6 +70,7 @@ defineEmits<{
 .box {
     border-radius: 10px;
     padding: 6px;
+    width: var(--player-overview-width);
 }
 
 .grid {
