@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BuildingType, Color, GamePhaseType, Resource, RoomType, UserType, addCards, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, tryRemoveCard, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type User } from 'shared';
+import { BuildingType, Color, GamePhaseType, Resource, RoomType, UserType, addCards, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameTradeOffer, tryRemoveCard, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User } from 'shared';
 import { computed, ref, watchEffect } from 'vue';
 import GameRenderer from './gameDrawing/GameRenderer.vue';
 import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vue';
@@ -55,6 +55,8 @@ const othersOverview = computed(() => {
                 isGuest: user.type == UserType.Guest,
                 color: player.color,
                 victoryPoints: victoryPointsFromRedacted(state.value!, player.color),
+                openTrades: state.value?.phase.type != GamePhaseType.Normal || state.value.phase.diceRolled == false ? [] :
+                    state.value.phase.tradeOffers.filter(x => x.offeringColor != state.value!.self.color)
             }
         })
 })
@@ -230,18 +232,44 @@ function removeOfferedCard(res: Resource) {
         offeredCards: newOffered
     }
 }
-
-const othersOpenTradeOffers = computed(() => {
+async function acceptTrade(trade: TradeOffer) {
     if (state.value?.phase.type != GamePhaseType.Normal || state.value.phase.diceRolled == false)
-        return []
+        return
 
-    state.value.phase.tradeOffers.filter(x => x.offeringColor != state.value?.self.color)
-})
+    if (!state.value.phase.tradeOffers.some(x => sameTradeOffer(x, trade)))
+        return
+
+    await sendAction({ type: GameActionType.AcceptTradeOffer, trade })
+}
+async function rejectTrade(trade: TradeOffer) {
+    // TODO
+    // if (state.value?.phase.type != GamePhaseType.Normal || state.value.phase.diceRolled == false)
+    //     return
+
+    // if (!state.value.phase.tradeOffers.some(x => sameTradeOffer(x, trade)))
+    //     return
+
+    // await sendAction({ type: GameActionType.RejectTradeOffer, trade })
+}
+async function finalizeTrade(trade: TradeOffer, color: Color) {
+    if (state.value?.phase.type != GamePhaseType.Normal || state.value.phase.diceRolled == false)
+        return
+
+    if (!state.value.phase.tradeOffers.some(x => sameTradeOffer(x, trade)))
+        return
+
+    await sendAction({ type: GameActionType.FinalizeTrade, trade: { ...trade, tradePartner: color } })
+}
+async function abortTrade(trade: TradeOffer) {
+
+}
+
+
 const ownOpenTradeOffers = computed(() => {
     if (state.value?.phase.type != GamePhaseType.Normal || state.value.phase.diceRolled == false)
         return []
 
-    state.value.phase.tradeOffers.filter(x => x.offeringColor == state.value?.self.color)
+    return state.value.phase.tradeOffers.filter(x => x.offeringColor == state.value?.self.color)
 })
 
 </script>
@@ -255,6 +283,7 @@ const ownOpenTradeOffers = computed(() => {
             :allowed-actions="currentAllowedActions!"
             :other-players="othersOverview" 
             :trade-menu="tradeMenuProps"
+            :own-trades="ownOpenTradeOffers"
             other-players-display="radial"
             @dice-clicked="rollDice"
             @build-road="buildRoad"
@@ -264,7 +293,11 @@ const ownOpenTradeOffers = computed(() => {
             @trade-menu="toggleTradeMenu"
             @trade-with-player="offerTradeWithPlayer"
             @trade-with-bank="bankTrade"
-            @resource-clicked="addOfferedCard"
+            @accept-trade="acceptTrade"
+            @reject-trade="rejectTrade"
+            @finalize-trade="finalizeTrade"
+            @abort-trade="abortTrade"
+            @stocked-card-clicked="addOfferedCard"
             @add-desired-card="(res) => { if (tradeMenu != undefined) tradeMenu.desiredCards = addCards(tradeMenu.desiredCards, [res])}"
             @remove-desired-card="(res) => { if (tradeMenu != undefined) tradeMenu.desiredCards = tryRemoveCard(tradeMenu.desiredCards, res) ?? tradeMenu.desiredCards}"
             @remove-offered-card="removeOfferedCard"

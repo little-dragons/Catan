@@ -6,7 +6,7 @@ export enum Resource {
     Brick
 }
 
-export const allResources: readonly Resource[] = [Resource.Grain, Resource.Ore, Resource.Lumber, Resource.Brick, Resource.Wool]
+export const allResources: readonly Resource[] = [Resource.Lumber, Resource.Brick, Resource.Wool, Resource.Grain, Resource.Ore]
 
 export type CardList = readonly Resource[]
 export function tryRemoveCard(cards: CardList, toRemove: Resource): CardList | undefined {

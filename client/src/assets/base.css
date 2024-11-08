@@ -17,6 +17,9 @@
     --modal-background-color: #ffffff;
     --modal-background-overlay: #f2f2f2af;
     --modal-border: 1px solid black;
+    
+    --game-ui-backgroundcolor: antiquewhite;
+    --game-ui-border: 1px solid black;
 }
 
 .default-button-colors {
@@ -52,6 +55,10 @@
     margin-top: 0;
 }
 
+.default-game-ui-props {
+    background-color: var(--game-ui-backgroundcolor);
+    border: var(--game-ui-border);
+}
 
 @media (prefers-color-scheme: dark) {
     :root {

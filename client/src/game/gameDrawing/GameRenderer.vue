@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Resource, type Board, type DieResult } from 'shared';
+import { Color, Resource, type Board, type DieResult, type OpenTradeOffer, type TradeOffer } from 'shared';
 import BoardRenderer from './board/Renderer.vue';
 import { UserSelectionType, type UserSelectionDataType, type UserSelectionOptions, type UserSelectionResult } from './board/UserSelection'
 import DiceRenderer from './DiceRenderer.vue';
@@ -8,10 +8,10 @@ import CardsRenderer from './CardsRenderer.vue';
 import PlayerOverviewRenderer, { type PlayerOverviewData } from './PlayerOverviewRenderer.vue';
 import type { GameActionAllowedMap } from 'shared/logic/GameAction';
 import TradeRenderer, { type TradeMenuRendererProps } from './TradeMenuRenderer.vue';
+import OwnTradeOverview from './OwnTradeOverview.vue';
 
 defineEmits<{
     diceClicked: []
-    resourceClicked: [resource: Resource]
     endTurn: []
     buildCity: []
     buildSettlement: []
@@ -19,9 +19,14 @@ defineEmits<{
     tradeMenu: []
     tradeWithPlayer: []
     tradeWithBank: []
+    stockedCardClicked: [resource: Resource]
     addDesiredCard: [card: Resource]
     removeDesiredCard: [card: Resource]
     removeOfferedCard: [card: Resource]
+    acceptTrade: [trade: TradeOffer]
+    rejectTrade: [trade: TradeOffer]
+    finalizeTrade: [trade: TradeOffer, color: Color]
+    abortTrade: [trade: TradeOffer]
 }>()
 
 defineProps<{
@@ -32,7 +37,7 @@ defineProps<{
     otherPlayers: readonly PlayerOverviewData[]
     otherPlayersDisplay: 'radial' | 'grid'
     tradeMenu: TradeMenuRendererProps | undefined
-
+    ownTrades: OpenTradeOffer[]
 }>()
 
 const boardContainer = ref<null | HTMLDivElement>(null)
@@ -60,24 +65,74 @@ defineExpose({ getUserSelection })
 
 <template>
     <div class="other-players">
-        <PlayerOverviewRenderer class="upper-left-radial" v-if="otherPlayers.length >= 1 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers[0]!"/>
-        <PlayerOverviewRenderer class="upper-left-grid" v-if="otherPlayers.length >= 1 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[0]!"/>
-        <PlayerOverviewRenderer class="upper-right-radial" v-if="otherPlayers.length >= 2 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers[1]!"/>
-        <PlayerOverviewRenderer class="upper-right-grid" v-if="otherPlayers.length >= 2 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[1]!"/>
-        <PlayerOverviewRenderer class="middle-left-radial" v-if="otherPlayers.length >= 3 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers[2]!"/>
-        <PlayerOverviewRenderer class="middle-left-grid" v-if="otherPlayers.length >= 3 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[2]!"/>
-        <PlayerOverviewRenderer class="middle-right-radial" v-if="otherPlayers.length >= 4 && otherPlayersDisplay == 'radial'" v-bind="otherPlayers[3]!"/>
-        <PlayerOverviewRenderer class="middle-right-grid" v-if="otherPlayers.length >= 4 && otherPlayersDisplay == 'grid'" v-bind="otherPlayers[3]!"/>
+        <PlayerOverviewRenderer 
+            v-if="otherPlayers.length >= 1 && otherPlayersDisplay == 'radial'" 
+            v-bind="otherPlayers[0]!"
+            @accept-trade="trade => $emit('acceptTrade', trade)"
+            @reject-trade="trade => $emit('rejectTrade', trade)"
+            class="upper-left-radial"/>
+        <PlayerOverviewRenderer 
+            v-if="otherPlayers.length >= 1 && otherPlayersDisplay == 'grid'" 
+            v-bind="otherPlayers[0]!"
+            @accept-trade="trade => $emit('acceptTrade', trade)"
+            @reject-trade="trade => $emit('rejectTrade', trade)"
+            class="upper-left-grid"/>
+        <PlayerOverviewRenderer 
+            v-if="otherPlayers.length >= 2 && otherPlayersDisplay == 'radial'" 
+            v-bind="otherPlayers[1]!"
+            @accept-trade="trade => $emit('acceptTrade', trade)"
+            @reject-trade="trade => $emit('rejectTrade', trade)"
+            class="upper-right-radial"/>
+        <PlayerOverviewRenderer 
+            v-if="otherPlayers.length >= 2 && otherPlayersDisplay == 'grid'" 
+            v-bind="otherPlayers[1]!"
+            @accept-trade="trade => $emit('acceptTrade', trade)"
+            @reject-trade="trade => $emit('rejectTrade', trade)"
+            class="upper-right-grid"/>
+        <PlayerOverviewRenderer 
+            v-if="otherPlayers.length >= 3 && otherPlayersDisplay == 'radial'" 
+            v-bind="otherPlayers[2]!"
+            @accept-trade="trade => $emit('acceptTrade', trade)"
+            @reject-trade="trade => $emit('rejectTrade', trade)"
+            class="middle-left-radial"/>
+        <PlayerOverviewRenderer 
+            v-if="otherPlayers.length >= 3 && otherPlayersDisplay == 'grid'" 
+            v-bind="otherPlayers[2]!"
+            @accept-trade="trade => $emit('acceptTrade', trade)"
+            @reject-trade="trade => $emit('rejectTrade', trade)"
+            class="middle-left-grid"/>
+        <PlayerOverviewRenderer 
+            v-if="otherPlayers.length >= 4 && otherPlayersDisplay == 'radial'" 
+            v-bind="otherPlayers[3]!"
+            @accept-trade="trade => $emit('acceptTrade', trade)"
+            @reject-trade="trade => $emit('rejectTrade', trade)"
+            class="middle-right-radial"/>
+        <PlayerOverviewRenderer 
+            v-if="otherPlayers.length >= 4 && otherPlayersDisplay == 'grid'" 
+            v-bind="otherPlayers[3]!"
+            @accept-trade="trade => $emit('acceptTrade', trade)"
+            @reject-trade="trade => $emit('rejectTrade', trade)"
+            class="middle-right-grid"/>
     </div>
     <div ref="boardContainer"class="main-box">   
         <BoardRenderer class="board" :board="board" ref="boardRenderer"/>
         <div class="below">
-            <DiceRenderer 
-                v-if="dice != undefined" 
-                class="dice" 
-                :dice="dice"
-                :enabled="!interactionRunning && allowedActions.rollDice"
-                @dice-clicked="() => $emit('diceClicked')"/>
+            <div class="rowAbove">
+                <DiceRenderer 
+                    v-if="dice != undefined" 
+                    class="dice" 
+                    :dice="dice"
+                    :enabled="!interactionRunning && allowedActions.rollDice"
+                    @dice-clicked="() => $emit('diceClicked')"
+                />
+                <div class="ownTrades">
+                    <OwnTradeOverview 
+                        v-for="trade in ownTrades" 
+                        v-bind="trade" 
+                        @abort="() => $emit('abortTrade', trade)"
+                        @accept="color => $emit('finalizeTrade', trade, color)"/>
+                </div>
+            </div>
             <TradeRenderer
                 v-if="tradeMenu != undefined"
                 v-bind="tradeMenu"
@@ -87,7 +142,7 @@ defineExpose({ getUserSelection })
                 @removeDesiredCard="card => $emit('removeDesiredCard', card)"
                 @removeOfferedCard="card => $emit('removeOfferedCard', card)"
             />
-            <CardsRenderer class="cards" :cards="stockedCards" @resource-clicked="res => $emit('resourceClicked', res)"/>
+            <CardsRenderer class="cards" :cards="stockedCards" @resource-clicked="res => $emit('stockedCardClicked', res)"/>
             <div class="buttons">
                 <button class="default-button-colors" @click="() => $emit('tradeMenu')" :disabled="interactionRunning || !allowedActions.offerTrade">Trade</button>
                 <button class="default-button-colors" @click="() => $emit('buildRoad')" :disabled="interactionRunning || !allowedActions.placeRoad">Road</button>

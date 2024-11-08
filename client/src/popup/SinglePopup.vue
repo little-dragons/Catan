@@ -31,11 +31,13 @@ const remaining = props.info.autoCloses ? popupLifetime - (Date.now() - props.in
 
 <style scoped>
 .box {
+    position: relative;
     background-color: white;
     border-radius: 5px;
     border: 1px solid black;
     margin: 8px;
     width: 200px;
+    z-index: 50;
 }
 
 

@@ -4,7 +4,7 @@ import { BuildingType, ConnectionType, availableBuildingPositions, buildingCost,
 import { RedactedGameState, FullGameState, nextTurn, GamePhaseType, MinimalGameState, DieResult } from "./GameState.js"
 import { Color, FullPlayer } from "./Player.js"
 import { addCards, Resource, tryRemoveCards } from "./Resource.js"
-import { canTradeWithBank, FinalizedTrade, isValidOffer, OpenTradeOffer, sameTradeOffer, TradeOffer } from "./Trade.js"
+import { canTradeWithBank, FinalizedTrade, isValidOffer, OpenTradeOffer, sameTradeOffer, TradeOffer, TradeStatusByColor } from "./Trade.js"
 
 
 export enum GameActionType {
@@ -130,7 +130,7 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
         rollDice: false,
         bankTrade: true,
         acceptTradeOffer: false,
-        finalizeTrade: state.phase.tradeOffers.some(x => x.acceptingColors.length > 0),
+        finalizeTrade: state.phase.tradeOffers.some(x => x.otherColors.some(y => y.status == TradeStatusByColor.Accepting)),
         offerTrade: player.handCards.length > 0
     }
 }
@@ -138,7 +138,7 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
 // mainly used in server to advance server state
 export function tryDoAction(state: FullGameState, executor: Color, action: GameAction): FullGameState | undefined {
     // TODO trading
-    if (executor != state.currentPlayer)
+    if (executor != state.currentPlayer && action.type != GameActionType.AcceptTradeOffer)
         return undefined
 
     const executorIdx = state.players.findIndex(x => x.color == executor)
@@ -291,7 +291,9 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                 return undefined
 
             const tradeObj: OpenTradeOffer = {
-                acceptingColors: [],
+                otherColors: state.players
+                    .filter(x => x.color != executor)
+                    .map(x => { return { color: x.color, status: TradeStatusByColor.Undecided } }),
                 desiredCards: action.desiredCards,
                 offeredCards: action.offeredCards,
                 offeringColor: executor
@@ -307,10 +309,15 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
         }
         else if (action.type == GameActionType.AcceptTradeOffer) {
             const partnerCards = state.players[executorIdx].handCards
-
-            if (state.phase.tradeOffers.find(x => sameTradeOffer(x, action.trade)) == undefined)
+            const tradeOffer = state.phase.tradeOffers.find(x => sameTradeOffer(x, action.trade))
+            
+            if (tradeOffer == undefined)
                 return undefined
             if (tryRemoveCards(partnerCards, action.trade.desiredCards) == undefined)
+                return undefined
+
+            const currentStatus = tradeOffer.otherColors.find(x => x.color == executor)?.status
+            if (currentStatus == undefined || currentStatus != TradeStatusByColor.Undecided)
                 return undefined
 
             return {
@@ -318,7 +325,11 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                 phase: {
                     ...state.phase,
                     tradeOffers: produce(state.phase.tradeOffers, to => { 
-                        to.find(x => sameTradeOffer(x, action.trade))!.acceptingColors.push(executor)
+                        to
+                            .find(x => sameTradeOffer(x, action.trade))!
+                            .otherColors
+                            .find(y => y.color == executor)!
+                            .status = TradeStatusByColor.Accepting
                         return to 
                     })
                 }
@@ -330,7 +341,7 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
 
             if (tradeObj == undefined)
                 return undefined
-            if (!tradeObj.acceptingColors.includes(partnerColor))
+            if (!tradeObj.otherColors.some(x => x.color == partnerColor && x.status == TradeStatusByColor.Accepting))
                 return undefined
 
             const partnerCards = state.players.find(x => x.color == partnerColor)
@@ -346,8 +357,8 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
             return {
                 ...state,
                 players: produce(state.players, newPlayers => {
-                    newPlayers.find(x => x.color == partnerColor)!.handCards = unfreeze(newPartnerCards)
-                    newPlayers[executorIdx].handCards = unfreeze(newPlayerCards)
+                    newPlayers.find(x => x.color == partnerColor)!.handCards = unfreeze(addCards(newPartnerCards, tradeObj.offeredCards))
+                    newPlayers[executorIdx].handCards = unfreeze(addCards(newPlayerCards, tradeObj.desiredCards))
                     return newPlayers
                 }),
                 phase: {

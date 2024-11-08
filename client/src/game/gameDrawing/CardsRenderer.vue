@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Resource, type CardList } from 'shared';
+import { countResources, Resource, type CardList } from 'shared';
 
 import brickCard from '@/assets/resource-cards/brick-card.svg'
 import grainCard from '@/assets/resource-cards/grain-card.svg'
@@ -20,26 +20,22 @@ function imageForResource(res: Resource): string {
 defineEmits<{
     resourceClicked: [res: Resource]
 }>()
-const props = defineProps<{ cards: CardList }>()
-
-function count(res: Resource) {
-    return props.cards.filter(x => x == res).length
-}
+defineProps<{ cards: CardList }>()
 
 </script>
 
 <template>
     <div class="container">
-        <div v-for="resource in [Resource.Lumber, Resource.Brick, Resource.Wool, Resource.Grain, Resource.Ore]" class="stack" @click="() => $emit('resourceClicked', resource)">
-            <img v-if="count(resource) < 8" v-for="_ in Array(count(resource)).keys()" 
-                :src="imageForResource(resource)"/>
+        <div v-for="[res, count] in Array.from(countResources(cards).entries()).filter(([_, count]) => count != 0)" class="stack" @click="() => $emit('resourceClicked', res)">
+            <img v-if="count < 8" v-for="_ in Array(count)" 
+                :src="imageForResource(res)" :title="`${Resource[res]} (x${count})`"/>
                
-            <img v-if="count(resource) >= 8" :src="imageForResource(resource)"/>
-            <img v-if="count(resource) >= 8" class="tighter" :src="imageForResource(resource)"/>
-            <img v-if="count(resource) >= 8" class="tighter" :src="imageForResource(resource)"/>
-            <img v-if="count(resource) >= 8" class="tighter" :src="imageForResource(resource)"/>
-            <img v-if="count(resource) >= 8" class="tighter" :src="imageForResource(resource)"/>
-            <div v-if="count(resource) >= 8" class="card-counter"><span>{{ count(resource) }}</span></div>
+            <img v-if="count >= 8" :src="imageForResource(res)" :title="`${Resource[res]} (x${count})`"/>
+            <img v-if="count >= 8" class="tighter" :src="imageForResource(res)" :title="`${Resource[res]} (x${count})`"/>
+            <img v-if="count >= 8" class="tighter" :src="imageForResource(res)" :title="`${Resource[res]} (x${count})`"/>
+            <img v-if="count >= 8" class="tighter" :src="imageForResource(res)" :title="`${Resource[res]} (x${count})`"/>
+            <img v-if="count >= 8" class="tighter" :src="imageForResource(res)" :title="`${Resource[res]} (x${count})`"/>
+            <div v-if="count >= 8" class="card-counter"><span>{{ count }}</span></div>
         </div>
     </div>
 </template>
@@ -47,24 +43,43 @@ function count(res: Resource) {
 <style scoped>
 @import '../../assets/base.css';
 
+
 .container {
     border: 1px solid black;
-    border-radius: 10px;
+    border-radius: 2px;
     display: flex;
-    flex-direction: row;
+    flex-direction: column-reverse;
     box-sizing: border-box;
-    padding: 5px;
     height: 100%;
+    padding: 0;
+    width: 100%;
+    background-color: white;
+    /*
+    This is a dirty trick to change the layout calcuation: Usually, 
+    percentages apply to the width of the containing element,
+    but as the stack height is the same for each card, and the 
+    stack width is not, the height is better for layouting.
+    Changing the writing mode, changes the layout calculation,
+    and makes the height the basis for percentage calculation.
+    This also reverses column and row for flex-direction.
+    */
+    writing-mode: vertical-rl;
 }
 
+
 .stack {
+    /* Remember that these percentages are in relation to the container's height,
+    and the flex-direction is reversed (see writing-mode) */
+    --stack-margin: 6.3%;
     position: relative;
-    height: 100%;
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: column;
+    margin: var(--stack-margin);
+    margin-right: 0;
+    height: calc(100% - var(--stack-margin));
 }
-.stack:not(:empty) {
-    margin-left: 5px;
+.stack:last-child {
+    margin-right: var(--stack-margin);
 }
 
 img {
@@ -73,10 +88,10 @@ img {
     user-select: none;
 }
 img:not(:first-child) {
-    margin-right: -1.9rem;
+    margin-right: -45%;
 }
 .tighter {
-    margin-right: -2.4rem !important;
+    margin-right: -55% !important;
 }
 img:hover {
     cursor: pointer;
@@ -84,6 +99,7 @@ img:hover {
 
 .card-counter {
     position: absolute;
+    writing-mode: horizontal-tb;
     font-size: xx-large;
     color: rgb(255, 255, 255);
     text-shadow: 2px 2px black;
