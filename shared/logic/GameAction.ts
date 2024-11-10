@@ -13,6 +13,7 @@ export enum GameActionType {
     PlaceCity,
     PlaceRoad,
     PlaceInitial,
+    PlaceRobber,
     BankTrade,
     OfferTrade,
     AcceptTradeOffer,
@@ -37,6 +38,10 @@ export type GameAction = {
 } | {
     type: GameActionType.PlaceRoad
     coordinates: Road
+} |{
+    type: GameActionType.PlaceRobber
+    coordinate: Coordinate
+    robbedColor: Color | undefined
 } | {
     type: GameActionType.BankTrade
     offeredCards: readonly Resource[]
@@ -82,6 +87,7 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
             placeInitial: false,
             placeRoad: false,
             placeSettlement: false,
+            placeRobber: false,
             rollDice: false,
             bankTrade: false,
             acceptTradeOffer: state.phase.type == GamePhaseType.Normal && state.phase.diceRolled != false && state.phase.tradeOffers.length > 0,
@@ -98,6 +104,7 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
             placeInitial: true,
             placeRoad: false,
             placeSettlement: false,
+            placeRobber: false,
             rollDice: false,
             bankTrade: false,
             acceptTradeOffer: false,
@@ -114,6 +121,7 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
             placeInitial: false,
             placeRoad: false,
             placeSettlement: false,
+            placeRobber: false,
             rollDice: true,
             bankTrade: false,
             acceptTradeOffer: false,
@@ -122,6 +130,22 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
             abortTrade: false,
             offerTrade: false
             // TODO with dev cards, a robber might also be played
+        }
+    if (state.phase.type == GamePhaseType.Robber) 
+        return {
+            finishTurn: false,
+            placeCity: false,
+            placeInitial: false,
+            placeRoad: false,
+            placeSettlement: false,
+            placeRobber: true,
+            rollDice: false,
+            bankTrade: false,
+            acceptTradeOffer: false,
+            rejectTradeOffer: false,
+            finalizeTrade: false,
+            abortTrade: false,
+            offerTrade: false
         }
 
     const hasSettlements = state.board.buildings.some(x => x[0] == myColor && x[2] == BuildingType.Settlement)
@@ -135,18 +159,20 @@ export function allowedActionsFor(state: MinimalGameState, player: FullPlayer): 
 
     
     // TODO a seven as a dice result, might need to require to move the robber
+
     return {
         finishTurn: true,
         placeInitial: false,
         placeCity: canPlaceCity,
         placeRoad: canPlaceRoad,
         placeSettlement: canPlaceSettlement,
+        placeRobber: false,
         rollDice: false,
         bankTrade: true,
         acceptTradeOffer: false,
         rejectTradeOffer: false,
-        finalizeTrade: state.phase.tradeOffers.some(x => x.otherColors.some(y => y.status == TradeStatusByColor.Accepting)),
-        abortTrade: state.phase.tradeOffers.length > 0,
+        finalizeTrade: state.phase.type == GamePhaseType.Normal && state.phase.tradeOffers.some(x => x.otherColors.some(y => y.status == TradeStatusByColor.Accepting)),
+        abortTrade: state.phase.type == GamePhaseType.Normal && state.phase.tradeOffers.length > 0,
         offerTrade: player.handCards.length > 0
     }
 }
@@ -205,6 +231,7 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
             const die2 = Math.floor(Math.random() * 6) + 1 as DieResult
 
             const sum = die1 + die2
+            const rolledSeven = sum == 7
 
             // dispense resources
             const newPlayers = state.players.map(
@@ -215,6 +242,20 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                     }
                 }
             )
+
+            if (rolledSeven)
+            {
+                return {
+                    ...state,
+                    phase: {
+                        type: GamePhaseType.Robber,
+                        diceRolled: [die1, die2],
+                        position: state.board.robber,
+                        robbedColor: undefined 
+                    },
+                    players: newPlayers
+                }
+            }
 
             return {
                 ...state,
@@ -229,8 +270,12 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
         if (state.phase.diceRolled == false)
             return undefined
 
+
         if (action.type == GameActionType.FinishTurn) {
             const [nextColor, nextPhase] = nextTurn(state)
+            console.log("current color executor" + executor)
+            console.log("next color" + nextColor)
+            console.log("next phase" + nextPhase)
             return {
                 ...state,
                 currentPlayer: nextColor,
@@ -420,6 +465,63 @@ export function tryDoAction(state: FullGameState, executor: Color, action: GameA
                     ...state.phase,
                     tradeOffers: produce(state.phase.tradeOffers, to => to.toSpliced(to.findIndex(x => sameTradeOffer(x, tradeOffer)), 1))
                 }
+            }
+        }
+        else
+            return undefined
+    }
+    if (state.phase.type == GamePhaseType.Robber) {
+        if (action.type == GameActionType.PlaceRobber) {
+            if (action.coordinate == state.phase.position)
+                return undefined
+
+            // TODO check that robbedColor is actually adjacent to new position
+            // and new position is valid
+
+            if (action.robbedColor == undefined) {
+                return {
+                    ...state,
+                    phase:{
+                        type: GamePhaseType.Normal,
+                        diceRolled: state.phase.diceRolled,
+                        tradeOffers: []
+                    }
+                }
+            }
+
+            const robbedPlayerIdx = state.players.findIndex(x => x.color == action.robbedColor)
+            if (robbedPlayerIdx < 0)
+                return undefined
+
+            const beforeRobbedPlayerHandCards = state.players[robbedPlayerIdx].handCards
+            
+            if (beforeRobbedPlayerHandCards.length == 0) {
+                return {
+                    ...state,
+                    phase:{
+                        type: GamePhaseType.Normal,
+                        diceRolled: state.phase.diceRolled,
+                        tradeOffers: []
+                    }
+                }
+            }
+
+            const robbedResource = beforeRobbedPlayerHandCards[Math.floor(Math.random() * beforeRobbedPlayerHandCards.length)]
+            const afterRobbedPlayerHandCards = tryRemoveCards(beforeRobbedPlayerHandCards, [robbedResource])!
+            const robbingPlayerHandCards = state.players[executorIdx].handCards.concat(robbedResource)
+            
+            return {
+                ...state,
+                phase:{
+                    type: GamePhaseType.Normal,
+                    diceRolled: state.phase.diceRolled,
+                    tradeOffers: []
+                },
+                players: produce(state.players, newPlayers => {
+                    newPlayers[executorIdx].handCards = unfreeze(robbingPlayerHandCards)
+                    newPlayers[robbedPlayerIdx].handCards = unfreeze(afterRobbedPlayerHandCards)
+                    return newPlayers
+                })
             }
         }
         else

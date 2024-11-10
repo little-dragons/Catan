@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BuildingType, Color, GamePhaseType, Resource, RoomType, UserType, addCards, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User } from 'shared';
+import { BuildingType, Color, GamePhaseType, Resource, RoomType, UserType, addCards, adjacentColorsToTile, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User } from 'shared';
 import { computed, ref, watchEffect } from 'vue';
 import GameRenderer from './gameDrawing/GameRenderer.vue';
 import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vue';
@@ -108,6 +108,31 @@ watchEffect(() => {
         // this is to show the dice once the user is first required to roll them
         lastDice.value = [3, 3]
 })
+
+// set interaction points for robber placement
+watchEffect(async () => {
+    if (state.value?.phase.type == GamePhaseType.Robber && state.value.currentPlayer == state.value.self.color) {
+        lastDice.value = state.value.phase.diceRolled
+        const possibleRobberPositions = 
+            state.value.board.tiles.filter(([tile, coord]) => 
+            (tile.type == 'resource' || tile.type == 'desert') && 
+            !sameCoordinate(coord, state.value!.board.robber)
+        ).map(x => x[1])
+        const newRobberCoordinate  = await renderer.value!.getUserSelection(UserSelectionType.Tile, possibleRobberPositions, { noAbort: true })
+
+        const adjacentColors = adjacentColorsToTile(state.value.board, newRobberCoordinate).filter(x => x != state.value!.self.color)
+        // TODO allow the user to select the color
+        const robbedColor = adjacentColors.length == 0 ? undefined : adjacentColors[0]
+        await sendAction(
+            { 
+                type: GameActionType.PlaceRobber, 
+                coordinate: newRobberCoordinate, 
+                robbedColor: robbedColor 
+            })
+        
+    }
+})
+
 
 const tradeMenu = ref<undefined | {
     // stocked cards are the cards meant to display during a trade menu interaction

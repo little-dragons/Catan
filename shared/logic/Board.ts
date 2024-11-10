@@ -93,6 +93,10 @@ export function adjacentRoads(crossing: Coordinate) {
     return adjacentCrossings(crossing).map(other => [crossing, other] as Road)
 }
 
+export function adjacentColorsToTile(board: Board, tile: Coordinate): readonly Color[] {
+    return board.buildings.filter(x => crossingAdjacentToTile(x[1], tile)).map(x => x[0])
+}
+
 function crossingsForColor(board: Board, color: Color) {
     const buildingCrossingsForColor = board.buildings.filter(x => x[0] == color).map(x => x[1])
     const roadCrossingsForColor = board.roads.filter(x => x[0] == color).map(x => x[1])
@@ -223,3 +227,4 @@ export function portsForColor(board: Board, color: Color): readonly (Resource | 
     const adjacentPorts = ports.filter(([tile, coord]) => buildingCoords.some(cross => crossingAdjacentToPort(tile, coord, cross)))
     return adjacentPorts.map(x => x[0].resource)
 }
+

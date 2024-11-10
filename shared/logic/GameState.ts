@@ -1,4 +1,4 @@
-import { Board } from "./Board.js"
+import { Board, Coordinate } from "./Board.js"
 import { Color, FullPlayer, RedactedPlayer, redactPlayer } from "./Player.js"
 import { BuildingType } from "./Buildings.js"
 import { type Freeze } from "structurajs"
@@ -7,6 +7,7 @@ import { OpenTradeOffer } from "./Trade.js"
 
 export enum GamePhaseType {
     Initial,
+    Robber,
     Normal
 }
 
@@ -22,7 +23,13 @@ export type GamePhase = Freeze<{
     type: GamePhaseType.Normal
     diceRolled: [DieResult, DieResult]
     tradeOffers: OpenTradeOffer[]
-}>
+} | {
+    type: GamePhaseType.Robber
+    diceRolled: [DieResult, DieResult]
+    position: Coordinate
+    robbedColor: Color | undefined
+}
+>
 
 export type PublicGameState = Freeze<{
     phase: GamePhase
