@@ -31,11 +31,12 @@ function iconForStatus(status: TradeStatusByColor) {
 <template>
 <div class="top">
     <PlayerIcon class="icon" :color="color" :icon="icon"/>
-    <img 
-        :src="iconForStatus(status)" 
-        class="status" 
+    <button 
         @click="() => enabled ? $emit('statusClicked') : ''"
-        :class="enabled ? 'hoverable' : ''"/>
+        class="status"            
+        :disabled="!enabled">
+            <img :src="iconForStatus(status)"/>
+    </button>
 </div>
 </template>
 
@@ -49,18 +50,28 @@ function iconForStatus(status: TradeStatusByColor) {
     height: 50%;
     z-index: 1;
 }
-.hoverable:hover {
-    cursor: pointer;
-}
 
-.status {
+button {
+    display: block;
     margin-top: -10%;
     height: 50%;
-    background-color: rgba(86, 51, 51, 0.152);
-    border: 1px solid black;
-    border-radius: 2px;
     padding-top: 3px;
     object-fit: scale-down;
     box-sizing: border-box;
+    border: 1px solid black;
+    border-radius: 2px;
+}
+button > img {
+    height: 100%;
+}
+button:disabled {
+    background-color: rgba(86, 51, 51, 0.152);
+}
+button:not(:disabled) {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    background: linear-gradient(215deg, #f5f5f5, #d7d7d7);
+}
+button:not(:disabled):hover {
+    cursor: pointer;
 }
 </style>

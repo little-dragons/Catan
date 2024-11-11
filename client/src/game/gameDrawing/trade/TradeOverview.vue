@@ -31,12 +31,12 @@ defineEmits<{
     <div style="width: 100%;">
         <div class="players">
             <PlayerTradeStatus 
-                    v-for="other in others"
-                    :color="other.color"
-                    icon="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Obama_family_dog_in_the_Rose_Garden_%28cropped%29.jpg/640px-Obama_family_dog_in_the_Rose_Garden_%28cropped%29.jpg"
-                    :status="other.status"
-                    :enabled="other.enabled"
-                    @status-clicked="() => $emit('acceptColor', other.color)"
+                v-for="other in others"
+                :color="other.color"
+                icon="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Obama_family_dog_in_the_Rose_Garden_%28cropped%29.jpg/640px-Obama_family_dog_in_the_Rose_Garden_%28cropped%29.jpg"
+                :status="other.status"
+                :enabled="other.enabled"
+                @status-clicked="() => $emit('acceptColor', other.color)"
             />
         </div>
         <slot/>

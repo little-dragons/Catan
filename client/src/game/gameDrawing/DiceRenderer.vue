@@ -33,20 +33,24 @@ defineProps<{
 </script>
 
 <template>
-    <svg ref="svg" viewBox="0 0 80 40" @click="() => { if (enabled) $emit('diceClicked') }" :class="enabled ? 'animation' : ''">
-        <image
-            x="0"
-            y="0"
-            width="40"
-            height="40"
-            :href="diceToIcon(dice[0])"/>
-        <image
-            x="40"
-            y="0"
-            width="40"
-            height="40"
-            :href="diceToIcon(dice[1])"/>
-    </svg>
+    <button
+        @click="() => $emit('diceClicked')"
+        :disabled="!enabled">
+        <svg ref="svg" viewBox="0 0 80 40" :class="enabled ? 'animation' : ''">
+            <image
+                x="0"
+                y="0"
+                width="40"
+                height="40"
+                :href="diceToIcon(dice[0])"/>
+            <image
+                x="40"
+                y="0"
+                width="40"
+                height="40"
+                :href="diceToIcon(dice[1])"/>
+        </svg>
+    </button>
 </template>
 
 <style scoped>
@@ -63,7 +67,11 @@ defineProps<{
 .animation {
     animation: setup 1s 1, resize 2.5s infinite 1s;
 }
-.animation:hover {
-    cursor: pointer;
+
+button {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
 }
 </style>
