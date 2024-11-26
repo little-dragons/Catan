@@ -27,7 +27,12 @@ export type ResourceTile = {
 }
 
 
-export type Tile = ResourceTile | PortTile | { type: 'desert' | 'ocean' }
+export type LandTile = { type: 'desert' } | ResourceTile
+export type OceanTile = { type: 'ocean' } | PortTile
+export type Tile = LandTile | OceanTile
+export function isLandTile(tile: Tile): tile is LandTile {
+    return tile.type == 'desert' || tile.type == 'resource'
+}
 
 export type BoardSeed = string
 export function randomBoardSeed(): BoardSeed {
@@ -62,8 +67,11 @@ function crossingAdjacentToTile(crossing: Coordinate, tile: Coordinate): boolean
     return allowedX.includes(crossing[0]) && allowedY.includes(crossing[1])
 }
 
+export function landTiles(board: Board): Freeze<[LandTile, Coordinate][]> {
+    return board.tiles.filter(x => isLandTile(x[0])) as Freeze<[LandTile, Coordinate][]>
+}
 export function crossingAdjacentToLand(crossing: Coordinate, board: Board): boolean {
-    return board.tiles.filter(x => x[0].type == 'desert' || x[0].type == 'resource').some(x => crossingAdjacentToTile(crossing, x[1]))
+    return landTiles(board).some(x => crossingAdjacentToTile(crossing, x[1]))
 }
 
 function crossingAdjacentToPort(tile: PortTile, tileCoordinate: Coordinate, crossing: Coordinate) {
@@ -94,7 +102,10 @@ export function adjacentRoads(crossing: Coordinate) {
 }
 
 export function adjacentColorsToTile(board: Board, tile: Coordinate): readonly Color[] {
-    return board.buildings.filter(x => crossingAdjacentToTile(x[1], tile)).map(x => x[0])
+    return adjacentBuildingsToTile(board, tile).map(x => x[0])
+}
+export function adjacentBuildingsToTile(board: Board, tile: Coordinate) {
+    return board.buildings.filter(x => crossingAdjacentToTile(x[1], tile))
 }
 
 function crossingsForColor(board: Board, color: Color) {
@@ -228,3 +239,9 @@ export function portsForColor(board: Board, color: Color): readonly (Resource | 
     return adjacentPorts.map(x => x[0].resource)
 }
 
+export function validNewRobberPosition(board: Board, robberPositon: Coordinate): boolean {
+    if (sameCoordinate(board.robber, robberPositon))
+        return false
+
+    return board.tiles.some(([tile, coord]) => sameCoordinate(coord, robberPositon) && isLandTile(tile))
+}

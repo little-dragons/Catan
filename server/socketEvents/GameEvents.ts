@@ -2,7 +2,7 @@ import { GameClientEventMap, GameServerEventMap, redactGameStateFor, RoomType } 
 import { type Socket } from 'socket.io'
 import { games, usersForRoom } from "./RoomManager.js";
 import { SocketDataType, SocketServerType } from "./Common.js";
-import { tryDoAction } from "shared/logic/GameAction.js";
+import { GameActionInfo, redactGameActionInfoFor, tryDoAction } from "shared/logic/GameAction.js";
 
 
 export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServerEventMap, GameClientEventMap, {}, SocketDataType>) {
@@ -30,13 +30,16 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
             return cb('invalid socket state')
         }
         
-        const nextState = tryDoAction(room.state, socket.data.room[1], action)
-        if (nextState == undefined)
+        const actionResult = tryDoAction(room.state, socket.data.room[1], action)
+        if (actionResult == undefined)
             return cb('action not allowed')
         else {
-            room.state = nextState
-            socket.emit('gameEvent')
-            socket.to(socket.data.room[0]).emit('gameEvent')
+            room.state = actionResult[0]
+            const gameAction: GameActionInfo = { type: action.type, input: action, response: actionResult[1] } as GameActionInfo
+            for (const s of io.of('/').adapter.rooms.get(socket.data.room[0])!) {
+                const fullSocket = io.sockets.sockets.get(s)!
+                fullSocket.emit('gameEvent', redactGameStateFor(room.state, fullSocket.data.room![1]), redactGameActionInfoFor(gameAction, socket.data.room[1], fullSocket.data.room![1]))
+            }
     
             return cb(true)
         }

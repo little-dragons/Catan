@@ -1,42 +1,29 @@
 <script setup lang="ts">
-import { BuildingType, Color, GamePhaseType, Resource, RoomType, UserType, addCards, adjacentColorsToTile, adjacentRoads, allowedActionsForMe, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User } from 'shared';
-import { computed, ref, watchEffect } from 'vue';
-import GameRenderer from './gameDrawing/GameRenderer.vue';
+import { BuildingType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentColorsToTile, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isLandTile, isActive, isPreDiceRoll, isInitial, validNewRobberPosition, adjacentBuildingsToTile } from 'shared';
+import { computed, ref, watchEffect, watch } from 'vue';
+import GameRenderer, { type ForbiddableButtons } from './gameDrawing/GameRenderer.vue';
 import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vue';
 import { UserSelectionType } from './gameDrawing/board/UserSelection';
-import { type GameAction, GameActionType } from 'shared/logic/GameAction';
-import { PopupSeverity, usePopups } from '@/popup/Popup';
+import { canFinishTurn, canOfferTrade, canPlaceRoad, canPlaceSettlement, type GameActionInput, GameActionType } from 'shared/logic/GameAction';
 import type { TradeMenuRendererProps } from './gameDrawing/trade/TradeMenuRenderer.vue';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 
 const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
 
-const popups = usePopups()
 const room = useCurrentRoomStore()
 const state = computed(() => room.info?.type == RoomType.InGame ? room.info.state : undefined)
-
-async function sendAction(action: GameAction) {
-    const response = await room.trySendAction(action)
-    if (response == true)
-        return
-
-    popups.insert({ 
-        title: 'Invalid action',
-        message: `Game action did not complete correctly: ${response}, trying to reload local state.`,
-        severity: PopupSeverity.Warning,
-        autoCloses: false,
-    })
-    
-    // TODO handle errors elegantly. An idea is given below
-    // potentially, if a action is rejected, the state may be completely wrong. Probably, triggering the state 
-    // again will not destroy it further, only potentially help
-}
-
-const currentAllowedActions = computed(() => {
+const forbiddableButtons = computed<ForbiddableButtons | undefined>(() => {
     if (state.value == undefined)
         return undefined
-    else
-        return allowedActionsForMe(state.value)
+
+    return {
+        finishTurn: canFinishTurn(state.value),
+        offerTrade: canOfferTrade(state.value),
+        placeCity: canPlaceCity(state.value),
+        placeRoad: canPlaceRoad(state.value),
+        placeSettlement: canPlaceSettlement(state.value),
+        rollDice: canRollDice(state.value)
+    }
 })
 
 const others = computed<[User, RedactedPlayer][]>(() => {
@@ -56,8 +43,8 @@ const othersOverview = computed(() => {
                 color: player.color,
                 victoryPoints: victoryPointsFromRedacted(state.value!, player.color),
                 openTrades: 
-                    state.value?.phase.type != GamePhaseType.Normal || 
-                    state.value.phase.diceRolled == false 
+                    state.value?.phase.type != GamePhaseType.Turns || 
+                    state.value.phase.subtype != TurnPhaseType.Active
                         ? [] 
                         : state.value.phase.tradeOffers
                             .filter(x => x.offeringColor != state.value!.self.color)
@@ -72,7 +59,7 @@ const othersOverview = computed(() => {
 
 // set interaction points for initial placements
 watchEffect(async () => {
-    if (currentAllowedActions.value?.placeInitial != true || renderer.value == null || state.value == undefined)
+    if (renderer.value == null || state.value == undefined || !isInitial(state.value.phase) || state.value.self.color != state.value.currentPlayer)
         return
 
     const freeSettlements = availableBuildingPositions(state.value.board, undefined)
@@ -84,7 +71,7 @@ watchEffect(async () => {
         road = await renderer.value.getUserSelection(UserSelectionType.Connection, adjacentRoads(settlement))
     } while(settlement == undefined || road == undefined)
 
-    await sendAction(
+    await room.trySendAction(
         { 
             type: GameActionType.PlaceInitial, 
             road: road,
@@ -93,44 +80,63 @@ watchEffect(async () => {
 })
 
 async function rollDice() {
-    if (currentAllowedActions.value?.rollDice != true)
+    if (state.value == undefined || !canRollDice(state.value))
         return
 
-    sendAction({ type: GameActionType.RollDice })
+    room.trySendAction({ type: GameActionType.RollDice })
 }
 
 const lastDice = ref<undefined | readonly [DieResult, DieResult]>(undefined)
-watchEffect(() => {
-    if (state.value?.phase.type == GamePhaseType.Normal && state.value.phase.diceRolled != false)
-        lastDice.value = state.value.phase.diceRolled
+watch(room.actions, () => {
+    const oldestAction = room.actions.shift()
+    if (oldestAction == undefined)
+        return
+    if (oldestAction.type == GameActionType.RollDice) {
+        lastDice.value = [oldestAction.response.die1, oldestAction.response.die2]
+    }
+    // TODO handle more actions
+})
 
-    if (state.value?.phase.type == GamePhaseType.Normal && lastDice.value == undefined)
-        // this is to show the dice once the user is first required to roll them
+watchEffect(() => {
+    // this is to show the dice once the user is first required to roll them
+    if (state.value?.phase.type == GamePhaseType.Turns && lastDice.value == undefined && room.actions.length == 0)
         lastDice.value = [3, 3]
 })
 
 // set interaction points for robber placement
 watchEffect(async () => {
-    if (state.value?.phase.type == GamePhaseType.Robber && state.value.currentPlayer == state.value.self.color) {
-        lastDice.value = state.value.phase.diceRolled
-        const possibleRobberPositions = 
-            state.value.board.tiles.filter(([tile, coord]) => 
-            (tile.type == 'resource' || tile.type == 'desert') && 
-            !sameCoordinate(coord, state.value!.board.robber)
-        ).map(x => x[1])
-        const newRobberCoordinate  = await renderer.value!.getUserSelection(UserSelectionType.Tile, possibleRobberPositions, { noAbort: true })
+    if (state.value == undefined || !isRobbingMovingRobber(state.value.phase) || state.value.currentPlayer != state.value.self.color)
+        return undefined
 
-        const adjacentColors = adjacentColorsToTile(state.value.board, newRobberCoordinate).filter(x => x != state.value!.self.color)
-        // TODO allow the user to select the color
-        const robbedColor = adjacentColors.length == 0 ? undefined : adjacentColors[0]
-        await sendAction(
-            { 
-                type: GameActionType.PlaceRobber, 
-                coordinate: newRobberCoordinate, 
-                robbedColor: robbedColor 
-            })
-        
-    }
+    const possibleRobberPositions = 
+        state.value.board.tiles.filter(([_, coord]) => validNewRobberPosition(state.value!.board, coord))
+        .map(x => x[1])
+
+    let newRobberCoordinate: Coordinate | undefined = undefined
+    let robbedColor: Color | undefined = undefined
+    do {
+        newRobberCoordinate = await renderer.value!.getUserSelection(UserSelectionType.Tile, possibleRobberPositions, { noAbort: true })
+        const adjacentColors =
+            adjacentBuildingsToTile(state.value.board, newRobberCoordinate)
+            .filter(([color]) => color != state.value!.self.color)
+
+        if (adjacentColors.length == 0)
+            break
+        if (adjacentColors.every(([color]) => adjacentColors.every(([color2]) => color == color2)))
+            robbedColor = adjacentColors[0][0]
+        else {
+            const robbedColorCoord = await renderer.value!.getUserSelection(UserSelectionType.Crossing, adjacentColors.map(x => x[1]))
+            if (robbedColorCoord == undefined)
+                continue
+            robbedColor = adjacentColors.find(([_, coord]) => sameCoordinate(robbedColorCoord, coord))![0]
+        }
+    } while (newRobberCoordinate == undefined)
+
+    await room.trySendAction({ 
+        type: GameActionType.PlaceRobber, 
+        coordinate: newRobberCoordinate, 
+        robbedColor: robbedColor 
+    })
 })
 
 
@@ -153,16 +159,16 @@ const tradeMenuProps = computed<TradeMenuRendererProps | undefined>(() => {
 })
 
 async function endTurn() {
-    if (currentAllowedActions.value?.finishTurn != true)
+    if (forbiddableButtons.value?.finishTurn != true)
         return
 
-    sendAction({ type: GameActionType.FinishTurn })
+    room.trySendAction({ type: GameActionType.FinishTurn })
     tradeMenu.value = undefined
 }
 
 
 async function buildCity() {
-    if (currentAllowedActions.value?.placeCity != true || renderer.value == null || state.value == undefined)
+    if (forbiddableButtons.value?.placeCity != true || renderer.value == null || state.value == undefined)
         return
 
     const possiblePositions = 
@@ -176,10 +182,10 @@ async function buildCity() {
     const settlement = await renderer.value.getUserSelection(UserSelectionType.Crossing, possiblePositions)
 
     if (settlement != undefined)
-        sendAction({ type: GameActionType.PlaceCity, coordinate: settlement })
+        room.trySendAction({ type: GameActionType.PlaceCity, coordinate: settlement })
 }
 async function buildRoad() {
-    if (currentAllowedActions.value?.placeRoad != true || renderer.value == null || state.value == undefined)
+    if (forbiddableButtons.value?.placeRoad != true || renderer.value == null || state.value == undefined)
         return
 
     const data = 
@@ -188,10 +194,10 @@ async function buildRoad() {
     const road = await renderer.value.getUserSelection(UserSelectionType.Connection, data)
 
     if (road != undefined)
-        sendAction({ type: GameActionType.PlaceRoad, coordinates: road })
+        room.trySendAction({ type: GameActionType.PlaceRoad, coordinates: road })
 }
 async function buildSettlement() {
-    if (currentAllowedActions.value?.placeSettlement != true || renderer.value == null || state.value == undefined)
+    if (forbiddableButtons.value?.placeSettlement != true || renderer.value == null || state.value == undefined)
         return
 
     const possiblePositions = 
@@ -200,14 +206,14 @@ async function buildSettlement() {
     const settlement = await renderer.value.getUserSelection(UserSelectionType.Crossing, possiblePositions)
 
     if (settlement != undefined)
-        sendAction({ type: GameActionType.PlaceSettlement, coordinate: settlement })
+        room.trySendAction({ type: GameActionType.PlaceSettlement, coordinate: settlement })
 }
 
 async function offerTradeWithPlayer() {
     if (tradeMenu.value == undefined)
         return
 
-    sendAction({
+    room.trySendAction({
         type: GameActionType.OfferTrade,
         desiredCards: tradeMenu.value.desiredCards,
         offeredCards: tradeMenu.value.offeredCards
@@ -219,7 +225,7 @@ async function bankTrade() {
     if (tradeMenu.value == undefined)
         return
 
-    sendAction({ type: GameActionType.BankTrade, offeredCards: tradeMenu.value.offeredCards, desiredCards: tradeMenu.value.desiredCards})
+    room.trySendAction({ type: GameActionType.BankTrade, offeredCards: tradeMenu.value.offeredCards, desiredCards: tradeMenu.value.desiredCards})
     tradeMenu.value = undefined
 }
 function toggleTradeMenu() {
@@ -268,39 +274,39 @@ function removeOfferedCard(res: Resource) {
     }
 }
 async function acceptTrade(trade: TradeOffer) {
-    if (state.value?.phase.type != GamePhaseType.Normal || state.value.phase.diceRolled == false)
+    if (state.value == undefined || !isActive(state.value.phase))
         return
 
     if (!state.value.phase.tradeOffers.some(x => sameTradeOffer(x, trade)))
         return
 
-    await sendAction({ type: GameActionType.AcceptTradeOffer, trade })
+    await room.trySendAction({ type: GameActionType.AcceptTradeOffer, trade })
 }
 async function rejectTrade(trade: TradeOffer) {
-    if (state.value?.phase.type != GamePhaseType.Normal || state.value.phase.diceRolled == false)
+    if (state.value == undefined || !isActive(state.value.phase))
         return
 
     if (!state.value.phase.tradeOffers.some(x => sameTradeOffer(x, trade)))
         return
 
-    await sendAction({ type: GameActionType.RejectTradeOffer, trade })
+    await room.trySendAction({ type: GameActionType.RejectTradeOffer, trade })
 }
 async function finalizeTrade(trade: TradeOffer, color: Color) {
-    if (state.value?.phase.type != GamePhaseType.Normal || state.value.phase.diceRolled == false)
+    if (state.value == undefined || !isActive(state.value.phase))
         return
 
     if (!state.value.phase.tradeOffers.some(x => sameTradeOffer(x, trade)))
         return
 
-    await sendAction({ type: GameActionType.FinalizeTrade, trade: { ...trade, tradePartner: color } })
+    await room.trySendAction({ type: GameActionType.FinalizeTrade, trade: { ...trade, tradePartner: color } })
 }
 async function abortTrade(trade: TradeOffer) {
-    await sendAction({ type: GameActionType.AbortTrade, trade })
+    await room.trySendAction({ type: GameActionType.AbortTrade, trade })
 }
 
 
 const ownOpenTradeOffers = computed(() => {
-    if (state.value?.phase.type != GamePhaseType.Normal || state.value.phase.diceRolled == false)
+    if (state.value == undefined || !isActive(state.value.phase))
         return []
 
     return state.value.phase.tradeOffers.filter(x => x.offeringColor == state.value?.self.color)
@@ -314,7 +320,7 @@ const ownOpenTradeOffers = computed(() => {
             :board="state.board" 
             :dice="lastDice" 
             :stocked-cards="tradeMenu == undefined ? state.self.handCards : tradeMenu.stockedCards"
-            :allowed-actions="currentAllowedActions!"
+            :forbiddable-buttons="forbiddableButtons!"
             :other-players="othersOverview" 
             :trade-menu="tradeMenuProps"
             :own-trades="ownOpenTradeOffers"

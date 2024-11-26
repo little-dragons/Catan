@@ -6,7 +6,6 @@ import DiceRenderer from './DiceRenderer.vue';
 import { onMounted, ref } from 'vue';
 import CardsRenderer from './CardsRenderer.vue';
 import PlayerOverviewRenderer, { type PlayerOverviewData } from './PlayerOverviewRenderer.vue';
-import type { GameActionAllowedMap } from 'shared/logic/GameAction';
 import TradeRenderer, { type TradeMenuRendererProps } from './trade/TradeMenuRenderer.vue';
 import OwnTradeOverview from './trade/OwnTradeOverview.vue';
 
@@ -28,12 +27,20 @@ defineEmits<{
     finalizeTrade: [trade: TradeOffer, color: Color]
     abortTrade: [trade: TradeOffer]
 }>()
+export type ForbiddableButtons = {
+    rollDice: boolean
+    offerTrade: boolean
+    placeCity: boolean
+    placeRoad: boolean
+    placeSettlement: boolean
+    finishTurn: boolean
+}
 
 defineProps<{
     stockedCards: readonly Resource[]
     board: Board
     dice: readonly [DieResult, DieResult] | undefined
-    allowedActions: GameActionAllowedMap
+    forbiddableButtons: ForbiddableButtons
     otherPlayers: readonly PlayerOverviewData[]
     otherPlayersDisplay: 'radial' | 'grid'
     tradeMenu: TradeMenuRendererProps | undefined
@@ -140,18 +147,18 @@ defineExpose({ getUserSelection })
                         v-if="dice != undefined" 
                         class="dice" 
                         :dice="dice"
-                        :enabled="!interactionRunning && allowedActions.rollDice"
+                        :enabled="!interactionRunning && forbiddableButtons.rollDice"
                         @dice-clicked="() => $emit('diceClicked')"
                     />
                 </div>
             </div>
             <CardsRenderer class="cards" :cards="stockedCards" @resource-clicked="res => $emit('stockedCardClicked', res)"/>
             <div class="buttons">
-                <button class="default-button-colors" @click="() => $emit('tradeMenu')" :disabled="interactionRunning || !allowedActions.offerTrade">Trade</button>
-                <button class="default-button-colors" @click="() => $emit('buildRoad')" :disabled="interactionRunning || !allowedActions.placeRoad">Road</button>
-                <button class="default-button-colors" @click="() => $emit('buildSettlement')" :disabled="interactionRunning || !allowedActions.placeSettlement">Settlement</button>
-                <button class="default-button-colors" @click="() => $emit('buildCity')" :disabled="interactionRunning || !allowedActions.placeCity">City</button>
-                <button class="default-button-colors" @click="() => $emit('endTurn')" :disabled="interactionRunning || !allowedActions.finishTurn">Finish turn</button>
+                <button class="default-button-colors" @click="() => $emit('tradeMenu')" :disabled="interactionRunning || !forbiddableButtons.offerTrade">Trade</button>
+                <button class="default-button-colors" @click="() => $emit('buildRoad')" :disabled="interactionRunning || !forbiddableButtons.placeRoad">Road</button>
+                <button class="default-button-colors" @click="() => $emit('buildSettlement')" :disabled="interactionRunning || !forbiddableButtons.placeSettlement">Settlement</button>
+                <button class="default-button-colors" @click="() => $emit('buildCity')" :disabled="interactionRunning || !forbiddableButtons.placeCity">City</button>
+                <button class="default-button-colors" @click="() => $emit('endTurn')" :disabled="interactionRunning || !forbiddableButtons.finishTurn">Finish turn</button>
             </div>
         </div>
     </div>

@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { type RedactedRoom, type RedactedGameState, RoomType, type GameAction } from "shared"
+import { type RedactedRoom, type RedactedGameState, RoomType, type GameActionInput, type PossiblyRedactedGameActionInfo } from "shared"
 import { ref, computed } from "vue"
 import { useCurrentUserStore, UserStatus } from "./CurrentUserStore"
 import { socket } from "./Socket"
@@ -119,21 +119,26 @@ export const useCurrentRoomStore = defineStore('room', () => {
         info.value.users = newUsers
     })
 
-    socket.on('gameEvent', tryFetchState)
+    const actions = ref<PossiblyRedactedGameActionInfo[]>([])
 
-    async function tryFetchState() {
-        // if this function should be publicly accessible, it should return proper errors
-        if (info.value?.type != RoomType.InGame)
+    socket.on('gameEvent', (newState, actionInfo) => {
+        if (info.value?.type != RoomType.InGame) {
+            const popups = usePopups()
+            popups.insert({ 
+                title: 'Received event',
+                message: 'Received a game event, but the client is not ingame',
+                severity: PopupSeverity.Warning,
+                autoCloses: false,
+            })
             return
+        }
 
-        const result = await socket.emitWithAck('gameState')
-        if (result == 'invalid socket state')
-            return
+        info.value.state = newState
 
-        info.value.state = result
-    }
+        actions.value.push(actionInfo)
+    })
 
-    async function trySendAction(action: GameAction) {
+    async function trySendAction(action: GameActionInput) {
         const response = await socket.emitWithAck('gameAction', action)
         if (response == true)
             return true
@@ -148,5 +153,5 @@ export const useCurrentRoomStore = defineStore('room', () => {
         return false
     }
 
-    return { info, tryJoin, tryCreate, tryLeave, tryStart, canJoin, isOwner, trySendAction }
+    return { info, tryJoin, tryCreate, tryLeave, tryStart, canJoin, isOwner, trySendAction, actions }
 })

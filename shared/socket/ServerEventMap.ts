@@ -1,7 +1,7 @@
 import { LobbyRoom, RedactedGameRoom, RoomId } from "../logic/Room.js"
 import { RedactedGameState } from "../logic/GameState.js"
 import { Settings } from "../logic/Settings.js"
-import { GameAction } from "../logic/GameAction.js"
+import { GameActionInput } from "../logic/GameAction.js"
 import { User } from "../authentication/User.js"
 import { PasswordNonce } from "../authentication/Password.js"
 
@@ -17,7 +17,7 @@ type Callback<T> = (arg: T) => void
 export type GameServerEventMap = {
     fullGameRoom: (cb: Callback<RedactedGameRoom | 'invalid socket state'>) => void
     gameState: (cb: Callback<RedactedGameState | 'invalid socket state'>) => void
-    gameAction: (action: GameAction, cb: Callback<true | 'invalid socket state' | 'action not allowed'>) => void
+    gameAction: (action: GameActionInput, cb: Callback<true | 'invalid socket state' | 'action not allowed'>) => void
 }
 
 export type RoomServerEventMap = {
