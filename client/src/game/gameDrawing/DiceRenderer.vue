@@ -35,8 +35,9 @@ defineProps<{
 <template>
     <button
         @click="() => $emit('diceClicked')"
-        :disabled="!enabled">
-        <svg ref="svg" viewBox="0 0 80 40" :class="enabled ? 'animation' : ''">
+        :disabled="!enabled"
+        title="Roll dice!">
+        <svg ref="svg" viewBox="0 0 80 40">
             <image
                 x="0"
                 y="0"
@@ -64,7 +65,7 @@ defineProps<{
     to { transform: scale(0.85); }
 }
 
-.animation {
+button:not(:disabled) > * {
     animation: setup 1s 1, resize 2.5s infinite 1s;
 }
 
@@ -73,5 +74,8 @@ button {
     background-color: transparent;
     padding: 0;
     margin: 0;
+}
+button:not(:disabled) {
+    cursor: pointer;
 }
 </style>
