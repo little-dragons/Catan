@@ -2,7 +2,7 @@
 import { isDevelopment } from '@/misc/Globals';
 import { ref } from 'vue';
 import { v4 } from 'uuid';
-import { Color, defaultBoard, GamePhaseType, Resource, type History } from 'shared';
+import { Color, defaultBoard, GamePhaseType, Resource, TurnPhaseType, type History } from 'shared';
 import HistoryComponent from '@/game/History.vue';
 import { usePopups, PopupSeverity } from '@/popup/Popup';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
@@ -40,8 +40,8 @@ const exampleHistory: History = {
         board: defaultBoard('default'),
         currentPlayer: Color.Blue,
         phase: {
-            diceRolled: [5, 5],
-            type: GamePhaseType.Normal,
+            type: GamePhaseType.Turns,
+            subtype: TurnPhaseType.Active,
             tradeOffers: []
         },
         players: [ 
