@@ -1,46 +1,52 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { ref } from 'vue';
-import LoginModal from './inputs/LoginModal.vue'
+import LoginModal from './inputs/modals/LoginModal.vue'
 import Popups from './popup/Popups.vue';
 import { UserType } from 'shared';
 import { useCurrentRoomStore } from './socket/CurrentRoomStore';
 import { useCurrentUserStore, UserStatus } from './socket/CurrentUserStore';
-
-const showLoginModal = ref(false)
+import { ModalType, useModalStore } from './inputs/modals/ModalStore';
+import CreateRoomModal from './inputs/modals/CreateRoomModal.vue';
 
 const currentRoom = useCurrentRoomStore()
 const currentUser = useCurrentUserStore()
+const modal = useModalStore()
 </script>
 
 <template>
-    <div class="navbar">
-        <div>
-            <RouterLink :to="{ name: 'home' }">Home</RouterLink>
+    <div id="app" :inert="modal.value != undefined">
+        <div class="navbar">
+            <div>
+                <RouterLink :to="{ name: 'home' }">Home</RouterLink>
+            </div>
+            <div class="empty"/>
+            <div>
+                <RouterLink :to="{ name: 'roomList' }">Room List</RouterLink>
+            </div>
+            <div class="empty"/>
+            <div v-if="currentRoom.info != undefined">
+                <RouterLink :to="{ name: 'room' }">Current room</RouterLink>
+            </div>
+            <div v-if="currentRoom.info != undefined" class="empty"/>
+            <div>
+                <p v-if="currentUser.info.status == UserStatus.Anonymous">Not logged in. <button type="button" @click="() => modal.value = ModalType.Login" class="login-button" title="Login">Login</button></p>
+                <p v-else-if="currentUser.info.status == UserStatus.Pending">Pending login...</p>
+                <p v-else-if="currentUser.info.status == UserStatus.LoggedIn">Logged in as {{ currentUser.info.user.name }}<span v-if="currentUser.info.user.type == UserType.Guest"> (Guest)</span></p>
+                <p v-else>Error with login!</p>
+            </div>
         </div>
-        <div class="empty"/>
-        <div>
-            <RouterLink :to="{ name: 'roomList' }">Room List</RouterLink>
-        </div>
-        <div class="empty"/>
-        <div v-if="currentRoom.info != undefined">
-            <RouterLink :to="{ name: 'room' }">Current room</RouterLink>
-        </div>
-        <div v-if="currentRoom.info != undefined" class="empty"/>
-        <div>
-            <p v-if="currentUser.info.status == UserStatus.Anonymous">Not logged in. <span @click="() => showLoginModal = true" class="login-button">Login</span></p>
-            <p v-else-if="currentUser.info.status == UserStatus.Pending">Pending login...</p>
-            <p v-else-if="currentUser.info.status == UserStatus.LoggedIn">Logged in as {{ currentUser.info.user.name }}<span v-if="currentUser.info.user.type == UserType.Guest"> (Guest)</span></p>
-            <p v-else>Error with login!</p>
-        </div>
+
+        <Popups/>
+
+        <main>
+            <RouterView/>
+        </main>
     </div>
-
-    <LoginModal v-if="showLoginModal" @close="() => showLoginModal = false"/>
-    <Popups/>
-
-    <main>
-        <RouterView/>
-    </main>
+    <div id="modals" v-if="modal.value != undefined">
+        <LoginModal v-if="modal.value == ModalType.Login"/>
+        <CreateRoomModal v-if="modal.value == ModalType.CreateRoom"/>
+    </div>
 </template>
 
 <style scoped>
@@ -86,8 +92,12 @@ main {
 
 
 .login-button {
-    text-decoration: underline;
     color: blueviolet;
+    padding: 0;
+    border: none;
+    margin: 0;
+    height: 100%;
+    font-size: medium;
 }
 
 .login-button:hover {

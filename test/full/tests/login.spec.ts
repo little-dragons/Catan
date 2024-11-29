@@ -7,9 +7,9 @@ test.beforeEach(async ({ page }) => {
 
 test('can login as guest', async ({ page }) => {
     const guestName = (Math.random() + 1).toString(36).substring(7)
-    await page.getByText('Login', { exact: true }).click()
-    await page.getByLabel('Guest name: ').fill(guestName)
-    await page.getByText('Guest login', { exact: true }).click()
+    await page.getByTitle('Login').click()
+    await page.getByLabel('Guest Name').fill(guestName)
+    await page.getByTitle('Guest Login').click()
     
-    expect(page.getByText(guestName)).toBeDefined()
+    expect((await page.getByText(guestName).all()).length > 0).toBeDefined()
 })

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import Close from '@/assets/ui/close.svg'
-defineEmits(['close'])
+import { useModalStore } from './ModalStore';
 
+
+const modalStore = useModalStore()
 </script>
 
 
@@ -9,7 +11,7 @@ defineEmits(['close'])
     <div class="all">
         <div class="modal">
             <div class="close">
-                <img :src="Close" @click="() => $emit('close')"/>
+                <img :src="Close" @click="() => modalStore.value = undefined"/>
             </div>
             <slot/>
         </div>
@@ -17,7 +19,7 @@ defineEmits(['close'])
 </template>
 
 <style scoped>
-@import '../assets/base.css';
+@import '../../assets/base.css';
 
 .all {
     position: absolute;

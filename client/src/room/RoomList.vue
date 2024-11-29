@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
-import CreateRoomModal from '../inputs/CreateRoomModal.vue';
+import CreateRoomModal from '../inputs/modals/CreateRoomModal.vue';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import { useRoomListStore } from '@/socket/Socket';
 import router from '@/misc/Router';
@@ -22,8 +22,8 @@ onUnmounted(() => roomList.autoRefresh = false)
 
 <template>
     <h1>Room list</h1>
-    <input type="button" value="Create Room" @click="() => showCreateRoomsModal = true" :disabled="!currentRoom.canJoin"
-        title="To create a room, you have to be logged in." />
+    <input type="button" value="Create New Room" @click="() => showCreateRoomsModal = true" :disabled="!currentRoom.canJoin"
+        title="Create New Room" />
     <input type="button" value="Refresh" @click="roomList.update"/>
     <input type="checkbox" id="autoRefresh" value="Refresh" v-model="roomList.autoRefresh"/>
     <label for="autoRefresh">Auto refresh</label>
@@ -38,6 +38,7 @@ onUnmounted(() => roomList.autoRefresh = false)
         <p>{{ room.owner.name }}</p>
         <button
             class="default-button-colors"
+            :title="`Join room ${room.name}`"
             :disabled="!currentRoom.canJoin"
             @click="() => tryJoin(room.id)">Join</button>
     </div>

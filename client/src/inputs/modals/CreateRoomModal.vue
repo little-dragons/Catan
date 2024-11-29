@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import LabeledInput from '@/inputs/LabeledInput.vue';
 import RoomInput from '@/inputs/RoomInput.vue';
-import Modal from '@/misc/Modal.vue'
+import Modal from '@/inputs/modals/Modal.vue'
 import router from '@/misc/Router';
 import { PopupSeverity, usePopups } from '@/popup/Popup';
 import { RoomOPResult, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
@@ -66,7 +66,7 @@ async function buttonClick() {
             <LabeledInput label="Room name:" type="space between">
                 <RoomInput ref="roomInput"/>
             </LabeledInput>
-            <input type="button" value="Create" @click="buttonClick" :disabled="roomInput?.result == null"/>
+            <input type="button" value="Create" @click="buttonClick" :disabled="roomInput?.result == null" title="Create Room"/>
         </form>
     </Modal>
 </template>

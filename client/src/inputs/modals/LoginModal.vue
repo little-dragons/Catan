@@ -2,12 +2,13 @@
 import { computed, ref } from 'vue';
 import UsernameInput from '@/inputs/UsernameInput.vue';
 import PasswordInput from '@/inputs/PasswordInput.vue';
-import Modal from '@/misc/Modal.vue'
+import Modal from '@/inputs/modals/Modal.vue'
 import LabeledInput from '@/inputs/LabeledInput.vue';
 import { PopupSeverity, usePopups } from '@/popup/Popup';
 import { useCurrentUserStore, UserOPResult, UserStatus } from '@/socket/CurrentUserStore';
+import { useModalStore } from './ModalStore';
 
-const emit = defineEmits(['close'])
+const modalStore = useModalStore()
 const popups = usePopups()
 const currentUser = useCurrentUserStore()
 
@@ -25,7 +26,7 @@ async function memberLogin() {
     const result = await currentUser.tryMemberLogin(membernameInput.value.result, passwordInput.value.result)
     switch (result) {
         case UserOPResult.Success:
-            emit('close')
+            modalStore.value = undefined
             return
         case UserOPResult.ServerDeniedLoginData:
         case UserOPResult.ServerError:
@@ -60,7 +61,7 @@ async function guestLogin() {
     const result = await currentUser.tryGuestLogin(guestnameInput.value.result)
     switch (result) {
         case UserOPResult.Success:
-            emit('close')
+            modalStore.value = undefined
             return
 
         case UserOPResult.NotAnonymous:
@@ -94,7 +95,7 @@ async function register() {
     const result = await currentUser.tryRegister(membernameInput.value.result, passwordInput.value.result)
     switch (result) {
         case UserOPResult.Success:
-            emit('close')
+            modalStore.value = undefined
             return
 
         case UserOPResult.NotAnonymous:
@@ -119,7 +120,7 @@ const pending = computed(() => currentUser.info.status == UserStatus.Pending)
 
 
 <template>
-    <Modal @close="$emit('close')" v-if="showRegister == false">
+    <Modal v-if="showRegister == false">
         <h1>Login</h1>
         <p>Please login with your account or create a temporary guest account.</p>
         <p>Kindly observe that member logins are to be done on the left side while guest logins are done on the right.</p>
@@ -141,6 +142,7 @@ const pending = computed(() => currentUser.info.status == UserStatus.Pending)
                     type="button"
                     value="Login"
                     @click="memberLogin"
+                    title="Member Login"
                     :disabled="membernameInput?.result == null || passwordInput?.result == null"/>
             </form>
             <div class="vertical-line"/>
@@ -152,12 +154,13 @@ const pending = computed(() => currentUser.info.status == UserStatus.Pending)
                 <input
                     type="button" 
                     value="Guest login" 
-                    @click="guestLogin" 
+                    @click="guestLogin"
+                    title="Guest Login"
                     :disabled="pending || guestnameInput?.result == null"/>
             </form>
         </div>
     </Modal>
-    <Modal @close="$emit('close')" v-if="showRegister == true">
+    <Modal v-if="showRegister == true">
         <h1>Register</h1>
         <p>Here you may create a member account.</p>
         <form class="member-login">
@@ -177,13 +180,14 @@ const pending = computed(() => currentUser.info.status == UserStatus.Pending)
                 type="button"
                 value="Register"
                 @click="register"
+                title="Register"
                 :disabled="pending || membernameInput?.result == null || passwordInput?.result == null"/>
         </form>
     </Modal>
 </template>
 
 <style scoped>
-@import '../assets/base.css';
+@import '../../assets/base.css';
 
 p {
     margin-bottom: 0.7rem;

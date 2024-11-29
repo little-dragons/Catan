@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory, type RouteNamedMap, type RouteRecordInfo, type RouteRecordRaw } from 'vue-router'
 import Home from '@/home/Home.vue'
+import Room from '@/room/Room.vue'
+import RoomList from '../room/RoomList.vue'
 
 declare module 'vue-router' {
     interface RouteNamedMap {
@@ -31,12 +33,17 @@ const routes = [
     {
         path: '/room',
         name: 'room',
-        component: () => import('../room/Room.vue')
+        component: Room
+        // Lazily initializing components like this is surely not a bad way
+        // However, playwright tests do no longer recognize this as an instant navigation
+        // and test may fail. (This can be circumvented with page.waitForUrl(...))
+        // For now, preloading all components is absolutely fine.
+        // component: () => import('../room/Room.vue')
     },
     {
         path: '/roomList',
         name: 'roomList',
-        component: () => import('../room/RoomList.vue')
+        component: RoomList
     }
 ] satisfies RouteRecordsFromMap
 
@@ -50,6 +57,4 @@ const router = createRouter({
     routes
 })
 export default router
-
-router.push({ name: 'home' })
 
