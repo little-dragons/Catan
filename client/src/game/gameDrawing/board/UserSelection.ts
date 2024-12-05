@@ -17,3 +17,13 @@ export type UserSelectionOptions = {
 export type UserSelectionResult<T extends UserSelectionType, options extends UserSelectionOptions | undefined> = 
     options extends { noAbort: true } ? UserSelectionDataType<T> :
     UserSelectionDataType<T> | undefined
+
+type InteractionPointsTemplate<T extends UserSelectionType> = {
+    type: T,
+    positions: UserSelectionDataType<T>[]
+}
+
+export type InteractionPoints =
+    | InteractionPointsTemplate<UserSelectionType.Connection>
+    | InteractionPointsTemplate<UserSelectionType.Tile>
+    | InteractionPointsTemplate<UserSelectionType.Crossing>

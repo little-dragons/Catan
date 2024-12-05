@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Color, Resource, type Board, type DieResult, type OpenTradeOffer, type TradeOffer } from 'shared';
 import BoardRenderer from './board/Renderer.vue';
-import { UserSelectionType, type UserSelectionDataType, type UserSelectionOptions, type UserSelectionResult } from './board/UserSelection'
+import { UserSelectionType, type InteractionPoints, type UserSelectionDataType, type UserSelectionOptions, type UserSelectionResult } from './board/UserSelection'
 import DiceRenderer from './DiceRenderer.vue';
 import { onMounted, ref } from 'vue';
 import CardsRenderer from './CardsRenderer.vue';
@@ -61,9 +61,9 @@ onMounted(() => {
 
 const interactionRunning = ref(false)
 const boardRenderer = ref<null | InstanceType<typeof BoardRenderer>>(null)
-async function getUserSelection<T extends UserSelectionType, Options extends UserSelectionOptions | undefined>(type: T, data: UserSelectionDataType<T>[], options?: Options): Promise<UserSelectionResult<T, Options>> {
+async function getUserSelection<T extends InteractionPoints, Options extends UserSelectionOptions | undefined>(value: T, options?: Options): Promise<UserSelectionResult<T['type'], Options>> {
     interactionRunning.value = true
-    const res = await boardRenderer.value!.getUserSelection(type, data, options)
+    const res = await boardRenderer.value!.getUserSelection(value, options)
     interactionRunning.value = false
     return res
 }

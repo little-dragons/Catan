@@ -67,8 +67,8 @@ watchEffect(async () => {
     let settlement: Coordinate | undefined = undefined
     let road: Road | undefined = undefined
     do {
-        settlement = await renderer.value.getUserSelection(UserSelectionType.Crossing, freeSettlements, { noAbort: true })
-        road = await renderer.value.getUserSelection(UserSelectionType.Connection, adjacentRoads(settlement))
+        settlement = await renderer.value.getUserSelection({ type: UserSelectionType.Crossing, positions: freeSettlements }, { noAbort: true })
+        road = await renderer.value.getUserSelection({ type: UserSelectionType.Connection, positions: adjacentRoads(settlement) })
     } while(settlement == undefined || road == undefined)
 
     await room.trySendAction(
@@ -115,7 +115,7 @@ watchEffect(async () => {
     let newRobberCoordinate: Coordinate | undefined = undefined
     let robbedColor: Color | undefined = undefined
     do {
-        newRobberCoordinate = await renderer.value!.getUserSelection(UserSelectionType.Tile, possibleRobberPositions, { noAbort: true })
+        newRobberCoordinate = await renderer.value!.getUserSelection({ type: UserSelectionType.Tile, positions: possibleRobberPositions }, { noAbort: true })
         const adjacentColors =
             adjacentBuildingsToTile(state.value.board, newRobberCoordinate)
             .filter(({ color }) => color != state.value!.self.color)
@@ -125,7 +125,7 @@ watchEffect(async () => {
         if (adjacentColors.every(({ color }) => adjacentColors.every(({ color: color2 }) => color == color2)))
             robbedColor = adjacentColors[0].color
         else {
-            const robbedColorCoord = await renderer.value!.getUserSelection(UserSelectionType.Crossing, adjacentColors.map(x => x.coord))
+            const robbedColorCoord = await renderer.value!.getUserSelection({ type: UserSelectionType.Crossing, positions: adjacentColors.map(x => x.coord) })
             if (robbedColorCoord == undefined)
                 continue
             robbedColor = adjacentColors.find(({ coord }) => sameCoordinate(robbedColorCoord, coord))!.color
@@ -179,7 +179,7 @@ async function buildCity() {
             .map(x => x.coord)
 
 
-    const settlement = await renderer.value.getUserSelection(UserSelectionType.Crossing, possiblePositions)
+    const settlement = await renderer.value.getUserSelection({ type: UserSelectionType.Crossing, positions: possiblePositions })
 
     if (settlement != undefined)
         room.trySendAction({ type: GameActionType.PlaceCity, coordinate: settlement })
@@ -191,7 +191,7 @@ async function buildRoad() {
     const data = 
         availableRoadPositions(state.value.board, state.value.self.color)
 
-    const road = await renderer.value.getUserSelection(UserSelectionType.Connection, data)
+    const road = await renderer.value.getUserSelection({ type: UserSelectionType.Connection, positions: data })
 
     if (road != undefined)
         room.trySendAction({ type: GameActionType.PlaceRoad, coordinates: road })
@@ -203,7 +203,7 @@ async function buildSettlement() {
     const possiblePositions = 
         availableBuildingPositions(state.value.board, state.value.self.color)
 
-    const settlement = await renderer.value.getUserSelection(UserSelectionType.Crossing, possiblePositions)
+    const settlement = await renderer.value.getUserSelection({ type: UserSelectionType.Crossing, positions: possiblePositions })
 
     if (settlement != undefined)
         room.trySendAction({ type: GameActionType.PlaceSettlement, coordinate: settlement })

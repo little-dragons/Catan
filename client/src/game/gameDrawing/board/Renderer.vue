@@ -3,7 +3,7 @@ import { ref } from 'vue';
 import { cssColor, BuildingType, Color, Resource, type Board, type Coordinate, type PortTile, type Road, type Tile } from 'shared';
 import { distance } from '../Vector';
 import { tileHexagon, buildingWidth, buildingHeight, tileCenter, robberHeight, robberWidth, roadCorners, tileNumberPosition, tileNumberFontSize, crossingPosition, interactionPointRadius, roadCenter, tilePortPosition, tilePortIconSize, tileResourceIconPosition, tileResourceIconSize } from './Layout';
-import { UserSelectionType, type UserSelectionDataType, type UserSelectionOptions, type UserSelectionResult } from './UserSelection';
+import { UserSelectionType, type InteractionPoints, type UserSelectionDataType, type UserSelectionOptions, type UserSelectionResult } from './UserSelection';
 
 import robber from '@/assets/board/robber.svg'
 
@@ -165,56 +165,48 @@ function translateClick(ev: MouseEvent) {
 }
 
 
-// this implementation is really not nice at all
-// but the interface is - and that's always the more important part
-type InteractionPoints<T extends UserSelectionType> = {
-    type: T,
-    data: UserSelectionDataType<T>[]
-}
-const interactionPoints = ref<InteractionPoints<any> | undefined>(undefined)
+const interactionPoints = ref<InteractionPoints | undefined>(undefined)
 const clickHandler = ref<((ev: MouseEvent) => void) | undefined>(undefined)
 
 
 defineExpose({ getUserSelection })
-function getUserSelection<T extends UserSelectionType, Options extends UserSelectionOptions | undefined>(type: T, data: UserSelectionDataType<T>[], options?: Options): Promise<UserSelectionResult<T, Options>> {
+function getUserSelection<T extends InteractionPoints, Options extends UserSelectionOptions | undefined>(value: T, options?: Options): Promise<UserSelectionResult<T['type'], Options>> {
     return new Promise(resolve => {
-        interactionPoints.value = { type, data }
+        interactionPoints.value = value
         clickHandler.value = ev => {
             const clicked = translateClick(ev)!
 
-            if (type == UserSelectionType.Connection) {
-                for (const p of data) {
-                    // it is weird that typescript cannot correctly infer the type of p
-                    // it seems to be unable to pick up that T is known through the check of type
-                    if (distance(clicked, roadCenter(p as Road, tileRadius)) < interactionPointRadius(tileRadius)) {
+            if (value.type == UserSelectionType.Connection) {
+                for (const p of value.positions) {
+                    if (distance(clicked, roadCenter(p, tileRadius)) < interactionPointRadius(tileRadius)) {
                         interactionPoints.value = undefined
                         clickHandler.value = undefined   
-                        resolve(p)
+                        resolve(p as UserSelectionResult<T['type'], Options>)
                     }
                 }
             }
-            else if (type == UserSelectionType.Crossing) {
-                for (const p of data) {
-                    if (distance(clicked, crossingPosition(p as Coordinate, tileRadius)) < interactionPointRadius(tileRadius)) {
+            else if (value.type == UserSelectionType.Crossing) {
+                for (const p of value.positions) {
+                    if (distance(clicked, crossingPosition(p, tileRadius)) < interactionPointRadius(tileRadius)) {
                         interactionPoints.value = undefined
                         clickHandler.value = undefined   
-                        resolve(p)
+                        resolve(p as UserSelectionResult<T['type'], Options>)
                     }
                 }
             }
-            else if (type == UserSelectionType.Tile) {
-                for (const p of data) {
-                    if (distance(clicked, tileCenter(p as Coordinate, tileRadius)) < interactionPointRadius(tileRadius)) {
+            else if (value.type == UserSelectionType.Tile) {
+                for (const p of value.positions) {
+                    if (distance(clicked, tileCenter(p, tileRadius)) < interactionPointRadius(tileRadius)) {
                         interactionPoints.value = undefined
                         clickHandler.value = undefined   
-                        resolve(p)
+                        resolve(p as UserSelectionResult<T['type'], Options>)
                     }
                 }
             }
 
             // TODO maybe add a proper abort button?
             if (options?.noAbort != true) {
-                resolve(undefined as UserSelectionResult<T, Options>)
+                resolve(undefined as UserSelectionResult<T['type'], Options>)
                 interactionPoints.value = undefined
                 clickHandler.value = undefined
             }
@@ -276,17 +268,17 @@ function getUserSelection<T extends UserSelectionType, Options extends UserSelec
                 :href="buildingForColor(building.color, building.type)"/>
         </g>
         <g id="interaction-points" v-if="interactionPoints != undefined">
-            <circle v-if="interactionPoints.type == UserSelectionType.Crossing" v-for="point in interactionPoints.data" 
-                :cx="crossingPosition(point as Coordinate, tileRadius)[0]"
-                :cy="crossingPosition(point as Coordinate, tileRadius)[1]"
+            <circle v-if="interactionPoints.type == UserSelectionType.Crossing" v-for="point in interactionPoints.positions" 
+                :cx="crossingPosition(point, tileRadius)[0]"
+                :cy="crossingPosition(point, tileRadius)[1]"
                 :r="interactionPointRadius(tileRadius)"/>
-            <circle v-if="interactionPoints.type == UserSelectionType.Connection" v-for="point in interactionPoints.data" 
-                :cx="roadCenter(point as Road, tileRadius)[0]"
-                :cy="roadCenter(point as Road, tileRadius)[1]"
+            <circle v-if="interactionPoints.type == UserSelectionType.Connection" v-for="road in interactionPoints.positions" 
+                :cx="roadCenter(road, tileRadius)[0]"
+                :cy="roadCenter(road, tileRadius)[1]"
                 :r="interactionPointRadius(tileRadius)"/>
-            <circle v-if="interactionPoints.type == UserSelectionType.Tile" v-for="point in interactionPoints.data" 
-                :cx="tileCenter(point as Coordinate, tileRadius)[0]"
-                :cy="tileCenter(point as Coordinate, tileRadius)[1]"
+            <circle v-if="interactionPoints.type == UserSelectionType.Tile" v-for="point in interactionPoints.positions" 
+                :cx="tileCenter(point, tileRadius)[0]"
+                :cy="tileCenter(point, tileRadius)[1]"
                 :r="interactionPointRadius(tileRadius)"/>
         </g>
     </svg>
