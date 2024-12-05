@@ -1,0 +1,17 @@
+{
+    "name": "jest-test",
+    "version": "1.0.0",
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "scripts": {
+        "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest"
+    },
+    "type": "module",
+    "devDependencies": {
+        "shared": "^1.0.0",
+        "jest": "^29.7.0",
+        "jest-ts-webcompat-resolver": "^1.0.0",
+        "ts-jest": "^29.2.5"
+    }
+}

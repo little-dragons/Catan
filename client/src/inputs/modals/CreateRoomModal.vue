@@ -6,14 +6,13 @@ import router from '@/misc/Router';
 import { PopupSeverity, usePopups } from '@/popup/Popup';
 import { RoomOPResult, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import { ref } from 'vue';
-
-
-const emit = defineEmits(['close'])
+import { useModalStore } from './ModalStore';
 
 const roomInput = ref<null | InstanceType<typeof RoomInput>>(null)
 
 const currentRoom = useCurrentRoomStore()
 const popups = usePopups()
+const modalStore = useModalStore()
 
 async function buttonClick() {
     if (roomInput.value?.result == null)
@@ -22,8 +21,8 @@ async function buttonClick() {
     const res = await currentRoom.tryCreate(roomInput.value.result)
     switch (res) {
         case RoomOPResult.Success:
-            emit('close')
-            router.push({ name: 'room' })
+            modalStore.value = undefined
+            await router.push({ name: 'room' })
             return
 
         case RoomOPResult.NotLoggedIn:

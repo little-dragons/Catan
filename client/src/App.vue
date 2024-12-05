@@ -43,7 +43,7 @@ const modal = useModalStore()
             <RouterView/>
         </main>
     </div>
-    <div id="modals" v-if="modal.value != undefined">
+    <div id="modals" v-if="modal.value != undefined" data-testid="modal">
         <LoginModal v-if="modal.value == ModalType.Login"/>
         <CreateRoomModal v-if="modal.value == ModalType.CreateRoom"/>
     </div>

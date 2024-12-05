@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { modal, noModal } from './Common'
 
 test.beforeEach(async ({ page }) => {
     await page.goto('/')
@@ -8,8 +9,10 @@ test.beforeEach(async ({ page }) => {
 test('can login as guest', async ({ page }) => {
     const guestName = (Math.random() + 1).toString(36).substring(7)
     await page.getByTitle('Login').click()
+    await modal(page)
     await page.getByLabel('Guest Name').fill(guestName)
+    await expect(page.getByTitle('Guest Login')).toBeEnabled()
     await page.getByTitle('Guest Login').click()
-    
-    expect((await page.getByText(guestName).all()).length > 0).toBeDefined()
+    await noModal(page)
+    await expect(page.getByText(guestName)).toHaveCount(1)
 })

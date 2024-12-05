@@ -4,11 +4,11 @@
   "scripts": {
     "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\"",
     "prod": "concurrently \"cd server && npm run prod\" \"cd client && npm run prod\"",
-    "test": "cd test/full && npx playwright test"
+    "test": "cd test/playwright && npm run test && cd ../jest && npm run test"
   },
   "dependencies": {
     "concurrently": "^8.2.2"
   },
   
-  "workspaces": [ "client", "shared", "server" ]
+  "workspaces": [ "client", "shared", "server", "test/playwright", "test/jest" ]
 }

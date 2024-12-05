@@ -4,11 +4,11 @@ import CreateRoomModal from '../inputs/modals/CreateRoomModal.vue';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import { useRoomListStore } from '@/socket/Socket';
 import router from '@/misc/Router';
+import { ModalType, useModalStore } from '@/inputs/modals/ModalStore';
 
 const currentRoom = useCurrentRoomStore()
 const roomList = useRoomListStore()
-
-const showCreateRoomsModal = ref(false)
+const modalStore = useModalStore()
 
 async function tryJoin(roomId: string) {
     const result = await currentRoom.tryJoin(roomId)
@@ -22,7 +22,7 @@ onUnmounted(() => roomList.autoRefresh = false)
 
 <template>
     <h1>Room list</h1>
-    <input type="button" value="Create New Room" @click="() => showCreateRoomsModal = true" :disabled="!currentRoom.canJoin"
+    <input type="button" value="Create New Room" @click="() => modalStore.value = ModalType.CreateRoom" :disabled="!currentRoom.canJoin"
         title="Create New Room" />
     <input type="button" value="Refresh" @click="roomList.update"/>
     <input type="checkbox" id="autoRefresh" value="Refresh" v-model="roomList.autoRefresh"/>
@@ -45,8 +45,6 @@ onUnmounted(() => roomList.autoRefresh = false)
     <div v-if="roomList.lobbies.length == 0">
         <p>Currently, there are no rooms. Create one at the top!</p>
     </div>
-
-    <CreateRoomModal v-if="showCreateRoomsModal" @close="() => showCreateRoomsModal = false" />
 </template>
 
 <style scoped>
