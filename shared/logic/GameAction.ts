@@ -220,7 +220,7 @@ function tryDoPlaceSettlement(state: FullGameState, executorColor: Color, action
 
     return [produce(state, newState => {
         newState.players[executorIdx].handCards = unfreeze(newCards)
-        newState.board.buildings.push([executorColor, unfreeze(action.coordinate), BuildingType.Settlement])
+        newState.board.buildings.push({ color: executorColor, coord: unfreeze(action.coordinate), type: BuildingType.Settlement })
         return newState
     }), undefined]
 }
@@ -233,7 +233,7 @@ function tryDoPlaceCity(state: FullGameState, executorColor: Color, action: Game
         return undefined
 
     const validSettlementIdx = 
-        state.board.buildings.findIndex(([color, coord, type]) => 
+        state.board.buildings.findIndex(({ color, coord, type }) => 
             sameCoordinate(action.coordinate, coord) && 
             type == BuildingType.Settlement && 
             color == executorColor)
@@ -247,7 +247,7 @@ function tryDoPlaceCity(state: FullGameState, executorColor: Color, action: Game
 
     return [produce(state, newState => {
         newState.players[executorIdx].handCards = unfreeze(newCards)
-        newState.board.buildings[validSettlementIdx] = [executorColor, unfreeze(action.coordinate), BuildingType.City]
+        newState.board.buildings[validSettlementIdx] = { color: executorColor, coord: unfreeze(action.coordinate), type: BuildingType.City }
     }), undefined]
 }
 function tryDoPlaceRoad(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceRoad]): ResultType<GameActionType.PlaceRoad> {
@@ -268,7 +268,7 @@ function tryDoPlaceRoad(state: FullGameState, executorColor: Color, action: Game
 
     return [produce(state, newState => {
         newState.players[executorIdx].handCards = unfreeze(newCards)
-        newState.board.roads.push([executorColor, unfreeze(action.coordinates)])
+        newState.board.roads.push({ color: executorColor, coord: unfreeze(action.coordinates) })
     }), undefined]
 }
 function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceInitial]): ResultType<GameActionType.PlaceInitial> {
@@ -295,8 +295,8 @@ function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: G
     
     const [nextColor, nextPhase] = nextTurn(state)
     const newBoard = produce(state.board, board => {
-        board.buildings.push([executorColor, unfreeze(action.settlement), BuildingType.Settlement])
-        board.roads.push([executorColor, unfreeze(action.road)])
+        board.buildings.push({ color: executorColor, coord: unfreeze(action.settlement), type: BuildingType.Settlement })
+        board.roads.push({ color: executorColor, coord: unfreeze(action.road) })
         return board
     })
     return [{
@@ -651,7 +651,7 @@ export function canPlaceCity(state: RedactedGameState): boolean {
     if (!isActive(state.phase) || state.currentPlayer != state.self.color)
         return false
 
-    const freePositions = state.board.buildings.some(([color, coord, type]) => type == BuildingType.Settlement && color == state.self.color)
+    const freePositions = state.board.buildings.some(({ color, coord, type }) => type == BuildingType.Settlement && color == state.self.color)
     const hasCards = tryBuyBuilding(state.self.handCards, BuildingType.City) != undefined
     return freePositions && hasCards
 }

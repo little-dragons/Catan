@@ -124,7 +124,7 @@ const tileRadius = 100
 // TODO this is not ideally implemented, but it works. It is supposed to keep the viewbox fitting to the content if
 // the leftmost row does not contain elements in uneven rows: because then, all tiles in the first row do not start
 // at 0, but rather have an offset into the x-axis.
-const viewboxStartX = props.board.tiles.some(x => x[1][0] == 0 && x[1][1] % 2 == 0) ? 0 : tileRadius * Math.cos(30 / 180 * Math.PI)
+const viewboxStartX = props.board.tiles.some(x => x.coord[0] == 0 && x.coord[1] % 2 == 0) ? 0 : tileRadius * Math.cos(30 / 180 * Math.PI)
 const viewboxWidth = tileRadius * 2 * (props.board.columnCount + 0.5) * Math.cos(30 / 180 * Math.PI) - viewboxStartX
 const viewboxHeight = tileRadius * (props.board.rowCount * 1.5 + 0.5)
 
@@ -228,29 +228,29 @@ function getUserSelection<T extends UserSelectionType, Options extends UserSelec
         <g id="tiles">
             <g v-for="tile in board.tiles">
                 <path
-                    :d="svgPath(tileHexagon(tile[1], tileRadius))"
-                    :fill="backgroundColor(tile[0])" />
-                <image v-if="tile[0].type == 'port'" 
-                    :x="tilePortPosition(tile[1], tileRadius)[0]"
-                    :y="tilePortPosition(tile[1], tileRadius)[1]"
+                    :d="svgPath(tileHexagon(tile.coord, tileRadius))"
+                    :fill="backgroundColor(tile)" />
+                <image v-if="tile.type == 'port'" 
+                    :x="tilePortPosition(tile.coord, tileRadius)[0]"
+                    :y="tilePortPosition(tile.coord, tileRadius)[1]"
                     :width="tilePortIconSize(tileRadius)[0]"
                     :height="tilePortIconSize(tileRadius)[1]"
-                    :href="portToIcon(tile[0])"/>
-                <image v-if="tile[0].type == 'resource'"
-                    :x="tileResourceIconPosition(tile[1], tileRadius)[0]"
-                    :y="tileResourceIconPosition(tile[1], tileRadius)[1]"
+                    :href="portToIcon(tile)"/>
+                <image v-if="tile.type == 'resource'"
+                    :x="tileResourceIconPosition(tile.coord, tileRadius)[0]"
+                    :y="tileResourceIconPosition(tile.coord, tileRadius)[1]"
                     :width="tileResourceIconSize(tileRadius)[0]"
                     :height="tileResourceIconSize(tileRadius)[1]"
-                    :href="resourceToIcon(tile[0].resource)"/>
-                <text v-if="tile[0].type == 'resource'"
-                    :x="tileNumberPosition(tile[1], tile[0].number, tileRadius)![0]"    
-                    :y="tileNumberPosition(tile[1], tile[0].number, tileRadius)![1]"
-                    :font-size="`${tileNumberFontSize(tile[0].number, tileRadius)!}px`">
-                    {{ tile[0].number }}
+                    :href="resourceToIcon(tile.resource)"/>
+                <text v-if="tile.type == 'resource'"
+                    :x="tileNumberPosition(tile.coord, tile.number, tileRadius)![0]"    
+                    :y="tileNumberPosition(tile.coord, tile.number, tileRadius)![1]"
+                    :font-size="`${tileNumberFontSize(tile.number, tileRadius)!}px`">
+                    {{ tile.number }}
                 </text>
-                <image v-if="tile[0].type == 'desert'" 
-                    :x="tileResourceIconPosition(tile[1], tileRadius)[0]"
-                    :y="tileResourceIconPosition(tile[1], tileRadius)[1]"
+                <image v-if="tile.type == 'desert'" 
+                    :x="tileResourceIconPosition(tile.coord, tileRadius)[0]"
+                    :y="tileResourceIconPosition(tile.coord, tileRadius)[1]"
                     :width="tileResourceIconSize(tileRadius)[0]"
                     :height="tileResourceIconSize(tileRadius)[1]"
                     :href="desert"/>
@@ -258,8 +258,8 @@ function getUserSelection<T extends UserSelectionType, Options extends UserSelec
         </g>
         <g id="roads">
             <path v-for="road in board.roads"
-                :d="svgPath(roadCorners(road[1], tileRadius))"
-                :fill="cssColor(road[0])"/>
+                :d="svgPath(roadCorners(road.coord, tileRadius))"
+                :fill="cssColor(road.color)"/>
         </g>
         <image id="robber"
             :x="tileCenter(board.robber, tileRadius)[0] - robberWidth(tileRadius) / 2"
@@ -269,11 +269,11 @@ function getUserSelection<T extends UserSelectionType, Options extends UserSelec
             :href="robber"/>
         <g id="buildings">
             <image v-for="building in board.buildings" 
-                :x="crossingPosition(building[1], tileRadius)[0] - buildingWidth(tileRadius) / 2"
-                :y="crossingPosition(building[1], tileRadius)[1] - buildingHeight(tileRadius) / 2"
+                :x="crossingPosition(building.coord, tileRadius)[0] - buildingWidth(tileRadius) / 2"
+                :y="crossingPosition(building.coord, tileRadius)[1] - buildingHeight(tileRadius) / 2"
                 :width="buildingWidth(tileRadius)"
                 :height="buildingHeight(tileRadius)"
-                :href="buildingForColor(building[0], building[2])"/>
+                :href="buildingForColor(building.color, building.type)"/>
         </g>
         <g id="interaction-points" v-if="interactionPoints != undefined">
             <circle v-if="interactionPoints.type == UserSelectionType.Crossing" v-for="point in interactionPoints.data" 

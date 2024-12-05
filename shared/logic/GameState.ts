@@ -134,7 +134,7 @@ export function victoryPointsForBuildingType(buildingType: BuildingType): number
     }
 }
 export function victoryPointsFromBuildings(state: MinimalGameState, color: Color): number {
-    return state.board.buildings.reduce((current, [buildColor, _, type]) => buildColor == color ? current + victoryPointsForBuildingType(type) : current, 0)
+    return state.board.buildings.reduce((current, { color: buildColor, type }) => buildColor == color ? current + victoryPointsForBuildingType(type) : current, 0)
 }
 
 export function victoryPointsFromFull(state: FullGameState, color: Color): number {

@@ -109,8 +109,8 @@ watchEffect(async () => {
         return undefined
 
     const possibleRobberPositions = 
-        state.value.board.tiles.filter(([_, coord]) => validNewRobberPosition(state.value!.board, coord))
-        .map(x => x[1])
+        state.value.board.tiles.filter(({ coord }) => validNewRobberPosition(state.value!.board, coord))
+        .map(x => x.coord)
 
     let newRobberCoordinate: Coordinate | undefined = undefined
     let robbedColor: Color | undefined = undefined
@@ -118,17 +118,17 @@ watchEffect(async () => {
         newRobberCoordinate = await renderer.value!.getUserSelection(UserSelectionType.Tile, possibleRobberPositions, { noAbort: true })
         const adjacentColors =
             adjacentBuildingsToTile(state.value.board, newRobberCoordinate)
-            .filter(([color]) => color != state.value!.self.color)
+            .filter(({ color }) => color != state.value!.self.color)
 
         if (adjacentColors.length == 0)
             break
-        if (adjacentColors.every(([color]) => adjacentColors.every(([color2]) => color == color2)))
-            robbedColor = adjacentColors[0][0]
+        if (adjacentColors.every(({ color }) => adjacentColors.every(({ color: color2 }) => color == color2)))
+            robbedColor = adjacentColors[0].color
         else {
-            const robbedColorCoord = await renderer.value!.getUserSelection(UserSelectionType.Crossing, adjacentColors.map(x => x[1]))
+            const robbedColorCoord = await renderer.value!.getUserSelection(UserSelectionType.Crossing, adjacentColors.map(x => x.coord))
             if (robbedColorCoord == undefined)
                 continue
-            robbedColor = adjacentColors.find(([_, coord]) => sameCoordinate(robbedColorCoord, coord))![0]
+            robbedColor = adjacentColors.find(({ coord }) => sameCoordinate(robbedColorCoord, coord))!.color
         }
     } while (newRobberCoordinate == undefined)
 
@@ -173,10 +173,10 @@ async function buildCity() {
 
     const possiblePositions = 
         state.value.board.buildings
-            .filter(([color, coord, type]) => 
+            .filter(({ color, type }) => 
                 color == state.value!.self.color &&
                 type == BuildingType.Settlement)
-            .map(x => x[1])
+            .map(x => x.coord)
 
 
     const settlement = await renderer.value.getUserSelection(UserSelectionType.Crossing, possiblePositions)

@@ -1,4 +1,4 @@
-import { type Board, type Tile, type Coordinate, sameCoordinate, BoardSeed } from "./Board.js";
+import { type Board, type Tile, type Coordinate, sameCoordinate, BoardSeed, CoordinateTile } from "./Board.js";
 import { allOrientations, clockwise, counterclockwise, neighborTile, opposite } from "./Orientation.js";
 import { Resource, allResources } from "./Resource.js";
 import seedrandom from 'seedrandom'
@@ -44,12 +44,12 @@ export function defaultBoard(seed: BoardSeed): Board {
     }
 
     
-    const tiles: [Tile, Coordinate][] = []
-    function getTile(coord: Coordinate): Tile | undefined{
-        const tile = tiles.find(([_, c]) => sameCoordinate(c, coord))
+    const tiles: CoordinateTile[] = []
+    function getTile(coord: Coordinate): CoordinateTile | undefined{
+        const tile = tiles.find(tile => sameCoordinate(tile.coord, coord))
         if (tile == undefined)
             return undefined
-        return tile[0]
+        return tile
     }
     // place tiles starting in the middle and choose a random starting orientation. This is the reverse of the original process.
     // set first few tiles manually
@@ -59,12 +59,12 @@ export function defaultBoard(seed: BoardSeed): Board {
     
     // to really understand the following part, look at the visualization of the rule set almanach
     // and consider that we follow the path in the reverse direction
-    tiles.push([landTiles.pop()!, coord])
+    tiles.push({ ...landTiles.pop()!, coord })
     coord = neighborTile(coord, orientation)
-    tiles.push([landTiles.pop()!, coord])
+    tiles.push({ ...landTiles.pop()!, coord })
     orientation = counterclockwise(opposite(orientation))
     coord = neighborTile(coord, orientation)
-    tiles.push([landTiles.pop()!, coord])
+    tiles.push({ ...landTiles.pop()!, coord })
     // now orientation and position contain the data to the last tile
 
     while (landTiles.length > 0) {
@@ -73,12 +73,12 @@ export function defaultBoard(seed: BoardSeed): Board {
         if (getTile(turnedCoord) == undefined) {
             orientation = turnedOrientation
             coord = turnedCoord
-            tiles.push([landTiles.pop()!, turnedCoord])
+            tiles.push({ ...landTiles.pop()!, coord: turnedCoord })
         }
         else {
             // follow straight
             coord = neighborTile(coord, orientation)
-            tiles.push([landTiles.pop()!, coord])
+            tiles.push({ ...landTiles.pop()!, coord })
         }
     }
 
@@ -115,12 +115,12 @@ export function defaultBoard(seed: BoardSeed): Board {
         if (getTile(turnedCoord) == undefined) {
             orientation = turnedOrientation
             coord = turnedCoord
-            tiles.push([popWaterTile()!, turnedCoord])
+            tiles.push({ ...popWaterTile()!, coord: turnedCoord })
         }
         else {
             // follow straight
             coord = neighborTile(coord, orientation)
-            tiles.push([popWaterTile()!, coord])
+            tiles.push({ ...popWaterTile()!, coord })
         }
     }
 
@@ -130,7 +130,7 @@ export function defaultBoard(seed: BoardSeed): Board {
         rowCount: 7,
         tiles: tiles,
         roads: [],
-        robber: tiles.find(x => x[0].type == 'desert')![1],
+        robber: tiles.find(x => x.type == 'desert')!.coord,
         buildings: []
     }
 }

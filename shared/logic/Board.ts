@@ -30,6 +30,7 @@ export type ResourceTile = {
 export type LandTile = { type: 'desert' } | ResourceTile
 export type OceanTile = { type: 'ocean' } | PortTile
 export type Tile = LandTile | OceanTile
+export type CoordinateTile = Tile & { coord: Coordinate }
 export function isLandTile(tile: Tile): tile is LandTile {
     return tile.type == 'desert' || tile.type == 'resource'
 }
@@ -43,10 +44,10 @@ export function randomBoardSeed(): BoardSeed {
 export type Board = Freeze<{
     rowCount: number
     columnCount: number
-    tiles: [Tile, Coordinate][]
-    roads: [Color, Road][]
+    tiles: CoordinateTile[]
+    roads: { color: Color, coord: Road }[]
     robber: Coordinate
-    buildings: [Color, Coordinate, BuildingType][]
+    buildings: { color: Color, coord: Coordinate, type: BuildingType }[]
 }>
 
 
@@ -67,15 +68,15 @@ function crossingAdjacentToTile(crossing: Coordinate, tile: Coordinate): boolean
     return allowedX.includes(crossing[0]) && allowedY.includes(crossing[1])
 }
 
-export function landTiles(board: Board): Freeze<[LandTile, Coordinate][]> {
-    return board.tiles.filter(x => isLandTile(x[0])) as Freeze<[LandTile, Coordinate][]>
+export function landTiles(board: Board): Freeze<CoordinateTile[]> {
+    return board.tiles.filter(x => isLandTile(x))
 }
 export function crossingAdjacentToLand(crossing: Coordinate, board: Board): boolean {
-    return landTiles(board).some(x => crossingAdjacentToTile(crossing, x[1]))
+    return landTiles(board).some(x => crossingAdjacentToTile(crossing, x.coord))
 }
 
-function crossingAdjacentToPort(tile: PortTile, tileCoordinate: Coordinate, crossing: Coordinate) {
-    return crossingAdjacentToTile(crossing, tileCoordinate) && crossingAdjacentToTile(crossing, neighborTile(tileCoordinate, tile.orientation))
+function crossingAdjacentToPort(tile: PortTile & { coord: Coordinate}, crossing: Coordinate) {
+    return crossingAdjacentToTile(crossing, tile.coord) && crossingAdjacentToTile(crossing, neighborTile(tile.coord, tile.orientation))
 }
 
 
@@ -102,15 +103,15 @@ export function adjacentRoads(crossing: Coordinate) {
 }
 
 export function adjacentColorsToTile(board: Board, tile: Coordinate): readonly Color[] {
-    return adjacentBuildingsToTile(board, tile).map(x => x[0])
+    return adjacentBuildingsToTile(board, tile).map(x => x.color)
 }
 export function adjacentBuildingsToTile(board: Board, tile: Coordinate) {
-    return board.buildings.filter(x => crossingAdjacentToTile(x[1], tile))
+    return board.buildings.filter(x => crossingAdjacentToTile(x.coord, tile))
 }
 
 function crossingsForColor(board: Board, color: Color) {
-    const buildingCrossingsForColor = board.buildings.filter(x => x[0] == color).map(x => x[1])
-    const roadCrossingsForColor = board.roads.filter(x => x[0] == color).map(x => x[1])
+    const buildingCrossingsForColor = board.buildings.filter(x => x.color == color).map(x => x.coord)
+    const roadCrossingsForColor = board.roads.filter(x => x.color == color).map(x => x.coord)
     const allCrossings = roadCrossingsForColor.flatMap(x => x).concat(buildingCrossingsForColor)
     return allCrossings.filter((val, idx) => allCrossings.findIndex(x => sameCoordinate(x, val)) == idx)
 }
@@ -126,7 +127,7 @@ export function availableRoadPositions(board: Board, color: Color) {
         // remove duplicates
         .filter((val, idx) => allPotentialRoads.findIndex(x => sameRoad(x, val)) == idx)
         // remove already built roads
-        .filter(road => !board.roads.some(other => sameRoad(road, other[1])))
+        .filter(road => !board.roads.some(other => sameRoad(road, other.coord)))
 }
 
 export function isAvailableRoadPosition(board: Board, road: Road, color: Color) {
@@ -207,9 +208,9 @@ export function adjacentResourceTiles(cross: Coordinate, board: Board, number: n
         coord => 
             mapFind(
                 board.tiles, 
-                tile => sameCoordinate(tile[1], coord) &&
-                tile[0].type == 'resource' &&
-                (number != undefined ? tile[0].number == number : true) ? tile[0] : undefined)
+                tile => sameCoordinate(tile.coord, coord) &&
+                tile.type == 'resource' &&
+                (number != undefined ? tile.number == number : true) ? tile : undefined)
             ?.resource
         )
 }
@@ -217,13 +218,13 @@ export function adjacentResourceTiles(cross: Coordinate, board: Board, number: n
 export function gainedResources(board: Board, color: Color, number: number): Resource[] {
     let accumulated: Resource[] = []
     for (const building of board.buildings) {
-        if (building[0] != color)
+        if (building.color != color)
             continue
 
-        const resources = adjacentResourceTiles(building[1], board, number)
-        if (building[2] == BuildingType.Settlement)
+        const resources = adjacentResourceTiles(building.coord, board, number)
+        if (building.type == BuildingType.Settlement)
             accumulated = accumulated.concat(resources)
-        if (building[2] == BuildingType.City) {
+        if (building.type == BuildingType.City) {
             accumulated = accumulated.concat(resources)
             accumulated = accumulated.concat(resources)
         }            
@@ -233,15 +234,15 @@ export function gainedResources(board: Board, color: Color, number: number): Res
 }
 
 export function portsForColor(board: Board, color: Color): readonly (Resource | 'general')[] {
-    const ports = mapFilter(board.tiles, x => x[0].type == 'port' ? x as Freeze<[PortTile, Coordinate]> : undefined)
-    const buildingCoords = board.buildings.filter(x => x[0] == color).map(x => x[1])
-    const adjacentPorts = ports.filter(([tile, coord]) => buildingCoords.some(cross => crossingAdjacentToPort(tile, coord, cross)))
-    return adjacentPorts.map(x => x[0].resource)
+    const ports = mapFilter(board.tiles, x => x.type == 'port' ? x as Freeze<PortTile & { coord: Coordinate }> : undefined)
+    const buildingCoords = board.buildings.filter(x => x.color == color).map(x => x.coord)
+    const adjacentPorts = ports.filter(port => buildingCoords.some(cross => crossingAdjacentToPort(port, cross)))
+    return adjacentPorts.map(x => x.resource)
 }
 
 export function validNewRobberPosition(board: Board, robberPositon: Coordinate): boolean {
     if (sameCoordinate(board.robber, robberPositon))
         return false
 
-    return board.tiles.some(([tile, coord]) => sameCoordinate(coord, robberPositon) && isLandTile(tile))
+    return board.tiles.some(tile => sameCoordinate(tile.coord, robberPositon) && isLandTile(tile))
 }
