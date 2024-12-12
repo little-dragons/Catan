@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+    <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+    <g class="layer">
+        <title>Layer 1</title>
+        <line fill="none" stroke="#000000" stroke-width="8" transform="rotate(45 100 100)" x1="100" x2="100" y1="10"
+            y2="190" />
+        <line fill="none" stroke="#000000" stroke-width="8" transform="rotate(-45 100 95)" x1="100" x2="100" y1="10"
+            y2="190" />
+        <path d="M 40 10 H 160 Q 190 10 190 40 V 160 Q 190 190 160 190 H 40 Q 10 190 10 160 V 40 Q 10 10 40 10 Z" fill="none"
+            stroke="#000000" stroke-width="8" width="180" stroke-linejoin="round" />
+    </g>
+</svg>

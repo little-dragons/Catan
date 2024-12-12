@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { cssColor, BuildingType, Color, Resource, type Board, type Coordinate, type PortTile, type Road, type Tile } from 'shared';
-import { distance } from '../Vector';
-import { tileHexagon, buildingWidth, buildingHeight, tileCenter, robberHeight, robberWidth, roadCorners, tileNumberPosition, tileNumberFontSize, crossingPosition, interactionPointRadius, roadCenter, tilePortPosition, tilePortIconSize, tileResourceIconPosition, tileResourceIconSize } from './Layout';
-import { UserSelectionType, type InteractionPoints, type UserSelectionDataType, type UserSelectionOptions, type UserSelectionResult } from './UserSelection';
+import { cssColor, BuildingType, Color, Resource, type Board, type PortTile, type Tile } from 'shared';
+import { tileHexagon, buildingWidth, buildingHeight, tileCenter, robberHeight, robberWidth, roadCorners, tileNumberPosition, tileNumberFontSize, crossingPosition, tilePortPosition, tilePortIconSize, tileResourceIconPosition, tileResourceIconSize } from './Layout';
+import { type AnyUserSelectionResult, type InteractionPoints, type UserSelectionOptions, type UserSelectionResult } from './UserSelection';
+import InteractionPointsRenderer from './InteractionPoints.vue';
 
 import robber from '@/assets/board/robber.svg'
 
@@ -61,30 +61,28 @@ function tileColor(resource: Resource): string {
     }
 }
 function backgroundColor(tile: Tile): string {
-    if (tile.type == 'desert')
-        return 'gold'
-    if (tile.type == 'ocean' || tile.type == 'port')
-        return 'royalblue'
-    if (tile.type == 'resource')
-        return tileColor(tile.resource)
-    else
-        return ''
+    switch (tile.type) {
+        case 'desert': return 'gold'
+        case 'resource': return tileColor(tile.resource)
+        case 'ocean': return 'royalblue'
+        case 'port': return 'royalblue'
+    }
 }
 function portToIcon(port: PortTile): string {
-  switch (port.resource) {
-    case Resource.Brick:
-        return brickPort
-    case Resource.Grain:
-        return grainPort
-    case Resource.Lumber:
-        return lumberPort
-    case Resource.Ore:
-        return orePort
-    case Resource.Wool:
-        return woolPort
-    case 'general':
-        return generalPort
-  }
+    switch (port.resource) {
+        case Resource.Brick:
+            return brickPort
+        case Resource.Grain:
+            return grainPort
+        case Resource.Lumber:
+            return lumberPort
+        case Resource.Ore:
+            return orePort
+        case Resource.Wool:
+            return woolPort
+        case 'general':
+            return generalPort
+    }
 }
 function buildingForColor(color: Color, type: BuildingType): string {
     switch (type) {
@@ -130,85 +128,21 @@ const viewboxHeight = tileRadius * (props.board.rowCount * 1.5 + 0.5)
 
 const boardSvg = ref<null | SVGElement>(null)
 
-function translateClick(ev: MouseEvent) {
-    if (boardSvg.value == undefined)
-        return
-    
-    // the idea is to find the coordinate of the click into the svg viewbox
-    // however, there may be blank space in the y-dimension (we assume the svg is centered vertically then)
-    // this increases the size of the svg element, which is not a problem in itself, but we need
-    // to consider it when converting the coordinates
-    // we don't need to handle the width case, as the svg always fits in the x-dimension
-
-    // the height of the blank space above (or below) the svg
-    let clientYOffset = 0
-    // the height of the actual content of the svg, e.g. the space we're interested in
-    let actualClientHeight = boardSvg.value.clientHeight
-
-    const clientAspectRatio = boardSvg.value.clientWidth / boardSvg.value.clientHeight
-    const viewboxAspectRatio = viewboxWidth / viewboxHeight
-
-    // only if there is vertically empty space, we consider the case
-    // the opposite case does not exist because of margin: auto
-    if (clientAspectRatio < viewboxAspectRatio) {
-        const clientUnnecessary = boardSvg.value.clientHeight - boardSvg.value.clientWidth / viewboxAspectRatio
-        clientYOffset = clientUnnecessary / 2
-        actualClientHeight = boardSvg.value.clientWidth / viewboxAspectRatio
-    }
-
-    const clickedPosition = [
-        viewboxWidth / boardSvg.value.clientWidth * ev.offsetX + viewboxStartX,
-        viewboxHeight / actualClientHeight * (ev.offsetY - clientYOffset)
-    ] as [number, number]
-
-    return clickedPosition
-}
-
-
-const interactionPoints = ref<InteractionPoints | undefined>(undefined)
-const clickHandler = ref<((ev: MouseEvent) => void) | undefined>(undefined)
+const interactionPoints = ref<(InteractionPoints & { resolver: (value: AnyUserSelectionResult) => boolean }) | undefined>(undefined)
 
 
 defineExpose({ getUserSelection })
 function getUserSelection<T extends InteractionPoints, Options extends UserSelectionOptions | undefined>(value: T, options?: Options): Promise<UserSelectionResult<T['type'], Options>> {
     return new Promise(resolve => {
-        interactionPoints.value = value
-        clickHandler.value = ev => {
-            const clicked = translateClick(ev)!
+        interactionPoints.value = {
+            ...value,
+            resolver(val) {
+                if (options?.noAbort && val == undefined)
+                    return false
 
-            if (value.type == UserSelectionType.Connection) {
-                for (const p of value.positions) {
-                    if (distance(clicked, roadCenter(p, tileRadius)) < interactionPointRadius(tileRadius)) {
-                        interactionPoints.value = undefined
-                        clickHandler.value = undefined   
-                        resolve(p as UserSelectionResult<T['type'], Options>)
-                    }
-                }
-            }
-            else if (value.type == UserSelectionType.Crossing) {
-                for (const p of value.positions) {
-                    if (distance(clicked, crossingPosition(p, tileRadius)) < interactionPointRadius(tileRadius)) {
-                        interactionPoints.value = undefined
-                        clickHandler.value = undefined   
-                        resolve(p as UserSelectionResult<T['type'], Options>)
-                    }
-                }
-            }
-            else if (value.type == UserSelectionType.Tile) {
-                for (const p of value.positions) {
-                    if (distance(clicked, tileCenter(p, tileRadius)) < interactionPointRadius(tileRadius)) {
-                        interactionPoints.value = undefined
-                        clickHandler.value = undefined   
-                        resolve(p as UserSelectionResult<T['type'], Options>)
-                    }
-                }
-            }
-
-            // TODO maybe add a proper abort button?
-            if (options?.noAbort != true) {
-                resolve(undefined as UserSelectionResult<T['type'], Options>)
+                resolve(val as UserSelectionResult<T['type'], Options>)
                 interactionPoints.value = undefined
-                clickHandler.value = undefined
+                return true
             }
         }
     })
@@ -216,7 +150,7 @@ function getUserSelection<T extends InteractionPoints, Options extends UserSelec
 </script>
 
 <template>
-    <svg :viewBox="`${viewboxStartX} 0 ${viewboxWidth} ${viewboxHeight}`" ref="boardSvg" @click="clickHandler">
+    <svg :viewBox="`${viewboxStartX} 0 ${viewboxWidth} ${viewboxHeight}`" ref="boardSvg" @click="() => interactionPoints?.resolver(undefined)">
         <g id="tiles">
             <g v-for="tile in board.tiles">
                 <path
@@ -267,20 +201,11 @@ function getUserSelection<T extends InteractionPoints, Options extends UserSelec
                 :height="buildingHeight(tileRadius)"
                 :href="buildingForColor(building.color, building.type)"/>
         </g>
-        <g id="interaction-points" v-if="interactionPoints != undefined">
-            <circle v-if="interactionPoints.type == UserSelectionType.Crossing" v-for="point in interactionPoints.positions" 
-                :cx="crossingPosition(point, tileRadius)[0]"
-                :cy="crossingPosition(point, tileRadius)[1]"
-                :r="interactionPointRadius(tileRadius)"/>
-            <circle v-if="interactionPoints.type == UserSelectionType.Connection" v-for="road in interactionPoints.positions" 
-                :cx="roadCenter(road, tileRadius)[0]"
-                :cy="roadCenter(road, tileRadius)[1]"
-                :r="interactionPointRadius(tileRadius)"/>
-            <circle v-if="interactionPoints.type == UserSelectionType.Tile" v-for="point in interactionPoints.positions" 
-                :cx="tileCenter(point, tileRadius)[0]"
-                :cy="tileCenter(point, tileRadius)[1]"
-                :r="interactionPointRadius(tileRadius)"/>
-        </g>
+        <InteractionPointsRenderer
+            v-if="interactionPoints != undefined"
+            :interactionPoints="interactionPoints"
+            :tileRadius="tileRadius"
+            :resolver="interactionPoints.resolver"/>
     </svg>
 </template>
 
@@ -303,9 +228,4 @@ svg {
     text-shadow: 1px 1px rgba(0, 0, 0, 0.18);
 }
 
-#interaction-points > circle {    
-    stroke: black;
-    fill: lightgray;
-    opacity: .25;
-}
 </style>

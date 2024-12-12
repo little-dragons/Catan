@@ -12,11 +12,13 @@ export type UserSelectionDataType<T> =
 
 export type UserSelectionOptions = {
     noAbort?: true
-}
+} | undefined
 
-export type UserSelectionResult<T extends UserSelectionType, options extends UserSelectionOptions | undefined> = 
+export type UserSelectionResult<T extends UserSelectionType, options extends UserSelectionOptions> = 
     options extends { noAbort: true } ? UserSelectionDataType<T> :
     UserSelectionDataType<T> | undefined
+
+export type AnyUserSelectionResult = UserSelectionResult<UserSelectionType, UserSelectionOptions>
 
 type InteractionPointsTemplate<T extends UserSelectionType> = {
     type: T,

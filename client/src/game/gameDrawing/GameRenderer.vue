@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Color, Resource, type Board, type DieResult, type OpenTradeOffer, type TradeOffer } from 'shared';
 import BoardRenderer from './board/Renderer.vue';
-import { UserSelectionType, type InteractionPoints, type UserSelectionDataType, type UserSelectionOptions, type UserSelectionResult } from './board/UserSelection'
+import { type InteractionPoints, type UserSelectionOptions, type UserSelectionResult } from './board/UserSelection'
 import DiceRenderer from './DiceRenderer.vue';
 import { onMounted, ref } from 'vue';
 import CardsRenderer from './CardsRenderer.vue';
@@ -122,7 +122,7 @@ defineExpose({ getUserSelection })
             class="middle-right-grid"/>
     </div>
     <div ref="boardContainer"class="main-box">   
-        <BoardRenderer class="board" :board="board" ref="boardRenderer"/>
+        <BoardRenderer :board="board" ref="boardRenderer"/>
         <div class="below">
             <div class="rowAbove">
                 <TradeRenderer
@@ -220,12 +220,6 @@ defineExpose({ getUserSelection })
     flex-direction: column;
     margin: 0 auto;
     margin-top: 30px;
-}
-
-.board {
-    flex: 1 1;
-    min-height: 0;
-    display: flex;
 }
 
 .below {
