@@ -31,3 +31,19 @@ export function sameCards(c1: CardList, c2: CardList) {
 export function countResources(cards: CardList): Map<Resource, number> {
     return new Map<Resource, number>(allResources.map(res => [res, cards.filter(x => res == x).length]))
 }
+
+export function tryTransferCard(giver: CardList, receiver: CardList, res: Resource): [CardList, CardList] {
+    const tryRemoved = tryRemoveCard(giver, res)
+    if (tryRemoved == undefined)
+        return [giver, receiver]
+    else
+        return [tryRemoved, addCards(receiver, [res])]
+}
+
+export function tryTransferCards(giver: CardList, receiver: CardList, res: Resource[]): [CardList, CardList] {
+    const tryRemoved = tryRemoveCards(giver, res)
+    if (tryRemoved == undefined)
+        return [giver, receiver]
+    else
+        return [tryRemoved, addCards(receiver, res)]
+}

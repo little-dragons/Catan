@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BuildingType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentColorsToTile, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isLandTile, isActive, isPreDiceRoll, isInitial, validNewRobberPosition, adjacentBuildingsToTile } from 'shared';
+import { BuildingType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentColorsToTile, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isLandTile, isActive, isPreDiceRoll, isInitial, validNewRobberPosition, adjacentBuildingsToTile, type CardList, RobbingPhaseType, tryTransferCard, isRobbingDiscardingCards } from 'shared';
 import { computed, ref, watchEffect, watch } from 'vue';
 import GameRenderer, { type ForbiddableButtons } from './gameDrawing/GameRenderer.vue';
 import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vue';
@@ -7,6 +7,7 @@ import { UserSelectionType } from './gameDrawing/board/UserSelection';
 import { canFinishTurn, canOfferTrade, canPlaceRoad, canPlaceSettlement, type GameActionInput, GameActionType } from 'shared/logic/GameAction';
 import type { TradeMenuRendererProps } from './gameDrawing/trade/TradeMenuRenderer.vue';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
+import type { DiscardMenuRendererProps } from './gameDrawing/DiscardRenderer.vue';
 
 const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
 
@@ -245,18 +246,25 @@ function toggleTradeMenu() {
     }
 }
 
-function addOfferedCard(res: Resource) {
-    if (tradeMenu.value == undefined)
-        return
-
-    const newStocked = tryRemoveCard(tradeMenu.value.stockedCards, res)
-    if (newStocked == undefined)
-        return
-    
-    tradeMenu.value = {
-        stockedCards: newStocked,
-        desiredCards: tradeMenu.value.desiredCards,
-        offeredCards: addCards(tradeMenu.value.offeredCards, [res])
+function stockedCardClicked(res: Resource) {
+    if (tradeMenu.value != undefined) {
+        const newStocked = tryRemoveCard(tradeMenu.value.stockedCards, res)
+        if (newStocked == undefined)
+            return
+        
+        tradeMenu.value = {
+            stockedCards: newStocked,
+            desiredCards: tradeMenu.value.desiredCards,
+            offeredCards: addCards(tradeMenu.value.offeredCards, [res])
+        }
+    }
+    if (discardMenu.value != undefined) {
+        const [newStocked, newDiscarded] = tryTransferCard(discardMenu.value.stockedCards, discardMenu.value.discardingCards, res)
+        discardMenu.value = {
+            discardingCards: newDiscarded,
+            stockedCards: newStocked,
+            expectedDiscardingCount: discardMenu.value.expectedDiscardingCount
+        }
     }
 }
 function removeOfferedCard(res: Resource) {
@@ -271,6 +279,17 @@ function removeOfferedCard(res: Resource) {
         stockedCards: addCards(tradeMenu.value.stockedCards, [res]),
         desiredCards: tradeMenu.value.desiredCards,
         offeredCards: newOffered
+    }
+}
+function removeDiscardingCard(res: Resource) {
+    if (discardMenu.value == undefined)
+        return
+
+    const [newDiscarded, newStocked] = tryTransferCard(discardMenu.value.discardingCards, discardMenu.value.stockedCards, res)
+    discardMenu.value = {
+        discardingCards: newDiscarded,
+        stockedCards: newStocked,
+        expectedDiscardingCount: discardMenu.value.expectedDiscardingCount
     }
 }
 async function acceptTrade(trade: TradeOffer) {
@@ -312,6 +331,46 @@ const ownOpenTradeOffers = computed(() => {
     return state.value.phase.tradeOffers.filter(x => x.offeringColor == state.value?.self.color)
 })
 
+const discardMenu = ref<({
+    stockedCards: CardList
+} & DiscardMenuRendererProps) | undefined>()
+
+// open and close discard menu
+watchEffect(() => {
+    if (state.value == undefined || 
+        !isRobbingDiscardingCards(state.value.phase) ||
+        !state.value.phase.playersLeftToDiscard.includes(state.value.self.color)
+    ) {
+        discardMenu.value = undefined
+    }
+    else {
+        discardMenu.value = {
+            stockedCards: state.value.self.handCards,
+            discardingCards: [],
+            expectedDiscardingCount: Math.floor(state.value.self.handCards.length / 2)
+        }
+    }
+})
+
+async function discardCards() {
+    if (discardMenu.value == undefined || 
+        discardMenu.value.expectedDiscardingCount != discardMenu.value.discardingCards.length)
+        return
+
+    await room.trySendAction({
+        type: GameActionType.DiscardResources,
+        resources: discardMenu.value.discardingCards
+    })
+}
+
+const stockedCardsToDisplay = computed(() => {
+    if (tradeMenu.value != undefined)
+        return tradeMenu.value.stockedCards
+    if (discardMenu.value != undefined)
+        return discardMenu.value.stockedCards
+    return state.value!.self.handCards
+})
+
 </script>
 
 <template>
@@ -319,10 +378,11 @@ const ownOpenTradeOffers = computed(() => {
         <GameRenderer ref="renderer" 
             :board="state.board" 
             :dice="lastDice" 
-            :stocked-cards="tradeMenu == undefined ? state.self.handCards : tradeMenu.stockedCards"
+            :stocked-cards="stockedCardsToDisplay"
             :forbiddable-buttons="forbiddableButtons!"
             :other-players="othersOverview" 
             :trade-menu="tradeMenuProps"
+            :discardingInfo="discardMenu"
             :own-trades="ownOpenTradeOffers"
             other-players-display="radial"
             @dice-clicked="rollDice"
@@ -337,10 +397,12 @@ const ownOpenTradeOffers = computed(() => {
             @reject-trade="rejectTrade"
             @finalize-trade="finalizeTrade"
             @abort-trade="abortTrade"
-            @stocked-card-clicked="addOfferedCard"
+            @stocked-card-clicked="stockedCardClicked"
             @add-desired-card="(res) => { if (tradeMenu != undefined) tradeMenu.desiredCards = addCards(tradeMenu.desiredCards, [res])}"
             @remove-desired-card="(res) => { if (tradeMenu != undefined) tradeMenu.desiredCards = tryRemoveCard(tradeMenu.desiredCards, res) ?? tradeMenu.desiredCards}"
             @remove-offered-card="removeOfferedCard"
+            @remove-discarding-card="removeDiscardingCard"
+            @discard-cards="discardCards"
         />
     </div>
 </template>

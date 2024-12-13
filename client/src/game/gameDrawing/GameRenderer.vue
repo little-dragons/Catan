@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Color, Resource, type Board, type DieResult, type OpenTradeOffer, type TradeOffer } from 'shared';
+import { Color, Resource, type Board, type CardList, type DieResult, type OpenTradeOffer, type TradeOffer } from 'shared';
 import BoardRenderer from './board/Renderer.vue';
 import { type InteractionPoints, type UserSelectionOptions, type UserSelectionResult } from './board/UserSelection'
 import DiceRenderer from './DiceRenderer.vue';
@@ -8,6 +8,7 @@ import CardsRenderer from './CardsRenderer.vue';
 import PlayerOverviewRenderer, { type PlayerOverviewData } from './PlayerOverviewRenderer.vue';
 import TradeRenderer, { type TradeMenuRendererProps } from './trade/TradeMenuRenderer.vue';
 import OwnTradeOverview from './trade/OwnTradeOverview.vue';
+import DiscardRenderer, { type DiscardMenuRendererProps } from './DiscardRenderer.vue';
 
 defineEmits<{
     diceClicked: []
@@ -26,6 +27,8 @@ defineEmits<{
     rejectTrade: [trade: TradeOffer]
     finalizeTrade: [trade: TradeOffer, color: Color]
     abortTrade: [trade: TradeOffer]
+    removeDiscardingCard: [card: Resource]
+    discardCards: []
 }>()
 export type ForbiddableButtons = {
     rollDice: boolean
@@ -37,13 +40,14 @@ export type ForbiddableButtons = {
 }
 
 defineProps<{
-    stockedCards: readonly Resource[]
+    stockedCards: CardList
     board: Board
     dice: readonly [DieResult, DieResult] | undefined
     forbiddableButtons: ForbiddableButtons
     otherPlayers: readonly PlayerOverviewData[]
     otherPlayersDisplay: 'radial' | 'grid'
     tradeMenu: TradeMenuRendererProps | undefined
+    discardingInfo: DiscardMenuRendererProps | undefined
     ownTrades: OpenTradeOffer[]
 }>()
 
@@ -134,6 +138,13 @@ defineExpose({ getUserSelection })
                     @addDesiredCard="card => $emit('addDesiredCard', card)"
                     @removeDesiredCard="card => $emit('removeDesiredCard', card)"
                     @removeOfferedCard="card => $emit('removeOfferedCard', card)"
+                />
+                <DiscardRenderer
+                    v-if="discardingInfo != undefined"
+                    class="discardRenderer"
+                    v-bind="discardingInfo"
+                    @remove-discarding-card="res => $emit('removeDiscardingCard', res)"
+                    @discard="() => $emit('discardCards')"
                 />
                 <div class="rightAnchored">
                     <div class="ownTrades">
@@ -242,6 +253,13 @@ defineExpose({ getUserSelection })
     position: absolute;
     bottom: 0;
     height: 200px;
+}
+
+.discardRenderer {
+    position: absolute;
+    bottom: 0;
+    height: 85px;
+    min-width: max(20%, 400px);
 }
 
 .rightAnchored {
