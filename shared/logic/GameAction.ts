@@ -315,6 +315,9 @@ function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: Ga
         return undefined
 
     if (action.robbedColor != undefined) {
+        if (action.robbedColor == executorColor)
+            return undefined
+        
         if (!adjacentColorsToTile(state.board, action.coordinate).includes(action.robbedColor))
             return undefined
 
@@ -347,8 +350,8 @@ function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: Ga
             }
         }, { robbedResource }]
     }
-    else if (adjacentColorsToTile(state.board, action.coordinate).length == 0)
-        // you can only not take a card if no color is adjacent
+    else if (adjacentColorsToTile(state.board, action.coordinate).every(x => x == executorColor))
+        // you can only not take a card if no other color is adjacent
         return [{...state,
             phase: {
                 type: GamePhaseType.Turns,

@@ -113,23 +113,27 @@ watchEffect(async () => {
         state.value.board.tiles.filter(({ coord }) => validNewRobberPosition(state.value!.board, coord))
         .map(x => x.coord)
 
-    let newRobberCoordinate: Coordinate | undefined = undefined
-    let robbedColor: Color | undefined = undefined
+    let newRobberCoordinate: Coordinate | undefined
+    let robbedColor: Color | undefined
     do {
         newRobberCoordinate = await renderer.value!.getUserSelection({ type: UserSelectionType.Tile, positions: possibleRobberPositions }, { noAbort: true })
-        const adjacentColors =
+        const adjacentBuildings =
             adjacentBuildingsToTile(state.value.board, newRobberCoordinate)
-            .filter(({ color }) => color != state.value!.self.color)
+            .filter(x => x.color != state.value!.self.color)
 
-        if (adjacentColors.length == 0)
-            break
-        if (adjacentColors.every(({ color }) => adjacentColors.every(({ color: color2 }) => color == color2)))
-            robbedColor = adjacentColors[0].color
+        if (adjacentBuildings.length == 0) {
+            robbedColor = undefined
+        }
+        else if (adjacentBuildings.every(x => x.color == adjacentBuildings[0].color)) {
+            robbedColor = adjacentBuildings[0].color
+        }
         else {
-            const robbedColorCoord = await renderer.value!.getUserSelection({ type: UserSelectionType.Crossing, positions: adjacentColors.map(x => x.coord) })
-            if (robbedColorCoord == undefined)
-                continue
-            robbedColor = adjacentColors.find(({ coord }) => sameCoordinate(robbedColorCoord, coord))!.color
+            const robbedCoord = await renderer.value!.getUserSelection({ type: UserSelectionType.Crossing, positions: adjacentBuildings.map(x => x.coord) })
+            if (robbedCoord != undefined)
+                robbedColor = adjacentBuildings.find(x => sameCoordinate(x.coord, robbedCoord))?.color
+            else
+                // no color was selected, indicating that maybe an abort is intended.
+                newRobberCoordinate = undefined
         }
     } while (newRobberCoordinate == undefined)
 
@@ -142,7 +146,6 @@ watchEffect(async () => {
 
 
 const tradeMenu = ref<undefined | {
-    // stocked cards are the cards meant to display during a trade menu interaction
     stockedCards: readonly Resource[],
     offeredCards: readonly Resource[],
     desiredCards: readonly Resource[] }>(undefined)
