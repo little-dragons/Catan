@@ -1,10 +1,18 @@
 import type { Color } from "./Player.js"
-import { neighborTile, type Orientation } from "./Orientation.js"
+import { neighborTile, Orientation } from "./Orientation.js"
 import type { Resource } from "./Resource.js"
 import { BuildingType } from "./Buildings.js"
 import { v4 } from "uuid"
 import { type Freeze } from "structurajs"
 
+// Coordinate has two meaning, depending on whether tiles or crossings are indexed.
+// The first coordinate always refers to the horizontal degree, left to right, the
+// second is vertical, top to bottom.
+// To tile correctly, each horizontally adjacent tile has a vertical offset to its
+// predecessor, this still counts as being in the same row.
+// Each row (for tiles) also has a horizontal offset. The first row starts completely
+// at 0 to the left, while the second has half a tile offset into the x-axis.
+// A good starting point for examples is the function `neighborTile`
 
 export type Coordinate = Freeze<[number, number]>
 export function sameCoordinate(c1: Coordinate, c2: Coordinate) {
@@ -59,6 +67,21 @@ export function allCrossingPositions(board: Board) {
 
     return allPositions
 }
+export function twoCrossingsFromTile(tile: Coordinate, orientation: Orientation): [Coordinate, Coordinate] {
+    const upperRow = tile[1]
+    const lowerRow = upperRow + 1
+    const leftCol = tile[0] * 2 + (tile[1] % 2 == 0 ? 0 : 1)
+    const middleCol = leftCol + 1
+    const rightCol = leftCol + 2
+    switch (orientation) {
+        case Orientation.LeftDown: return [[leftCol, lowerRow], [middleCol, lowerRow]]
+        case Orientation.RightDown: return [[middleCol, lowerRow], [rightCol, lowerRow]]
+        case Orientation.Left: return [[leftCol, lowerRow], [leftCol, upperRow]]
+        case Orientation.LeftUp: return [[leftCol, upperRow], [middleCol, upperRow]]
+        case Orientation.RightUp: return [[middleCol, upperRow], [rightCol, upperRow]]
+        case Orientation.Right: return [[rightCol, upperRow], [rightCol, lowerRow]]
+    }
+}
 
 function crossingAdjacentToTile(crossing: Coordinate, tile: Coordinate): boolean {
     const xCorrection = tile[1] % 2 == 0 ? 0 : 1
@@ -75,8 +98,11 @@ export function crossingAdjacentToLand(crossing: Coordinate, board: Board): bool
     return landTiles(board).some(x => crossingAdjacentToTile(crossing, x.coord))
 }
 
-function crossingAdjacentToPort(tile: PortTile & { coord: Coordinate}, crossing: Coordinate) {
+function isPortPoint(tile: PortTile & { coord: Coordinate }, crossing: Coordinate) {
     return crossingAdjacentToTile(crossing, tile.coord) && crossingAdjacentToTile(crossing, neighborTile(tile.coord, tile.orientation))
+}
+export function portPoints(tile: PortTile & { coord: Coordinate }): [Coordinate, Coordinate] {
+    return twoCrossingsFromTile(tile.coord, tile.orientation)
 }
 
 
@@ -236,7 +262,7 @@ export function gainedResources(board: Board, color: Color, number: number): Res
 export function portsForColor(board: Board, color: Color): readonly (Resource | 'general')[] {
     const ports = mapFilter(board.tiles, x => x.type == 'port' ? x as Freeze<PortTile & { coord: Coordinate }> : undefined)
     const buildingCoords = board.buildings.filter(x => x.color == color).map(x => x.coord)
-    const adjacentPorts = ports.filter(port => buildingCoords.some(cross => crossingAdjacentToPort(port, cross)))
+    const adjacentPorts = ports.filter(port => buildingCoords.some(cross => isPortPoint(port, cross)))
     return adjacentPorts.map(x => x.resource)
 }
 

@@ -38,3 +38,9 @@ export function distance(v1: Vector, v2: Vector): number {
     const y = (v1[1] - v2[1]) * (v1[1] - v2[1])
     return Math.sqrt(x + y)
 }
+
+export function lerp(start: Vector, end: Vector, t: number): Vector {
+    const direction = add(opposite(start), end)
+    const scaled = withLength(direction, length(direction) * t)
+    return add(scaled, start)
+}

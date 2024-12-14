@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { cssColor, BuildingType, Color, Resource, type Board, type PortTile, type Tile } from 'shared';
-import { tileHexagon, buildingWidth, buildingHeight, tileCenter, robberHeight, robberWidth, roadCorners, tileNumberPosition, tileNumberFontSize, crossingPosition, tilePortPosition, tilePortIconSize, tileResourceIconPosition, tileResourceIconSize } from './Layout';
+import { cssColor, BuildingType, Color, Resource, type Board, type PortTile, type Tile, portPoints } from 'shared';
+import { tileHexagon, segmentedPortPaths, buildingWidth, buildingHeight, tileCenter, robberHeight, robberWidth, roadCorners, tileNumberPosition, tileNumberFontSize, crossingPosition, tilePortPosition, tilePortIconSize, tileResourceIconPosition, tileResourceIconSize, triangularPortPaths } from './Layout';
 import { type AnyUserSelectionResult, type InteractionPoints, type UserSelectionOptions, type UserSelectionResult } from './UserSelection';
 import InteractionPointsRenderer from './InteractionPoints.vue';
 
@@ -162,6 +162,12 @@ function getUserSelection<T extends InteractionPoints, Options extends UserSelec
                     :width="tilePortIconSize(tileRadius)[0]"
                     :height="tilePortIconSize(tileRadius)[1]"
                     :href="portToIcon(tile)"/>
+                <path
+                    v-if="tile.type == 'port'"
+                    v-for="path in triangularPortPaths(tile, tileRadius)"
+                    :d="svgPath(path)"
+                    fill="white"
+                    />
                 <image v-if="tile.type == 'resource'"
                     :x="tileResourceIconPosition(tile.coord, tileRadius)[0]"
                     :y="tileResourceIconPosition(tile.coord, tileRadius)[1]"

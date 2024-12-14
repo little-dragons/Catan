@@ -20,24 +20,24 @@ export function neighborTile(pos: Coordinate, orientation: Orientation): Coordin
             return [pos[0] + 1, pos[1]]
         case Orientation.LeftDown:
             if (pos[1] % 2 == 0)
-                return [pos[0] - 1, pos[1] - 1]
-            else
-                return [pos[0], pos[1] - 1]
-        case Orientation.RightDown:
-            if (pos[1] % 2 == 0)
-                return [pos[0], pos[1] - 1]
-            else
-                return [pos[0] + 1, pos[1] - 1]
-        case Orientation.LeftUp:
-            if (pos[1] % 2 == 0)
                 return [pos[0] - 1, pos[1] + 1]
             else
                 return [pos[0], pos[1] + 1]
-        case Orientation.RightUp:
+        case Orientation.RightDown:
             if (pos[1] % 2 == 0)
                 return [pos[0], pos[1] + 1]
             else
                 return [pos[0] + 1, pos[1] + 1]
+        case Orientation.LeftUp:
+            if (pos[1] % 2 == 0)
+                return [pos[0] - 1, pos[1] - 1]
+            else
+                return [pos[0], pos[1] - 1]
+        case Orientation.RightUp:
+            if (pos[1] % 2 == 0)
+                return [pos[0], pos[1] - 1]
+            else
+                return [pos[0] + 1, pos[1] - 1]
     }
 }
 

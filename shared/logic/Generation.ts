@@ -46,10 +46,7 @@ export function defaultBoard(seed: BoardSeed): Board {
     
     const tiles: CoordinateTile[] = []
     function getTile(coord: Coordinate): CoordinateTile | undefined{
-        const tile = tiles.find(tile => sameCoordinate(tile.coord, coord))
-        if (tile == undefined)
-            return undefined
-        return tile
+        return tiles.find(tile => sameCoordinate(tile.coord, coord))
     }
     // place tiles starting in the middle and choose a random starting orientation. This is the reverse of the original process.
     // set first few tiles manually

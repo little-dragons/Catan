@@ -1,5 +1,5 @@
-import type { Board, Coordinate, Road } from "shared"
-import { add, middlepoint, opposite, perpendicular, withLength } from "../Vector"
+import { neighborTile, Orientation, portPoints, type Board, type Coordinate, type PortTile, type Road } from "shared"
+import { add, distance, lerp, middlepoint, opposite, perpendicular, withLength } from "../Vector"
 
 type Pixel = [number, number]
 
@@ -139,4 +139,57 @@ export function buildingHeight(tileRadius: number) {
 
 export function buildingWidth(tileRadius: number) {
     return tileRadius * 0.5;
+}
+
+
+function segment(start: Pixel, end: Pixel, width: number): Pixel[] {
+    const midpoint = middlepoint(start, end)
+    const lengthVector = withLength([start[0] - midpoint[0], start[1] - midpoint[1]], distance(start, end) / 2)
+    const widthVector =  withLength(perpendicular(lengthVector), width / 2)
+
+    return [
+        add(midpoint, lengthVector, widthVector),
+        add(midpoint, opposite(lengthVector), widthVector),
+        add(midpoint, opposite(lengthVector), opposite(widthVector)),
+        add(midpoint, lengthVector, opposite(widthVector))
+    ]
+}
+
+export function triangularPortPaths(portTile: PortTile & { coord: Coordinate }, tileRadius: number): Pixel[][] {
+    const center = tileCenter(portTile.coord, tileRadius)
+    const points = portPoints(portTile).map(x => crossingPosition(x, tileRadius))
+    const width = tileRadius * 0.08
+    const freeAtStart = 0.3
+    const freeAtEnd = 0.2
+    return points.map(target => {
+        const middle = lerp(center, target, freeAtStart)
+        const orth = withLength(perpendicular(add(center, opposite(middle))), width)
+        const p1 = add(middle, orth)
+        const p2 = add(middle, opposite(orth))
+        const p3 = lerp(center, target, 1 - freeAtEnd)
+        return [p1, p2, p3]
+    })
+}
+
+export function segmentedPortPaths(portTile: PortTile & { coord: Coordinate }, tileRadius: number): Pixel[][] {
+    const segments = Array.from(new Array(3).keys())
+    const center = tileCenter(portTile.coord, tileRadius)
+    const points = portPoints(portTile).map(x => crossingPosition(x, tileRadius))
+    
+    function segmentBounds(seg: number): [number, number] {
+        const freeAtStart = 0.2
+        const freeAtEnd = 0.2
+        const freeBetween = 0.1
+        const allFree = freeAtEnd + freeAtStart + freeBetween * (segments.length - 1)
+        const segSize = (1 - allFree) / segments.length
+        const segStart = freeAtStart + seg * (segSize + freeBetween)
+        const segEnd = segStart + segSize
+        return [segStart, segEnd]
+    }
+
+    return points.flatMap(target => 
+        segments.map(seg => 
+            segment(lerp(center, target, segmentBounds(seg)[0]), lerp(center, target, segmentBounds(seg)[1]), tileRadius * 0.1)
+        )
+    )
 }
