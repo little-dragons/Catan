@@ -1,10 +1,11 @@
 import { produce, unfreeze } from "structurajs"
-import { adjacentColorsToTile, adjacentResourceTiles, adjacentRoads, availableRoadPositions, Coordinate, gainedResources, isAvailableRoadPosition, Road, sameCoordinate, sameRoad, validNewRobberPosition } from "./Board.js"
+import { adjacentResourceTiles, adjacentRoads, availableRoadPositions, Coordinate, gainedResources, isAvailableRoadPosition, Road, sameCoordinate, sameRoad } from "./Board.js"
 import { BuildingType, ConnectionType, availableBuildingPositions, buildingCost, connectionCost, isAvailableBuildingPosition } from "./Buildings.js"
-import { FullGameState, nextTurn, GamePhaseType, DieResult, isPreDiceRoll, TurnPhaseType, isActive, isInitial, isRobbingDiscardingCards, isRobbingMovingRobber, RobbingPhaseType, RedactedGameState } from "./GameState.js"
+import { FullGameState, nextTurn, GamePhaseType, DieResult, isPreDiceRoll, TurnPhaseType, isActive, isInitial, isRobbingDiscardingCards, isRobbingMovingRobber, RobbingPhaseType, RedactedGameState, minimalGameState } from "./GameState.js"
 import { Color } from "./Player.js"
 import { addCards, Resource, tryRemoveCards } from "./Resource.js"
 import { canTradeWithBank, FinalizedTrade, isValidOffer, OpenTradeOffer, sameTradeOffer, TradeOffer, TradeStatusByColor } from "./Trade.js"
+import { allRobbableCrossings, robbableCrossingsForColor, validNewRobberPosition } from "./Robber.js"
 
 
 export enum DevCardType {
@@ -293,7 +294,7 @@ function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: G
     })
 
     
-    const [nextColor, nextPhase] = nextTurn(state)
+    const [nextColor, nextPhase] = nextTurn(minimalGameState(state))
     const newBoard = produce(state.board, board => {
         board.buildings.push({ color: executorColor, coord: unfreeze(action.settlement), type: BuildingType.Settlement })
         board.roads.push({ color: executorColor, coord: unfreeze(action.road) })
@@ -315,10 +316,8 @@ function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: Ga
         return undefined
 
     if (action.robbedColor != undefined) {
-        if (action.robbedColor == executorColor)
-            return undefined
-        
-        if (!adjacentColorsToTile(state.board, action.coordinate).includes(action.robbedColor))
+        const robbables = robbableCrossingsForColor(minimalGameState(state), action.coordinate, action.robbedColor)
+        if (robbables.length == 0)
             return undefined
 
         const robbedPlayerIdx = state.players.findIndex(x => x.color == action.robbedColor)
@@ -330,6 +329,8 @@ function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: Ga
             return undefined
 
         const robbedPlayerCards = state.players[robbedPlayerIdx].handCards
+        if (robbedPlayerCards.length == 0)
+            return undefined
         const robbedResourceIdx = Math.floor(robbedPlayerCards.length * Math.random())
         const robbedResource = robbedPlayerCards[robbedResourceIdx]
         const newRobbedPlayerCards = robbedPlayerCards.toSpliced(robbedResourceIdx, 1)
@@ -350,8 +351,8 @@ function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: Ga
             }
         }, { robbedResource }]
     }
-    else if (adjacentColorsToTile(state.board, action.coordinate).every(x => x == executorColor))
-        // you can only not take a card if no other color is adjacent
+    else if (allRobbableCrossings(minimalGameState(state), action.coordinate).size == 0)
+        // you can only not take a card if no robbable color is adjacent
         return [{...state,
             phase: {
                 type: GamePhaseType.Turns,
@@ -538,7 +539,7 @@ function tryDoFinishTurn(state: FullGameState, executorColor: Color, action: Gam
     if (!isActive(state.phase) || executorColor != state.currentPlayer)
         return undefined
 
-    const [nextColor, nextPhase] = nextTurn(state)
+    const [nextColor, nextPhase] = nextTurn(minimalGameState(state))
     return [{
         ...state,
         currentPlayer: nextColor,

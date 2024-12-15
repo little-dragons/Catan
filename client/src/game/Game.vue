@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { BuildingType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentColorsToTile, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isLandTile, isActive, isPreDiceRoll, isInitial, validNewRobberPosition, adjacentBuildingsToTile, type CardList, RobbingPhaseType, tryTransferCard, isRobbingDiscardingCards } from 'shared';
+import { BuildingType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isActive, isInitial, adjacentBuildingsToTile, type CardList, tryTransferCard, isRobbingDiscardingCards, validNewRobberPositions, allRobbableCrossings } from 'shared';
 import { computed, ref, watchEffect, watch } from 'vue';
 import GameRenderer, { type ForbiddableButtons } from './gameDrawing/GameRenderer.vue';
 import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vue';
 import { UserSelectionType } from './gameDrawing/board/UserSelection';
-import { canFinishTurn, canOfferTrade, canPlaceRoad, canPlaceSettlement, type GameActionInput, GameActionType } from 'shared/logic/GameAction';
+import { canFinishTurn, canOfferTrade, canPlaceRoad, canPlaceSettlement, GameActionType } from 'shared/logic/GameAction';
 import type { TradeMenuRendererProps } from './gameDrawing/trade/TradeMenuRenderer.vue';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import type { DiscardMenuRendererProps } from './gameDrawing/DiscardRenderer.vue';
@@ -43,6 +43,7 @@ const othersOverview = computed(() => {
                 isGuest: user.type == UserType.Guest,
                 color: player.color,
                 victoryPoints: victoryPointsFromRedacted(state.value!, player.color),
+                handCardCount: player.handCardsCount,
                 openTrades: 
                     state.value?.phase.type != GamePhaseType.Turns || 
                     state.value.phase.subtype != TurnPhaseType.Active
@@ -109,28 +110,26 @@ watchEffect(async () => {
     if (state.value == undefined || !isRobbingMovingRobber(state.value.phase) || state.value.currentPlayer != state.value.self.color)
         return undefined
 
-    const possibleRobberPositions = 
-        state.value.board.tiles.filter(({ coord }) => validNewRobberPosition(state.value!.board, coord))
-        .map(x => x.coord)
+    const possibleRobberPositions = validNewRobberPositions(state.value.board).map(x => x.coord)
 
+    const unrobbablePlayers = [state.value.self.color, ...state.value.players.filter(x => x.handCardsCount == 0).map(x => x.color)]
     let newRobberCoordinate: Coordinate | undefined
     let robbedColor: Color | undefined
     do {
         newRobberCoordinate = await renderer.value!.getUserSelection({ type: UserSelectionType.Tile, positions: possibleRobberPositions }, { noAbort: true })
-        const adjacentBuildings =
-            adjacentBuildingsToTile(state.value.board, newRobberCoordinate)
-            .filter(x => x.color != state.value!.self.color)
-
-        if (adjacentBuildings.length == 0) {
+        
+        const robbableCrossings = allRobbableCrossings(state.value, newRobberCoordinate)
+        if (robbableCrossings.size == 0) {
             robbedColor = undefined
         }
-        else if (adjacentBuildings.every(x => x.color == adjacentBuildings[0].color)) {
-            robbedColor = adjacentBuildings[0].color
+        else if (robbableCrossings.size == 1) {
+            robbedColor = robbableCrossings.keys().next?.().value!
         }
         else {
-            const robbedCoord = await renderer.value!.getUserSelection({ type: UserSelectionType.Crossing, positions: adjacentBuildings.map(x => x.coord) })
+            const selectableCrossings = Array.from(robbableCrossings.values()).flat()
+            const robbedCoord = await renderer.value!.getUserSelection({ type: UserSelectionType.Crossing, positions: selectableCrossings })
             if (robbedCoord != undefined)
-                robbedColor = adjacentBuildings.find(x => sameCoordinate(x.coord, robbedCoord))?.color
+                robbedColor = Array.from(robbableCrossings.entries()).find(x => x[1].some(coord => sameCoordinate(coord, robbedCoord)))![0]
             else
                 // no color was selected, indicating that maybe an abort is intended.
                 newRobberCoordinate = undefined
@@ -344,9 +343,12 @@ watchEffect(() => {
         !isRobbingDiscardingCards(state.value.phase) ||
         !state.value.phase.playersLeftToDiscard.includes(state.value.self.color)
     ) {
+        // there is no action required to discard
         discardMenu.value = undefined
     }
-    else {
+    else if (discardMenu.value == undefined) {
+        // discarding needs to happen and the menu isn't already open
+        // (without the check, the menu resets itself when other players discard their cards)
         discardMenu.value = {
             stockedCards: state.value.self.handCards,
             discardingCards: [],

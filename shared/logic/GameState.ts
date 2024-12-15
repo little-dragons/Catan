@@ -84,7 +84,12 @@ export type FullGameState = Freeze<{
     players: FullPlayer[]
 }>
 
-export type MinimalGameState = PublicGameState | RedactedGameState | FullGameState
+export type MinimalGameState = Freeze<{
+    phase: GamePhase,
+    board: Board
+    currentPlayer: Color
+    players: RedactedPlayer[]
+}>
 
 export function redactGameState(state: FullGameState): PublicGameState {
     return {
@@ -92,6 +97,12 @@ export function redactGameState(state: FullGameState): PublicGameState {
         currentPlayer: state.currentPlayer,
         players: state.players.map(redactPlayer),
         phase: state.phase,
+    }
+}
+export function minimalGameState(state: FullGameState): MinimalGameState {
+    return {
+        ...state,
+        players: state.players.map(redactPlayer)
     }
 }
 
@@ -133,20 +144,20 @@ export function victoryPointsForBuildingType(buildingType: BuildingType): number
         case BuildingType.City: return 2
     }
 }
-export function victoryPointsFromBuildings(state: MinimalGameState, color: Color): number {
-    return state.board.buildings.reduce((current, { color: buildColor, type }) => buildColor == color ? current + victoryPointsForBuildingType(type) : current, 0)
+export function victoryPointsFromBuildings(board: Board, color: Color): number {
+    return board.buildings.reduce((current, { color: buildColor, type }) => buildColor == color ? current + victoryPointsForBuildingType(type) : current, 0)
 }
 
 export function victoryPointsFromFull(state: FullGameState, color: Color): number {
     // TODO longest road, knights, hidden dev cards
 
-    return victoryPointsFromBuildings(state, color)
+    return victoryPointsFromBuildings(state.board, color)
 }
 
 export function victoryPointsFromRedacted(state: RedactedGameState, color: Color): number {
     // TODO longest road, knights
 
-    return victoryPointsFromBuildings(state, color)
+    return victoryPointsFromBuildings(state.board, color)
 
     if (state.self.color == color) {
         // TODO hidden devcards

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { Color, OpenTradeOffer } from 'shared';
-import { cssColor, Resource } from 'shared';
 import OtherTradeOverview from './trade/OtherTradeOverview.vue';
 import PlayerIcon from './PlayerIcon.vue';
 
@@ -9,6 +8,7 @@ export type PlayerOverviewData = {
     name: string
     color: Color
     victoryPoints: number
+    handCardCount: number
     isGuest: boolean
     openTrades: { offer: OpenTradeOffer, canAccept: boolean, ownColor: Color }[]
 }
@@ -27,6 +27,7 @@ defineEmits<{
             <div class="username">{{ name }}</div>
             <div class="grid">
                 <div>{{ victoryPoints }} vp</div>
+                <div>{{ handCardCount }} hc</div>
             </div>
         </div>
         <OtherTradeOverview 

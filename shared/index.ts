@@ -9,6 +9,7 @@ export * from './logic/GameAction.js'
 export * from './logic/Room.js'
 export * from './logic/History.js'
 export * from './logic/Trade.js'
+export * from './logic/Robber.js'
 
 export * from './socket/Configuration.js'
 export * from './socket/ClientEventMap.js'

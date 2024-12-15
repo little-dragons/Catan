@@ -1,4 +1,4 @@
-import { Board, Coordinate, adjacentCrossings, adjacentRoads, allCrossingPositions, crossingAdjacentToLand, sameCoordinate, sameRoad} from "./Board.js";
+import { Board, Coordinate, adjacentCrossings, adjacentRoads, allCrossings, crossingAdjacentToLand, sameCoordinate, sameRoad} from "./Board.js";
 import { Color } from "./Player.js";
 import { Resource } from "./Resource.js";
 
@@ -29,7 +29,7 @@ export function isAvailableBuildingPosition(crossing: Coordinate, board: Board, 
 }
 
 export function availableBuildingPositions(board: Board, forPlayer: Color | undefined) {
-    return allCrossingPositions(board).filter(x => isAvailableBuildingPosition(x, board, forPlayer))
+    return allCrossings(board).filter(x => isAvailableBuildingPosition(x, board, forPlayer))
 }
 
 

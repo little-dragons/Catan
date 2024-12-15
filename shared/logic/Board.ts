@@ -59,7 +59,7 @@ export type Board = Freeze<{
 }>
 
 
-export function allCrossingPositions(board: Board) {
+export function allCrossings(board: Board) {
     let allPositions: Coordinate[] = []
     for (let col = 0; col < 2 * board.columnCount + 2; col++)
         for (let row = 0; row < board.rowCount + 1; row++)
@@ -83,7 +83,7 @@ export function twoCrossingsFromTile(tile: Coordinate, orientation: Orientation)
     }
 }
 
-function crossingAdjacentToTile(crossing: Coordinate, tile: Coordinate): boolean {
+export function crossingAdjacentToTile(crossing: Coordinate, tile: Coordinate): boolean {
     const xCorrection = tile[1] % 2 == 0 ? 0 : 1
     const xBase = tile[0] * 2 + xCorrection
     const allowedX = [xBase, xBase + 1, xBase + 2]
@@ -266,9 +266,3 @@ export function portsForColor(board: Board, color: Color): readonly (Resource | 
     return adjacentPorts.map(x => x.resource)
 }
 
-export function validNewRobberPosition(board: Board, robberPositon: Coordinate): boolean {
-    if (sameCoordinate(board.robber, robberPositon))
-        return false
-
-    return board.tiles.some(tile => sameCoordinate(tile.coord, robberPositon) && isLandTile(tile))
-}
