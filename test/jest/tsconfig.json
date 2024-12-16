@@ -3,7 +3,12 @@
         "composite": true,
         "target": "ESNext",
         "module": "ESNext",
-        "moduleResolution": "Bundler",
+        "lib": [
+            "ES2023.Collection",
+            "ESNext.Collection",
+            "ES2023.Array"
+        ],
+        "moduleResolution": "bundler",
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "strict": true,

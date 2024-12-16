@@ -8,6 +8,7 @@ import { canFinishTurn, canOfferTrade, canPlaceRoad, canPlaceSettlement, GameAct
 import type { TradeMenuRendererProps } from './gameDrawing/trade/TradeMenuRenderer.vue';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import type { DiscardMenuRendererProps } from './gameDrawing/DiscardRenderer.vue';
+import { isDevelopment } from '@/misc/Globals';
 
 const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
 
@@ -380,6 +381,7 @@ const stockedCardsToDisplay = computed(() => {
 
 <template>
     <div v-if="state != undefined" class="container">
+        <button v-if="isDevelopment" @click="console.log(state)">Print state to console</button>
         <GameRenderer ref="renderer" 
             :board="state.board" 
             :dice="lastDice" 
@@ -418,5 +420,9 @@ const stockedCardsToDisplay = computed(() => {
     display: flex;
     flex-direction: row;
     height: 90vh;
+}
+
+button {
+    position: absolute;
 }
 </style>

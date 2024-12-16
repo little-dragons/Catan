@@ -37,10 +37,11 @@ export function defaultBoard(seed: BoardSeed): Board {
 
     for (let i = 0; i < 9; i++) {
         oceanTiles.push(portTiles.splice(Math.floor(rand() * portTiles.length), 1)[0])
-        if (i < 8 || (i == 8 && rand() > 0.5))
-            oceanTiles.push('ocean')
-        else if (i == 8)
-            oceanTiles.unshift('ocean')
+        oceanTiles.push('ocean')
+    }
+
+    if (rand() > 0.5) {
+        oceanTiles.push(oceanTiles.shift()!)
     }
 
     

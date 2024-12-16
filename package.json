@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\"",
     "prod": "concurrently \"cd server && npm run prod\" \"cd client && npm run prod\"",
-    "test": "cd test/playwright && npm run test && cd ../jest && npm run test"
+    "test:jest": "cd test/jest && npm run test",
+    "test:all": "cd test/playwright && npm run test && cd ../jest && npm run test"
   },
   "dependencies": {
     "concurrently": "^8.2.2"

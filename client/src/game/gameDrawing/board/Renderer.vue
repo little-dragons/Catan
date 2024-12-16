@@ -156,18 +156,17 @@ function getUserSelection<T extends InteractionPoints, Options extends UserSelec
                 <path
                     :d="svgPath(tileHexagon(tile.coord, tileRadius))"
                     :fill="backgroundColor(tile)" />
+                <path
+                    v-if="tile.type == 'port'"
+                    v-for="path in segmentedPortPaths(tile, tileRadius)"
+                    :d="svgPath(path)"
+                    fill="white"/>
                 <image v-if="tile.type == 'port'" 
                     :x="tilePortPosition(tile.coord, tileRadius)[0]"
                     :y="tilePortPosition(tile.coord, tileRadius)[1]"
                     :width="tilePortIconSize(tileRadius)[0]"
                     :height="tilePortIconSize(tileRadius)[1]"
                     :href="portToIcon(tile)"/>
-                <path
-                    v-if="tile.type == 'port'"
-                    v-for="path in triangularPortPaths(tile, tileRadius)"
-                    :d="svgPath(path)"
-                    fill="white"
-                    />
                 <image v-if="tile.type == 'resource'"
                     :x="tileResourceIconPosition(tile.coord, tileRadius)[0]"
                     :y="tileResourceIconPosition(tile.coord, tileRadius)[1]"
