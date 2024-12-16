@@ -25,11 +25,12 @@ defineEmits<{
     <div class="left">
         <div class="desired">
             <div class="desiredButtons">
-                <img 
-                    v-for="res in allResources" 
-                    :src="imageForResource(res)"
+                <button
+                    v-for="res in allResources"
                     @click="() => $emit('addDesiredCard', res)"
-                    class="desiredResource"/>
+                    class="desiredResource">
+                    <img :src="imageForResource(res)"/>
+                </button>
             </div>
             <CardsRenderer class="cardsRendererDesired" :cards="desiredCards" @resourceClicked="resource => $emit('removeDesiredCard', resource)"/>
         </div>
@@ -62,12 +63,19 @@ defineEmits<{
     margin-bottom: 10px;
     box-sizing: border-box;
 }
-.desiredButtons > * {
+.desiredResource {
     height: 40px;
     user-select: none;
     cursor: pointer;
     margin-right: 4px;
+    padding: 0;
+    border: none;
+    background: none;
 }
+.desiredResource > img {
+    height: 100%;
+}
+
 .desired {
     height: 55%;
     display: flex;

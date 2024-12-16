@@ -31,7 +31,7 @@ export function robbableCrossingsForColor(state: MinimalGameState, tileCoord: Co
 
 export function allRobbableCrossings(state: MinimalGameState, tileCoord: Coordinate): ReadonlyMap<Color, Coordinate[]> {
     return new Map(state.players
-        .map(x => [x.color, robbableCrossingsForColor(state, tileCoord, x.color)] as [Color, Coordinate[]])
+        .map<[Color, Coordinate[]]>(x => [x.color, robbableCrossingsForColor(state, tileCoord, x.color)])
         .filter(([_, coords]) => coords.length > 0)
     )
 }

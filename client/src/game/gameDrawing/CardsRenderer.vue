@@ -11,7 +11,7 @@ defineProps<{ cards: CardList }>()
 
 <template>
     <div class="container">
-        <div v-for="[res, count] in Array.from(countResources(cards).entries()).filter(([_, count]) => count != 0)" class="stack" @click="() => $emit('resourceClicked', res)">
+        <button v-for="[res, count] in Array.from(countResources(cards).entries()).filter(([_, count]) => count != 0)" class="stack" @click="() => $emit('resourceClicked', res)">
             <img v-if="count < 8" v-for="_ in Array(count)" 
                 :src="imageForResource(res)" :title="`${Resource[res]} (x${count})`"/>
                
@@ -21,7 +21,7 @@ defineProps<{ cards: CardList }>()
             <img v-if="count >= 8" class="tighter" :src="imageForResource(res)" :title="`${Resource[res]} (x${count})`"/>
             <img v-if="count >= 8" class="tighter" :src="imageForResource(res)" :title="`${Resource[res]} (x${count})`"/>
             <div v-if="count >= 8" class="card-counter"><span>{{ count }}</span></div>
-        </div>
+        </button>
     </div>
 </template>
 
@@ -61,14 +61,17 @@ defineProps<{ cards: CardList }>()
     flex-direction: column;
     margin: var(--stack-margin);
     margin-right: 0;
-    height: calc(100% - var(--stack-margin));
+    height: calc(100% - 2 * var(--stack-margin));
+    background: none;
+    padding: 0;
+    border: none;
 }
 .stack:last-child {
     margin-right: var(--stack-margin);
 }
 
 img {
-    height: inherit;
+    height: 100%;
     position: relative;
     user-select: none;
 }

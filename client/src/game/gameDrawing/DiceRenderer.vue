@@ -36,7 +36,8 @@ defineProps<{
     <button
         @click="() => $emit('diceClicked')"
         :disabled="!enabled"
-        title="Roll dice!">
+        title="Roll dice!"
+        tabindex="1">
         <svg ref="svg" viewBox="0 0 80 40">
             <image
                 x="0"
