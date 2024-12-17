@@ -8,8 +8,17 @@
         "esm": true
     },
     "compilerOptions": {
+        "composite": true,
         "target": "ESNext",
         "module": "ESNext",
+        "lib": [
+            "ES2022",
+            "DOM",
+            "ES2023.Collection",
+            "ESNext.Collection",
+            "ES2023.Array",
+            "ES6"
+        ],
         "moduleResolution": "Bundler",
         "outDir": "../dist/server/",
         "esModuleInterop": true,

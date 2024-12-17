@@ -41,6 +41,7 @@ describe('boardGeneration', () => {
             const board = defaultBoard(seed)
             const ports = getPortTiles(board)
 
+            expect(ports.length).toBe(9)
             expect(allResources.every(res => ports.some(port => port.resource == res))).toBeTruthy()
             expect(ports.filter(x => x.resource == 'general').length).toBe(4)
         })

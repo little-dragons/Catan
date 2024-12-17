@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BuildingType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isActive, isInitial, adjacentBuildingsToTile, type CardList, tryTransferCard, isRobbingDiscardingCards, validNewRobberPositions, allRobbableCrossings } from 'shared';
+import { BuildingType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isActive, isInitial, adjacentBuildingsToTile, type CardList, tryTransferCard, isRobbingDiscardingCards, validNewRobberPositions, allRobbableCrossings, colorWithLongestRoad } from 'shared';
 import { computed, ref, watchEffect, watch } from 'vue';
 import GameRenderer, { type ForbiddableButtons } from './gameDrawing/GameRenderer.vue';
 import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vue';
@@ -376,6 +376,8 @@ const stockedCardsToDisplay = computed(() => {
         return discardMenu.value.stockedCards
     return state.value!.self.handCards
 })
+
+watch(state, () => console.log(colorWithLongestRoad(state.value!.board, state.value?.longestRoad)))
 
 </script>
 

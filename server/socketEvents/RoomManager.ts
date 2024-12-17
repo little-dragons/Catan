@@ -54,7 +54,8 @@ export async function initializeGame(io: SocketServerType, room: ServerLobbyRoom
         phase: {
             type: GamePhaseType.Initial,
             forward: true,
-        }
+        },
+        longestRoad: undefined
     }
 }
 

@@ -1,5 +1,5 @@
 import { Board, Coordinate, sameCoordinate, isLandTile, allCrossings, CoordinateTile, adjacentCrossings, crossingAdjacentToTile } from "./Board.js"
-import { MinimalGameState } from "./GameState.js"
+import { type PublicGameState } from "./GameState.js"
 import { Color } from "./Player.js"
 
 export function validNewRobberPosition(board: Board, robberPositon: Coordinate): boolean {
@@ -15,7 +15,7 @@ export function validNewRobberPositions(board: Board): CoordinateTile[] {
 
 
 
-export function robbableCrossingsForColor(state: MinimalGameState, tileCoord: Coordinate, color: Color): Coordinate[] {
+export function robbableCrossingsForColor(state: PublicGameState, tileCoord: Coordinate, color: Color): Coordinate[] {
     const player = state.players.find(x => x.color == color)
     if (player == undefined)
         return []
@@ -29,7 +29,7 @@ export function robbableCrossingsForColor(state: MinimalGameState, tileCoord: Co
 }
 
 
-export function allRobbableCrossings(state: MinimalGameState, tileCoord: Coordinate): ReadonlyMap<Color, Coordinate[]> {
+export function allRobbableCrossings(state: PublicGameState, tileCoord: Coordinate): ReadonlyMap<Color, Coordinate[]> {
     return new Map(state.players
         .map<[Color, Coordinate[]]>(x => [x.color, robbableCrossingsForColor(state, tileCoord, x.color)])
         .filter(([_, coords]) => coords.length > 0)

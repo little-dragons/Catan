@@ -3,6 +3,12 @@
         "composite": true,
         "target": "ESNext",
         "module": "ESNext",
+        
+        "lib": [
+            "ES2023.Collection",
+            "ESNext.Collection",
+            "ES2023.Array"
+        ],
         "moduleResolution": "Bundler",
         "outDir": "../dist/shared",
         "esModuleInterop": true,

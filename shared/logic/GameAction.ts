@@ -1,7 +1,7 @@
 import { produce, unfreeze } from "structurajs"
 import { adjacentResourceTiles, adjacentRoads, availableRoadPositions, Coordinate, gainedResources, isAvailableRoadPosition, Road, sameCoordinate, sameRoad } from "./Board.js"
 import { BuildingType, ConnectionType, availableBuildingPositions, buildingCost, connectionCost, isAvailableBuildingPosition } from "./Buildings.js"
-import { FullGameState, nextTurn, GamePhaseType, DieResult, isPreDiceRoll, TurnPhaseType, isActive, isInitial, isRobbingDiscardingCards, isRobbingMovingRobber, RobbingPhaseType, RedactedGameState, minimalGameState } from "./GameState.js"
+import { FullGameState, nextTurn, GamePhaseType, DieResult, isPreDiceRoll, TurnPhaseType, isActive, isInitial, isRobbingDiscardingCards, isRobbingMovingRobber, RobbingPhaseType, RedactedGameState, publicGameState, longestRoadForColor, colorWithLongestRoad } from "./GameState.js"
 import { Color } from "./Player.js"
 import { addCards, Resource, tryRemoveCards } from "./Resource.js"
 import { canTradeWithBank, FinalizedTrade, isValidOffer, OpenTradeOffer, sameTradeOffer, TradeOffer, TradeStatusByColor } from "./Trade.js"
@@ -266,10 +266,14 @@ function tryDoPlaceRoad(state: FullGameState, executorColor: Color, action: Game
     if (newCards == undefined)
         return undefined
 
+    // check for longest road
+    const newBoard = produce(state.board, newBoard => { newBoard.roads.push({ color: executorColor, coord: unfreeze(action.coordinates) }) })
+    const longestRoad = colorWithLongestRoad(newBoard, state.longestRoad)
 
     return [produce(state, newState => {
         newState.players[executorIdx].handCards = unfreeze(newCards)
         newState.board.roads.push({ color: executorColor, coord: unfreeze(action.coordinates) })
+        newState.longestRoad = longestRoad
     }), undefined]
 }
 function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceInitial]): ResultType<GameActionType.PlaceInitial> {
@@ -294,7 +298,7 @@ function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: G
     })
 
     
-    const [nextColor, nextPhase] = nextTurn(minimalGameState(state))
+    const [nextColor, nextPhase] = nextTurn(publicGameState(state))
     const newBoard = produce(state.board, board => {
         board.buildings.push({ color: executorColor, coord: unfreeze(action.settlement), type: BuildingType.Settlement })
         board.roads.push({ color: executorColor, coord: unfreeze(action.road) })
@@ -304,7 +308,8 @@ function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: G
         currentPlayer: nextColor,
         phase: nextPhase,
         players: newPlayers,
-        board: newBoard
+        board: newBoard,
+        longestRoad: undefined
     }, undefined]
 }
 function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceRobber]): ResultType<GameActionType.PlaceRobber> {
@@ -316,7 +321,7 @@ function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: Ga
         return undefined
 
     if (action.robbedColor != undefined) {
-        const robbables = robbableCrossingsForColor(minimalGameState(state), action.coordinate, action.robbedColor)
+        const robbables = robbableCrossingsForColor(publicGameState(state), action.coordinate, action.robbedColor)
         if (robbables.length == 0)
             return undefined
 
@@ -351,7 +356,7 @@ function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: Ga
             }
         }, { robbedResource }]
     }
-    else if (allRobbableCrossings(minimalGameState(state), action.coordinate).size == 0)
+    else if (allRobbableCrossings(publicGameState(state), action.coordinate).size == 0)
         // you can only not take a card if no robbable color is adjacent
         return [{...state,
             phase: {
@@ -539,7 +544,7 @@ function tryDoFinishTurn(state: FullGameState, executorColor: Color, action: Gam
     if (!isActive(state.phase) || executorColor != state.currentPlayer)
         return undefined
 
-    const [nextColor, nextPhase] = nextTurn(minimalGameState(state))
+    const [nextColor, nextPhase] = nextTurn(publicGameState(state))
     return [{
         ...state,
         currentPlayer: nextColor,

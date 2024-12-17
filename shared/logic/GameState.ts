@@ -1,4 +1,4 @@
-import { Board, Coordinate } from "./Board.js"
+import { Board, Coordinate, mapFilter, Road, sameCoordinate } from "./Board.js"
 import { Color, FullPlayer, RedactedPlayer, redactPlayer } from "./Player.js"
 import { BuildingType } from "./Buildings.js"
 import { produce, type Freeze } from "structurajs"
@@ -71,6 +71,7 @@ export type PublicGameState = Freeze<{
     phase: GamePhase
     board: Board
     currentPlayer: Color
+    longestRoad: Color | undefined
     players: RedactedPlayer[]
 }>
 export type RedactedGameState = Freeze<PublicGameState & {
@@ -81,15 +82,11 @@ export type FullGameState = Freeze<{
     phase: GamePhase,
     board: Board
     currentPlayer: Color
+    longestRoad: Color | undefined
     players: FullPlayer[]
 }>
 
-export type MinimalGameState = Freeze<{
-    phase: GamePhase,
-    board: Board
-    currentPlayer: Color
-    players: RedactedPlayer[]
-}>
+export type AnyGameState = FullGameState | RedactedGameState | PublicGameState
 
 export function redactGameState(state: FullGameState): PublicGameState {
     return {
@@ -97,9 +94,10 @@ export function redactGameState(state: FullGameState): PublicGameState {
         currentPlayer: state.currentPlayer,
         players: state.players.map(redactPlayer),
         phase: state.phase,
+        longestRoad: state.longestRoad
     }
 }
-export function minimalGameState(state: FullGameState): MinimalGameState {
+export function publicGameState(state: FullGameState): PublicGameState {
     return {
         ...state,
         players: state.players.map(redactPlayer)
@@ -113,7 +111,7 @@ export function redactGameStateFor(state: FullGameState, color: Color): Redacted
     }
 }
 
-export function nextTurn(state: MinimalGameState): [Color, GamePhase] {
+export function nextTurn(state: AnyGameState): [Color, GamePhase] {
     const currentIdx = state.players.findIndex(x => x.color == state.currentPlayer)
     // check if index is in range? unncessary
 
@@ -148,16 +146,127 @@ export function victoryPointsFromBuildings(board: Board, color: Color): number {
     return board.buildings.reduce((current, { color: buildColor, type }) => buildColor == color ? current + victoryPointsForBuildingType(type) : current, 0)
 }
 
+function adjacentSegments(crossing: Coordinate, roads: RoadSegment[]): [RoadSegment, Coordinate][] {
+    function hasValidCrossing(item: [RoadSegment, Coordinate | undefined]): item is [RoadSegment, Coordinate] {
+        return item[1] != undefined
+    }
+
+    return roads
+        .map<[RoadSegment, Coordinate | undefined]>(x => 
+            [x, sameCoordinate(x.coordinates[0], crossing) ? x.coordinates[1] : (
+                sameCoordinate(x.coordinates[1], crossing) ? x.coordinates[0] :
+                undefined
+            )])
+        .filter(hasValidCrossing)
+}
+
+type RoadSegment = {
+    roads: readonly Road[],
+    coordinates: readonly [Coordinate, Coordinate],
+}
+
+
+function tryJoinSegments(segments: RoadSegment[]): RoadSegment[] {
+    const connectors = segments.filter(x => x.coordinates.length == 2)
+    {
+        // first, join connectors with exactly two coordinates
+        // there is no other option to connect those and this is always a right step
+        const connectorCoords = connectors.flatMap(x => x.coordinates)
+        const adjacents = connectorCoords.map(coord => adjacentSegments(coord, segments))
+        const twoAdjacents = adjacents.filter(adjacents => adjacents.length == 2)
+        if (twoAdjacents.length > 0) {
+            const [[seg1, target1], [seg2, target2]] = twoAdjacents[0]
+            const others = segments.filter(x => x != seg1 && x != seg2)
+            const newCoordinates: [Coordinate, Coordinate] = [
+                target1, target2
+            ]
+
+            return [...others, {
+                roads: seg1.roads.concat(seg2.roads),
+                coordinates: newCoordinates
+            }]
+        }
+    }
+
+    // maybe it is possible to join more segments beacuse we know that each
+    // vertex of the graph only has three edges.
+
+
+    return segments
+}
+
+function longestPathFrom(inputCoord: Coordinate, segments: ReadonlySet<RoadSegment>): number {
+    function helper(current: Coordinate, visited: ReadonlySet<RoadSegment>): number {
+        const adjacents = 
+            adjacentSegments(current, [...segments.difference(visited)])
+        
+        const results =
+            adjacents.map(([seg, target]) => helper(target, visited.union(new Set([seg]))) + seg.roads.length)
+
+        const longest = results.find(x => !results.some(y => y > x))
+        if (longest == undefined)
+            return 0
+        return longest
+    }
+
+
+    return helper(inputCoord, new Set())
+}
+
+function longestRoad(road: Road[]): number {
+    let segments = road.map<RoadSegment>(x => { return { roads: [x], coordinates: x } })
+
+    while (true) {
+        const newSegments = tryJoinSegments(segments)
+        if (newSegments.length == segments.length)
+            break
+        segments = newSegments
+    }
+
+    const allCoords = segments.flatMap(x => x.coordinates)
+    const eachPathLength =
+        allCoords.map(coord => longestPathFrom(coord, new Set(segments)))
+
+    return eachPathLength.find(x => !eachPathLength.some(y => y > x)) ?? 0
+}
+
+export function longestRoadForColor(board: Board, color: Color): number {
+    return longestRoad(board.roads.filter(x => x.color == color).map(x => x.coord))
+}
+
+export function colorWithLongestRoad(board: Board, currentHolder: Color | undefined): Color | undefined {
+    const colors = new Set(board.roads.map(x => x.color))
+    const coloredLength = [...colors].map<[Color, number]>(color=> [color, longestRoadForColor(board, color)])
+    const filtered = coloredLength.filter(([_, length]) => length >= 5)
+    const highestColors = filtered.filter(([col1, length1]) => !filtered.some(([col2, length2]) => length2 > length1)).map(x => x[0])
+    if (highestColors.length == 0)
+        return undefined
+
+    if (currentHolder != undefined && highestColors.includes(currentHolder))
+        return currentHolder
+
+    // now highest colors may actually contain multiple values, depending on the board
+    // this situation will not appear as then currentHolder has been correctly defined
+    // TODO maybe this will be better
+    return highestColors[0]
+}
+
+export function victoryPointsFromLongestRoad(state: AnyGameState, color: Color): number {
+    if (state.longestRoad == color)
+        return 2
+    return 0
+}
+
 export function victoryPointsFromFull(state: FullGameState, color: Color): number {
     // TODO longest road, knights, hidden dev cards
 
-    return victoryPointsFromBuildings(state.board, color)
+    return victoryPointsFromBuildings(state.board, color) + victoryPointsFromLongestRoad(publicGameState(state), color)
 }
 
 export function victoryPointsFromRedacted(state: RedactedGameState, color: Color): number {
     // TODO longest road, knights
 
-    return victoryPointsFromBuildings(state.board, color)
+    return victoryPointsFromBuildings(state.board, color) + victoryPointsFromLongestRoad(state, color)
 
     if (state.self.color == color) {
         // TODO hidden devcards

@@ -46,7 +46,8 @@ const exampleHistory: History = {
         },
         players: [ 
             { color: Color.Blue, handCards: [Resource.Brick, Resource.Grain] }, 
-            { color: Color.Green, handCards: [Resource.Grain, Resource.Grain] } ]
+            { color: Color.Green, handCards: [Resource.Grain, Resource.Grain] } ],
+        longestRoad: undefined
     }
 }
 const showHistory = ref(false)
@@ -72,5 +73,5 @@ const boardString = ref('')
 
     <HistoryComponent v-if="showHistory" :history="exampleHistory" />
     <textarea v-if="showBoardRenderer" v-model="boardString"/>
-    <BoardRenderer v-if="showBoardRenderer && boardString != ''" v-bind="JSON.parse(boardString)"/>
+    <BoardRenderer v-if="showBoardRenderer && boardString != ''" :board="JSON.parse(boardString)"/>
 </template>
