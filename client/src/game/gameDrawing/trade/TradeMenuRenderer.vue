@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { allResources, Resource } from 'shared';
-import CardsRenderer from './../CardsRenderer.vue';
+import CardsRenderer from '../cards/ResourceCardsRenderer.vue';
 import { imageForResource } from '@/misc/CardTextures';
+import ResourceCardsRenderer from '../cards/ResourceCardsRenderer.vue';
 
 export type TradeMenuRendererProps = {
     offeredCards: readonly Resource[]
@@ -32,9 +33,9 @@ defineEmits<{
                     <img :src="imageForResource(res)"/>
                 </button>
             </div>
-            <CardsRenderer class="cardsRendererDesired" :cards="desiredCards" @resourceClicked="resource => $emit('removeDesiredCard', resource)"/>
+            <ResourceCardsRenderer class="cardsRendererDesired" :cards="desiredCards" @resourceClicked="resource => $emit('removeDesiredCard', resource)"/>
         </div>
-        <CardsRenderer class="cardsRendererOffered" :cards="offeredCards" @resourceClicked="resource => $emit('removeOfferedCard', resource)"/>
+        <ResourceCardsRenderer class="cardsRendererOffered" :cards="offeredCards" @resourceClicked="resource => $emit('removeOfferedCard', resource)"/>
     </div>
     <div class="right">
         <button @click="() => $emit('tradeWithPlayer')" :disabled="!validOffer">Trade with player</button>

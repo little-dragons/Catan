@@ -8,7 +8,8 @@ export type PlayerOverviewData = {
     name: string
     color: Color
     victoryPoints: number
-    handCardCount: number
+    handCardsCount: number
+    devCardsCount: number
     isGuest: boolean
     openTrades: { offer: OpenTradeOffer, canAccept: boolean, ownColor: Color }[]
 }
@@ -27,7 +28,8 @@ defineEmits<{
             <div class="username">{{ name }}</div>
             <div class="grid">
                 <div>{{ victoryPoints }} vp</div>
-                <div>{{ handCardCount }} hc</div>
+                <div>{{ handCardsCount }} hc</div>
+                <div>{{ devCardsCount }} dc</div>
             </div>
         </div>
         <OtherTradeOverview 

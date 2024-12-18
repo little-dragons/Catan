@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { CardList, Resource } from 'shared'
-import CardsRenderer from './CardsRenderer.vue'
+import ResourceCardsRenderer from './cards/ResourceCardsRenderer.vue'
 import { computed } from 'vue'
 import ok from '@/assets/ui/ok.svg'
 import error from '@/assets/ui/error.svg'
@@ -26,7 +26,7 @@ const diff = computed(() => props.discardingCards.length - props.expectedDiscard
         </p>
     </div>
     <div class="actions">
-        <CardsRenderer :cards="discardingCards" @resourceClicked="res => $emit('removeDiscardingCard', res)"/>
+        <ResourceCardsRenderer class="cards" :cards="discardingCards" @resourceClicked="res => $emit('removeDiscardingCard', res)"/>
         <div class="right">
             <button @click="() => $emit('discard')" :disabled="diff != 0" title="Discard selected cards">
                 <img :src="diff == 0 ? ok : error"/>
@@ -57,6 +57,9 @@ const diff = computed(() => props.discardingCards.length - props.expectedDiscard
     flex-direction: row;
     height: 70%;
     align-items: center;
+}
+.cards {
+    height: 100%;
 }
 
 .right {

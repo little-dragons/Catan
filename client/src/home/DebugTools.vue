@@ -45,8 +45,8 @@ const exampleHistory: History = {
             tradeOffers: []
         },
         players: [ 
-            { color: Color.Blue, handCards: [Resource.Brick, Resource.Grain] }, 
-            { color: Color.Green, handCards: [Resource.Grain, Resource.Grain] } ],
+            { color: Color.Blue, handCards: [Resource.Brick, Resource.Grain], devCards: [] }, 
+            { color: Color.Green, handCards: [Resource.Grain, Resource.Grain], devCards: [] } ],
         longestRoad: undefined
     }
 }

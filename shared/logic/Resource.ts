@@ -1,3 +1,5 @@
+import { BuildingType, ConnectionType } from "./Buildings.js"
+
 export enum Resource {
     Grain,
     Ore,
@@ -46,4 +48,23 @@ export function tryTransferCards(giver: CardList, receiver: CardList, res: Resou
         return [giver, receiver]
     else
         return [tryRemoved, addCards(receiver, res)]
+}
+
+export const devCardCost = [Resource.Ore, Resource.Wool, Resource.Grain] as const
+
+
+export const roadCost: readonly Resource[] = [Resource.Lumber, Resource.Brick]
+export const settlementCost: readonly Resource[] = [Resource.Lumber, Resource.Brick, Resource.Grain, Resource.Wool]
+export const cityCost: readonly Resource[] = [Resource.Grain, Resource.Grain, Resource.Ore, Resource.Ore, Resource.Ore]
+
+export function buildingCost(type: BuildingType) {
+    switch (type) {
+        case BuildingType.Settlement: return settlementCost
+        case BuildingType.City: return cityCost
+    }
+}
+export function connectionCost(type: ConnectionType) {
+    switch (type) {
+        case ConnectionType.Road: return roadCost
+    }
 }

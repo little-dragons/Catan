@@ -1,9 +1,9 @@
 import { produce, unfreeze } from "structurajs"
 import { adjacentResourceTiles, adjacentRoads, availableRoadPositions, Coordinate, gainedResources, isAvailableRoadPosition, Road, sameCoordinate, sameRoad } from "./Board.js"
-import { BuildingType, ConnectionType, availableBuildingPositions, buildingCost, connectionCost, isAvailableBuildingPosition } from "./Buildings.js"
+import { BuildingType, ConnectionType, availableBuildingPositions, isAvailableBuildingPosition } from "./Buildings.js"
 import { FullGameState, nextTurn, GamePhaseType, DieResult, isPreDiceRoll, TurnPhaseType, isActive, isInitial, isRobbingDiscardingCards, isRobbingMovingRobber, RobbingPhaseType, RedactedGameState, publicGameState, longestRoadForColor, colorWithLongestRoad } from "./GameState.js"
 import { Color } from "./Player.js"
-import { addCards, Resource, tryRemoveCards } from "./Resource.js"
+import { addCards, buildingCost, connectionCost, devCardCost, Resource, tryRemoveCards } from "./Resource.js"
 import { canTradeWithBank, FinalizedTrade, isValidOffer, OpenTradeOffer, sameTradeOffer, TradeOffer, TradeStatusByColor } from "./Trade.js"
 import { allRobbableCrossings, robbableCrossingsForColor, validNewRobberPosition } from "./Robber.js"
 
@@ -12,6 +12,13 @@ export enum DevCardType {
     Knight,
     YearOfPlenty,
     Monopoly
+}
+export const allDevCardTypes = [DevCardType.Knight, DevCardType.Monopoly, DevCardType.YearOfPlenty] as const
+
+export function countDevCards(cards: readonly DevCardType[]): Map<DevCardType, number> {
+    return new Map(
+        allDevCardTypes.map(type => [type, cards.filter(x => x == type).length])
+    )
 }
 
 export enum GameActionType {
@@ -29,6 +36,7 @@ export enum GameActionType {
     AbortTrade,
     FinishTurn,
     PlayDevCard,
+    BuyDevCard,
     DiscardResources,
 }
 
@@ -139,6 +147,14 @@ type GameActionInfos = {
                 resources: readonly Resource[]
             },
             response: undefined
+        } : Name extends GameActionType.BuyDevCard ? {
+            type: Name,
+            input: {
+
+            },
+            response: {
+                cardType: DevCardType
+            }
         }
         : never
 }
@@ -187,10 +203,11 @@ function tryDoRollDice(state: FullGameState, executorColor: Color, action: GameA
     }
     else {
         // dispense resources
-        const newPlayers = state.players.map(({ color, handCards: oldCards }) => {
+        const newPlayers = state.players.map(({ color, handCards: oldCards, devCards }) => {
             return {
                 color,
-                handCards: addCards(oldCards, gainedResources(state.board, color, die1 + die2))
+                handCards: addCards(oldCards, gainedResources(state.board, color, die1 + die2)),
+                devCards
             }
         })
 
@@ -290,11 +307,11 @@ function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: G
         state.phase.forward ? [] :
         adjacentResourceTiles(action.settlement, state.board, undefined)
 
-    const newPlayers = state.players.map(({ color, handCards }) => {
+    const newPlayers = state.players.map(({ color, handCards, devCards }) => {
         if (color == executorColor)
-            return { color, handCards: newCards }
+            return { color, handCards: newCards, devCards }
         else
-            return { color, handCards }
+            return { color, handCards, devCards }
     })
 
     
@@ -602,6 +619,29 @@ function tryDoDiscardResources(state: FullGameState, executorColor: Color, actio
             players: newPlayers
         }, undefined]
 }
+
+export function tryDoBuyDevCard(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.BuyDevCard]): ResultType<GameActionType.BuyDevCard> {
+    if (!isActive(state.phase) || state.currentPlayer != executorColor)
+        return undefined
+
+    const executorIdx = state.players.findIndex(x => x.color == executorColor)
+    if (executorIdx < 0)
+        return undefined
+
+    const playerCards = state.players[executorIdx].handCards
+    const newCards = tryRemoveCards(playerCards, devCardCost)
+    if (newCards == undefined)
+        return undefined
+
+    // TODO
+    const receivedCard = DevCardType.Knight
+
+    return [produce(state, newState => {
+        newState.players[executorIdx].handCards = unfreeze(newCards)
+        newState.players[executorIdx].devCards.push(receivedCard)
+    }), { cardType: receivedCard }]
+}
+
 export function tryDoAction<T extends GameActionType>(state: FullGameState, executor: Color,  action: GameActionInput): ResultType<T> {
     switch (action.type) {
         case GameActionType.RollDice: return tryDoRollDice(state, executor, action)
@@ -619,6 +659,7 @@ export function tryDoAction<T extends GameActionType>(state: FullGameState, exec
         case GameActionType.FinishTurn: return tryDoFinishTurn(state, executor, action)
         case GameActionType.PlayDevCard: return tryDoPlayDevCard(state, executor, action)
         case GameActionType.DiscardResources: return tryDoDiscardResources(state, executor, action)
+        case GameActionType.BuyDevCard: return tryDoBuyDevCard(state, executor, action)
     }
 
     // this is required because undefined is a possible return value for this function
@@ -670,6 +711,13 @@ export function canOfferTrade(state: RedactedGameState): boolean {
 export function canRollDice(state: RedactedGameState): boolean {
     return isPreDiceRoll(state.phase) && state.currentPlayer == state.self.color
 }
+export function canBuyDevCard(state: RedactedGameState): boolean {
+    if (!isActive(state.phase) || state.currentPlayer != state.self.color)
+        return false
+
+    const hasResources = tryRemoveCards(state.self.handCards, devCardCost) != undefined
+    return hasResources
+}
 
 export type PossiblyRedactedGameActionInfo = 
     {
@@ -684,7 +732,12 @@ export type PossiblyRedactedGameActionInfo =
         redacted: true,
         input: GameActionInfos[GameActionType.PlaceRobber]['input'],
         response: undefined
-    } | 
+    } | {
+        type: GameActionType.BuyDevCard,
+        redacted: true,
+        input: GameActionInfos[GameActionType.BuyDevCard]['input'],
+        response: undefined
+    } |
     GameActionInfo & { redacted: false }
 
 export function redactGameActionInfoFor(gameActionInfo: GameActionInfo, executorColor: Color, redactTarget: Color): PossiblyRedactedGameActionInfo {
@@ -704,6 +757,14 @@ export function redactGameActionInfoFor(gameActionInfo: GameActionInfo, executor
     if (gameActionInfo.type == GameActionType.PlaceRobber && gameActionInfo.input.robbedColor != executorColor) {
         return {
             type: GameActionType.PlaceRobber,
+            redacted: true,
+            input: gameActionInfo.input,
+            response: undefined
+        }
+    }
+    if (gameActionInfo.type == GameActionType.BuyDevCard){
+        return {
+            type: GameActionType.BuyDevCard,
             redacted: true,
             input: gameActionInfo.input,
             response: undefined

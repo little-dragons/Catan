@@ -50,7 +50,7 @@ export async function initializeGame(io: SocketServerType, room: ServerLobbyRoom
     game.state = {
         board: defaultBoard(room.settings.seed),
         currentPlayer: users[0][1],
-        players: users.map(([user, color]) => { return { color, handCards: [] } }),
+        players: users.map(([user, color]) => { return { color, handCards: [], devCards: [] } }),
         phase: {
             type: GamePhaseType.Initial,
             forward: true,

@@ -4,7 +4,7 @@ import { computed, ref, watchEffect, watch } from 'vue';
 import GameRenderer, { type ForbiddableButtons } from './gameDrawing/GameRenderer.vue';
 import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vue';
 import { UserSelectionType } from './gameDrawing/board/UserSelection';
-import { canFinishTurn, canOfferTrade, canPlaceRoad, canPlaceSettlement, GameActionType } from 'shared/logic/GameAction';
+import { canBuyDevCard, canFinishTurn, canOfferTrade, canPlaceRoad, canPlaceSettlement, GameActionType } from 'shared/logic/GameAction';
 import type { TradeMenuRendererProps } from './gameDrawing/trade/TradeMenuRenderer.vue';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import type { DiscardMenuRendererProps } from './gameDrawing/DiscardRenderer.vue';
@@ -24,7 +24,8 @@ const forbiddableButtons = computed<ForbiddableButtons | undefined>(() => {
         placeCity: canPlaceCity(state.value),
         placeRoad: canPlaceRoad(state.value),
         placeSettlement: canPlaceSettlement(state.value),
-        rollDice: canRollDice(state.value)
+        rollDice: canRollDice(state.value),
+        buyDevCard: canBuyDevCard(state.value)
     }
 })
 
@@ -44,7 +45,8 @@ const othersOverview = computed(() => {
                 isGuest: user.type == UserType.Guest,
                 color: player.color,
                 victoryPoints: victoryPointsFromRedacted(state.value!, player.color),
-                handCardCount: player.handCardsCount,
+                handCardsCount: player.handCardsCount,
+                devCardsCount: player.devCardsCount,
                 openTrades: 
                     state.value?.phase.type != GamePhaseType.Turns || 
                     state.value.phase.subtype != TurnPhaseType.Active
@@ -213,6 +215,13 @@ async function buildSettlement() {
         room.trySendAction({ type: GameActionType.PlaceSettlement, coordinate: settlement })
 }
 
+async function buyDevCard() {
+    if (forbiddableButtons.value?.buyDevCard != true || renderer.value == null || state.value == undefined)
+        return
+
+    room.trySendAction({ type: GameActionType.BuyDevCard })
+}
+
 async function offerTradeWithPlayer() {
     if (tradeMenu.value == undefined)
         return
@@ -377,8 +386,6 @@ const stockedCardsToDisplay = computed(() => {
     return state.value!.self.handCards
 })
 
-watch(state, () => console.log(colorWithLongestRoad(state.value!.board, state.value?.longestRoad)))
-
 </script>
 
 <template>
@@ -388,6 +395,7 @@ watch(state, () => console.log(colorWithLongestRoad(state.value!.board, state.va
             :board="state.board" 
             :dice="lastDice" 
             :stocked-cards="stockedCardsToDisplay"
+            :dev-cards="state.self.devCards"
             :forbiddable-buttons="forbiddableButtons!"
             :other-players="othersOverview" 
             :trade-menu="tradeMenuProps"
@@ -398,6 +406,7 @@ watch(state, () => console.log(colorWithLongestRoad(state.value!.board, state.va
             @build-road="buildRoad"
             @build-settlement="buildSettlement"
             @build-city="buildCity"
+            @buy-dev-card="buyDevCard"
             @end-turn="endTurn"
             @trade-menu="toggleTradeMenu"
             @trade-with-player="offerTradeWithPlayer"

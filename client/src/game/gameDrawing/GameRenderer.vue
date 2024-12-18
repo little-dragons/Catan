@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { Color, Resource, type Board, type CardList, type DieResult, type OpenTradeOffer, type TradeOffer } from 'shared';
+import { Color, DevCardType, Resource, type Board, type CardList, type DieResult, type OpenTradeOffer, type TradeOffer } from 'shared';
 import BoardRenderer from './board/Renderer.vue';
 import { type InteractionPoints, type UserSelectionOptions, type UserSelectionResult } from './board/UserSelection'
 import DiceRenderer from './DiceRenderer.vue';
 import { onMounted, ref } from 'vue';
-import CardsRenderer from './CardsRenderer.vue';
+import ResourceCardsRenderer from './cards/ResourceCardsRenderer.vue';
 import PlayerOverviewRenderer, { type PlayerOverviewData } from './PlayerOverviewRenderer.vue';
 import TradeRenderer, { type TradeMenuRendererProps } from './trade/TradeMenuRenderer.vue';
 import OwnTradeOverview from './trade/OwnTradeOverview.vue';
 import DiscardRenderer, { type DiscardMenuRendererProps } from './DiscardRenderer.vue';
+import DevCardsRenderer from './cards/DevCardsRenderer.vue';
 
 defineEmits<{
     diceClicked: []
@@ -16,6 +17,8 @@ defineEmits<{
     buildCity: []
     buildSettlement: []
     buildRoad: []
+    buyDevCard: []
+    devCardClicked: [card: DevCardType]
     tradeMenu: []
     tradeWithPlayer: []
     tradeWithBank: []
@@ -32,6 +35,7 @@ defineEmits<{
 }>()
 export type ForbiddableButtons = {
     rollDice: boolean
+    buyDevCard: boolean
     offerTrade: boolean
     placeCity: boolean
     placeRoad: boolean
@@ -41,6 +45,7 @@ export type ForbiddableButtons = {
 
 defineProps<{
     stockedCards: CardList
+    devCards: readonly DevCardType[]
     board: Board
     dice: readonly [DieResult, DieResult] | undefined
     forbiddableButtons: ForbiddableButtons
@@ -163,9 +168,13 @@ defineExpose({ getUserSelection })
                     />
                 </div>
             </div>
-            <CardsRenderer class="cards" :cards="stockedCards" @resource-clicked="res => $emit('stockedCardClicked', res)"/>
+            <div class="cardRenderers">
+                <ResourceCardsRenderer class="resourceCards" :cards="stockedCards" @resource-clicked="res => $emit('stockedCardClicked', res)"/>
+                <DevCardsRenderer class="devCards" :cards="devCards" @dev-card-clicked="card => $emit('devCardClicked', card)"/>
+            </div>
             <div class="buttons">
                 <button class="default-button-colors" @click="() => $emit('tradeMenu')" :disabled="interactionRunning || !forbiddableButtons.offerTrade">Trade</button>
+                <button class="default-button-colors" @click="() => $emit('buyDevCard')" :disabled="interactionRunning || !forbiddableButtons.buyDevCard">Dev Card</button>
                 <button class="default-button-colors" @click="() => $emit('buildRoad')" :disabled="interactionRunning || !forbiddableButtons.placeRoad">Road</button>
                 <button class="default-button-colors" @click="() => $emit('buildSettlement')" :disabled="interactionRunning || !forbiddableButtons.placeSettlement">Settlement</button>
                 <button class="default-button-colors" @click="() => $emit('buildCity')" :disabled="interactionRunning || !forbiddableButtons.placeCity">City</button>
@@ -279,8 +288,21 @@ defineExpose({ getUserSelection })
     width: 100px;
     z-index: 100;
 }
-.cards {
+
+
+
+.cardRenderers {
+    display: flex;
+    flex-direction: row;
     width: 100%;
+}
+.resourceCards {
+    width: 100%;
+}
+.devCards {
+    flex: 0;
+    margin-left: 10px;
+    min-width: max(50px, 10vw);
 }
 .buttons {
     width: max-content;

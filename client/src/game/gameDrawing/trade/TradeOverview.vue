@@ -2,7 +2,7 @@
 import { type CardList, Color, TradeStatusByColor } from 'shared';
 import GreenArrow from '@/assets/ui/greenarrow.svg'
 import RedArrow from '@/assets/ui/redarrow.svg'
-import CardsRenderer from './../CardsRenderer.vue';
+import ResourceCardsRenderer from '../cards/ResourceCardsRenderer.vue';
 import PlayerTradeStatus from './PlayerTradeStatus.vue';
 
 defineProps<{
@@ -21,11 +21,11 @@ defineEmits<{
     <div class="left">
         <div class="top">
             <img :src="RedArrow"/>
-            <CardsRenderer :cards="toGiveAway"/>
+            <ResourceCardsRenderer :cards="toGiveAway"/>
         </div>
         <div class="bottom">
             <img :src="GreenArrow"/>
-            <CardsRenderer :cards="toCollect"/>
+            <ResourceCardsRenderer :cards="toCollect"/>
         </div>
     </div>
     <div style="width: 100%;">
