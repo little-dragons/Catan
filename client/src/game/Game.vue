@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { BuildingType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isActive, isInitial, adjacentBuildingsToTile, type CardList, tryTransferCard, isRobbingDiscardingCards, validNewRobberPositions, allRobbableCrossings, colorWithLongestRoad } from 'shared';
+import { BuildingType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isActive, isInitial, adjacentBuildingsToTile, type CardList, tryTransferCard, isRobbingDiscardingCards, validNewRobberPositions, allRobbableCrossings, colorWithLongestRoad, isPreDiceRoll, robbableCrossingsForColor, publicGameState, allRobbableCrossingsExcept } from 'shared';
 import { computed, ref, watchEffect, watch } from 'vue';
 import GameRenderer, { type ForbiddableButtons } from './gameDrawing/GameRenderer.vue';
 import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vue';
 import { UserSelectionType } from './gameDrawing/board/UserSelection';
-import { canBuyDevCard, canFinishTurn, canOfferTrade, canPlaceRoad, canPlaceSettlement, GameActionType } from 'shared/logic/GameAction';
+import { canBuyDevCard, canFinishTurn, canOfferTrade, canPlaceRoad, canPlaceSettlement, DevCardType, GameActionType } from 'shared/logic/GameAction';
 import type { TradeMenuRendererProps } from './gameDrawing/trade/TradeMenuRenderer.vue';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import type { DiscardMenuRendererProps } from './gameDrawing/DiscardRenderer.vue';
@@ -386,6 +386,35 @@ const stockedCardsToDisplay = computed(() => {
     return state.value!.self.handCards
 })
 
+async function devCardClicked(card: DevCardType) {
+    if (state.value == undefined || renderer.value == undefined)
+        return
+
+    if (card == DevCardType.Knight) {
+        if (!isPreDiceRoll(state.value.phase) && !isActive(state.value.phase))
+            return
+
+        const newRobbers = validNewRobberPositions(state.value.board)
+        const newPosition = await renderer.value.getUserSelection({ type: UserSelectionType.Tile, positions: newRobbers.map(x => x.coord) })
+        if (newPosition == undefined)
+            return
+
+        const robbables = allRobbableCrossingsExcept(state.value, newPosition, state.value.self.color)
+        let robbedColor: Color | undefined = undefined
+        if (robbables.size > 1) {
+            const robbedCrossing = await renderer.value.getUserSelection({ type: UserSelectionType.Crossing, positions: [...robbables.values()].flat() })
+            if (robbedCrossing == undefined)
+                return
+
+            robbedColor = Array.from(robbables.entries()).filter(x => x[1].some(y => sameCoordinate(y, robbedCrossing)))[0][0]
+        }
+        else if (robbables.size == 1) {
+            robbedColor = robbables.keys().next().value!
+        }
+        await room.trySendAction({ type: GameActionType.PlayDevCard, cardType: DevCardType.Knight, newPosition, robbedColor })
+    }
+}
+
 </script>
 
 <template>
@@ -407,6 +436,7 @@ const stockedCardsToDisplay = computed(() => {
             @build-settlement="buildSettlement"
             @build-city="buildCity"
             @buy-dev-card="buyDevCard"
+            @dev-card-clicked="devCardClicked"
             @end-turn="endTurn"
             @trade-menu="toggleTradeMenu"
             @trade-with-player="offerTradeWithPlayer"

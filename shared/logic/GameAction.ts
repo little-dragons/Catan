@@ -5,15 +5,17 @@ import { FullGameState, nextTurn, GamePhaseType, DieResult, isPreDiceRoll, TurnP
 import { Color } from "./Player.js"
 import { addCards, buildingCost, connectionCost, devCardCost, Resource, tryRemoveCards } from "./Resource.js"
 import { canTradeWithBank, FinalizedTrade, isValidOffer, OpenTradeOffer, sameTradeOffer, TradeOffer, TradeStatusByColor } from "./Trade.js"
-import { allRobbableCrossings, robbableCrossingsForColor, validNewRobberPosition } from "./Robber.js"
+import { allRobbableCrossings, allRobbableCrossingsExcept, robbableCrossingsForColor, validNewRobberPosition } from "./Robber.js"
 
 
 export enum DevCardType {
     Knight,
     YearOfPlenty,
-    Monopoly
+    Monopoly,
+    VictoryPoint,
+    RoadBuilding
 }
-export const allDevCardTypes = [DevCardType.Knight, DevCardType.Monopoly, DevCardType.YearOfPlenty] as const
+export const allDevCardTypes = [DevCardType.Knight, DevCardType.Monopoly, DevCardType.YearOfPlenty, DevCardType.RoadBuilding, DevCardType.VictoryPoint] as const
 
 export function countDevCards(cards: readonly DevCardType[]): Map<DevCardType, number> {
     return new Map(
@@ -129,19 +131,35 @@ type GameActionInfos = {
             response: undefined
         } : Name extends GameActionType.PlayDevCard ? {
             type: Name,
-            input: {
-                cardType: DevCardType.Knight
-                newPosition: Coordinate
-                robbedColor: Color | undefined
+        } & ({
+                input: {
+                    cardType: DevCardType.Knight
+                    newPosition: Coordinate
+                    robbedColor: Color | undefined
+                }
+                response: {
+                    robbedCard: Resource | undefined
+                }
             } | {
-                cardType: DevCardType.YearOfPlenty
-                resources: readonly [Resource, Resource]
+                input: {
+                    cardType: DevCardType.YearOfPlenty
+                    resources: readonly [Resource, Resource]
+                }
+                response: undefined
             } | {
-                cardType: DevCardType.Monopoly
-                resource: Resource
-            },
-            response: undefined
-        } : Name extends GameActionType.DiscardResources ? {
+                input: {
+                    cardType: DevCardType.Monopoly
+                    resource: Resource
+                }
+                response: undefined
+            } | {
+                input: {
+                    cardType: DevCardType.RoadBuilding
+                    roads: [Road, Road]
+                }
+                response: undefined
+            }
+        ) : Name extends GameActionType.DiscardResources ? {
             type: Name,
             input: {
                 resources: readonly Resource[]
@@ -355,8 +373,6 @@ function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: Ga
             return undefined
         const robbedResourceIdx = Math.floor(robbedPlayerCards.length * Math.random())
         const robbedResource = robbedPlayerCards[robbedResourceIdx]
-        const newRobbedPlayerCards = robbedPlayerCards.toSpliced(robbedResourceIdx, 1)
-        const newExecutorCards = state.players[executorIdx].handCards.concat(newRobbedPlayerCards)
 
         return [{...state,
             phase: {
@@ -365,8 +381,8 @@ function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: Ga
                 tradeOffers: []
             },
             players: produce(state.players, x => {
-                x[robbedPlayerIdx].handCards = newRobbedPlayerCards
-                x[executorIdx].handCards = newExecutorCards
+                x[robbedPlayerIdx].handCards = robbedPlayerCards.toSpliced(robbedResourceIdx, 1)
+                x[executorIdx].handCards.push(robbedResource)
             }),
             board: {...state.board,
                 robber: action.coordinate
@@ -573,10 +589,58 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
     const executorIdx = state.players.findIndex(x => x.color == executorColor)
     if (executorIdx < 0)
         return undefined
-    if (!isActive(state.phase) || executorColor != state.currentPlayer)
-        return undefined
 
-    return undefined // TODO
+    const devCardIdx = state.players[executorIdx].devCards.findIndex(x => x == action.cardType)
+    if (devCardIdx < 0)
+        return undefined
+    const newDevCards = state.players[executorIdx].devCards.toSpliced(devCardIdx, 1)
+
+    switch (action.cardType) {
+        case DevCardType.Knight: {
+            if ((!isActive(state.phase) && !isPreDiceRoll(state.phase)) || executorColor != state.currentPlayer)
+                return undefined
+
+            if (!validNewRobberPosition(state.board, action.newPosition))
+                return undefined
+        
+            if (action.robbedColor == undefined) {
+                if (allRobbableCrossingsExcept(publicGameState(state), action.newPosition, executorColor).size != 0)
+                    return undefined
+
+                return [produce(state, newState => {
+                    newState.board.robber = unfreeze(action.newPosition)
+                    newState.players[executorIdx].devCards = newDevCards
+                }), undefined]
+
+            }
+            else {
+                if (robbableCrossingsForColor(publicGameState(state), action.newPosition, action.robbedColor).length == 0)
+                    return undefined
+        
+                const robbedPlayerIdx = state.players.findIndex(x => x.color == action.robbedColor)
+                if (robbedPlayerIdx < 0)
+                    return undefined
+
+                const robbedPlayerCards = state.players[robbedPlayerIdx].handCards
+                if (robbedPlayerCards.length == 0)
+                    return undefined
+                const robbedResourceIdx = Math.floor(robbedPlayerCards.length * Math.random())
+                const robbedResource = robbedPlayerCards[robbedResourceIdx]
+                const newRobbedPlayerCards = robbedPlayerCards.toSpliced(robbedResourceIdx, 1)
+                const newExecutorCards = state.players[executorIdx].handCards.concat([robbedResource])
+
+                return [produce(state, newState => {
+                    newState.players[robbedPlayerIdx].handCards = unfreeze(newRobbedPlayerCards)
+                    newState.players[executorIdx].handCards = unfreeze(newExecutorCards)
+                    newState.board.robber = unfreeze(action.newPosition)
+                    newState.players[executorIdx].devCards = newDevCards
+                }), { robbedCard: robbedResource }]
+            }
+        }
+        case DevCardType.YearOfPlenty: return undefined
+        case DevCardType.Monopoly: return undefined
+        case DevCardType.RoadBuilding: return undefined
+    }
 }
 function tryDoDiscardResources(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.DiscardResources]): ResultType<GameActionType.DiscardResources> {
     if (!isRobbingDiscardingCards(state.phase))
@@ -737,6 +801,11 @@ export type PossiblyRedactedGameActionInfo =
         redacted: true,
         input: GameActionInfos[GameActionType.BuyDevCard]['input'],
         response: undefined
+    } | {
+        type: GameActionType.PlayDevCard,
+        input: GameActionInfos[GameActionType.BuyDevCard]['input'],
+        reponse: undefined
+        redacted: true
     } |
     GameActionInfo & { redacted: false }
 
@@ -754,7 +823,7 @@ export function redactGameActionInfoFor(gameActionInfo: GameActionInfo, executor
             response: undefined
         }
     }
-    if (gameActionInfo.type == GameActionType.PlaceRobber && gameActionInfo.input.robbedColor != executorColor) {
+    if (gameActionInfo.type == GameActionType.PlaceRobber && gameActionInfo.input.robbedColor != redactTarget) {
         return {
             type: GameActionType.PlaceRobber,
             redacted: true,
@@ -762,12 +831,20 @@ export function redactGameActionInfoFor(gameActionInfo: GameActionInfo, executor
             response: undefined
         }
     }
-    if (gameActionInfo.type == GameActionType.BuyDevCard){
+    if (gameActionInfo.type == GameActionType.BuyDevCard) {
         return {
             type: GameActionType.BuyDevCard,
             redacted: true,
             input: gameActionInfo.input,
             response: undefined
+        }
+    }
+    if (gameActionInfo.type == GameActionType.PlayDevCard && gameActionInfo.input.cardType == DevCardType.Knight && redactTarget != gameActionInfo.input.robbedColor) {
+        return {
+            input: gameActionInfo.input,
+            redacted: true,
+            reponse: undefined,
+            type: GameActionType.PlayDevCard
         }
     }
 

@@ -35,3 +35,11 @@ export function allRobbableCrossings(state: PublicGameState, tileCoord: Coordina
         .filter(([_, coords]) => coords.length > 0)
     )
 }
+
+export function allRobbableCrossingsExcept(state: PublicGameState, tileCoord: Coordinate, exceptColor: Color) {
+    return new Map(state.players
+        .filter(x => x.color != exceptColor)
+        .map<[Color, Coordinate[]]>(x => [x.color, robbableCrossingsForColor(state, tileCoord, x.color)])
+        .filter(([_, coords]) => coords.length > 0)
+    )
+}
