@@ -1,4 +1,4 @@
-import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, defaultBoard, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType } from "shared"
+import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, defaultBoard, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType, PostGameRoom } from "shared"
 import { type Socket } from 'socket.io'
 import { SocketDataType, SocketServerType } from "./Common.js"
 import { defaultSettings } from "shared/logic/Settings.js"
@@ -6,6 +6,7 @@ import { v4 } from "uuid"
 
 type ServerLobbyRoom = Omit<LobbyRoom, 'users'>
 type ServerGameRoom = Omit<FullGameRoom, 'users'>
+type ServerPostGameRoom = Omit<PostGameRoom, 'users'>
 type ServerRoom = Omit<FullRoom, 'users'>
 
 const rooms = [] as ServerRoom[]
@@ -63,6 +64,21 @@ export async function initializeGame(io: SocketServerType, room: ServerLobbyRoom
             roadBuilding: 2,
             yearOfPlenty: 2,
         }
+    }
+}
+
+export function endGame(io: SocketServerType, room: ServerGameRoom) {
+    for (const s of io.of('/').adapter.rooms.get(room.id)!) {
+        const fullSocket = io.sockets.sockets.get(s)!
+        fullSocket.emit('gameOver', {
+            lastState: room.state
+        })
+    }
+
+    const newRoom = room as unknown as ServerPostGameRoom
+    newRoom.type = RoomType.PostGame
+    newRoom.history = {
+        lastState: room.state
     }
 }
 

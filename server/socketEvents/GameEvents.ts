@@ -1,6 +1,6 @@
-import { GameClientEventMap, GameServerEventMap, redactGameStateFor, RoomType } from "shared";
+import { GameClientEventMap, GameServerEventMap, redactGameStateFor, RoomType, victoryPointsFromFull } from "shared";
 import { type Socket } from 'socket.io'
-import { games, usersForRoom } from "./RoomManager.js";
+import { endGame, games, usersForRoom } from "./RoomManager.js";
 import { SocketDataType, SocketServerType } from "./Common.js";
 import { GameActionInfo, redactGameActionInfoFor, tryDoAction } from "shared/logic/GameAction.js";
 
@@ -40,8 +40,12 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
                 const fullSocket = io.sockets.sockets.get(s)!
                 fullSocket.emit('gameEvent', redactGameStateFor(room.state, fullSocket.data.room![1]), redactGameActionInfoFor(gameAction, socket.data.room[1], fullSocket.data.room![1]))
             }
+            cb(true)
+
+            if (room.state.players.some(x => victoryPointsFromFull(room.state, x.color) >= room.settings.requiredVictoryPoints)) {
+                endGame(io, room)
+            }
     
-            return cb(true)
         }
     })
 

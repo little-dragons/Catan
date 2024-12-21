@@ -153,5 +153,16 @@ export const useCurrentRoomStore = defineStore('room', () => {
         return false
     }
 
+    socket.on('gameOver', history => {
+        if (info.value?.type != RoomType.InGame)
+            return
+
+        info.value = {
+            ...info.value,
+            type: RoomType.PostGame,
+            history,
+        }
+    })
+
     return { info, tryJoin, tryCreate, tryLeave, tryStart, canJoin, isOwner, trySendAction, actions }
 })
