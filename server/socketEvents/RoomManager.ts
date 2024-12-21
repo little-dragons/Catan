@@ -55,7 +55,14 @@ export async function initializeGame(io: SocketServerType, room: ServerLobbyRoom
             type: GamePhaseType.Initial,
             forward: true,
         },
-        longestRoad: undefined
+        longestRoad: undefined,
+        devCards: {
+            knights: 14,
+            victoryPoints: 5,
+            monopoly: 2,
+            roadBuilding: 2,
+            yearOfPlenty: 2,
+        }
     }
 }
 

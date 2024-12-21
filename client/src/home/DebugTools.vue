@@ -44,6 +44,13 @@ const exampleHistory: History = {
             subtype: TurnPhaseType.Active,
             tradeOffers: []
         },
+        devCards: {
+            knights: 10,
+            monopoly: 4,
+            roadBuilding: 3,
+            victoryPoints: 2,
+            yearOfPlenty: 2
+        },
         players: [ 
             { color: Color.Blue, handCards: [Resource.Brick, Resource.Grain], devCards: [] }, 
             { color: Color.Green, handCards: [Resource.Grain, Resource.Grain], devCards: [] } ],

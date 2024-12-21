@@ -10,6 +10,8 @@ import TradeRenderer, { type TradeMenuRendererProps } from './trade/TradeMenuRen
 import OwnTradeOverview from './trade/OwnTradeOverview.vue';
 import DiscardRenderer, { type DiscardMenuRendererProps } from './DiscardRenderer.vue';
 import DevCardsRenderer from './cards/DevCardsRenderer.vue';
+import ResourceSelector from './ResourceSelector.vue';
+import ResourceTypeSelector from './ResourceTypeSelector.vue';
 
 defineEmits<{
     diceClicked: []
@@ -76,7 +78,27 @@ async function getUserSelection<T extends InteractionPoints, Options extends Use
     interactionRunning.value = false
     return res
 }
-defineExpose({ getUserSelection })
+
+const chooseResourceTypeData = ref<((r: Resource | undefined) => void) | undefined>(undefined)
+const chooseResourcesData = ref<[number, ((r: CardList | undefined) => void)] | undefined>(undefined)
+defineExpose({ getUserSelection,
+    chooseResourceType(): Promise<Resource | undefined> {
+        return new Promise(resolve => {
+            chooseResourceTypeData.value = r => {
+                chooseResourceTypeData.value = undefined
+                resolve(r)
+            }
+        })
+    },
+    chooseResources(count: number): Promise<CardList | undefined> {
+        return new Promise(resolve => {
+            chooseResourcesData.value = [count, r => {
+                chooseResourcesData.value = undefined
+                resolve(r)
+            }]
+        })
+    }
+})
 </script>
 
 <template>
@@ -150,6 +172,19 @@ defineExpose({ getUserSelection })
                     v-bind="discardingInfo"
                     @remove-discarding-card="res => $emit('removeDiscardingCard', res)"
                     @discard="() => $emit('discardCards')"
+                />
+                <ResourceTypeSelector 
+                    v-if="chooseResourceTypeData != undefined"
+                    class="resourceTypeSelector"
+                    @selected="res => chooseResourceTypeData!(res)"
+                    @abort="() => chooseResourceTypeData!(undefined)"
+                />
+                <ResourceSelector 
+                    v-if="chooseResourcesData != undefined"
+                    class="resourcesSelector"
+                    :count="chooseResourcesData[0]"
+                    @selected="res => chooseResourcesData![1](res)"
+                    @abort="() => chooseResourcesData![1](undefined)"
                 />
                 <div class="rightAnchored">
                     <div class="ownTrades">
@@ -271,6 +306,20 @@ defineExpose({ getUserSelection })
     min-width: max(20%, 400px);
 }
 
+.resourcesSelector {
+    position: absolute;
+    bottom: 0;
+    height: 125px;
+    min-width: max(20%, 400px);
+}
+
+.resourceTypeSelector {
+    position: absolute;
+    bottom: 0;
+    height: 70px;
+    min-width: max(20%, 200px);
+}
+
 .rightAnchored {
     position: absolute;
     right: 0;
@@ -295,14 +344,13 @@ defineExpose({ getUserSelection })
     display: flex;
     flex-direction: row;
     width: 100%;
+    min-width: min-content;
 }
 .resourceCards {
-    width: 100%;
 }
 .devCards {
     flex: 0;
     margin-left: 10px;
-    min-width: max(50px, 10vw);
 }
 .buttons {
     width: max-content;

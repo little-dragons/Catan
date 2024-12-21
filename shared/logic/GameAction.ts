@@ -344,7 +344,8 @@ function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: G
         phase: nextPhase,
         players: newPlayers,
         board: newBoard,
-        longestRoad: undefined
+        longestRoad: undefined,
+        devCards: state.devCards,
     }, undefined]
 }
 function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceRobber]): ResultType<GameActionType.PlaceRobber> {
@@ -637,9 +638,50 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
                 }), { robbedCard: robbedResource }]
             }
         }
-        case DevCardType.YearOfPlenty: return undefined
-        case DevCardType.Monopoly: return undefined
-        case DevCardType.RoadBuilding: return undefined
+        case DevCardType.YearOfPlenty: {
+            return [produce(state, newState => {
+                newState.players[executorIdx].handCards = [...action.resources, ...state.players[executorIdx].handCards]
+                newState.players[executorIdx].devCards = newDevCards
+            }), undefined]
+        }
+        case DevCardType.Monopoly: {
+            return [produce(state, newState => {
+                newState.players = newState.players.map(player => {
+                    if (player.color == executorColor)
+                        return { 
+                            ...player,
+                            devCards: newDevCards,
+                            handCards: 
+                                player.handCards.filter(x => x != action.resource)
+                                .concat(
+                                    state.players
+                                    .flatMap(x => x.handCards
+                                        .filter(res => res == action.resource)))
+                        }
+                    else
+                        return { ...player, handCards: player.handCards.filter(x => x != action.resource)}
+                })
+            }), undefined]
+        }
+        case DevCardType.RoadBuilding: 
+            if (!isAvailableRoadPosition(state.board, action.roads[0], executorColor))
+                return undefined
+
+            const firstRoadBoard = produce(state.board, newBoard => {
+                newBoard.roads.push({ color: executorColor, coord: unfreeze(action.roads[0]) })
+            })
+
+            if (!isAvailableRoadPosition(firstRoadBoard, action.roads[1], executorColor))
+                return undefined
+            
+            const secondRoadBoard = produce(firstRoadBoard, newBoard => {
+                newBoard.roads.push({ color: executorColor, coord: unfreeze(action.roads[1]) })
+            })
+
+            return [produce(state, newState => {
+                newState.board = unfreeze(secondRoadBoard)
+                newState.players[executorIdx].devCards = newDevCards
+            }), undefined]
     }
 }
 function tryDoDiscardResources(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.DiscardResources]): ResultType<GameActionType.DiscardResources> {
@@ -697,8 +739,26 @@ export function tryDoBuyDevCard(state: FullGameState, executorColor: Color, acti
     if (newCards == undefined)
         return undefined
 
-    // TODO
-    const receivedCard = DevCardType.Knight
+    const devCardCounts = new Map([
+        [DevCardType.Knight, state.devCards.knights],
+        [DevCardType.VictoryPoint, state.devCards.victoryPoints],
+        [DevCardType.RoadBuilding, state.devCards.roadBuilding],
+        [DevCardType.Monopoly, state.devCards.monopoly],
+        [DevCardType.YearOfPlenty, state.devCards.yearOfPlenty]
+    ])
+    const total = Array.from(devCardCounts).reduce((a, b) => a + b[1], 0)
+    let idx = Math.floor(Math.random() * total)
+      
+    let receivedCard: DevCardType | undefined
+    for(const [card, count] of devCardCounts) {
+        if (idx < count) {
+            receivedCard = card
+            break
+        }
+        idx -= count
+    }
+    if (receivedCard == undefined)
+        receivedCard = DevCardType.Knight
 
     return [produce(state, newState => {
         newState.players[executorIdx].handCards = unfreeze(newCards)

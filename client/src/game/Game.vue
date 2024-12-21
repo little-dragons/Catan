@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BuildingType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isActive, isInitial, adjacentBuildingsToTile, type CardList, tryTransferCard, isRobbingDiscardingCards, validNewRobberPositions, allRobbableCrossings, colorWithLongestRoad, isPreDiceRoll, robbableCrossingsForColor, publicGameState, allRobbableCrossingsExcept } from 'shared';
+import { BuildingType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isActive, isInitial, type CardList, tryTransferCard, isRobbingDiscardingCards, validNewRobberPositions, allRobbableCrossings, isPreDiceRoll, allRobbableCrossingsExcept, type Board } from 'shared';
 import { computed, ref, watchEffect, watch } from 'vue';
 import GameRenderer, { type ForbiddableButtons } from './gameDrawing/GameRenderer.vue';
 import { type PlayerOverviewData } from './gameDrawing/PlayerOverviewRenderer.vue';
@@ -14,6 +14,8 @@ const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
 
 const room = useCurrentRoomStore()
 const state = computed(() => room.info?.type == RoomType.InGame ? room.info.state : undefined)
+const customBoard = ref<Board | undefined>(undefined)
+
 const forbiddableButtons = computed<ForbiddableButtons | undefined>(() => {
     if (state.value == undefined)
         return undefined
@@ -52,7 +54,7 @@ const othersOverview = computed(() => {
                     state.value.phase.subtype != TurnPhaseType.Active
                         ? [] 
                         : state.value.phase.tradeOffers
-                            .filter(x => x.offeringColor != state.value!.self.color)
+                            .filter(x => x.offeringColor == player.color)
                             .map(offer => { return { 
                                 offer, 
                                 canAccept: tryRemoveCards(state.value!.self.handCards, offer.desiredCards) != undefined,
@@ -72,7 +74,12 @@ watchEffect(async () => {
     let settlement: Coordinate | undefined = undefined
     let road: Road | undefined = undefined
     do {
+        customBoard.value = undefined
         settlement = await renderer.value.getUserSelection({ type: UserSelectionType.Crossing, positions: freeSettlements }, { noAbort: true })
+        customBoard.value = {
+            ...state.value.board,
+            buildings: [{ color: state.value.self.color, coord: settlement, type: BuildingType.Settlement }, ...state.value.board.buildings]
+        }
         road = await renderer.value.getUserSelection({ type: UserSelectionType.Connection, positions: adjacentRoads(settlement) })
     } while(settlement == undefined || road == undefined)
 
@@ -82,6 +89,7 @@ watchEffect(async () => {
             road: road,
             settlement: settlement
         })
+    customBoard.value = undefined
 })
 
 async function rollDice() {
@@ -115,7 +123,6 @@ watchEffect(async () => {
 
     const possibleRobberPositions = validNewRobberPositions(state.value.board).map(x => x.coord)
 
-    const unrobbablePlayers = [state.value.self.color, ...state.value.players.filter(x => x.handCardsCount == 0).map(x => x.color)]
     let newRobberCoordinate: Coordinate | undefined
     let robbedColor: Color | undefined
     do {
@@ -390,28 +397,74 @@ async function devCardClicked(card: DevCardType) {
     if (state.value == undefined || renderer.value == undefined)
         return
 
-    if (card == DevCardType.Knight) {
-        if (!isPreDiceRoll(state.value.phase) && !isActive(state.value.phase))
-            return
-
-        const newRobbers = validNewRobberPositions(state.value.board)
-        const newPosition = await renderer.value.getUserSelection({ type: UserSelectionType.Tile, positions: newRobbers.map(x => x.coord) })
-        if (newPosition == undefined)
-            return
-
-        const robbables = allRobbableCrossingsExcept(state.value, newPosition, state.value.self.color)
-        let robbedColor: Color | undefined = undefined
-        if (robbables.size > 1) {
-            const robbedCrossing = await renderer.value.getUserSelection({ type: UserSelectionType.Crossing, positions: [...robbables.values()].flat() })
-            if (robbedCrossing == undefined)
+    switch (card) {
+        case DevCardType.Knight: {
+            if (!isPreDiceRoll(state.value.phase) && !isActive(state.value.phase))
                 return
 
-            robbedColor = Array.from(robbables.entries()).filter(x => x[1].some(y => sameCoordinate(y, robbedCrossing)))[0][0]
+            const newRobbers = validNewRobberPositions(state.value.board)
+            const newPosition = await renderer.value.getUserSelection({ type: UserSelectionType.Tile, positions: newRobbers.map(x => x.coord) })
+            if (newPosition == undefined)
+                return
+
+            const robbables = allRobbableCrossingsExcept(state.value, newPosition, state.value.self.color)
+            let robbedColor: Color | undefined = undefined
+            if (robbables.size > 1) {
+                const robbedCrossing = await renderer.value.getUserSelection({ type: UserSelectionType.Crossing, positions: [...robbables.values()].flat() })
+                if (robbedCrossing == undefined)
+                    return
+
+                robbedColor = Array.from(robbables.entries()).filter(x => x[1].some(y => sameCoordinate(y, robbedCrossing)))[0][0]
+            }
+            else if (robbables.size == 1) {
+                robbedColor = robbables.keys().next().value!
+            }
+            await room.trySendAction({ type: GameActionType.PlayDevCard, cardType: DevCardType.Knight, newPosition, robbedColor })
+            return
         }
-        else if (robbables.size == 1) {
-            robbedColor = robbables.keys().next().value!
+        case DevCardType.VictoryPoint: return
+        case DevCardType.YearOfPlenty: {
+            const res = await renderer.value.chooseResources(2)
+            if (res == undefined)
+                return
+
+            await room.trySendAction({ type: GameActionType.PlayDevCard, cardType: DevCardType.YearOfPlenty, resources: res as [Resource, Resource] })
+            return
         }
-        await room.trySendAction({ type: GameActionType.PlayDevCard, cardType: DevCardType.Knight, newPosition, robbedColor })
+        case DevCardType.Monopoly: {
+            const res = await renderer.value.chooseResourceType()
+            if (res == undefined)
+                return
+
+            await room.trySendAction({ type: GameActionType.PlayDevCard, cardType: DevCardType.Monopoly, resource: res })
+            return
+        }
+        case DevCardType.RoadBuilding: {
+            const firstFree = availableRoadPositions(state.value.board, state.value.self.color)
+            let first: Road | undefined
+            let second: Road | undefined
+            do {
+                customBoard.value = undefined
+                first = await renderer.value.getUserSelection({ type: UserSelectionType.Connection, positions: firstFree })
+                if (first == undefined)
+                    // this means that the user aborted selection of the entire dev card.
+                    return
+
+                const newBoard: Board = {
+                    ...state.value.board,
+                    roads: [{ color: state.value.self.color, coord: first }, ...state.value.board.roads]
+                }
+
+                const secondFree = availableRoadPositions(newBoard, state.value.self.color)
+                customBoard.value = newBoard
+                second = await renderer.value.getUserSelection({ type: UserSelectionType.Connection, positions: secondFree })
+            } while (first == undefined || second == undefined)
+
+            
+            await room.trySendAction({ type: GameActionType.PlayDevCard, cardType: DevCardType.RoadBuilding, roads: [first, second] })
+            customBoard.value = undefined
+            return
+        }
     }
 }
 
@@ -421,7 +474,7 @@ async function devCardClicked(card: DevCardType) {
     <div v-if="state != undefined" class="container">
         <button v-if="isDevelopment" @click="console.log(state)">Print state to console</button>
         <GameRenderer ref="renderer" 
-            :board="state.board" 
+            :board="customBoard == undefined ? state.board : customBoard" 
             :dice="lastDice" 
             :stocked-cards="stockedCardsToDisplay"
             :dev-cards="state.self.devCards"
