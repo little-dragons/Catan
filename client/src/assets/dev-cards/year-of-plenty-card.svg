@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<svg width="200" height="300" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+
+ <g class="layer">
+  <title>Layer 1</title>
+  <rect fill="#72553c" height="296" id="svg_5" rx="5" ry="5" stroke="#000000" stroke-linejoin="round" stroke-width="2" width="196" x="2" y="2"/>
+  <text fill="#000000" font-family="Cursive" font-size="25" id="svg_17" stroke="#333333" stroke-width="0" text-anchor="middle" x="101" xml:space="preserve" y="36">Year of Plenty</text>
+  <g id="svg_24" transform="rotate(2.36128 128 168) matrix(0.984784 0.173783 -0.173783 0.984784 32.2838 -18.7125)">
+   <rect fill="#005fbf" height="133.5" id="svg_25" rx="5" ry="5" stroke="#000000" stroke-width="2" width="89" x="82.21" y="100.49"/>
+   <text fill="#000000" font-family="Cursive" font-size="80" id="svg_26" stroke="#000000" stroke-width="0" text-anchor="middle" transform="matrix(0.985809 -0.143236 0.131404 0.904382 -21.9691 45.8263)" x="136.17" xml:space="preserve" y="179.46">?</text>
+  </g>
+  <g id="svg_21" transform="matrix(1 0 0 1 0 0) matrix(0.99459 -0.103878 0.103878 0.99459 -17.1946 8.34295)">
+   <rect fill="#005fbf" height="133.5" id="svg_22" rx="5" ry="5" stroke="#000000" stroke-width="2" width="89" x="22.03" y="101.98"/>
+   <text fill="#000000" font-family="Cursive" font-size="80" id="svg_23" stroke="#000000" stroke-width="0" text-anchor="middle" transform="matrix(0.985809 -0.143236 0.131404 0.904382 -18.9691 39.8263)" x="72.33" xml:space="preserve" y="177.63">?</text>
+  </g>
+ </g>
+</svg>
