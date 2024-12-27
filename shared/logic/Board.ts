@@ -23,24 +23,31 @@ export function sameRoad(r1: Road, r2: Road) {
     return sameCoordinate(r1[0], r2[0]) && sameCoordinate(r1[1], r2[1]) || sameCoordinate(r1[0], r2[1]) && sameCoordinate(r1[1], r2[0])
 }
 
+export enum TileType {
+    Port,
+    Resource,
+    Desert,
+    Ocean
+}
 export type PortTile = {
-    type: 'port'
+    type: TileType.Port
     resource: Resource | 'general'
     orientation: Orientation
 }
+export type ResourceTileNumber = 2 | 3 | 4 | 5 | 6 | 8 | 9 | 10 | 11 | 12
 export type ResourceTile = {
-    type: 'resource'
+    type: TileType.Resource
     resource: Resource
-    number: number
+    number: ResourceTileNumber
 }
 
 
-export type LandTile = { type: 'desert' } | ResourceTile
-export type OceanTile = { type: 'ocean' } | PortTile
+export type LandTile = { type: TileType.Desert } | ResourceTile
+export type OceanTile = { type: TileType.Ocean } | PortTile
 export type Tile = LandTile | OceanTile
 export type CoordinateTile = Tile & { coord: Coordinate }
 export function isLandTile(tile: Tile): tile is LandTile {
-    return tile.type == 'desert' || tile.type == 'resource'
+    return tile.type == TileType.Desert || tile.type == TileType.Resource
 }
 
 export type BoardSeed = string
@@ -228,20 +235,20 @@ export function mapFind<T, R>(array: Freeze<T[]>, finder: ((item: Freeze<T>) => 
     }
 }
 
-export function adjacentResourceTiles(cross: Coordinate, board: Board, number: number | undefined): readonly Resource[] {
+export function adjacentResourceTiles(cross: Coordinate, board: Board, number: ResourceTileNumber | undefined): readonly Resource[] {
     return mapFilter(
         adjacentTiles(cross), 
         coord => 
             mapFind(
                 board.tiles, 
                 tile => sameCoordinate(tile.coord, coord) &&
-                tile.type == 'resource' &&
+                tile.type == TileType.Resource &&
                 (number != undefined ? tile.number == number : true) ? tile : undefined)
             ?.resource
         )
 }
 
-export function gainedResources(board: Board, color: Color, number: number): Resource[] {
+export function gainedResources(board: Board, color: Color, number: ResourceTileNumber): Resource[] {
     let accumulated: Resource[] = []
     for (const building of board.buildings) {
         if (building.color != color)
@@ -253,16 +260,122 @@ export function gainedResources(board: Board, color: Color, number: number): Res
         if (building.type == BuildingType.City) {
             accumulated = accumulated.concat(resources)
             accumulated = accumulated.concat(resources)
-        }            
+        }
     }
 
     return accumulated
 }
 
 export function portsForColor(board: Board, color: Color): readonly (Resource | 'general')[] {
-    const ports = mapFilter(board.tiles, x => x.type == 'port' ? x as Freeze<PortTile & { coord: Coordinate }> : undefined)
+    const ports = mapFilter(board.tiles, x => x.type == TileType.Port ? x as Freeze<PortTile & { coord: Coordinate }> : undefined)
     const buildingCoords = board.buildings.filter(x => x.color == color).map(x => x.coord)
     const adjacentPorts = ports.filter(port => buildingCoords.some(cross => isPortPoint(port, cross)))
     return adjacentPorts.map(x => x.resource)
+}
+
+
+function adjacentSegments(crossing: Coordinate, roads: RoadSegment[]): [RoadSegment, Coordinate][] {
+    function hasValidCrossing(item: [RoadSegment, Coordinate | undefined]): item is [RoadSegment, Coordinate] {
+        return item[1] != undefined
+    }
+
+    return roads
+        .map<[RoadSegment, Coordinate | undefined]>(x => 
+            [x, sameCoordinate(x.coordinates[0], crossing) ? x.coordinates[1] : (
+                sameCoordinate(x.coordinates[1], crossing) ? x.coordinates[0] :
+                undefined
+            )])
+        .filter(hasValidCrossing)
+}
+
+type RoadSegment = {
+    roads: readonly Road[],
+    coordinates: readonly [Coordinate, Coordinate],
+}
+
+
+function tryJoinSegments(segments: RoadSegment[]): RoadSegment[] {
+    const connectors = segments.filter(x => x.coordinates.length == 2)
+    {
+        // first, join connectors with exactly two coordinates
+        // there is no other option to connect those and this is always a right step
+        const connectorCoords = connectors.flatMap(x => x.coordinates)
+        const adjacents = connectorCoords.map(coord => adjacentSegments(coord, segments))
+        const twoAdjacents = adjacents.filter(adjacents => adjacents.length == 2)
+        if (twoAdjacents.length > 0) {
+            const [[seg1, target1], [seg2, target2]] = twoAdjacents[0]
+            const others = segments.filter(x => x != seg1 && x != seg2)
+            const newCoordinates: [Coordinate, Coordinate] = [
+                target1, target2
+            ]
+
+            return [...others, {
+                roads: seg1.roads.concat(seg2.roads),
+                coordinates: newCoordinates
+            }]
+        }
+    }
+
+    // maybe it is possible to join more segments beacuse we know that each
+    // vertex of the graph only has three edges.
+
+
+    return segments
+}
+
+function longestPathFrom(inputCoord: Coordinate, segments: ReadonlySet<RoadSegment>): number {
+    function helper(current: Coordinate, visited: ReadonlySet<RoadSegment>): number {
+        const adjacents = 
+            adjacentSegments(current, [...segments.difference(visited)])
+        
+        const results =
+            adjacents.map(([seg, target]) => helper(target, visited.union(new Set([seg]))) + seg.roads.length)
+
+        const longest = results.find(x => !results.some(y => y > x))
+        if (longest == undefined)
+            return 0
+        return longest
+    }
+
+
+    return helper(inputCoord, new Set())
+}
+
+function longestRoad(road: Road[]): number {
+    let segments = road.map<RoadSegment>(x => { return { roads: [x], coordinates: x } })
+
+    while (true) {
+        const newSegments = tryJoinSegments(segments)
+        if (newSegments.length == segments.length)
+            break
+        segments = newSegments
+    }
+
+    const allCoords = segments.flatMap(x => x.coordinates)
+    const eachPathLength =
+        allCoords.map(coord => longestPathFrom(coord, new Set(segments)))
+
+    return eachPathLength.find(x => !eachPathLength.some(y => y > x)) ?? 0
+}
+
+export function longestRoadForColor(board: Board, color: Color): number {
+    return longestRoad(board.roads.filter(x => x.color == color).map(x => x.coord))
+}
+
+export function colorWithLongestRoad(board: Board, currentHolder: Color | undefined): Color | undefined {
+    const colors = new Set(board.roads.map(x => x.color))
+    const coloredLength = [...colors].map<[Color, number]>(color=> [color, longestRoadForColor(board, color)])
+    const filtered = coloredLength.filter(([_, length]) => length >= 5)
+    const highestColors = filtered.filter(([col1, length1]) => !filtered.some(([col2, length2]) => length2 > length1)).map(x => x[0])
+    if (highestColors.length == 0)
+        return undefined
+
+    if (currentHolder != undefined && highestColors.includes(currentHolder))
+        return currentHolder
+
+    // now highest colors may actually contain multiple values, depending on the board
+    // this situation will not appear as then currentHolder has been correctly defined
+    // TODO maybe this will be better
+    return highestColors[0]
 }
 

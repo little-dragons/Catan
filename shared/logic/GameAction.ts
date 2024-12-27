@@ -1,7 +1,7 @@
 import { produce, unfreeze } from "structurajs"
-import { adjacentResourceTiles, adjacentRoads, availableRoadPositions, Coordinate, gainedResources, isAvailableRoadPosition, Road, sameCoordinate, sameRoad } from "./Board.js"
+import { adjacentResourceTiles, adjacentRoads, availableRoadPositions, colorWithLongestRoad, Coordinate, gainedResources, isAvailableRoadPosition, ResourceTileNumber, Road, sameCoordinate, sameRoad } from "./Board.js"
 import { BuildingType, ConnectionType, availableBuildingPositions, isAvailableBuildingPosition } from "./Buildings.js"
-import { FullGameState, nextTurn, GamePhaseType, DieResult, isPreDiceRoll, TurnPhaseType, isActive, isInitial, isRobbingDiscardingCards, isRobbingMovingRobber, RobbingPhaseType, RedactedGameState, publicGameState, longestRoadForColor, colorWithLongestRoad } from "./GameState.js"
+import { FullGameState, nextTurn, GamePhaseType, DieResult, isPreDiceRoll, TurnPhaseType, isActive, isInitial, isRobbingDiscardingCards, isRobbingMovingRobber, RobbingPhaseType, RedactedGameState, publicGameState } from "./GameState.js"
 import { Color } from "./Player.js"
 import { addCards, buildingCost, connectionCost, devCardCost, Resource, tryRemoveCards } from "./Resource.js"
 import { canTradeWithBank, FinalizedTrade, isValidOffer, OpenTradeOffer, sameTradeOffer, TradeOffer, TradeStatusByColor } from "./Trade.js"
@@ -200,8 +200,9 @@ function tryDoRollDice(state: FullGameState, executorColor: Color, action: GameA
 
     const die1 = Math.floor(Math.random() * 6) + 1 as DieResult
     const die2 = Math.floor(Math.random() * 6) + 1 as DieResult
+    const sum = die1 + die2 as ResourceTileNumber | 7
 
-    if (die1 + die2 == 7) {
+    if (sum == 7) {
         const playersToDiscard = state.players.filter(x => x.handCards.length > 7).map(x => x.color)
 
         if (playersToDiscard.length == 0)
@@ -224,7 +225,7 @@ function tryDoRollDice(state: FullGameState, executorColor: Color, action: GameA
         const newPlayers = state.players.map(({ color, handCards: oldCards, devCards }) => {
             return {
                 color,
-                handCards: addCards(oldCards, gainedResources(state.board, color, die1 + die2)),
+                handCards: addCards(oldCards, gainedResources(state.board, color, sum)),
                 devCards
             }
         })

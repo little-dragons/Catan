@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { cssColor, BuildingType, Color, Resource, type Board, type PortTile, type Tile, portPoints } from 'shared';
+import { cssColor, BuildingType, Color, Resource, type Board, type PortTile, type Tile, portPoints, TileType } from 'shared';
 import { tileHexagon, segmentedPortPaths, buildingWidth, buildingHeight, tileCenter, robberHeight, robberWidth, roadCorners, tileNumberPosition, tileNumberFontSize, crossingPosition, tilePortPosition, tilePortIconSize, tileResourceIconPosition, tileResourceIconSize, triangularPortPaths } from './Layout';
 import { type AnyUserSelectionResult, type InteractionPoints, type UserSelectionOptions, type UserSelectionResult } from './UserSelection';
 import InteractionPointsRenderer from './InteractionPoints.vue';
@@ -62,10 +62,10 @@ function tileColor(resource: Resource): string {
 }
 function backgroundColor(tile: Tile): string {
     switch (tile.type) {
-        case 'desert': return 'gold'
-        case 'resource': return tileColor(tile.resource)
-        case 'ocean': return 'royalblue'
-        case 'port': return 'royalblue'
+        case TileType.Desert: return 'gold'
+        case TileType.Resource: return tileColor(tile.resource)
+        case TileType.Ocean: return 'royalblue'
+        case TileType.Port: return 'royalblue'
     }
 }
 function portToIcon(port: PortTile): string {
@@ -157,29 +157,29 @@ function getUserSelection<T extends InteractionPoints, Options extends UserSelec
                     :d="svgPath(tileHexagon(tile.coord, tileRadius))"
                     :fill="backgroundColor(tile)" />
                 <path
-                    v-if="tile.type == 'port'"
+                    v-if="tile.type == TileType.Port"
                     v-for="path in segmentedPortPaths(tile, tileRadius)"
                     :d="svgPath(path)"
                     fill="white"/>
-                <image v-if="tile.type == 'port'" 
+                <image v-if="tile.type == TileType.Port" 
                     :x="tilePortPosition(tile.coord, tileRadius)[0]"
                     :y="tilePortPosition(tile.coord, tileRadius)[1]"
                     :width="tilePortIconSize(tileRadius)[0]"
                     :height="tilePortIconSize(tileRadius)[1]"
                     :href="portToIcon(tile)"/>
-                <image v-if="tile.type == 'resource'"
+                <image v-if="tile.type == TileType.Resource"
                     :x="tileResourceIconPosition(tile.coord, tileRadius)[0]"
                     :y="tileResourceIconPosition(tile.coord, tileRadius)[1]"
                     :width="tileResourceIconSize(tileRadius)[0]"
                     :height="tileResourceIconSize(tileRadius)[1]"
                     :href="resourceToIcon(tile.resource)"/>
-                <text v-if="tile.type == 'resource'"
+                <text v-if="tile.type == TileType.Resource"
                     :x="tileNumberPosition(tile.coord, tile.number, tileRadius)![0]"    
                     :y="tileNumberPosition(tile.coord, tile.number, tileRadius)![1]"
                     :font-size="`${tileNumberFontSize(tile.number, tileRadius)!}px`">
                     {{ tile.number }}
                 </text>
-                <image v-if="tile.type == 'desert'" 
+                <image v-if="tile.type == TileType.Desert" 
                     :x="tileResourceIconPosition(tile.coord, tileRadius)[0]"
                     :y="tileResourceIconPosition(tile.coord, tileRadius)[1]"
                     :width="tileResourceIconSize(tileRadius)[0]"

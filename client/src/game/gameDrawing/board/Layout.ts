@@ -1,5 +1,5 @@
-import { neighborTile, Orientation, portPoints, type Board, type Coordinate, type PortTile, type Road } from "shared"
-import { add, distance, lerp, middlepoint, opposite, perpendicular, withLength } from "../Vector"
+import { portPoints, type Board, type Coordinate, type PortTile, type Road } from "shared"
+import { add, distance, lerp, middlepoint, opposite, perpendicular, withLength } from "./Vector"
 
 type Pixel = [number, number]
 
