@@ -1,7 +1,7 @@
 import { Freeze } from "structurajs";
-import { Board, portsForColor } from "./Board.js";
+import { Board, PortResource, portsForColor, SpecialPorts } from "./Board.js";
 import { Color } from "./Player.js";
-import { allResources, CardList, Resource, sameCards, tryRemoveCards } from "./Resource.js";
+import { allResources, CardList, Resource, sameCards } from "./Resource.js";
 
 
 export type TradeOffer = {
@@ -39,11 +39,11 @@ export function isValidOffer(offered: CardList, desired: CardList) {
     return true
 }
 
-function freeResourcesBy(offered: CardList, ports: readonly (Resource | 'general')[], resource: Resource) {
+function freeResourcesBy(offered: CardList, ports: readonly PortResource[], resource: Resource) {
     const offeredCount = offered.filter(x => x === resource).length
     const ratio = 
         ports.includes(resource) ? 2 :
-        ports.includes('general') ? 3 :
+        ports.includes(SpecialPorts.General) ? 3 :
         4
 
     if (offeredCount % ratio !== 0)
@@ -52,7 +52,7 @@ function freeResourcesBy(offered: CardList, ports: readonly (Resource | 'general
     return offeredCount / ratio
 }
 
-function allFreeResources(offered: CardList, ports: readonly (Resource | 'general')[]) {
+function allFreeResources(offered: CardList, ports: readonly PortResource[]) {
     const allResults = allResources.map(x => freeResourcesBy(offered, ports, x))
     let sum = 0
     for (const res of allResults) {

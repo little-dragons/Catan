@@ -1,6 +1,6 @@
 import type { Color } from "./Player.js"
 import { neighborTile, Orientation } from "./Orientation.js"
-import type { Resource } from "./Resource.js"
+import { Resource } from "./Resource.js"
 import { BuildingType } from "./Buildings.js"
 import { v4 } from "uuid"
 import { type Freeze } from "structurajs"
@@ -29,9 +29,27 @@ export enum TileType {
     Desert,
     Ocean
 }
+export type LandTileType = TileType.Resource | TileType.Desert
+export type SeaTileType = TileType.Port | TileType.Ocean
+export function isLandTileType(type: TileType): type is LandTileType {
+    return type == TileType.Desert || type == TileType.Resource
+}
+export function isSeaTileType(type: TileType): type is SeaTileType {
+    return type == TileType.Port || type == TileType.Ocean
+}
+
+export enum SpecialPorts {
+    // this is made such that the value of general is distinct from other resource values.
+    General = 
+        Object.values(Resource)
+        .filter(x => typeof x == 'number')
+        .reduce((a, b) => a + b, 0) + 1,
+}
+
+export type PortResource = Resource | SpecialPorts
 export type PortTile = {
     type: TileType.Port
-    resource: Resource | 'general'
+    resource: PortResource
     orientation: Orientation
 }
 export type ResourceTileNumber = 2 | 3 | 4 | 5 | 6 | 8 | 9 | 10 | 11 | 12
@@ -46,8 +64,11 @@ export type LandTile = { type: TileType.Desert } | ResourceTile
 export type OceanTile = { type: TileType.Ocean } | PortTile
 export type Tile = LandTile | OceanTile
 export type CoordinateTile = Tile & { coord: Coordinate }
+export function isLand(tileType: TileType) {
+    return tileType == TileType.Desert || tileType == TileType.Resource
+}
 export function isLandTile(tile: Tile): tile is LandTile {
-    return tile.type == TileType.Desert || tile.type == TileType.Resource
+    return isLand(tile.type)
 }
 
 export type BoardSeed = string
@@ -266,7 +287,7 @@ export function gainedResources(board: Board, color: Color, number: ResourceTile
     return accumulated
 }
 
-export function portsForColor(board: Board, color: Color): readonly (Resource | 'general')[] {
+export function portsForColor(board: Board, color: Color): readonly PortResource[] {
     const ports = mapFilter(board.tiles, x => x.type == TileType.Port ? x as Freeze<PortTile & { coord: Coordinate }> : undefined)
     const buildingCoords = board.buildings.filter(x => x.color == color).map(x => x.coord)
     const adjacentPorts = ports.filter(port => buildingCoords.some(cross => isPortPoint(port, cross)))

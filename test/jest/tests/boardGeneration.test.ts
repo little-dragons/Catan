@@ -1,8 +1,9 @@
 import { describe, expect, it, jest } from '@jest/globals'
-import { allResources, availableBuildingPositions, Board, BoardSeed, clockwise, Coordinate, CoordinateTile, defaultBoard, neighborTile, Orientation, PortTile, randomBoardSeed, sameCoordinate } from 'shared'
+import { allResources, availableBuildingPositions, Board, BoardSeed, clockwise, Coordinate, CoordinateTile,  defaultScenario, generateBoardFromScenario, neighborTile, Orientation, PortTile, randomBoardSeed, sameCoordinate, SpecialPorts, TileType } from 'shared'
+import { Seed } from 'shared/logic/Scenario'
 
-describe('boardGeneration', () => {
-    function testWithAllSeeds(tester: (seed: BoardSeed) => void) {
+describe('Default board generation', () => {
+    function testWithAllSeeds(tester: (seed: Seed) => void) {
         tester('random seed one')
         tester('random seed two')
         tester('random seed three')
@@ -10,10 +11,19 @@ describe('boardGeneration', () => {
         tester('random seed five')
     }
 
-    it('should generate the correct amount of available building positions', () => {
+    function testWithAllBoards(test: (board: Board) => void) {
         testWithAllSeeds(seed => {
-            const generatedBoard = defaultBoard(seed)
-            const positions = availableBuildingPositions(generatedBoard, undefined)
+            const generatedBoard = generateBoardFromScenario(defaultScenario.board, seed)
+            expect(generatedBoard).toBeDefined()
+            if (generatedBoard == undefined)
+                return
+            test(generatedBoard)
+        })
+    }
+
+    it('should generate the correct amount of available building positions', () => {
+        testWithAllBoards(board => {
+            const positions = availableBuildingPositions(board, undefined)
             expect(positions.length).toBe(54)
         })
     })
@@ -33,17 +43,16 @@ describe('boardGeneration', () => {
             currentRot = clockwise(currentRot)
         }
 
-        return tiles.filter(x => x.type == 'port')
+        return tiles.filter(x => x.type == TileType.Port)
     }
 
     it('should generate four general ports and five distinct resource ports', () => {
-        testWithAllSeeds(seed => {
-            const board = defaultBoard(seed)
+        testWithAllBoards(board => {
             const ports = getPortTiles(board)
 
             expect(ports.length).toBe(9)
             expect(allResources.every(res => ports.some(port => port.resource == res))).toBeTruthy()
-            expect(ports.filter(x => x.resource == 'general').length).toBe(4)
+            expect(ports.filter(x => x.resource == SpecialPorts.General).length).toBe(4)
         })
     })
 })

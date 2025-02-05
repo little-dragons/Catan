@@ -2,12 +2,14 @@ import { createRouter, createWebHistory, type RouteNamedMap, type RouteRecordInf
 import Home from '@/home/Home.vue'
 import Room from '@/room/Room.vue'
 import RoomList from '../room/RoomList.vue'
+import ScenarioEditor from '@/scenario/ScenarioEditor.vue'
 
 declare module 'vue-router' {
     interface RouteNamedMap {
         home: RouteRecordInfo<'home', '/', Record<never, never>, Record<never, never>>,
         room: RouteRecordInfo<'room', '/room', Record<never, never>, Record<never, never>>,
-        roomList: RouteRecordInfo<'roomList', '/roomList', Record<never, never>, Record<never, never>>
+        roomList: RouteRecordInfo<'roomList', '/roomList', Record<never, never>, Record<never, never>>,
+        scenarioEditor: RouteRecordInfo<'scenarioEditor', '/scenarioEditor', Record<never, never>, Record<never, never>>
     }
     
     interface TypesConfig {
@@ -44,6 +46,11 @@ const routes = [
         path: '/roomList',
         name: 'roomList',
         component: RoomList
+    },
+    {
+        path: '/scenarioEditor',
+        name: 'scenarioEditor',
+        component: ScenarioEditor
     }
 ] satisfies RouteRecordsFromMap
 

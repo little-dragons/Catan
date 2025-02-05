@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { v4 } from 'uuid';
-import { Color, defaultBoard, GamePhaseType, Resource, TurnPhaseType, type History } from 'shared';
+import { Color, defaultScenario, GamePhaseType, generateBoardFromScenario, Resource, TurnPhaseType, type History } from 'shared';
 import HistoryComponent from '@/game/History.vue';
 import { usePopups, PopupSeverity } from '@/popup/Popup';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
@@ -37,7 +37,7 @@ function triggerNotification() {
 
 const exampleHistory: History = {
     lastState: {
-        board: defaultBoard('default'),
+        board: generateBoardFromScenario(defaultScenario.board, 'default')!,
         currentPlayer: Color.Blue,
         phase: {
             type: GamePhaseType.Turns,

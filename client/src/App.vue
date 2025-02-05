@@ -22,6 +22,10 @@ const modal = useModalStore()
             </div>
             <div class="empty"/>
             <div>
+                <RouterLink :to="{ name: 'scenarioEditor' }">Scenarios</RouterLink>
+            </div>
+            <div class="empty"/>
+            <div>
                 <RouterLink :to="{ name: 'roomList' }">Room List</RouterLink>
             </div>
             <div class="empty"/>

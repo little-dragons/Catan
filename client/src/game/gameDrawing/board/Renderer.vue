@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { cssColor, BuildingType, Color, Resource, type Board, type PortTile, type Tile, portPoints, TileType } from 'shared';
+import { cssColor, BuildingType, Color, Resource, type Board, type PortTile, type Tile, portPoints, TileType, SpecialPorts } from 'shared';
 import { tileHexagon, segmentedPortPaths, buildingWidth, buildingHeight, tileCenter, robberHeight, robberWidth, roadCorners, tileNumberPosition, tileNumberFontSize, crossingPosition, tilePortPosition, tilePortIconSize, tileResourceIconPosition, tileResourceIconSize, triangularPortPaths } from './Layout';
 import { type AnyUserSelectionResult, type InteractionPoints, type UserSelectionOptions, type UserSelectionResult } from './UserSelection';
 import InteractionPointsRenderer from './InteractionPoints.vue';
@@ -80,7 +80,7 @@ function portToIcon(port: PortTile): string {
             return orePort
         case Resource.Wool:
             return woolPort
-        case 'general':
+        case SpecialPorts.General:
             return generalPort
     }
 }

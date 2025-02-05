@@ -1,4 +1,4 @@
-import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, defaultBoard, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType, PostGameRoom } from "shared"
+import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType, PostGameRoom, generateBoardFromScenario, defaultScenario } from "shared"
 import { type Socket } from 'socket.io'
 import { SocketDataType, SocketServerType } from "./Common.js"
 import { defaultSettings } from "shared/logic/Settings.js"
@@ -49,7 +49,7 @@ export async function initializeGame(io: SocketServerType, room: ServerLobbyRoom
     const game = room as unknown as ServerGameRoom
     game.type = RoomType.InGame
     game.state = {
-        board: defaultBoard(room.settings.seed),
+        board: generateBoardFromScenario(defaultScenario.board, room.settings.seed)!,
         currentPlayer: users[0][1],
         players: users.map(([user, color]) => { return { color, handCards: [], devCards: [] } }),
         phase: {
