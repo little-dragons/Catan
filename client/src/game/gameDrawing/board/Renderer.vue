@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { cssColor, BuildingType, Color, Resource, type Board, type PortTile, type Tile, portPoints, TileType, SpecialPorts } from 'shared';
-import { tileHexagon, segmentedPortPaths, buildingWidth, buildingHeight, tileCenter, robberHeight, robberWidth, roadCorners, tileNumberPosition, tileNumberFontSize, crossingPosition, tilePortPosition, tilePortIconSize, tileResourceIconPosition, tileResourceIconSize, triangularPortPaths } from './Layout';
+import { tileHexagon, segmentedPortPaths, buildingWidth, buildingHeight, tileCenter, robberHeight, robberWidth, roadCorners, tileNumberPosition, tileNumberFontSize, crossingPosition, tilePortPosition, tilePortIconSize, tileResourceIconPosition, tileResourceIconSize, triangularPortPaths, tileRadius, svgViewboxContainer } from './Layout';
 import { type AnyUserSelectionResult, type InteractionPoints, type UserSelectionOptions, type UserSelectionResult } from './UserSelection';
 import InteractionPointsRenderer from './InteractionPoints.vue';
 
@@ -117,16 +117,8 @@ function svgPath(pixels: [number, number][]): string {
 const props = defineProps<{ 
     board: Board
 }>()
-const tileRadius = 100
 
-// TODO this is not ideally implemented, but it works. It is supposed to keep the viewbox fitting to the content if
-// the leftmost row does not contain elements in uneven rows: because then, all tiles in the first row do not start
-// at 0, but rather have an offset into the x-axis.
-const viewboxStartX = props.board.tiles.some(x => x.coord[0] == 0 && x.coord[1] % 2 == 0) ? 0 : tileRadius * Math.cos(30 / 180 * Math.PI)
-const viewboxWidth = tileRadius * 2 * (props.board.columnCount + 0.5) * Math.cos(30 / 180 * Math.PI) - viewboxStartX
-const viewboxHeight = tileRadius * (props.board.rowCount * 1.5 + 0.5)
-
-const boardSvg = ref<null | SVGElement>(null)
+const svgConstraints = svgViewboxContainer(props.board)
 
 const interactionPoints = ref<(InteractionPoints & { resolver: (value: AnyUserSelectionResult) => boolean }) | undefined>(undefined)
 
@@ -150,60 +142,62 @@ function getUserSelection<T extends InteractionPoints, Options extends UserSelec
 </script>
 
 <template>
-    <svg :viewBox="`${viewboxStartX} 0 ${viewboxWidth} ${viewboxHeight}`" ref="boardSvg" @click="() => interactionPoints?.resolver(undefined)">
+    <svg 
+        :viewBox="`${svgConstraints.startX} ${svgConstraints.startY} ${svgConstraints.width} ${svgConstraints.height}`"
+        @click="() => interactionPoints?.resolver(undefined)">
         <g id="tiles">
             <g v-for="tile in board.tiles">
                 <path
-                    :d="svgPath(tileHexagon(tile.coord, tileRadius))"
+                    :d="svgPath(tileHexagon(tile.coord))"
                     :fill="backgroundColor(tile)" />
                 <path
                     v-if="tile.type == TileType.Port"
-                    v-for="path in segmentedPortPaths(tile, tileRadius)"
+                    v-for="path in segmentedPortPaths(tile)"
                     :d="svgPath(path)"
                     fill="white"/>
                 <image v-if="tile.type == TileType.Port" 
-                    :x="tilePortPosition(tile.coord, tileRadius)[0]"
-                    :y="tilePortPosition(tile.coord, tileRadius)[1]"
-                    :width="tilePortIconSize(tileRadius)[0]"
-                    :height="tilePortIconSize(tileRadius)[1]"
+                    :x="tilePortPosition(tile.coord)[0]"
+                    :y="tilePortPosition(tile.coord)[1]"
+                    :width="tilePortIconSize[0]"
+                    :height="tilePortIconSize[1]"
                     :href="portToIcon(tile)"/>
                 <image v-if="tile.type == TileType.Resource"
-                    :x="tileResourceIconPosition(tile.coord, tileRadius)[0]"
-                    :y="tileResourceIconPosition(tile.coord, tileRadius)[1]"
-                    :width="tileResourceIconSize(tileRadius)[0]"
-                    :height="tileResourceIconSize(tileRadius)[1]"
+                    :x="tileResourceIconPosition(tile.coord)[0]"
+                    :y="tileResourceIconPosition(tile.coord)[1]"
+                    :width="tileResourceIconSize[0]"
+                    :height="tileResourceIconSize[1]"
                     :href="resourceToIcon(tile.resource)"/>
                 <text v-if="tile.type == TileType.Resource"
-                    :x="tileNumberPosition(tile.coord, tile.number, tileRadius)![0]"    
-                    :y="tileNumberPosition(tile.coord, tile.number, tileRadius)![1]"
-                    :font-size="`${tileNumberFontSize(tile.number, tileRadius)!}px`">
+                    :x="tileNumberPosition(tile.coord, tile.number)[0]"    
+                    :y="tileNumberPosition(tile.coord, tile.number)[1]"
+                    :font-size="`${tileNumberFontSize(tile.number)}px`">
                     {{ tile.number }}
                 </text>
                 <image v-if="tile.type == TileType.Desert" 
-                    :x="tileResourceIconPosition(tile.coord, tileRadius)[0]"
-                    :y="tileResourceIconPosition(tile.coord, tileRadius)[1]"
-                    :width="tileResourceIconSize(tileRadius)[0]"
-                    :height="tileResourceIconSize(tileRadius)[1]"
+                    :x="tileResourceIconPosition(tile.coord)[0]"
+                    :y="tileResourceIconPosition(tile.coord)[1]"
+                    :width="tileResourceIconSize[0]"
+                    :height="tileResourceIconSize[1]"
                     :href="desert"/>
             </g>
         </g>
         <g id="roads">
             <path v-for="road in board.roads"
-                :d="svgPath(roadCorners(road.coord, tileRadius))"
+                :d="svgPath(roadCorners(road.coord))"
                 :fill="cssColor(road.color)"/>
         </g>
         <image id="robber"
-            :x="tileCenter(board.robber, tileRadius)[0] - robberWidth(tileRadius) / 2"
-            :y="tileCenter(board.robber, tileRadius)[1] - robberHeight(tileRadius) / 2"
-            :width="robberWidth(tileRadius)"
-            :height="robberHeight(tileRadius)"
+            :x="tileCenter(board.robber)[0] - robberWidth / 2"
+            :y="tileCenter(board.robber)[1] - robberHeight / 2"
+            :width="robberWidth"
+            :height="robberHeight"
             :href="robber"/>
         <g id="buildings">
             <image v-for="building in board.buildings" 
-                :x="crossingPosition(building.coord, tileRadius)[0] - buildingWidth(tileRadius) / 2"
-                :y="crossingPosition(building.coord, tileRadius)[1] - buildingHeight(tileRadius) / 2"
-                :width="buildingWidth(tileRadius)"
-                :height="buildingHeight(tileRadius)"
+                :x="crossingPosition(building.coord)[0] - buildingWidth / 2"
+                :y="crossingPosition(building.coord)[1] - buildingHeight / 2"
+                :width="buildingWidth"
+                :height="buildingHeight"
                 :href="buildingForColor(building.color, building.type)"/>
         </g>
         <InteractionPointsRenderer

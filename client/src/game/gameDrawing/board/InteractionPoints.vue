@@ -6,7 +6,6 @@ import { type AnyUserSelectionResult, type InteractionPoints, type UserSelection
 const props = defineProps<{
     interactionPoints: InteractionPoints
     resolver: (value: Exclude<AnyUserSelectionResult, undefined>) => void
-    tileRadius: number
 }>()
 defineEmits<{ clicked: [] }>()
 
@@ -31,8 +30,8 @@ function handleClickEvent(point: UserSelectionDataType<UserSelectionType>, mouse
         <InteractionPoint 
             v-if="interactionPoints.type == UserSelectionType.Crossing"
             v-for="point in interactionPoints.positions" 
-            :position="crossingPosition(point, props.tileRadius)"
-            :min-radius="interactionPointRadius(props.tileRadius)"
+            :position="crossingPosition(point)"
+            :min-radius="interactionPointRadius"
             @click="ev => handleClickEvent(point, ev)"
             @keydown="ev => handleKeyEvent(point, ev)"
         />
@@ -40,8 +39,8 @@ function handleClickEvent(point: UserSelectionDataType<UserSelectionType>, mouse
         <InteractionPoint 
             v-if="interactionPoints.type == UserSelectionType.Tile"
             v-for="point in interactionPoints.positions" 
-            :position="tileCenter(point, props.tileRadius)"
-            :min-radius="interactionPointRadius(props.tileRadius)"
+            :position="tileCenter(point)"
+            :min-radius="interactionPointRadius"
             @click="ev => handleClickEvent(point, ev)"
             @keydown="ev => handleKeyEvent(point, ev)"
         />
@@ -49,8 +48,8 @@ function handleClickEvent(point: UserSelectionDataType<UserSelectionType>, mouse
         <InteractionPoint 
             v-if="interactionPoints.type == UserSelectionType.Connection"
             v-for="road in interactionPoints.positions" 
-            :position="roadCenter(road, props.tileRadius)"
-            :min-radius="interactionPointRadius(props.tileRadius)"
+            :position="roadCenter(road)"
+            :min-radius="interactionPointRadius"
             @click="ev => handleClickEvent(road, ev)"
             @keydown="ev => handleKeyEvent(road, ev)"
         />
