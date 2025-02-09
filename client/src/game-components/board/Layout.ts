@@ -1,4 +1,4 @@
-import { portPoints, type Board, type Coordinate, type PortTile, type ResourceTileNumber, type Road } from "shared"
+import { portPoints, type Coordinate, type PortTile, type ResourceTileNumber, type Road } from "shared"
 import { add, distance, lerp, middlepoint, opposite, perpendicular, withLength } from "./Vector"
 
 type Pixel = [number, number]
@@ -13,13 +13,15 @@ type SvgViewboxContainer = {
     width: number
     height: number
 }
-export function svgViewboxContainer(board: Board): SvgViewboxContainer {    
+export function svgViewboxContainer(tileCoordinates: Coordinate[]): SvgViewboxContainer {    
     // TODO this is not ideally implemented, but it works. It is supposed to keep the viewbox fitting to the content if
     // the leftmost row does not contain elements in uneven rows: because then, all tiles in the first row do not start
     // at 0, but rather have an offset into the x-axis.
-    const viewboxStartX = board.tiles.some(x => x.coord[0] == 0 && x.coord[1] % 2 == 0) ? 0 : tileRadius * Math.cos(30 / 180 * Math.PI)
-    const viewboxWidth = tileRadius * 2 * (board.columnCount + 0.5) * Math.cos(30 / 180 * Math.PI) - viewboxStartX
-    const viewboxHeight = tileRadius * (board.rowCount * 1.5 + 0.5)
+    const highestX = tileCoordinates.reduce((s, c) => c[0] > s ? c[0] : s, 0)
+    const highestY = tileCoordinates.reduce((s, c) => c[1] > s ? c[1] : s, 0)
+    const viewboxStartX = tileCoordinates.some(x => x[0] == 0 && x[1] % 2 == 0) ? 0 : tileRadius * Math.cos(30 / 180 * Math.PI)
+    const viewboxWidth = tileRadius * 2 * (highestX + 1.5) * Math.cos(30 / 180 * Math.PI) - viewboxStartX
+    const viewboxHeight = tileRadius * ((highestY + 1)* 1.5 + 0.5)
 
     return {
         startX: viewboxStartX,
@@ -27,6 +29,14 @@ export function svgViewboxContainer(board: Board): SvgViewboxContainer {
         width: viewboxWidth,
         height: viewboxHeight
     }
+}
+
+export type SvgViewboxString = `${number} ${number} ${number} ${number}`
+function svgViewboxToString(svgConstraints: SvgViewboxContainer): SvgViewboxString {
+    return `${svgConstraints.startX} ${svgConstraints.startY} ${svgConstraints.width} ${svgConstraints.height}`
+}
+export function svgViewboxStringFromTileCoords(tileCoordinates: Coordinate[]): SvgViewboxString {
+    return svgViewboxToString(svgViewboxContainer(tileCoordinates))
 }
 
 export function tileCenter(coord: Coordinate): Pixel {
@@ -131,7 +141,8 @@ export function roadCorners(road: Road): Pixel[] {
     ]
 }
 
-export const interactionPointRadius = tileRadius * 0.25
+export const minInteractionPointRadius = tileRadius * 0.25
+export const maxInteractionPointRadius = tileRadius * 0.325
 export const robberHeight = tileRadius * 0.7
 export const robberWidth = tileRadius * 0.4
 export const buildingHeight = tileRadius * 0.5

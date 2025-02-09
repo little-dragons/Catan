@@ -19,7 +19,7 @@ const modalStore = useModalStore()
 </template>
 
 <style scoped>
-@import '../../assets/base.css';
+@import '../assets/base.css';
 
 .all {
     position: absolute;

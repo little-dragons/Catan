@@ -43,7 +43,7 @@ defineEmits<{
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Sedan+SC&display=swap');
-@import '../../assets/base.css';
+@import '../assets/base.css';
 
 .picture {
     position: absolute;

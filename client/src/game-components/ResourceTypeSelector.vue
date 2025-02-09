@@ -45,7 +45,7 @@ const chosen = ref<Resource | undefined>(undefined)
 </template>
 
 <style scoped>
-@import '../../assets/base.css';
+@import '../assets/base.css';
 
 .top {
     padding: 5px;

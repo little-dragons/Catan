@@ -45,7 +45,7 @@ defineEmits<{
 </template>
 
 <style scoped>
-@import '../../../assets/base.css';
+@import '../../assets/base.css';
 
 .tradeBox {
     border-radius: 5px;

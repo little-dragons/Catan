@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { Color, DevCardType, Resource, type Board, type CardList, type DieResult, type OpenTradeOffer, type TradeOffer } from 'shared';
-import BoardRenderer from './board/Renderer.vue';
-import { type InteractionPoints, type UserSelectionOptions, type UserSelectionResult } from './board/UserSelection'
-import DiceRenderer from './DiceRenderer.vue';
 import { onMounted, ref } from 'vue';
-import ResourceCardsRenderer from './cards/ResourceCardsRenderer.vue';
-import PlayerOverviewRenderer, { type PlayerOverviewData } from './PlayerOverviewRenderer.vue';
-import TradeRenderer, { type TradeMenuRendererProps } from './trade/TradeMenuRenderer.vue';
-import OwnTradeOverview from './trade/OwnTradeOverview.vue';
-import DiscardRenderer, { type DiscardMenuRendererProps } from './DiscardRenderer.vue';
-import DevCardsRenderer from './cards/DevCardsRenderer.vue';
-import ResourceSelector from './ResourceSelector.vue';
-import ResourceTypeSelector from './ResourceTypeSelector.vue';
+import { Color, DevCardType, Resource, type Board, type CardList, type DieResult, type OpenTradeOffer, type TradeOffer } from 'shared';
+import { type InteractionPoints, type UserSelectionOptions, type UserSelectionResult } from '../game-components/board/UserSelection'
+import DiceRenderer from '../game-components/DiceRenderer.vue';
+import ResourceCardsRenderer from '../game-components/cards/ResourceCardsRenderer.vue';
+import PlayerOverviewRenderer, { type PlayerOverviewData } from '../game-components/PlayerOverviewRenderer.vue';
+import TradeRenderer, { type TradeMenuRendererProps } from '../game-components/trade/TradeMenuRenderer.vue';
+import OwnTradeOverview from '../game-components/trade/OwnTradeOverview.vue';
+import DiscardRenderer, { type DiscardMenuRendererProps } from '../game-components/DiscardRenderer.vue';
+import DevCardsRenderer from '../game-components/cards/DevCardsRenderer.vue';
+import ResourceSelector from '../game-components/ResourceSelector.vue';
+import ResourceTypeSelector from '../game-components/ResourceTypeSelector.vue';
+import InteractionProvider from '../game-components/board/InteractionProvider.vue';
+import BoardContainer from '../game-components/board/Container.vue';
+import DefaultBoardItems from '../game-components/board/DefaultBoardItems.vue';
 
 defineEmits<{
     diceClicked: []
@@ -70,18 +72,15 @@ onMounted(() => {
     }).observe(boardContainer.value!.children[0])
 })
 
-const interactionRunning = ref(false)
-const boardRenderer = ref<null | InstanceType<typeof BoardRenderer>>(null)
+const interaction = ref<null | InstanceType<typeof InteractionProvider>>(null)
 async function getUserSelection<T extends InteractionPoints, Options extends UserSelectionOptions | undefined>(value: T, options?: Options): Promise<UserSelectionResult<T['type'], Options>> {
-    interactionRunning.value = true
-    const res = await boardRenderer.value!.getUserSelection(value, options)
-    interactionRunning.value = false
-    return res
+    return await interaction.value!.get(value, options)
 }
 
 const chooseResourceTypeData = ref<((r: Resource | undefined) => void) | undefined>(undefined)
 const chooseResourcesData = ref<[number, ((r: CardList | undefined) => void)] | undefined>(undefined)
-defineExpose({ getUserSelection,
+defineExpose({
+    getUserSelection,
     chooseResourceType(): Promise<Resource | undefined> {
         return new Promise(resolve => {
             chooseResourceTypeData.value = r => {
@@ -152,8 +151,11 @@ defineExpose({ getUserSelection,
             @reject-trade="trade => $emit('rejectTrade', trade)"
             class="middle-right-grid"/>
     </div>
-    <div ref="boardContainer"class="main-box">   
-        <BoardRenderer :board="board" ref="boardRenderer"/>
+    <div ref="boardContainer" class="main-box">   
+        <BoardContainer :tile-coordinates="board.tiles.map(x => x.coord)" @click="() => interaction!.abort()">
+            <DefaultBoardItems :board="board"/>
+            <InteractionProvider ref="interaction"/>
+        </BoardContainer>
         <div class="below">
             <div class="rowAbove">
                 <TradeRenderer
@@ -198,7 +200,7 @@ defineExpose({ getUserSelection,
                         v-if="dice != undefined" 
                         class="dice" 
                         :dice="dice"
-                        :enabled="!interactionRunning && forbiddableButtons.rollDice"
+                        :enabled="forbiddableButtons.rollDice && !interaction?.running"
                         @dice-clicked="() => $emit('diceClicked')"
                     />
                 </div>
@@ -208,12 +210,12 @@ defineExpose({ getUserSelection,
                 <DevCardsRenderer class="devCards" :cards="devCards" @dev-card-clicked="card => $emit('devCardClicked', card)"/>
             </div>
             <div class="buttons">
-                <button class="default-button-colors" @click="() => $emit('tradeMenu')" :disabled="interactionRunning || !forbiddableButtons.offerTrade">Trade</button>
-                <button class="default-button-colors" @click="() => $emit('buyDevCard')" :disabled="interactionRunning || !forbiddableButtons.buyDevCard">Dev Card</button>
-                <button class="default-button-colors" @click="() => $emit('buildRoad')" :disabled="interactionRunning || !forbiddableButtons.placeRoad">Road</button>
-                <button class="default-button-colors" @click="() => $emit('buildSettlement')" :disabled="interactionRunning || !forbiddableButtons.placeSettlement">Settlement</button>
-                <button class="default-button-colors" @click="() => $emit('buildCity')" :disabled="interactionRunning || !forbiddableButtons.placeCity">City</button>
-                <button class="default-button-colors" @click="() => $emit('endTurn')" :disabled="interactionRunning || !forbiddableButtons.finishTurn">Finish turn</button>
+                <button class="default-button-colors" @click="() => $emit('tradeMenu')" :disabled="interaction?.running || !forbiddableButtons.offerTrade">Trade</button>
+                <button class="default-button-colors" @click="() => $emit('buyDevCard')" :disabled="interaction?.running || !forbiddableButtons.buyDevCard">Dev Card</button>
+                <button class="default-button-colors" @click="() => $emit('buildRoad')" :disabled="interaction?.running || !forbiddableButtons.placeRoad">Road</button>
+                <button class="default-button-colors" @click="() => $emit('buildSettlement')" :disabled="interaction?.running || !forbiddableButtons.placeSettlement">Settlement</button>
+                <button class="default-button-colors" @click="() => $emit('buildCity')" :disabled="interaction?.running || !forbiddableButtons.placeCity">City</button>
+                <button class="default-button-colors" @click="() => $emit('endTurn')" :disabled="interaction?.running || !forbiddableButtons.finishTurn">Finish turn</button>
             </div>
         </div>
     </div>

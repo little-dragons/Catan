@@ -10,7 +10,7 @@ const boardJSONString = `
         "rowCount": 7,
         "tiles": [
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 1,
                 "number": 11,
                 "coord": [
@@ -19,7 +19,7 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 0,
                 "number": 3,
                 "coord": [
@@ -28,7 +28,7 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 0,
                 "number": 6,
                 "coord": [
@@ -37,7 +37,7 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 2,
                 "number": 5,
                 "coord": [
@@ -46,7 +46,7 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 1,
                 "number": 4,
                 "coord": [
@@ -55,7 +55,7 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 3,
                 "number": 9,
                 "coord": [
@@ -64,7 +64,7 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 2,
                 "number": 10,
                 "coord": [
@@ -73,7 +73,7 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 0,
                 "number": 8,
                 "coord": [
@@ -82,7 +82,7 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 3,
                 "number": 4,
                 "coord": [
@@ -91,7 +91,7 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 2,
                 "number": 11,
                 "coord": [
@@ -100,7 +100,7 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 1,
                 "number": 12,
                 "coord": [
@@ -109,7 +109,7 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 3,
                 "number": 9,
                 "coord": [
@@ -118,7 +118,7 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 0,
                 "number": 10,
                 "coord": [
@@ -127,7 +127,7 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 4,
                 "number": 8,
                 "coord": [
@@ -136,14 +136,14 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "desert",
+                "type": 2,
                 "coord": [
                     4,
                     5
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 4,
                 "number": 3,
                 "coord": [
@@ -152,7 +152,7 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 4,
                 "number": 6,
                 "coord": [
@@ -161,7 +161,7 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 3,
                 "number": 2,
                 "coord": [
@@ -170,7 +170,7 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "resource",
+                "type": 1,
                 "resource": 2,
                 "number": 5,
                 "coord": [
@@ -179,14 +179,14 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "ocean",
+                "type": 3,
                 "coord": [
                     1,
                     2
                 ]
             },
             {
-                "type": "port",
+                "type": 0,
                 "resource": 0,
                 "orientation": 1,
                 "coord": [
@@ -195,15 +195,15 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "ocean",
+                "type": 3,
                 "coord": [
                     2,
                     0
                 ]
             },
             {
-                "type": "port",
-                "resource": "general",
+                "type": 0,
+                "resource": 11,
                 "orientation": 0,
                 "coord": [
                     3,
@@ -211,14 +211,14 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "ocean",
+                "type": 3,
                 "coord": [
                     4,
                     0
                 ]
             },
             {
-                "type": "port",
+                "type": 0,
                 "resource": 4,
                 "orientation": 0,
                 "coord": [
@@ -227,15 +227,15 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "ocean",
+                "type": 3,
                 "coord": [
                     5,
                     1
                 ]
             },
             {
-                "type": "port",
-                "resource": "general",
+                "type": 0,
+                "resource": 11,
                 "orientation": 0,
                 "coord": [
                     6,
@@ -243,14 +243,14 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "ocean",
+                "type": 3,
                 "coord": [
                     6,
                     3
                 ]
             },
             {
-                "type": "port",
+                "type": 0,
                 "resource": 3,
                 "orientation": 3,
                 "coord": [
@@ -259,14 +259,14 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "ocean",
+                "type": 3,
                 "coord": [
                     5,
                     5
                 ]
             },
             {
-                "type": "port",
+                "type": 0,
                 "resource": 2,
                 "orientation": 3,
                 "coord": [
@@ -275,15 +275,15 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "ocean",
+                "type": 3,
                 "coord": [
                     4,
                     6
                 ]
             },
             {
-                "type": "port",
-                "resource": "general",
+                "type": 0,
+                "resource": 11,
                 "orientation": 3,
                 "coord": [
                     3,
@@ -291,15 +291,15 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "ocean",
+                "type": 3,
                 "coord": [
                     2,
                     6
                 ]
             },
             {
-                "type": "port",
-                "resource": "general",
+                "type": 0,
+                "resource": 11,
                 "orientation": 5,
                 "coord": [
                     1,
@@ -307,14 +307,14 @@ const boardJSONString = `
                 ]
             },
             {
-                "type": "ocean",
+                "type": 3,
                 "coord": [
                     1,
                     4
                 ]
             },
             {
-                "type": "port",
+                "type": 0,
                 "resource": 1,
                 "orientation": 5,
                 "coord": [
@@ -468,7 +468,7 @@ const yellowHasLongestRoadJSON = `
     "rowCount": 7,
     "tiles": [
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 11,
             "coord": [
@@ -477,7 +477,7 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 3,
             "coord": [
@@ -486,7 +486,7 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 6,
             "coord": [
@@ -495,7 +495,7 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 5,
             "coord": [
@@ -504,7 +504,7 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 4,
             "coord": [
@@ -513,14 +513,14 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "desert",
+            "type": 2,
             "coord": [
                 3,
                 2
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 9,
             "coord": [
@@ -529,7 +529,7 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 10,
             "coord": [
@@ -538,7 +538,7 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 8,
             "coord": [
@@ -547,7 +547,7 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 4,
             "coord": [
@@ -556,7 +556,7 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 11,
             "coord": [
@@ -565,7 +565,7 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 12,
             "coord": [
@@ -574,7 +574,7 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 9,
             "coord": [
@@ -583,7 +583,7 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 10,
             "coord": [
@@ -592,7 +592,7 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 8,
             "coord": [
@@ -601,7 +601,7 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 3,
             "coord": [
@@ -610,7 +610,7 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 6,
             "coord": [
@@ -619,7 +619,7 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 2,
             "coord": [
@@ -628,7 +628,7 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 5,
             "coord": [
@@ -637,15 +637,15 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 1
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 2,
             "coord": [
                 6,
@@ -653,15 +653,15 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 6,
                 3
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 3,
             "coord": [
                 6,
@@ -669,15 +669,15 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 5
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 3,
             "coord": [
                 5,
@@ -685,14 +685,14 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 6
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 3,
             "orientation": 4,
             "coord": [
@@ -701,14 +701,14 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 6
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 1,
             "orientation": 5,
             "coord": [
@@ -717,14 +717,14 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 4
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 2,
             "orientation": 5,
             "coord": [
@@ -733,14 +733,14 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 2
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 4,
             "orientation": 5,
             "coord": [
@@ -749,15 +749,15 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 0
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 0,
             "coord": [
                 3,
@@ -765,14 +765,14 @@ const yellowHasLongestRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 0
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 0,
             "orientation": 0,
             "coord": [
@@ -936,7 +936,7 @@ const yellowHasLongestRoad2JSON = `
     "rowCount": 7,
     "tiles": [
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 11,
             "coord": [
@@ -945,7 +945,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 3,
             "coord": [
@@ -954,7 +954,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 6,
             "coord": [
@@ -963,7 +963,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 5,
             "coord": [
@@ -972,7 +972,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 4,
             "coord": [
@@ -981,7 +981,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 9,
             "coord": [
@@ -990,7 +990,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 10,
             "coord": [
@@ -999,7 +999,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 8,
             "coord": [
@@ -1008,7 +1008,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 4,
             "coord": [
@@ -1017,7 +1017,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 11,
             "coord": [
@@ -1026,7 +1026,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 12,
             "coord": [
@@ -1035,7 +1035,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 9,
             "coord": [
@@ -1044,7 +1044,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 10,
             "coord": [
@@ -1053,7 +1053,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 8,
             "coord": [
@@ -1062,7 +1062,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 3,
             "coord": [
@@ -1071,7 +1071,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 6,
             "coord": [
@@ -1080,7 +1080,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 2,
             "coord": [
@@ -1089,7 +1089,7 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 5,
             "coord": [
@@ -1098,22 +1098,22 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "desert",
+            "type": 2,
             "coord": [
                 4,
                 1
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 1
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 0,
             "coord": [
                 6,
@@ -1121,14 +1121,14 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 6,
                 3
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 0,
             "orientation": 2,
             "coord": [
@@ -1137,14 +1137,14 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 5
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 4,
             "orientation": 3,
             "coord": [
@@ -1153,15 +1153,15 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 6
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 4,
             "coord": [
                 3,
@@ -1169,14 +1169,14 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 6
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 3,
             "orientation": 4,
             "coord": [
@@ -1185,14 +1185,14 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 4
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 1,
             "orientation": 5,
             "coord": [
@@ -1201,14 +1201,14 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 2
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 2,
             "orientation": 1,
             "coord": [
@@ -1217,15 +1217,15 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 0
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 1,
             "coord": [
                 3,
@@ -1233,15 +1233,15 @@ const yellowHasLongestRoad2JSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 0
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 0,
             "coord": [
                 5,
@@ -1417,7 +1417,7 @@ const yellowHasLongestRoadWithCycleJSON = `
     "rowCount": 7,
     "tiles": [
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 11,
             "coord": [
@@ -1426,7 +1426,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 3,
             "coord": [
@@ -1435,7 +1435,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 6,
             "coord": [
@@ -1444,7 +1444,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 5,
             "coord": [
@@ -1453,7 +1453,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 4,
             "coord": [
@@ -1462,7 +1462,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 9,
             "coord": [
@@ -1471,7 +1471,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 10,
             "coord": [
@@ -1480,7 +1480,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 8,
             "coord": [
@@ -1489,7 +1489,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 4,
             "coord": [
@@ -1498,7 +1498,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 11,
             "coord": [
@@ -1507,7 +1507,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 12,
             "coord": [
@@ -1516,7 +1516,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 9,
             "coord": [
@@ -1525,7 +1525,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 10,
             "coord": [
@@ -1534,7 +1534,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 8,
             "coord": [
@@ -1543,7 +1543,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 3,
             "coord": [
@@ -1552,7 +1552,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 6,
             "coord": [
@@ -1561,7 +1561,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 2,
             "coord": [
@@ -1570,7 +1570,7 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 5,
             "coord": [
@@ -1579,22 +1579,22 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "desert",
+            "type": 2,
             "coord": [
                 4,
                 1
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 1
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 0,
             "coord": [
                 6,
@@ -1602,14 +1602,14 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 6,
                 3
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 0,
             "orientation": 2,
             "coord": [
@@ -1618,14 +1618,14 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 5
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 4,
             "orientation": 3,
             "coord": [
@@ -1634,15 +1634,15 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 6
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 4,
             "coord": [
                 3,
@@ -1650,14 +1650,14 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 6
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 3,
             "orientation": 4,
             "coord": [
@@ -1666,14 +1666,14 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 4
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 1,
             "orientation": 5,
             "coord": [
@@ -1682,14 +1682,14 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 2
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 2,
             "orientation": 1,
             "coord": [
@@ -1698,15 +1698,15 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 0
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 1,
             "coord": [
                 3,
@@ -1714,15 +1714,15 @@ const yellowHasLongestRoadWithCycleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 0
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 0,
             "coord": [
                 5,
@@ -1911,7 +1911,7 @@ const yellowHasLongerThanGreenJSON = `
     "rowCount": 7,
     "tiles": [
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 11,
             "coord": [
@@ -1920,7 +1920,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 3,
             "coord": [
@@ -1929,7 +1929,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 6,
             "coord": [
@@ -1938,7 +1938,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 5,
             "coord": [
@@ -1947,7 +1947,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 4,
             "coord": [
@@ -1956,7 +1956,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 9,
             "coord": [
@@ -1965,7 +1965,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 10,
             "coord": [
@@ -1974,7 +1974,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 8,
             "coord": [
@@ -1983,7 +1983,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 4,
             "coord": [
@@ -1992,7 +1992,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 11,
             "coord": [
@@ -2001,7 +2001,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 12,
             "coord": [
@@ -2010,7 +2010,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 9,
             "coord": [
@@ -2019,7 +2019,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 10,
             "coord": [
@@ -2028,7 +2028,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 8,
             "coord": [
@@ -2037,7 +2037,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 3,
             "coord": [
@@ -2046,7 +2046,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 6,
             "coord": [
@@ -2055,7 +2055,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 2,
             "coord": [
@@ -2064,7 +2064,7 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 5,
             "coord": [
@@ -2073,22 +2073,22 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "desert",
+            "type": 2,
             "coord": [
                 4,
                 1
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 1
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 0,
             "coord": [
                 6,
@@ -2096,14 +2096,14 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 6,
                 3
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 0,
             "orientation": 2,
             "coord": [
@@ -2112,14 +2112,14 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 5
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 4,
             "orientation": 3,
             "coord": [
@@ -2128,15 +2128,15 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 6
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 4,
             "coord": [
                 3,
@@ -2144,14 +2144,14 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 6
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 3,
             "orientation": 4,
             "coord": [
@@ -2160,14 +2160,14 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 4
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 1,
             "orientation": 5,
             "coord": [
@@ -2176,14 +2176,14 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 2
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 2,
             "orientation": 1,
             "coord": [
@@ -2192,15 +2192,15 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 0
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 1,
             "coord": [
                 3,
@@ -2208,15 +2208,15 @@ const yellowHasLongerThanGreenJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 0
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 0,
             "coord": [
                 5,
@@ -2431,7 +2431,7 @@ const yellowAndGreenSameLengthJSON = `
     "rowCount": 7,
     "tiles": [
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 11,
             "coord": [
@@ -2440,7 +2440,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 3,
             "coord": [
@@ -2449,7 +2449,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 6,
             "coord": [
@@ -2458,7 +2458,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 5,
             "coord": [
@@ -2467,7 +2467,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 4,
             "coord": [
@@ -2476,7 +2476,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 9,
             "coord": [
@@ -2485,7 +2485,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 10,
             "coord": [
@@ -2494,7 +2494,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 8,
             "coord": [
@@ -2503,7 +2503,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 4,
             "coord": [
@@ -2512,7 +2512,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 11,
             "coord": [
@@ -2521,7 +2521,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 12,
             "coord": [
@@ -2530,7 +2530,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 9,
             "coord": [
@@ -2539,7 +2539,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 10,
             "coord": [
@@ -2548,7 +2548,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 8,
             "coord": [
@@ -2557,7 +2557,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 3,
             "coord": [
@@ -2566,7 +2566,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 6,
             "coord": [
@@ -2575,7 +2575,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 2,
             "coord": [
@@ -2584,7 +2584,7 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 5,
             "coord": [
@@ -2593,22 +2593,22 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "desert",
+            "type": 2,
             "coord": [
                 4,
                 1
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 1
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 0,
             "coord": [
                 6,
@@ -2616,14 +2616,14 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 6,
                 3
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 0,
             "orientation": 2,
             "coord": [
@@ -2632,14 +2632,14 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 5
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 4,
             "orientation": 3,
             "coord": [
@@ -2648,15 +2648,15 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 6
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 4,
             "coord": [
                 3,
@@ -2664,14 +2664,14 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 6
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 3,
             "orientation": 4,
             "coord": [
@@ -2680,14 +2680,14 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 4
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 1,
             "orientation": 5,
             "coord": [
@@ -2696,14 +2696,14 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 2
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 2,
             "orientation": 1,
             "coord": [
@@ -2712,15 +2712,15 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 0
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 1,
             "coord": [
                 3,
@@ -2728,15 +2728,15 @@ const yellowAndGreenSameLengthJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 0
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 0,
             "coord": [
                 5,
@@ -2964,7 +2964,7 @@ const yellowAndGreenSameLength2JSON = `
     "rowCount": 7,
     "tiles": [
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 11,
             "coord": [
@@ -2973,7 +2973,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 3,
             "coord": [
@@ -2982,7 +2982,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 6,
             "coord": [
@@ -2991,7 +2991,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 5,
             "coord": [
@@ -3000,7 +3000,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 4,
             "coord": [
@@ -3009,7 +3009,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 9,
             "coord": [
@@ -3018,7 +3018,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 10,
             "coord": [
@@ -3027,7 +3027,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 8,
             "coord": [
@@ -3036,7 +3036,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 4,
             "coord": [
@@ -3045,7 +3045,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 11,
             "coord": [
@@ -3054,7 +3054,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 12,
             "coord": [
@@ -3063,7 +3063,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 9,
             "coord": [
@@ -3072,7 +3072,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 10,
             "coord": [
@@ -3081,7 +3081,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 8,
             "coord": [
@@ -3090,7 +3090,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 3,
             "coord": [
@@ -3099,7 +3099,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 6,
             "coord": [
@@ -3108,7 +3108,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 2,
             "coord": [
@@ -3117,7 +3117,7 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 5,
             "coord": [
@@ -3126,22 +3126,22 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "desert",
+            "type": 2,
             "coord": [
                 4,
                 1
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 1
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 0,
             "coord": [
                 6,
@@ -3149,14 +3149,14 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 6,
                 3
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 0,
             "orientation": 2,
             "coord": [
@@ -3165,14 +3165,14 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 5
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 4,
             "orientation": 3,
             "coord": [
@@ -3181,15 +3181,15 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 6
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 4,
             "coord": [
                 3,
@@ -3197,14 +3197,14 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 6
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 3,
             "orientation": 4,
             "coord": [
@@ -3213,14 +3213,14 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 4
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 1,
             "orientation": 5,
             "coord": [
@@ -3229,14 +3229,14 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 2
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 2,
             "orientation": 1,
             "coord": [
@@ -3245,15 +3245,15 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 0
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 1,
             "coord": [
                 3,
@@ -3261,15 +3261,15 @@ const yellowAndGreenSameLength2JSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 0
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 0,
             "coord": [
                 5,
@@ -3510,7 +3510,7 @@ export const blueAndRedTriangleJSON = `
     "rowCount": 7,
     "tiles": [
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 11,
             "coord": [
@@ -3519,14 +3519,14 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "desert",
+            "type": 2,
             "coord": [
                 3,
                 2
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 3,
             "coord": [
@@ -3535,7 +3535,7 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 6,
             "coord": [
@@ -3544,7 +3544,7 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 5,
             "coord": [
@@ -3553,7 +3553,7 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 4,
             "coord": [
@@ -3562,7 +3562,7 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 9,
             "coord": [
@@ -3571,7 +3571,7 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 10,
             "coord": [
@@ -3580,7 +3580,7 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 8,
             "coord": [
@@ -3589,7 +3589,7 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 4,
             "coord": [
@@ -3598,7 +3598,7 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 11,
             "coord": [
@@ -3607,7 +3607,7 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 12,
             "coord": [
@@ -3616,7 +3616,7 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 9,
             "coord": [
@@ -3625,7 +3625,7 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 10,
             "coord": [
@@ -3634,7 +3634,7 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 8,
             "coord": [
@@ -3643,7 +3643,7 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 3,
             "coord": [
@@ -3652,7 +3652,7 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 6,
             "coord": [
@@ -3661,7 +3661,7 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 2,
             "coord": [
@@ -3670,7 +3670,7 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 5,
             "coord": [
@@ -3679,14 +3679,14 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 2
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 0,
             "orientation": 5,
             "coord": [
@@ -3695,14 +3695,14 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 0
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 1,
             "orientation": 1,
             "coord": [
@@ -3711,14 +3711,14 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 0
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 2,
             "orientation": 0,
             "coord": [
@@ -3727,15 +3727,15 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 1
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 0,
             "coord": [
                 6,
@@ -3743,15 +3743,15 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 6,
                 3
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 2,
             "coord": [
                 6,
@@ -3759,15 +3759,15 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 5
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 3,
             "coord": [
                 5,
@@ -3775,15 +3775,15 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 6
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 3,
             "coord": [
                 3,
@@ -3791,14 +3791,14 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 6
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 3,
             "orientation": 5,
             "coord": [
@@ -3807,14 +3807,14 @@ export const blueAndRedTriangleJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 4
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 4,
             "orientation": 5,
             "coord": [
@@ -3991,7 +3991,7 @@ const blueAndRedMoreTrianglesJSON = `
     "rowCount": 7,
     "tiles": [
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 11,
             "coord": [
@@ -4000,14 +4000,14 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "desert",
+            "type": 2,
             "coord": [
                 3,
                 2
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 3,
             "coord": [
@@ -4016,7 +4016,7 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 6,
             "coord": [
@@ -4025,7 +4025,7 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 5,
             "coord": [
@@ -4034,7 +4034,7 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 4,
             "coord": [
@@ -4043,7 +4043,7 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 9,
             "coord": [
@@ -4052,7 +4052,7 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 10,
             "coord": [
@@ -4061,7 +4061,7 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 8,
             "coord": [
@@ -4070,7 +4070,7 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 4,
             "coord": [
@@ -4079,7 +4079,7 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 11,
             "coord": [
@@ -4088,7 +4088,7 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 12,
             "coord": [
@@ -4097,7 +4097,7 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 9,
             "coord": [
@@ -4106,7 +4106,7 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 10,
             "coord": [
@@ -4115,7 +4115,7 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 8,
             "coord": [
@@ -4124,7 +4124,7 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 3,
             "coord": [
@@ -4133,7 +4133,7 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 6,
             "coord": [
@@ -4142,7 +4142,7 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 2,
             "coord": [
@@ -4151,7 +4151,7 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 5,
             "coord": [
@@ -4160,14 +4160,14 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 2
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 0,
             "orientation": 5,
             "coord": [
@@ -4176,14 +4176,14 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 0
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 1,
             "orientation": 1,
             "coord": [
@@ -4192,14 +4192,14 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 0
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 2,
             "orientation": 0,
             "coord": [
@@ -4208,15 +4208,15 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 1
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 0,
             "coord": [
                 6,
@@ -4224,15 +4224,15 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 6,
                 3
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 2,
             "coord": [
                 6,
@@ -4240,15 +4240,15 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 5
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 3,
             "coord": [
                 5,
@@ -4256,15 +4256,15 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 6
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 3,
             "coord": [
                 3,
@@ -4272,14 +4272,14 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 6
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 3,
             "orientation": 5,
             "coord": [
@@ -4288,14 +4288,14 @@ const blueAndRedMoreTrianglesJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 4
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 4,
             "orientation": 5,
             "coord": [
@@ -4512,7 +4512,7 @@ const complexBlueRoadJSON = `
     "rowCount": 7,
     "tiles": [
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 11,
             "coord": [
@@ -4521,14 +4521,14 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "desert",
+            "type": 2,
             "coord": [
                 3,
                 2
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 3,
             "coord": [
@@ -4537,7 +4537,7 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 6,
             "coord": [
@@ -4546,7 +4546,7 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 5,
             "coord": [
@@ -4555,7 +4555,7 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 4,
             "coord": [
@@ -4564,7 +4564,7 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 9,
             "coord": [
@@ -4573,7 +4573,7 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 10,
             "coord": [
@@ -4582,7 +4582,7 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 8,
             "coord": [
@@ -4591,7 +4591,7 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 4,
             "coord": [
@@ -4600,7 +4600,7 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 11,
             "coord": [
@@ -4609,7 +4609,7 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 12,
             "coord": [
@@ -4618,7 +4618,7 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 9,
             "coord": [
@@ -4627,7 +4627,7 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 10,
             "coord": [
@@ -4636,7 +4636,7 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 8,
             "coord": [
@@ -4645,7 +4645,7 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 3,
             "coord": [
@@ -4654,7 +4654,7 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 6,
             "coord": [
@@ -4663,7 +4663,7 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 2,
             "coord": [
@@ -4672,7 +4672,7 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 5,
             "coord": [
@@ -4681,14 +4681,14 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 2
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 0,
             "orientation": 5,
             "coord": [
@@ -4697,14 +4697,14 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 0
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 1,
             "orientation": 1,
             "coord": [
@@ -4713,14 +4713,14 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 0
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 2,
             "orientation": 0,
             "coord": [
@@ -4729,15 +4729,15 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 1
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 0,
             "coord": [
                 6,
@@ -4745,15 +4745,15 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 6,
                 3
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 2,
             "coord": [
                 6,
@@ -4761,15 +4761,15 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 5
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 3,
             "coord": [
                 5,
@@ -4777,15 +4777,15 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 6
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 3,
             "coord": [
                 3,
@@ -4793,14 +4793,14 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 6
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 3,
             "orientation": 5,
             "coord": [
@@ -4809,14 +4809,14 @@ const complexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 4
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 4,
             "orientation": 5,
             "coord": [
@@ -5097,7 +5097,7 @@ const moreComplexBlueRoadJSON = `
     "rowCount": 7,
     "tiles": [
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 11,
             "coord": [
@@ -5106,14 +5106,14 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "desert",
+            "type": 2,
             "coord": [
                 3,
                 2
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 3,
             "coord": [
@@ -5122,7 +5122,7 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 6,
             "coord": [
@@ -5131,7 +5131,7 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 5,
             "coord": [
@@ -5140,7 +5140,7 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 4,
             "coord": [
@@ -5149,7 +5149,7 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 9,
             "coord": [
@@ -5158,7 +5158,7 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 0,
             "number": 10,
             "coord": [
@@ -5167,7 +5167,7 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 8,
             "coord": [
@@ -5176,7 +5176,7 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 4,
             "coord": [
@@ -5185,7 +5185,7 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 11,
             "coord": [
@@ -5194,7 +5194,7 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 12,
             "coord": [
@@ -5203,7 +5203,7 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 9,
             "coord": [
@@ -5212,7 +5212,7 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 4,
             "number": 10,
             "coord": [
@@ -5221,7 +5221,7 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 8,
             "coord": [
@@ -5230,7 +5230,7 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 3,
             "coord": [
@@ -5239,7 +5239,7 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 3,
             "number": 6,
             "coord": [
@@ -5248,7 +5248,7 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 1,
             "number": 2,
             "coord": [
@@ -5257,7 +5257,7 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "resource",
+            "type": 1,
             "resource": 2,
             "number": 5,
             "coord": [
@@ -5266,14 +5266,14 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 2
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 0,
             "orientation": 5,
             "coord": [
@@ -5282,14 +5282,14 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 0
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 1,
             "orientation": 1,
             "coord": [
@@ -5298,14 +5298,14 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 0
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 2,
             "orientation": 0,
             "coord": [
@@ -5314,15 +5314,15 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 1
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 0,
             "coord": [
                 6,
@@ -5330,15 +5330,15 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 6,
                 3
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 2,
             "coord": [
                 6,
@@ -5346,15 +5346,15 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 5,
                 5
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 3,
             "coord": [
                 5,
@@ -5362,15 +5362,15 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 4,
                 6
             ]
         },
         {
-            "type": "port",
-            "resource": "general",
+            "type": 0,
+            "resource": 11,
             "orientation": 3,
             "coord": [
                 3,
@@ -5378,14 +5378,14 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 2,
                 6
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 3,
             "orientation": 5,
             "coord": [
@@ -5394,14 +5394,14 @@ const moreComplexBlueRoadJSON = `
             ]
         },
         {
-            "type": "ocean",
+            "type": 3,
             "coord": [
                 1,
                 4
             ]
         },
         {
-            "type": "port",
+            "type": 0,
             "resource": 4,
             "orientation": 5,
             "coord": [

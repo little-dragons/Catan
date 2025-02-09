@@ -44,7 +44,7 @@ defineProps<CardStackProps>()
 </template>
 
 <style scoped>
-@import '../../../assets/base.css';
+@import '../../assets/base.css';
 
 
 

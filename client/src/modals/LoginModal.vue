@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import UsernameInput from '@/inputs/UsernameInput.vue';
-import PasswordInput from '@/inputs/PasswordInput.vue';
-import Modal from '@/inputs/modals/Modal.vue'
-import LabeledInput from '@/inputs/LabeledInput.vue';
+import UsernameInput from './input-fields/UsernameInput.vue';
+import PasswordInput from './input-fields/PasswordInput.vue';
+import Modal from '@/modals/Modal.vue'
+import LabeledInput from './input-fields/LabeledInput.vue';
 import { PopupSeverity, usePopups } from '@/popup/Popup';
 import { useCurrentUserStore, UserOPResult, UserStatus } from '@/socket/CurrentUserStore';
 import { useModalStore } from './ModalStore';
@@ -187,7 +187,7 @@ const pending = computed(() => currentUser.info.status == UserStatus.Pending)
 </template>
 
 <style scoped>
-@import '../../assets/base.css';
+@import '../assets/base.css';
 
 p {
     margin-bottom: 0.7rem;

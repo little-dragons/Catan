@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { v4 } from 'uuid';
-import { Color, defaultScenario, GamePhaseType, generateBoardFromScenario, Resource, TurnPhaseType, type History } from 'shared';
+import { Color, defaultScenario, GamePhaseType, generateBoardFromScenario, Resource, TurnPhaseType, type Board, type History } from 'shared';
 import HistoryComponent from '@/game/History.vue';
 import { usePopups, PopupSeverity } from '@/popup/Popup';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import { useCurrentUserStore, UserStatus } from '@/socket/CurrentUserStore';
 import router from '@/misc/Router';
-import BoardRenderer from '@/game/gameDrawing/board/Renderer.vue';
+import Container from '@/game-components/board/Container.vue';
+import DefaultBoardItems from '@/game-components/board/DefaultBoardItems.vue';
 
 const currentUser = useCurrentUserStore()
 const currentRoom = useCurrentRoomStore()
@@ -60,6 +61,7 @@ const exampleHistory: History = {
 const showHistory = ref(false)
 const showBoardRenderer = ref(false)
 const boardString = ref('')
+const board = computed<Board | undefined>(() => boardString.value == '' ? undefined : JSON.parse(boardString.value))
 </script>
 
 
@@ -80,5 +82,7 @@ const boardString = ref('')
 
     <HistoryComponent v-if="showHistory" :history="exampleHistory" />
     <textarea v-if="showBoardRenderer" v-model="boardString"/>
-    <BoardRenderer v-if="showBoardRenderer && boardString != ''" :board="JSON.parse(boardString)"/>
+    <Container v-if="showBoardRenderer && board != undefined" :tile-coordinates="board.tiles.map(x => x.coord)">
+        <DefaultBoardItems :board="board"/>
+    </Container>
 </template>

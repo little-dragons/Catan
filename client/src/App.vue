@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { ref } from 'vue';
-import LoginModal from './inputs/modals/LoginModal.vue'
+import LoginModal from './modals/LoginModal.vue'
 import Popups from './popup/Popups.vue';
 import { UserType } from 'shared';
 import { useCurrentRoomStore } from './socket/CurrentRoomStore';
 import { useCurrentUserStore, UserStatus } from './socket/CurrentUserStore';
-import { ModalType, useModalStore } from './inputs/modals/ModalStore';
-import CreateRoomModal from './inputs/modals/CreateRoomModal.vue';
+import { ModalType, useModalStore } from './modals/ModalStore';
+import CreateRoomModal from './modals/CreateRoomModal.vue';
 
 const currentRoom = useCurrentRoomStore()
 const currentUser = useCurrentUserStore()

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import LabeledInput from '@/inputs/LabeledInput.vue';
-import RoomInput from '@/inputs/RoomInput.vue';
-import Modal from '@/inputs/modals/Modal.vue'
+import LabeledInput from './input-fields/LabeledInput.vue';
+import RoomInput from './input-fields/RoomInput.vue';
+import Modal from '@/modals/Modal.vue'
 import router from '@/misc/Router';
 import { PopupSeverity, usePopups } from '@/popup/Popup';
 import { RoomOPResult, useCurrentRoomStore } from '@/socket/CurrentRoomStore';

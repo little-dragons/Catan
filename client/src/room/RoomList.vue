@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
-import CreateRoomModal from '../inputs/modals/CreateRoomModal.vue';
+import { onMounted, onUnmounted } from 'vue';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import { useRoomListStore } from '@/socket/Socket';
 import router from '@/misc/Router';
-import { ModalType, useModalStore } from '@/inputs/modals/ModalStore';
+import { ModalType, useModalStore } from '@/modals/ModalStore';
 
 const currentRoom = useCurrentRoomStore()
 const roomList = useRoomListStore()

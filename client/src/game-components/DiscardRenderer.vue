@@ -37,7 +37,7 @@ const diff = computed(() => props.discardingCards.length - props.expectedDiscard
 </template>
 
 <style scoped>
-@import '../../assets/base.css';
+@import '../assets/base.css';
 
 .top {
     padding: 5px;

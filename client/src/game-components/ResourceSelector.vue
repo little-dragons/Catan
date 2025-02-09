@@ -49,7 +49,7 @@ const diff = computed(() => chosen.value.length - props.count)
 </template>
 
 <style scoped>
-@import '../../assets/base.css';
+@import '../assets/base.css';
 
 .top {
     padding: 5px;
