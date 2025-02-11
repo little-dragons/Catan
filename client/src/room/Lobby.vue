@@ -1,17 +1,24 @@
 <script setup lang="ts">
 import Setting from './Setting.vue'
-import { watchEffect } from 'vue';
-import { PopupSeverity, usePopups } from '@/popup/Popup';
-import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
-import { useCurrentUserStore } from '@/socket/CurrentUserStore';
+import { RoomOPResult, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import router from '@/misc/Router';
+import { isValidSetting, type Settings } from 'shared/logic/Settings';
 
-const currentUser = useCurrentUserStore()
 const currentRoom = useCurrentRoomStore()
 
 async function tryStart() {
     const result = await currentRoom.tryStart()
     // TODO
+}
+
+async function changeSetting<Key extends keyof Settings>(key: Key, value: string) {
+    const valid = isValidSetting(key, value)
+    if (valid == undefined)
+        return false
+
+
+    const res = await currentRoom.tryChangeSetting(key, valid)
+    return res == RoomOPResult.Success
 }
 </script>
 
@@ -27,12 +34,25 @@ async function tryStart() {
             </div>
         </div>
         <div class="right">
-            <Setting name="requiredVictoryPoints" :value="currentRoom.info!.settings.requiredVictoryPoints" :allowChange="false"/>
-            <Setting name="longestRoadMinimum" :value="currentRoom.info!.settings.longestRoadMinimum" :allowChange="false"/>
-            <Setting name="seed" :value="currentRoom.info!.settings.seed" :allowChange="false"/>
+            <Setting 
+                name="Required victory points" 
+                :initial="currentRoom.info!.settings.requiredVictoryPoints.toString()"
+                :isValid="(val) => isValidSetting('requiredVictoryPoints', val) != undefined"
+                :update="currentRoom.isOwner ? ((val) => changeSetting('requiredVictoryPoints', val)) : undefined"/>
+            <Setting 
+                name="Minimal longest road" 
+                :initial="currentRoom.info!.settings.longestRoadMinimum.toString()"
+                :isValid="(val) => isValidSetting('longestRoadMinimum', val) != undefined"
+                :update="currentRoom.isOwner ? ((val) => changeSetting('longestRoadMinimum', val)) : undefined"/>
+            <Setting 
+                name="Seed" 
+                :initial="currentRoom.info!.settings.seed"
+                :isValid="(val) => isValidSetting('seed', val) != undefined"
+                :update="currentRoom.isOwner ? ((val) => changeSetting('seed', val)) : undefined"/>
+
             <div class="buttons">
                 <button @click="() => { router.push('/').then(currentRoom.tryLeave) }">Leave room</button>
-                <button @click="tryStart" :disabled="currentRoom.info!.owner.name != currentUser.loggedInInfo!.name">Start room</button>
+                <button @click="tryStart" :disabled="!currentRoom.isOwner">Start room</button>
             </div>
         </div>
     </div>

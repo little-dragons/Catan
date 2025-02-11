@@ -5,6 +5,7 @@ import { useCurrentUserStore, UserStatus } from "./CurrentUserStore"
 import { socket } from "./Socket"
 import router from "@/misc/Router"
 import { PopupSeverity, usePopups } from "@/popup/Popup"
+import type { Settings } from "shared/logic/Settings"
 
 
 export enum RoomOPResult {
@@ -95,8 +96,29 @@ export const useCurrentRoomStore = defineStore('room', () => {
     }
 
     const canJoin = computed(() => user.info.status == UserStatus.LoggedIn && info.value == undefined)
-    const isOwner = computed(() => user.info.status == UserStatus.LoggedIn ? info.value?.owner == user.info.user : false)
+    const isOwner = computed(() => user.info.status == UserStatus.LoggedIn ? info.value?.owner.name == user.info.user.name : false)
 
+
+    async function tryChangeSetting<Key extends keyof Settings>(key: Key, value: Settings[Key]) {
+        if (user.info.status != UserStatus.LoggedIn)
+            return RoomOPResult.NotLoggedIn
+
+        if (user.info.user.name != info.value?.owner.name)
+            return RoomOPResult.NotOwner
+
+        const res = await socket.emitWithAck('changeSettings', key, value)
+        if (res == 'room is ingame')
+            return RoomOPResult.RoomInvalid
+
+        if (res == 'not the owner')
+            return RoomOPResult.NotOwner
+
+        if (res == 'invalid socket state')
+            return RoomOPResult.ServerRejected
+        
+        const _assert: true = res
+        return RoomOPResult.Success
+    }
     socket.on('settingsChange', set => {
         if (info.value == undefined)
             return
@@ -164,5 +186,5 @@ export const useCurrentRoomStore = defineStore('room', () => {
         }
     })
 
-    return { info, tryJoin, tryCreate, tryLeave, tryStart, canJoin, isOwner, trySendAction, actions }
+    return { info, tryJoin, tryCreate, tryLeave, tryStart, canJoin, isOwner, tryChangeSetting, trySendAction, actions }
 })

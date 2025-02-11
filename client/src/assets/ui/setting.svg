@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+ <g class="layer">
+  <title>Layer 1</title>
+  <ellipse cx="100" cy="100" fill="#cccccc" id="svg_1" rx="60" ry="60" stroke="#000000" stroke-width="5"/>
+  <path d="m78.5,42l7,-25l25,0l8,25l-43,1l3,-1z" fill="#cccccc" id="svg_2" stroke="#000000" stroke-width="5"/>
+  <path d="m129.17,61.84l7,-25l25,0l8,25l-43,1l3,-1z" fill="#cccccc" id="svg_3" stroke="#000000" stroke-width="5" transform="rotate(45 147.667 49.841)"/>
+  <path d="m151.5,109l7,-25l25,0l8,25l-43,1l3,-1z" fill="#cccccc" id="svg_4" stroke="#000000" stroke-width="5" transform="rotate(90 170 97)"/>
+  <path d="m133.5,160l7,-25l25,0l8,25l-43,1l3,-1z" fill="#cccccc" id="svg_5" stroke="#000000" stroke-width="5" transform="rotate(135 152 148)"/>
+  <path d="m86.5,181l7,-25l25,0l8,25l-43,1l3,-1z" fill="#cccccc" id="svg_6" stroke="#000000" stroke-width="5" transform="rotate(180 105 169)"/>
+  <path d="m36.5,164l7,-25l25,0l8,25l-43,1l3,-1z" fill="#cccccc" id="svg_7" stroke="#000000" stroke-width="5" transform="rotate(-135 55 152)"/>
+  <path d="m11.5,113l7,-25l25,0l8,25l-43,1l3,-1z" fill="#cccccc" id="svg_8" stroke="#000000" stroke-width="5" transform="rotate(-90 30 101)"/>
+  <path d="m31.5,61l7,-25l25,0l8,25l-43,1l3,-1z" fill="#cccccc" id="svg_9" stroke="#000000" stroke-width="5" transform="rotate(-45 50 49)"/>
+ </g>
+</svg>
