@@ -5,7 +5,7 @@ import ok from '@/assets/ui/ok.svg'
 
 const props = withDefaults(defineProps<{
     tagId?: string,
-    type: 'text' | 'password',
+    type: 'text' | 'password' | 'number',
     rules: ((current: string) => true | string)[]
     disabled?: boolean,
 }>(), { disabled: false })
@@ -45,7 +45,7 @@ defineExpose({
 <template>
     <div>
         <div class="input-container" :class="disabled ? 'disabled' : ''">
-            <input :id="$props.tagId" :type="$props.type" v-model="rawInput" spellcheck="false" :disabled="disabled" v-bind="$attrs"/>
+            <input :id="tagId" :type="type" v-model="rawInput" spellcheck="false" :disabled="disabled" v-bind="$attrs"/>
             <img :src="error" v-if="validityStatus != true && validityStatus != null" :title="validityStatus">
             <img :src="ok" v-if="validityStatus == true" title="Everything is good!">
         </div>

@@ -12,6 +12,7 @@
     --main-side-padding: 40px;
     --max-area-width: calc(100vw - 2 * var(--main-side-padding) - 2px);
     --default-area-width: min(60rem, 1500px, var(--max-area-width));
+    --wide-area-width: max(min(calc(100vw - 200px), 1500px), 400px);
 
     
     --modal-background-color: #ffffff;

@@ -509,8 +509,10 @@ async function devCardClicked(card: DevCardType) {
 </template>
 
 <style scoped>
+@import '../assets/base.css';
+
 .container {
-    width: max(min(calc(100vw - 200px), 1500px), 400px);
+    width: var(--wide-area-width);
     display: flex;
     flex-direction: row;
     height: 90vh;

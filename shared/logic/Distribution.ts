@@ -1,3 +1,5 @@
+import { type Freeze } from "structurajs"
+
 export class EnumMap<K extends (keyof any) & number, V> {
     private internal: Map<K, V>
     constructor(entries: Record<K, V> | Map<K, V>) {
@@ -48,7 +50,7 @@ export class EnumMap<K extends (keyof any) & number, V> {
 }
 
 
-export type Distribution<T extends keyof any & number> = EnumMap<T, number>
+export type Distribution<T extends keyof any & number> = Freeze<EnumMap<T, number>>
 
 // this function decreases counts for elements of the distribution
 // while keeping the ratios intact

@@ -3,6 +3,7 @@ import Setting from './Setting.vue'
 import { RoomOPResult, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import router from '@/misc/Router';
 import { isValidSetting, type Settings } from 'shared/logic/Settings';
+import SideMenu from '@/misc/SideMenu.vue';
 
 const currentRoom = useCurrentRoomStore()
 
@@ -25,7 +26,7 @@ async function changeSetting<Key extends keyof Settings>(key: Key, value: string
 <template>
     <h1>Lobby - {{ currentRoom.info!.name }}</h1>
     <div class="container">
-        <div class="left">            
+        <div>            
             <div class="default-grid-header-layout grid-columns">
                 <p>User name</p>
             </div>
@@ -33,7 +34,7 @@ async function changeSetting<Key extends keyof Settings>(key: Key, value: string
                 <p>{{ user[0].name }}</p>
             </div>
         </div>
-        <div class="right">
+        <SideMenu>
             <Setting 
                 name="Required victory points" 
                 :initial="currentRoom.info!.settings.requiredVictoryPoints.toString()"
@@ -54,7 +55,7 @@ async function changeSetting<Key extends keyof Settings>(key: Key, value: string
                 <button @click="() => { router.push('/').then(currentRoom.tryLeave) }">Leave room</button>
                 <button @click="tryStart" :disabled="!currentRoom.isOwner">Start room</button>
             </div>
-        </div>
+        </SideMenu>
     </div>
     
 </template>
@@ -68,18 +69,6 @@ async function changeSetting<Key extends keyof Settings>(key: Key, value: string
     grid-template-columns: 55% 38%;
     column-gap: 7%;
     margin-top: 30px;
-}
-
-.right {
-    background-color: var(--secondary-background-color);
-    border-radius: 10px;
-    border: var(--mute-border);
-    padding: 18px;
-    width: calc(100% - 36px);
-}
-
-.right > *:not(:first-child) {
-    margin-top: 15px;
 }
 
 .grid-columns {

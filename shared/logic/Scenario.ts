@@ -4,6 +4,7 @@ import { DevCardType } from "./GameAction.js"
 import { CardList, Resource } from "./Resource.js"
 import { Distribution } from "./Distribution.js"
 import { Orientation } from "./Orientation.js"
+import { type Freeze } from "structurajs"
 
 /**
  * Generally, scenario generation should be versatile. It has to combine randomness with 
@@ -34,25 +35,25 @@ export enum GenerationMethod {
 }
 
 
-export type SelectGeneration<T> = {
+export type SelectGeneration<T> = Freeze<{
     method: GenerationMethod.SelectOne
     data: readonly T[]
-}
-export type FixedGeneration<T> = {
+}>
+export type FixedGeneration<T> = Freeze<{
     method: GenerationMethod.Fixed
     data: T
-}
-export type DistributedGeneration<T extends keyof any & number> = {
+}>
+export type DistributedGeneration<T extends keyof any & number> = Freeze<{
     method: GenerationMethod.Distribution
     data: Distribution<T>
-}
-export type IndexedGeneration<T> = {
+}>
+export type IndexedGeneration<T> = Freeze<{
     method: GenerationMethod.Indexed
     data: {
         source: readonly T[]
         indices: readonly number[][]
     }
-}
+}>
 
 export enum ScenarioResourceNumberAssignmentMethod {
     /**
@@ -67,7 +68,7 @@ export enum ScenarioResourceNumberAssignmentMethod {
     CirclingOut,
 }
 
-export type ResourceNumberAssignmentInfo = ({
+export type ResourceNumberAssignmentInfo = Freeze<({
     method: ScenarioResourceNumberAssignmentMethod.Zipped,
 } | {
     method: ScenarioResourceNumberAssignmentMethod.CirclingOut,
@@ -81,9 +82,9 @@ export type ResourceNumberAssignmentInfo = ({
         | FixedGeneration<ResourceTileNumber[]>
         | IndexedGeneration<ResourceTileNumber>
         | SelectGeneration<ResourceTileNumber[]>
-}
+}>
 
-export type ScenarioTileGroup ={
+export type ScenarioTileGroup = Freeze<{
     coordinates: 
         | SelectGeneration<Coordinate[]>
     tileTypes:
@@ -96,7 +97,7 @@ export type ScenarioTileGroup ={
     portResources: 
         | DistributedGeneration<PortResource>
         | FixedGeneration<PortResource[]>
-}
+}>
 
 
 export enum ScenarioStartingPhaseType {
@@ -110,7 +111,7 @@ export enum ScenarioRobberPlacement {
     RandomDesert
 }
 
-export type Scenario = {
+export type Scenario = Freeze<{
     board: {
         columnCount: number
         rowCount: number
@@ -126,7 +127,7 @@ export type Scenario = {
         additionalStartingDevCards: DevCardType[]
     }
     startingPhase: ScenarioStartingPhaseType.WithInitialPlacing
-}
+}>
 
 
 export type Seed = string

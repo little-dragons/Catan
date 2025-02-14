@@ -11,6 +11,7 @@ export * from './logic/History.js'
 export * from './logic/Trade.js'
 export * from './logic/Robber.js'
 export * from './logic/Distribution.js'
+export * from './logic/Scenario.js'
 
 export * from './socket/Configuration.js'
 export * from './socket/ClientEventMap.js'

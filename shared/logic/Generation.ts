@@ -6,6 +6,7 @@ import { Color } from "./Player.js";
 import { Resource } from "./Resource.js";
 import seedrandom from 'seedrandom'
 import { DistributedGeneration, IndexedGeneration, SelectGeneration, ScenarioTileGroup, GenerationMethod, Scenario, Seed, ScenarioStartingPhaseType, ScenarioRobberPlacement, ScenarioResourceNumberAssignmentMethod, ResourceNumberAssignmentInfo } from "./Scenario.js";
+import { type Freeze } from "structurajs";
 
 export const defaultScenario: Scenario = {
     players: {
@@ -149,26 +150,6 @@ export const defaultScenario: Scenario = {
                         method: GenerationMethod.SelectOne,
                         data: ['cw', 'ccw']
                     }
-                        // those are both directions where fives are at the top right corner
-                        // [5, 10, 8, 4, 11, 12, 9, 10, 8, 3, 6, 2, 9, 3, 6, 5, 4, 11], //xd
-                        // [5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11], //xs
-
-                        // [6, 3, 8, 10, 9, 12, 11, 4, 8, 5, 2, 9, 4, 5, 6, 3, 10, 11], //x
-                        // [8, 10, 9, 12, 11, 4, 8, 10, 5, 2, 6, 3, 4, 5, 6, 3, 9, 11], //xd
-                        // [9, 12, 11, 4, 8, 5, 2, 6, 3, 8, 10, 5, 6, 3, 10, 9, 4, 11], //x
-                        // [11, 4, 8, 10, 5, 2, 6, 3, 8, 10, 9, 12, 6, 3, 9, 4, 5, 11], //xs
-                        // [8, 10, 5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 9, , 5, 6, 3, 11],
-
-                        // [4, 8, 5, 2, 6, 3, 8, 10, 9, 12, 11, 3, 10, 9, 4, 5, 6, 11], //x
-                        // [11, 12, 9, 10, 8, 3, 6, 2, 5, 10, 8, 4, 6, 5, 4, 9, 3, 11], //x
-                        // [12, 11, 4, 8, 5, 2, 6, 3, 8, 10, 9, 6, 3, 10, 9, 4, 5, 11], //x
-                        // [10, 8, 3, 6, 2, 5, 8, 4, 11, 12, 9, 5, 4, 9, 10, 3, 6, 11], //x
-                        // [8, 4, 11, 12, 9, 10, 8, 3, 6, 2, 5, 10, 11, 3, 6, 5, 4, 9], //xs
-                        // [9, 10, 8, 3, 6, 2, 5, 10, 8, 4, 11, 12, 6, 5, 4, 9, 3, 11], //x
-
-                        // [5, 10, 8, 4, 11, 12, 9, 10, 8, 3, 6, 2, 9, 3, 6, 5, 4, 11], //xd
-                        // [6, 2, 5, 8, 4, 11, 12, 9, 10, 8, 3, 9, 10, 3, 6, 5, 4, 11], //x
-                    // ]
                 }],
                 portResources: {
                     method: GenerationMethod.Fixed,
@@ -221,9 +202,9 @@ function retrieveIndexedGeneration<T>(dist: IndexedGeneration<T>, rng: () => num
     if (indices.slice(0, source.length).some(i => i >= source.length))
         return GenerationFailure.IndicesOutOfRange
 
-    return source.map<T>((_value, i) => source[indices[i]])
+    return source.map<Freeze<T>>((_value, i) => source[indices[i]])
 }
-function retrieveSelectGeneration<T>(dist: SelectGeneration<T>, rng: () => number): T | GenerationFailure.TooFewOptions {
+function retrieveSelectGeneration<T>(dist: SelectGeneration<T>, rng: () => number) {
     if (dist.data.length == 0)
         return GenerationFailure.TooFewOptions
     else
