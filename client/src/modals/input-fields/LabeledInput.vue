@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const props = withDefaults(defineProps<{
     label: string,
-    type: 'space between' | 'tight'
+    type?: 'space between' | 'tight'
 }>(), {
     type: 'space between'
 })
