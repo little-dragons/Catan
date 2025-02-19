@@ -58,6 +58,16 @@ export function tileHexagon(coord: Coordinate): Pixel[] {
 
     return points
 }
+export function svgPath(pixels: Pixel[]) {
+    let res = `M ${pixels[0][0]} ${pixels[0][1]}`
+    for (let corner = 1; corner < pixels.length; corner++)
+        res += `L ${pixels[corner][0]} ${pixels[corner][1]}`
+
+    return res + ' Z'
+}
+export function tilePath(coord: Coordinate): string {
+    return svgPath(tileHexagon(coord))
+}
 
 
 export const tileResourceIconSize = [0.6 * tileRadius, 0.5 * tileRadius] as const

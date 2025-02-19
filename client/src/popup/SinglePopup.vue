@@ -47,13 +47,14 @@ const remaining = props.info.autoCloses ? popupLifetime - (Date.now() - props.in
 }
 @keyframes dwindling {
     from {
-        width: 100%;
+        transform: scaleX(1);
     }
     to {
-        width: 0%;
+        transform: scaleX(0);
     }
 }
 .duration {
+    transform-origin: left bottom;
     animation: dwindling calc(v-bind(remaining) / 1000 * 1s) linear 1 forwards;
 }
 

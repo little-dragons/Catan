@@ -206,7 +206,7 @@ defineExpose({
                 </div>
             </div>
             <div class="cardRenderers">
-                <ResourceCardsRenderer class="resourceCards" :cards="stockedCards" @resource-clicked="res => $emit('stockedCardClicked', res)"/>
+                <ResourceCardsRenderer :cards="stockedCards" @resource-clicked="res => $emit('stockedCardClicked', res)"/>
                 <DevCardsRenderer class="devCards" :cards="devCards" @dev-card-clicked="card => $emit('devCardClicked', card)"/>
             </div>
             <div class="buttons">
@@ -348,8 +348,7 @@ defineExpose({
     width: 100%;
     min-width: min-content;
 }
-.resourceCards {
-}
+
 .devCards {
     flex: 0;
     margin-left: 10px;

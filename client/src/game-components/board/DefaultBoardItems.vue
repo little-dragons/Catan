@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { cssColor, BuildingType, Color, Resource, type Board, type PortTile, type Tile, TileType, SpecialPorts } from 'shared';
-import { tileHexagon, segmentedPortPaths, buildingWidth, buildingHeight, tileCenter, robberHeight, robberWidth, roadCorners, tileNumberPosition, tileNumberFontSize, crossingPosition, tilePortPosition, tilePortIconSize, tileResourceIconPosition, tileResourceIconSize } from './Layout';
+import { tilePath, svgPath, segmentedPortPaths, buildingWidth, buildingHeight, tileCenter, robberHeight, robberWidth, roadCorners, tileNumberPosition, tileNumberFontSize, crossingPosition, tilePortPosition, tilePortIconSize, tileResourceIconPosition, tileResourceIconSize } from './Layout';
 
 import robber from '@/assets/board/robber.svg'
 
@@ -103,13 +103,6 @@ function buildingForColor(color: Color, type: BuildingType): string {
     }
 }
 
-function svgPath(pixels: [number, number][]): string {
-    let res = `M ${pixels[0][0]} ${pixels[0][1]}`
-    for (let corner = 1; corner < pixels.length; corner++)
-        res += `L ${pixels[corner][0]} ${pixels[corner][1]}`
-
-    return res + ' Z'
-}
 
 defineProps<{
     board: Board
@@ -120,7 +113,7 @@ defineProps<{
     <g id="tiles">
         <g v-for="tile in board.tiles">
             <path
-                :d="svgPath(tileHexagon(tile.coord))"
+                :d="tilePath(tile.coord)"
                 :fill="backgroundColor(tile)" />
             <path
                 v-if="tile.type == TileType.Port"
