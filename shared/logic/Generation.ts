@@ -17,8 +17,6 @@ export const defaultScenario: Scenario = {
     },
     startingPhase: ScenarioStartingPhaseType.WithInitialPlacing,
     board: {
-        columnCount: 7,
-        rowCount: 7,
         robber: {
             type: ScenarioRobberPlacement.RandomDesert
         },
@@ -446,8 +444,6 @@ export function generateBoardFromScenario(scenarioBoard: Scenario['board'], seed
         buildings: [],
         roads: [],
         robber,
-        columnCount: scenarioBoard.columnCount,
-        rowCount: scenarioBoard.rowCount,
         tiles: tilesByGroups.filter<CoordinateTile>(x => x.type != TileType.Port).concat(cleanPortTiles)
     }    
 }

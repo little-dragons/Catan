@@ -113,8 +113,6 @@ export enum ScenarioRobberPlacement {
 
 export type Scenario = Freeze<{
     board: {
-        columnCount: number
-        rowCount: number
         robber: {
             type: ScenarioRobberPlacement.RandomDesert
         }

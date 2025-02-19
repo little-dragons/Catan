@@ -78,8 +78,6 @@ export function randomBoardSeed(): BoardSeed {
 
 
 export type Board = Freeze<{
-    rowCount: number
-    columnCount: number
     tiles: CoordinateTile[]
     roads: { color: Color, coord: Road }[]
     robber: Coordinate
@@ -89,10 +87,20 @@ export type Board = Freeze<{
 
 export function allCrossings(board: Board) {
     let allPositions: Coordinate[] = []
-    for (let col = 0; col < 2 * board.columnCount + 2; col++)
-        for (let row = 0; row < board.rowCount + 1; row++)
-            allPositions.push([col, row])
+    for (const tile of board.tiles) {
+        const upperRow = tile.coord[1]
+        const lowerRow = upperRow + 1
+        const leftCol = tile.coord[0] * 2 + (tile.coord[1] % 2 == 0 ? 0 : 1)
+        const middleCol = leftCol + 1
+        const rightCol = leftCol + 2
 
+        const tileCoords: Coordinate[] = [[leftCol, lowerRow], [middleCol, lowerRow], [middleCol, upperRow], [rightCol, upperRow], [rightCol, lowerRow], [leftCol, upperRow]]
+        for (const coord of tileCoords) {
+            if (!allPositions.some(x => sameCoordinate(x, coord)))
+                allPositions.push(coord)
+        }
+    }
+    
     return allPositions
 }
 export function twoCrossingsFromTile(tile: Coordinate, orientation: Orientation): [Coordinate, Coordinate] {
