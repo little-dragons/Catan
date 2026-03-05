@@ -1,5 +1,5 @@
-import { type Board, type Coordinate, sameCoordinate, CoordinateTile, ResourceTileNumber, TileType, SpecialPorts, PortTile, LandTile, isLand } from "./Board.js";
-import { EnumMap, narrowDistribution } from "./Distribution.js";
+import { type Board, type Coordinate, sameCoordinate, CoordinateTile, ResourceTileNumber, TileType, SpecialPorts, PortTile, LandTile, isLand, PortResource } from "./Board.js";
+import { type Distribution, foldDistribution, narrowDistribution } from "./Distribution.js";
 import { FullGameState } from "./GameState.js";
 import { allOrientations, clockwise, counterclockwise, neighborTile } from "./Orientation.js";
 import { Color } from "./Player.js";
@@ -80,14 +80,14 @@ export const defaultScenario: Scenario = {
                 resourceNumberAssignment: [],
                 portResources: {
                     method: GenerationMethod.Distribution,
-                    data: new EnumMap({
+                    data: {
                         [Resource.Ore]: 1,
                         [Resource.Brick]: 1,
                         [Resource.Wool]: 1,
                         [Resource.Grain]: 1,
                         [Resource.Lumber]: 1,
                         [SpecialPorts.General]: 4,
-                    })
+                    }
                 }
             },
             // land tiles
@@ -118,20 +118,22 @@ export const defaultScenario: Scenario = {
                 },
                 tileTypes: {
                     method: GenerationMethod.Distribution,
-                    data: new EnumMap({
+                    data: {
+                        [TileType.Ocean]: 0,
+                        [TileType.Port]: 0,
                         [TileType.Resource]: 18,
                         [TileType.Desert]: 1
-                    })
+                    }
                 },
                 resources: {
                     method: GenerationMethod.Distribution,
-                    data: new EnumMap({
+                    data: {
                         [Resource.Ore]: 4,
                         [Resource.Brick]: 4,
                         [Resource.Wool]: 4,
                         [Resource.Grain]: 4,
                         [Resource.Lumber]: 4,
-                    })
+                    }
                 },
                 resourceNumberAssignment: [{
                     method: ScenarioResourceNumberAssignmentMethod.CirclingOut,
@@ -179,14 +181,14 @@ function isGenerationFailure(value: any): value is GenerationFailure {
  * @returns The selected output, if possible. The elements are already randomly shuffled according to the random number generator. 
  * Can also return errors if the distribution does not fulfill the targeted properties.
  */
-function retrieveDistributedGeneration<T extends keyof any & number>(dist: DistributedGeneration<T>, target: number, rng: () => number) {
+function retrieveDistributedGeneration<Keys extends keyof any>(dist: DistributedGeneration<Keys>, target: number, rng: () => number) {
     const narrowed = narrowDistribution(dist.data, target, rng)
-    const count = narrowed.fold((s, v) => s + v, 0)
+    const count = foldDistribution(narrowed, (s, [_, v]) => s + v, 0)
     if (count != target)
         return GenerationFailure.SourceDistributionTooSmall
 
     // narrowed contains the correct items, but they have to be sorted randomly
-    const items = narrowed.fold<T[]>((s, v, k) => 
+    const items = foldDistribution<Keys, Keys[]>(narrowed, (s, [k, v]) => 
         s.concat(new Array(v).fill(k)), [])
     return items.toSorted(() => rng() - 0.5)
 }
@@ -215,7 +217,7 @@ type TileWithoutPortOrientation = Exclude<CoordinateTile, { type: TileType.Port 
 function generateNumberAssignment(info: ResourceNumberAssignmentInfo, coordsToAssign: Coordinate[], cordsToSkip: Coordinate[], rng: () => number): [Coordinate, ResourceTileNumber][] | undefined {
     const numbers = 
         info.numbers.method == GenerationMethod.Distribution
-        ? retrieveDistributedGeneration(info.numbers, coordsToAssign.length, rng)
+        ? retrieveDistributedGeneration<ResourceTileNumber>(info.numbers, coordsToAssign.length, rng)
         : info.numbers.method == GenerationMethod.Indexed
         ? retrieveIndexedGeneration(info.numbers, rng)
         : info.numbers.method == GenerationMethod.SelectOne
@@ -324,7 +326,7 @@ function generateScenarioTileGroup(tileGroup: ScenarioTileGroup, rng: () => numb
 
     const landTileResources = 
         tileGroup.resources.method == GenerationMethod.Distribution
-        ? retrieveDistributedGeneration(tileGroup.resources, landTileResourceCoords.length, rng)
+        ? retrieveDistributedGeneration<Resource>(tileGroup.resources, landTileResourceCoords.length, rng)
         : tileGroup.resources.data
 
     if (landTileResources === GenerationFailure.SourceDistributionTooSmall)
@@ -364,7 +366,7 @@ function generateScenarioTileGroup(tileGroup: ScenarioTileGroup, rng: () => numb
         .map(({ coord }) => coord)
     const portResources =
         tileGroup.portResources.method == GenerationMethod.Distribution
-        ? retrieveDistributedGeneration(tileGroup.portResources, portCoords.length, rng)
+        ? retrieveDistributedGeneration<PortResource>(tileGroup.portResources, portCoords.length, rng)
         : tileGroup.portResources.data
 
     if (isGenerationFailure(portResources))

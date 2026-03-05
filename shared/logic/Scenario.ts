@@ -43,10 +43,10 @@ export type FixedGeneration<T> = Freeze<{
     method: GenerationMethod.Fixed
     data: T
 }>
-export type DistributedGeneration<T extends keyof any & number> = Freeze<{
+export type DistributedGeneration<T extends keyof any> = {
     method: GenerationMethod.Distribution
     data: Distribution<T>
-}>
+}
 export type IndexedGeneration<T> = Freeze<{
     method: GenerationMethod.Indexed
     data: {
