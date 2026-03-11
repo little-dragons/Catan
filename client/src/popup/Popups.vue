@@ -17,7 +17,6 @@ const { popups, remove } = usePopups()
 </template>
 
 <style scoped>
-
 .notificationBox {
     position: absolute;
 }

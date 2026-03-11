@@ -1,3 +1,8 @@
+/**
+ * This distribution type is supposed to be supplied an enum: then, it maps the values of 
+ * the enum to a number. Note that an enum relying on strings are not supported. The current
+ * solution only supports enums on numbers.
+ */
 export type Distribution<T extends keyof any> = {
     readonly [P in T as Extract<P, number>]: number
 }
@@ -50,4 +55,8 @@ export function narrowDistribution<Keys extends keyof any>(dist: Distribution<Ke
 export function foldDistribution<Keys extends keyof any, T>(dist: Distribution<Keys>, folder: (state: T, pair: [Keys , number]) => T, initial: T): T {
     const keys = Object.keys(dist).map(Number) as (keyof Distribution<Keys>)[]
     return keys.reduce<T>((s, key) => folder(s, [key, dist[key]]), initial)
+}
+
+export function sumDistribution<Keys extends keyof any>(dist: Distribution<Keys>): number {
+    return foldDistribution(dist, (s, [_ , v]) => s + v, 0)
 }

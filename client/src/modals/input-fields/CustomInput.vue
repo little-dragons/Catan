@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { computed, ref, triggerRef, type Ref } from 'vue';
-import error from '@/assets/ui/error.svg'
-import ok from '@/assets/ui/ok.svg'
+import { computed, ref, triggerRef, watch, type Ref } from 'vue';
+import ErrorImg from './ErrorImg.vue';
+import ErrorText from './ErrorText.vue';
 
 const props = withDefaults(defineProps<{
     tagId?: string,
-    type: 'text' | 'password' | 'number',
+    type: 'text' | 'password',
     rules: ((current: string) => true | string)[]
     disabled?: boolean,
 }>(), { disabled: false })
-
 defineOptions({
     inheritAttrs: false
 })
@@ -17,8 +16,8 @@ defineOptions({
 const rawInput = ref("")
 
 const validityStatus = computed(() => {
-    if (rawInput.value == "")
-        return null
+    if (rawInput.value === "")
+        return 'This field is not optional' as const
     
     for (const rule of props.rules) {
         const result = rule(rawInput.value)
@@ -28,6 +27,7 @@ const validityStatus = computed(() => {
 
     return true
 })
+
 
 const result = computed(() => {
     if (validityStatus.value == true)
@@ -46,10 +46,9 @@ defineExpose({
     <div>
         <div class="input-container" :class="disabled ? 'disabled' : ''">
             <input :id="tagId" :type="type" v-model="rawInput" spellcheck="false" :disabled="disabled" v-bind="$attrs"/>
-            <img :src="error" v-if="validityStatus != true && validityStatus != null" :title="validityStatus">
-            <img :src="ok" v-if="validityStatus == true" title="Everything is good!">
+            <ErrorImg :status="validityStatus"/>
         </div>
-        <p v-if="validityStatus != true && validityStatus != null"> {{ validityStatus }}</p>
+        <ErrorText :status="validityStatus"/>
     </div>
 </template>
 
@@ -59,6 +58,7 @@ defineExpose({
     display: flex;
     flex-direction: row;
     align-self: end;
+    background-color: white;
 }
 
 .disabled {
@@ -80,19 +80,5 @@ input {
 input:disabled {
     background-color: inherit;
     color: inherit;
-}
-
-img {
-    /* TODO make image non-draggable */
-    user-select: none;
-    width: 1rem;
-    height: 1rem;
-    margin: 2px;
-}
-
-p {
-    color: #ff3333;
-    font-size: x-small;
-    line-height: 0.8rem;
 }
 </style>

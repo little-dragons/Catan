@@ -14,7 +14,7 @@ const props = defineProps<{
 const editing = ref<false | string>(false)
 const input = ref<null | HTMLInputElement>(null)
 function sendUpdate() {
-    if (editing.value == false || props.update == undefined || !props.isValid(editing.value))
+    if (editing.value === false || props.update == undefined || !props.isValid(editing.value))
         return
 
     props.update(editing.value)
@@ -30,7 +30,7 @@ function startEditing() {
 </script>
 
 <template>
-    <div v-if="editing && update != undefined" class="top">
+    <div v-if="editing !== false && update != undefined" class="top">
         <span class="descriptor">{{ name }}:</span>
         <div class="right">            
             <input
@@ -38,7 +38,7 @@ function startEditing() {
                 type="text"
                 class="value"
                 v-model="editing"
-                @keypress.enter="() => { if (editing != false && isValid(editing)) sendUpdate() }"
+                @keypress.enter="() => { if (editing !== false && isValid(editing)) sendUpdate() }"
             />
             <button 
                 class="edit"

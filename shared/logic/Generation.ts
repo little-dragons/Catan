@@ -400,6 +400,17 @@ function generateScenarioTileGroup(tileGroup: ScenarioTileGroup, rng: () => numb
 export function generateBoardFromScenario(scenarioBoard: Scenario['board'], seed: Seed): Board | undefined {
     const rng = seedrandom(seed)
 
+    var tilesWithoutPorts: TileWithoutPortOrientation[] = []
+    const generatedGroups = scenarioBoard.tileGroups.map(x => generateScenarioTileGroup(x , rng))
+    for (var group of generatedGroups) {
+        if (group == undefined)
+            return undefined
+        for (var tile of group) {
+            tilesWithoutPorts = tilesWithoutPorts.filter(t => sameCoordinate(t.coord, tile.coord))
+            tilesWithoutPorts.push(tile)
+        }
+    }
+
     const tilesByGroups = 
         scenarioBoard.tileGroups.reduce<TileWithoutPortOrientation[] | undefined>((s, group) => 
             s == undefined

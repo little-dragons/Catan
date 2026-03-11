@@ -88,8 +88,8 @@ export type ScenarioTileGroup = Freeze<{
     coordinates: 
         | SelectGeneration<Coordinate[]>
     tileTypes:
-        | FixedGeneration<TileType[]>
         | DistributedGeneration<TileType>
+        | FixedGeneration<TileType[]>
     resources:
         | DistributedGeneration<Resource>
         | FixedGeneration<Resource[]>
@@ -111,6 +111,11 @@ export enum ScenarioRobberPlacement {
     RandomDesert
 }
 
+/**
+ * In addition to some minor metadata, the board of a scenario is the most complex type.
+ * If several tile groups generate tiles for the same coordinate, the tile group later in
+ * the list has priority.
+ */
 export type Scenario = Freeze<{
     board: {
         robber: {
