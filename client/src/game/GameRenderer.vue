@@ -232,6 +232,11 @@ defineExpose({
     --upper-rotate-angle: 45deg;
     --middle-rotate-angle: 15deg;
 
+    --radial-upper-x-offset: calc(cos(var(--upper-rotate-angle)) * var(--radius));
+    --radial-upper-y-offset: calc(-1 * sin(var(--upper-rotate-angle)) * var(--radius));
+    --radial-middle-x-offset: calc(cos(var(--middle-rotate-angle)) * var(--radius));
+    --radial-middle-y-offset: calc(-1 * sin(var(--middle-rotate-angle)) * var(--radius));
+
     --grid-x-offset: calc(100px + 1px * var(--board-width) / 2);
     --upper-y-offset: -350px;
     --middle-y-offset: -150px;
@@ -243,16 +248,24 @@ defineExpose({
 
 
 .middle-left-radial {
-    transform: rotate(var(--middle-rotate-angle)) translateX(calc(-1 * var(--radius))) rotate(calc(-1 * var(--middle-rotate-angle))) translateX(calc(-1 * var(--player-overview-width)));
+    transform: 
+        translateX(calc(-0.5 * var(--player-overview-width)))
+        translate(calc(-1 * var(--radial-middle-x-offset)), var(--radial-middle-y-offset));
 }
 .middle-right-radial {
-    transform: rotate(calc(-1 * var(--middle-rotate-angle))) translateX(var(--radius)) rotate(var(--middle-rotate-angle)) translateX(calc(-1 * var(--player-overview-width)));
+    transform: 
+        translateX(calc(-0.5 * var(--player-overview-width)))
+        translate(calc(1 * var(--radial-middle-x-offset)), var(--radial-middle-y-offset));
 }
 .upper-left-radial {
-    transform: rotate(var(--upper-rotate-angle)) translateX(calc(-1 * var(--radius))) rotate(calc(-1 * var(--upper-rotate-angle))) translateX(calc(-1 * var(--player-overview-width)));
+    transform: 
+        translateX(calc(-0.5 * var(--player-overview-width)))
+        translate(calc(-1 * var(--radial-upper-x-offset)), var(--radial-upper-y-offset));
 }
 .upper-right-radial {
-    transform: rotate(calc(-1 * var(--upper-rotate-angle))) translateX(var(--radius)) rotate(var(--upper-rotate-angle)) translateX(calc(-1 * var(--player-overview-width)));
+    transform: 
+        translateX(calc(-0.5 * var(--player-overview-width)))
+        translate(calc(1 * var(--radial-upper-x-offset)), var(--radial-upper-y-offset));
 }
 
 

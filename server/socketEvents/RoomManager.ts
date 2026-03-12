@@ -206,11 +206,12 @@ export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
         if (participants.length >= room.scenario.players.maxAllowedCount)
             return cb('room full')
 
-        const freeColor = allColors.filter(x => !participants.some(([_, col]) => x == col))
+        const freeColors = allColors.filter(x => !participants.some(([_, col]) => x == col))
+        const botColor = freeColors[Math.floor(Math.random() * freeColors.length)]
         room.bots.push([{
-            name: 'bottest',
+            name: 'Vincent',
             personality: BotPersonality.Vincent
-        }, freeColor[0]])
+        }, botColor])
         
         socket.emit('participantChange', await participantsForRoom(io, room.id))
         socket.in(room.id).emit('participantChange', await participantsForRoom(io, room.id))
