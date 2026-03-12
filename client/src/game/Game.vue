@@ -50,6 +50,7 @@ const othersOverview = computed(() => {
                 victoryPoints: victoryPointsFromRedacted(state.value!, player.color),
                 handCardsCount: player.handCardsCount,
                 devCardsCount: player.devCardsCount,
+                currentPlayer: state.value?.currentPlayer == player.color,
                 openTrades: 
                     state.value?.phase.type != GamePhaseType.Turns || 
                     state.value.phase.subtype != TurnPhaseType.Active

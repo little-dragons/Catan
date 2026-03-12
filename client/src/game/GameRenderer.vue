@@ -237,7 +237,7 @@ defineExpose({
     --radial-middle-x-offset: calc(cos(var(--middle-rotate-angle)) * var(--radius));
     --radial-middle-y-offset: calc(-1 * sin(var(--middle-rotate-angle)) * var(--radius));
 
-    --grid-x-offset: calc(100px + 1px * var(--board-width) / 2);
+    --grid-x-offset: var(--radius);
     --upper-y-offset: -350px;
     --middle-y-offset: -150px;
 }
@@ -247,16 +247,6 @@ defineExpose({
 }
 
 
-.middle-left-radial {
-    transform: 
-        translateX(calc(-0.5 * var(--player-overview-width)))
-        translate(calc(-1 * var(--radial-middle-x-offset)), var(--radial-middle-y-offset));
-}
-.middle-right-radial {
-    transform: 
-        translateX(calc(-0.5 * var(--player-overview-width)))
-        translate(calc(1 * var(--radial-middle-x-offset)), var(--radial-middle-y-offset));
-}
 .upper-left-radial {
     transform: 
         translateX(calc(-0.5 * var(--player-overview-width)))
@@ -267,19 +257,29 @@ defineExpose({
         translateX(calc(-0.5 * var(--player-overview-width)))
         translate(calc(1 * var(--radial-upper-x-offset)), var(--radial-upper-y-offset));
 }
+.middle-left-radial {
+    transform: 
+        translateX(calc(-0.5 * var(--player-overview-width)))
+        translate(calc(-1 * var(--radial-middle-x-offset)), var(--radial-middle-y-offset));
+}
+.middle-right-radial {
+    transform: 
+        translateX(calc(-0.5 * var(--player-overview-width)))
+        translate(calc(1 * var(--radial-middle-x-offset)), var(--radial-middle-y-offset));
+}
 
 
-.middle-left-grid {
-    transform: translateX(calc(-1 * var(--grid-x-offset))) translateY(var(--middle-y-offset)) translateX(calc(-1 * var(--player-overview-width)));
-}
-.middle-right-grid {
-    transform: translateX(var(--grid-x-offset)) translateY(var(--middle-y-offset)) translateX(calc(-1 * var(--player-overview-width)));
-}
 .upper-left-grid {
     transform: translateX(calc(-1 * var(--grid-x-offset))) translateY(var(--upper-y-offset)) translateX(calc(-1 * var(--player-overview-width)));
 }
 .upper-right-grid {
     transform: translateX(var(--grid-x-offset)) translateY(var(--upper-y-offset)) translateX(calc(-1 * var(--player-overview-width)));
+}
+.middle-left-grid {
+    transform: translateX(calc(-1 * var(--grid-x-offset))) translateY(var(--middle-y-offset)) translateX(calc(-1 * var(--player-overview-width)));
+}
+.middle-right-grid {
+    transform: translateX(var(--grid-x-offset)) translateY(var(--middle-y-offset)) translateX(calc(-1 * var(--player-overview-width)));
 }
 
 

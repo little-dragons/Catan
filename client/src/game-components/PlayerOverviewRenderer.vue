@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Color, OpenTradeOffer } from 'shared';
+import { type Color, type OpenTradeOffer } from 'shared';
 import OtherTradeOverview from './trade/OtherTradeOverview.vue';
 import PlayerIcon from './PlayerIcon.vue';
 
@@ -11,6 +11,7 @@ export type PlayerOverviewData = {
     handCardsCount: number
     devCardsCount: number
     isGuest: boolean
+    currentPlayer: boolean
     openTrades: { offer: OpenTradeOffer, canAccept: boolean, ownColor: Color }[]
 }
 defineProps<PlayerOverviewData>()
@@ -25,7 +26,7 @@ defineEmits<{
     <div class="top">
         <PlayerIcon class="picture" :color="color"/>
         <div class="box default-game-ui-props">
-            <div class="username">{{ name }}</div>
+            <div class="username">{{ name }}<div v-if="currentPlayer" class="current-player"/></div>
             <div class="grid">
                 <div>{{ victoryPoints }} vp</div>
                 <div>{{ handCardsCount }} hc</div>
@@ -54,6 +55,15 @@ defineEmits<{
     z-index: 1;
 }
 
+.current-player {
+    width: 0.7em;
+    height: 0.7em;
+    border-radius: 0.7em;
+    background-color: red;
+    border: 1px black solid;
+    margin-right: 0.35em;
+}
+
 .trade {
     height: 100px;
 }
@@ -69,6 +79,9 @@ defineEmits<{
     border: var(--mute-border);
     border-radius: 3px;
     font-family: "Sedan SC", serif;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 .box {
     border-radius: 10px;
@@ -80,10 +93,11 @@ defineEmits<{
     display: grid;
     margin-top: 5px;
     margin-left: 25px;
-    height: 45px;
+    height: 40px;
     column-gap: 5px;
     row-gap: 3px;
-    grid-template-columns: 33% 33% 33%;
+    align-items: center;
+    grid-template-columns: auto auto auto;
     grid-template-rows: 50% 50%;
 }
 
@@ -92,6 +106,8 @@ defineEmits<{
     text-align: end;
     border: var(--mute-border);
     border-radius: 2px;
+    margin-top: -1px;
+    padding: 1px;
     background-color: rgba(255, 255, 255, 0.62);
 }
 </style>
