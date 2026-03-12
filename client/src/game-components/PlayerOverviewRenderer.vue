@@ -12,6 +12,7 @@ export type PlayerOverviewData = {
     devCardsCount: number
     isGuest: boolean
     currentPlayer: boolean
+    knightsPlayed: number
     openTrades: { offer: OpenTradeOffer, canAccept: boolean, ownColor: Color }[]
 }
 defineProps<PlayerOverviewData>()
@@ -31,6 +32,7 @@ defineEmits<{
                 <div>{{ victoryPoints }} vp</div>
                 <div>{{ handCardsCount }} hc</div>
                 <div>{{ devCardsCount }} dc</div>
+                <div>{{ knightsPlayed }} kp</div>
             </div>
         </div>
         <OtherTradeOverview 

@@ -53,9 +53,10 @@ const exampleHistory: History = {
             yearOfPlenty: 2
         },
         players: [ 
-            { color: Color.Blue, handCards: [Resource.Brick, Resource.Grain], devCards: [] }, 
-            { color: Color.Green, handCards: [Resource.Grain, Resource.Grain], devCards: [] } ],
-        longestRoad: undefined
+            { color: Color.Blue, handCards: [Resource.Brick, Resource.Grain], devCards: [], knightsPlayed: 0 }, 
+            { color: Color.Green, handCards: [Resource.Grain, Resource.Grain], devCards: [], knightsPlayed: 0 } ],
+        longestRoad: undefined,
+        knightForce: undefined
     }
 }
 const showHistory = ref(false)

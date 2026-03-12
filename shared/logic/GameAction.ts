@@ -222,11 +222,12 @@ function tryDoRollDice(state: FullGameState, executorColor: Color, action: GameA
     }
     else {
         // dispense resources
-        const newPlayers = state.players.map(({ color, handCards: oldCards, devCards }) => {
+        const newPlayers = state.players.map(({ color, handCards: oldCards, devCards, knightsPlayed }) => {
             return {
                 color,
                 handCards: addCards(oldCards, gainedResources(state.board, color, sum)),
-                devCards
+                devCards,
+                knightsPlayed
             }
         })
 
@@ -326,11 +327,11 @@ function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: G
         state.phase.forward ? [] :
         adjacentResourceTiles(action.settlement, state.board, undefined)
 
-    const newPlayers = state.players.map(({ color, handCards, devCards }) => {
+    const newPlayers = state.players.map(({ color, handCards, devCards, knightsPlayed }) => {
         if (color == executorColor)
-            return { color, handCards: newCards, devCards }
+            return { color, handCards: newCards, devCards, knightsPlayed }
         else
-            return { color, handCards, devCards }
+            return { color, handCards, devCards, knightsPlayed }
     })
 
     
@@ -347,6 +348,7 @@ function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: G
         board: newBoard,
         longestRoad: undefined,
         devCards: state.devCards,
+        knightForce: undefined
     }, undefined]
 }
 function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceRobber]): ResultType<GameActionType.PlaceRobber> {
@@ -605,6 +607,14 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
             if (!validNewRobberPosition(state.board, action.newPosition))
                 return undefined
         
+            let newKnightForce : Color | undefined
+            if (state.knightForce == undefined) 
+                newKnightForce = state.players[executorIdx].knightsPlayed == 2 ? executorColor : undefined
+            else {
+                const oldKnightForce = state.players.find(x => x.color == state.knightForce)!.knightsPlayed
+                newKnightForce = oldKnightForce < state.players[executorIdx].knightsPlayed + 1 ? executorColor : state.knightForce
+            }
+            
             if (action.robbedColor == undefined) {
                 if (allRobbableCrossingsExcept(publicGameState(state), action.newPosition, executorColor).size != 0)
                     return undefined
@@ -612,6 +622,8 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
                 return [produce(state, newState => {
                     newState.board.robber = unfreeze(action.newPosition)
                     newState.players[executorIdx].devCards = newDevCards
+                    newState.players[executorIdx].knightsPlayed = newState.players[executorIdx].knightsPlayed + 1
+                    newState.knightForce = newKnightForce
                 }), undefined]
 
             }
@@ -636,6 +648,8 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
                     newState.players[executorIdx].handCards = unfreeze(newExecutorCards)
                     newState.board.robber = unfreeze(action.newPosition)
                     newState.players[executorIdx].devCards = newDevCards
+                    newState.players[executorIdx].knightsPlayed = newState.players[executorIdx].knightsPlayed + 1
+                    newState.knightForce = newKnightForce
                 }), { robbedCard: robbedResource }]
             }
         }

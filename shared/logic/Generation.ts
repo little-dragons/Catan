@@ -490,12 +490,14 @@ export function generateStateFromScenario(scenario: Scenario, participatingColor
         board: board,
         devCards: scenario.devCardStacks,
         longestRoad: undefined, // TODO
+        knightForce: undefined,
         currentPlayer: currentPlayer,
         phase: phase,
         players: participatingColors.map(col => {return {
             color: col,
             devCards: scenario.players.additionalStartingDevCards.slice(),
-            handCards: scenario.players.additionalStartingHandCards.slice()
+            handCards: scenario.players.additionalStartingHandCards.slice(),
+            knightsPlayed: 0
         }})
     }
 }

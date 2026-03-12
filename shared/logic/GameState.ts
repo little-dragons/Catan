@@ -4,6 +4,7 @@ import { BuildingType } from "./Buildings.js"
 import { produce, type Freeze } from "structurajs"
 import { Resource } from "./Resource.js"
 import { OpenTradeOffer } from "./Trade.js"
+import { DevCardType } from "./GameAction.js"
 
 export enum GamePhaseType {
     Initial,
@@ -72,6 +73,7 @@ export type PublicGameState = Freeze<{
     board: Board
     currentPlayer: Color
     longestRoad: Color | undefined
+    knightForce: Color | undefined
     players: RedactedPlayer[]
     devCardCount: number
 }>
@@ -84,6 +86,7 @@ export type FullGameState = Freeze<{
     board: Board
     currentPlayer: Color
     longestRoad: Color | undefined
+    knightForce: Color | undefined
     players: FullPlayer[]
     devCards: {
         knights: number,
@@ -159,20 +162,32 @@ export function victoryPointsFromLongestRoad(state: AnyGameState, color: Color):
     return 0
 }
 
-export function victoryPointsFromFull(state: FullGameState, color: Color): number {
-    // TODO longest road, knights, hidden dev cards
+export function victoryPointsFromKnightForce(state: AnyGameState, color: Color): number {
+    if (state.knightForce == color)
+        return 2
+    return 0
+}
 
-    return victoryPointsFromBuildings(state.board, color) + victoryPointsFromLongestRoad(publicGameState(state), color)
+export function victoryPointsFromFull(state: FullGameState, color: Color): number {
+    const hiddenVpCards = state.players.find(x => x.color == color)!.devCards
+                                .filter(x => x == DevCardType.VictoryPoint).length
+    return victoryPointsFromBuildings(state.board, color) + 
+           victoryPointsFromLongestRoad(state, color) + 
+           victoryPointsFromKnightForce(state, color) +
+           hiddenVpCards
+
 }
 
 export function victoryPointsFromRedacted(state: RedactedGameState, color: Color): number {
-    // TODO longest road, knights
-
-    return victoryPointsFromBuildings(state.board, color) + victoryPointsFromLongestRoad(state, color)
-
+    let hiddenVpCards = 0
     if (state.self.color == color) {
-        // TODO hidden devcards
+        hiddenVpCards = state.self.devCards.filter(x => x == DevCardType.VictoryPoint).length
     }
+
+    return victoryPointsFromBuildings(state.board, color) + 
+           victoryPointsFromLongestRoad(state, color) +
+           victoryPointsFromKnightForce(state, color) +
+           hiddenVpCards
 }
 
 
