@@ -23,6 +23,5 @@ export type LobbyClientEventMap = {
     settingsChange: (settings: Settings) => void
 }
 
-type Callback<T> = (arg: T) => void
 export type LoginClientEventMap = {
 }

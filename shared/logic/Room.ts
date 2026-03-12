@@ -4,6 +4,7 @@ import { Color } from './Player.js';
 import { Settings } from './Settings.js';
 import { History, Statistics } from './History.js';
 import { Bot } from './Bots.js';
+import { Scenario } from './Scenario.js';
 
 export type RoomId = string
 export enum RoomType {
@@ -35,6 +36,7 @@ type CommonRoom = {
     owner: User
     participants: [Participant, Color][]
     settings: Settings
+    scenario: Scenario
 }
 export type LobbyRoom = {
     type: RoomType.Lobby

@@ -23,12 +23,13 @@ export type GameServerEventMap = {
 export type RoomServerEventMap = {
     lobbyList: (cb: Callback<LobbyRoom[]>) => void
     createAndJoin: (roomName: string, cb: Callback<LobbyRoom | 'room name in use' | 'invalid socket state'>) => void
-    join: (roomId: RoomId, cb: Callback<LobbyRoom | 'invalid room id' | 'invalid socket state'>) => void
+    join: (roomId: RoomId, cb: Callback<LobbyRoom | 'invalid room id' | 'invalid socket state' | 'game full'>) => void
     leave: (cb: Callback<true | 'invalid socket state'>) => void
+    addBot: (cb: Callback<true | 'invalid socket state' | 'not the owner' | 'room full'>) => void
 }
 
 export type LobbyServerEventMap = {
-    startGame: (cb: Callback<true | 'invalid socket state' | 'not the owner'>) => void
+    startGame: (cb: Callback<true | 'invalid socket state' | 'not the owner' | 'generation error'>) => void
     changeSettings: <Property extends keyof Settings>(
         setting: Property,
         value: Settings[Property],

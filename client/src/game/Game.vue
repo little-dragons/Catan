@@ -109,6 +109,7 @@ watch(room.actions, () => {
         lastDice.value = [oldestAction.response.die1, oldestAction.response.die2]
     }
     // TODO handle more actions
+    // (for example, show cars sliding to player)
 })
 
 watchEffect(() => {

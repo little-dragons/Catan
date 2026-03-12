@@ -1,6 +1,6 @@
 import { type Board, type Coordinate, sameCoordinate, CoordinateTile, ResourceTileNumber, TileType, SpecialPorts, PortTile, LandTile, isLand, PortResource } from "./Board.js";
 import { type Distribution, foldDistribution, narrowDistribution } from "./Distribution.js";
-import { FullGameState } from "./GameState.js";
+import { FullGameState, GamePhase, GamePhaseType, TurnPhaseType } from "./GameState.js";
 import { allOrientations, clockwise, counterclockwise, neighborTile } from "./Orientation.js";
 import { Color } from "./Player.js";
 import { Resource } from "./Resource.js";
@@ -157,6 +157,13 @@ export const defaultScenario: Scenario = {
                 }
             }
         ],
+    },
+    devCardStacks: {
+        knights: 14,
+        victoryPoints: 5,
+        monopoly: 2,
+        roadBuilding: 2,
+        yearOfPlenty: 2,
     }
 }
 
@@ -462,10 +469,33 @@ export function generateBoardFromScenario(scenarioBoard: Scenario['board'], seed
 }
 
 
-export function generateStateFromScenario(scenario: Scenario, participatingColors: Color[], seed: Seed): FullGameState | undefined {
+export function generateStateFromScenario(scenario: Scenario, participatingColors: Color[], currentPlayer: Color, seed: Seed): FullGameState | undefined {
     if (participatingColors.length > scenario.players.maxAllowedCount
         || participatingColors.length < scenario.players.minAllowedCount)
         return undefined
 
-    
+    const board = generateBoardFromScenario(scenario.board, seed)
+    if (board == undefined)
+        return undefined
+
+    const phase: GamePhase = scenario.startingPhase == ScenarioStartingPhaseType.WithInitialPlacing ? {
+            type: GamePhaseType.Initial,
+            forward: true
+        } : {
+            type: GamePhaseType.Turns,
+            subtype: TurnPhaseType.PreDiceRoll
+        }
+
+    return {
+        board: board,
+        devCards: scenario.devCardStacks,
+        longestRoad: undefined, // TODO
+        currentPlayer: currentPlayer,
+        phase: phase,
+        players: participatingColors.map(col => {return {
+            color: col,
+            devCards: scenario.players.additionalStartingDevCards.slice(),
+            handCards: scenario.players.additionalStartingHandCards.slice()
+        }})
+    }
 }

@@ -1,16 +1,16 @@
-import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType, PostGameRoom, generateBoardFromScenario, defaultScenario, ParticipantType, Participant } from "shared"
+import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType, PostGameRoom, generateBoardFromScenario, defaultScenario, ParticipantType, Participant, generateStateFromScenario } from "shared"
 import { type Socket } from 'socket.io'
 import { SocketDataType, SocketServerType } from "./Common.js"
 import { defaultSettings } from "shared/logic/Settings.js"
 import { v4 } from "uuid"
+import { Bot, BotPersonality } from "shared/logic/Bots.js"
 
-type ServerLobbyRoom = Omit<LobbyRoom, 'participants'>
-type ServerGameRoom = Omit<FullGameRoom, 'participants'>
-type ServerPostGameRoom = Omit<PostGameRoom, 'participants'>
-type ServerRoom = Omit<FullRoom, 'participants'>
+type ServerLobbyRoom    = Omit<LobbyRoom, 'participants'>    & { bots : [Bot, Color][] }
+type ServerGameRoom     = Omit<FullGameRoom, 'participants'> & { bots : [Bot, Color][] }
+type ServerPostGameRoom = Omit<PostGameRoom, 'participants'> & { bots : [Bot, Color][] }
+type ServerRoom         = Omit<FullRoom, 'participants'>     & { bots : [Bot, Color][] }
 
-const rooms = [] as ServerRoom[]
-
+const rooms = new Map<RoomId, ServerRoom>()
 
 function isLobby(room: ServerRoom): room is ServerLobbyRoom {
     return room.type == RoomType.Lobby
@@ -19,55 +19,46 @@ function isGame(room: ServerRoom): room is ServerGameRoom {
     return room.type == RoomType.InGame
 }
 
-export function lobbies() { return rooms.filter(isLobby) }
-export function games() { return rooms.filter(isGame) }
+export function gameRoomFor(roomId: RoomId): ServerGameRoom | undefined {
+    const val = rooms.get(roomId)
+    if (val == undefined || !isGame(val))
+        return undefined
+    return val
+}
+export function lobbyRoomFor(roomId: RoomId): ServerLobbyRoom | undefined {
+    const val = rooms.get(roomId)
+    if (val == undefined || !isLobby(val))
+        return undefined
+    return val
+}
 
 type RoomSocket = Socket<RoomServerEventMap, RoomClientEventMap, {}, SocketDataType>
 
-
-export function roomIdxFor(roomId: RoomId) {
-    return rooms.findIndex(x => x.id == roomId)
-}
-export function roomFor(roomId: RoomId) {
-    const idx = roomIdxFor(roomId)
-    if (idx < 0)
-        return undefined
-    else
-        return rooms[idx]
-}
 export async function usersForRoom(io: SocketServerType, roomId: RoomId) {
     return (await io.in(roomId).fetchSockets()).map(x => [x.data.user, x.data.room![1]] as [User, Color])
 }
 export async function participantsForRoom(io: SocketServerType, roomId: RoomId): Promise<[Participant, Color][]> {
-    return (await usersForRoom(io, roomId)).map(([user, color]) => [{type: ParticipantType.User, user}, color])
+    const users = (await io.in(roomId).fetchSockets()).map<[Participant, Color]>(x => 
+                        [{ type: ParticipantType.User, user: x.data.user! }, x.data.room![1]])
+    const bots = rooms.get(roomId)?.bots.map<[Participant, Color]>(([bot, col]) => [{ type: ParticipantType.Bot, bot: bot }, col])
+    return users.concat(bots ?? [])
 }
 
 export async function initializeGame(io: SocketServerType, room: ServerLobbyRoom) {
-    if (!rooms.includes(room)) {
+    if (!rooms.has(room.id)) {
         console.warn(`Tried to initialize game, but there was no such lobby: ${room}`)
-        return
+        return 'no correct room'
     }
+    const participants = await participantsForRoom(io, room.id)
+    // TODO correct current player
+    const state = generateStateFromScenario(room.scenario, participants.map(x => x[1]), participants[0][1], room.settings.seed)
+    if (state == undefined)
+        return 'could not generate state'
 
-    const users = await usersForRoom(io, room.id)
     const game = room as unknown as ServerGameRoom
     game.type = RoomType.InGame
-    game.state = {
-        board: generateBoardFromScenario(defaultScenario.board, room.settings.seed)!,
-        currentPlayer: users[0][1],
-        players: users.map(([user, color]) => { return { color, handCards: [], devCards: [] } }),
-        phase: {
-            type: GamePhaseType.Initial,
-            forward: true,
-        },
-        longestRoad: undefined,
-        devCards: {
-            knights: 14,
-            victoryPoints: 5,
-            monopoly: 2,
-            roadBuilding: 2,
-            yearOfPlenty: 2,
-        }
-    }
+    game.state = state
+    return true
 }
 
 export function endGame(io: SocketServerType, room: ServerGameRoom) {
@@ -89,7 +80,7 @@ export function createRoom(socket: RoomSocket, name: string) {
     if (socket.data.user == undefined || socket.data.room != undefined)
         return 'invalid socket state'
 
-    if (rooms.some(x => x.name == name))
+    if (Array.from(rooms.values()).some(x => x.name == name))
         return 'room name in use'
 
     const color = allColors[Math.floor(Math.random() * allColors.length)]
@@ -98,9 +89,11 @@ export function createRoom(socket: RoomSocket, name: string) {
         name: name,
         id: v4(),
         owner: socket.data.user,
-        settings: defaultSettings()
+        settings: defaultSettings(),
+        scenario: defaultScenario,
+        bots: []
     }
-    rooms.push(room)
+    rooms.set(room.id, room)
     socket.data.room = [room.id, color]
     socket.join(room.id)
     return room
@@ -111,7 +104,7 @@ async function joinRoom(io: SocketServerType, socket: RoomSocket, id: RoomId) {
     if (socket.data.user == undefined || socket.data.room != undefined)
         return 'invalid socket state'
 
-    const room = rooms.find(x => x.id == id)
+    const room = lobbyRoomFor(id)
     if (room == undefined || room.type != RoomType.Lobby) {
         return 'invalid room id'
     }
@@ -133,7 +126,8 @@ async function leaveRoom(io: SocketServerType, socket: RoomSocket) {
     if (socket.data.user == undefined || socket.data.room == undefined)
         return 'invalid socket state'
 
-    const room = rooms.find(x => x.id == socket.data.room![0])
+    // TODO what if index changes between here and following?
+    const room = rooms.get(socket.data.room![0])
     if (room == undefined) {
         // TODO this is not supposed to happen
         console.warn('Socket contained invalid room id.')
@@ -143,7 +137,7 @@ async function leaveRoom(io: SocketServerType, socket: RoomSocket) {
 
     const users = await usersForRoom(io, socket.data.room[0])
     if (room.owner.name == socket.data.user.name || users.length <= 1) {
-        rooms.splice(rooms.indexOf(room), 1)
+        rooms.delete(socket.data.room![0])
 
         const sockets = await io.in(socket.data.room[0]).fetchSockets()
         sockets.forEach(s => s.emit('closed'))
@@ -165,10 +159,10 @@ async function leaveRoom(io: SocketServerType, socket: RoomSocket) {
 
 export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
     socket.on('lobbyList', async cb => {
-        cb(await Promise.all(lobbies().map(async (x) => { 
+        cb(await Promise.all(Array.from(rooms.values()).filter(isLobby).map<Promise<LobbyRoom>>(async (x) => { 
             return { 
-                ...x, 
-                participants: await participantsForRoom(io, x.id)
+                ...x,
+                participants: await participantsForRoom(io, x.id)                
             } })))
     })
 
@@ -182,12 +176,44 @@ export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
     })
 
     socket.on('join', async (roomId, cb) => {
+        if (!rooms.has(roomId))
+            return cb('invalid room id')
+
+        const old = await participantsForRoom(io, roomId)
+        if (old.length >= rooms.get(roomId)!.scenario.players.maxAllowedCount)
+            return cb('game full')
+
         const res = await joinRoom(io, socket, roomId)
         if (res == 'invalid room id' || res == 'invalid socket state')
             return cb(res)
 
-        const users = await participantsForRoom(io, res.id)
-        return cb({ ...res, participants: users })
+        return cb({ ...res, participants: await participantsForRoom(io, roomId) })
+    })
+
+
+    socket.on('addBot', async cb => {
+        if (socket.data.room == undefined)
+            return cb('invalid socket state')
+
+        const room = lobbyRoomFor(socket.data.room[0])
+        if (room == undefined)
+            return cb('invalid socket state')
+
+        if (room.owner.name != socket.data.user.name)
+            return cb('not the owner')
+
+        const participants = await participantsForRoom(io, room.id)
+        if (participants.length >= room.scenario.players.maxAllowedCount)
+            return cb('room full')
+
+        const freeColor = allColors.filter(x => !participants.some(([_, col]) => x == col))
+        room.bots.push([{
+            name: 'bottest',
+            personality: BotPersonality.Vincent
+        }, freeColor[0]])
+        
+        socket.emit('participantChange', await participantsForRoom(io, room.id))
+        socket.in(room.id).emit('participantChange', await participantsForRoom(io, room.id))
     })
 
     socket.on('leave', async cb => {

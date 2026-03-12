@@ -130,6 +130,13 @@ export type Scenario = Freeze<{
         additionalStartingDevCards: DevCardType[]
     }
     startingPhase: ScenarioStartingPhaseType.WithInitialPlacing
+    devCardStacks: {
+        knights: number,
+        victoryPoints: number,
+        monopoly: number,
+        roadBuilding: number,
+        yearOfPlenty: number,
+    }
 }>
 
 

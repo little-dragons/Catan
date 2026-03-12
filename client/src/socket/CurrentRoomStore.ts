@@ -16,6 +16,7 @@ export enum RoomOPResult {
     NameInvalid,
     AlreadyInRoom,
     NotInRoom,
+    RoomFull,
     NotOwner
 }
 
@@ -34,6 +35,8 @@ export const useCurrentRoomStore = defineStore('room', () => {
             return RoomOPResult.RoomInvalid
         if (result == 'invalid socket state')
             return RoomOPResult.ServerRejected
+        if (result == 'game full')
+            return RoomOPResult.RoomFull
 
         info.value = result
         return RoomOPResult.Success
@@ -88,7 +91,7 @@ export const useCurrentRoomStore = defineStore('room', () => {
         if (result == 'not the owner')
             return RoomOPResult.NotOwner
 
-        if (result == 'invalid socket state')
+        if (result == 'invalid socket state' || result == 'generation error')
             return RoomOPResult.ServerRejected
 
         const _assert: true = result
@@ -186,5 +189,18 @@ export const useCurrentRoomStore = defineStore('room', () => {
         }
     })
 
-    return { info, tryJoin, tryCreate, tryLeave, tryStart, canJoin, isOwner, tryChangeSetting, trySendAction, actions }
+    async function tryAddBot() {
+        const result = await socket.emitWithAck('addBot')
+        if (result == 'invalid socket state')
+            return RoomOPResult.NotInRoom
+        if (result == 'not the owner')
+            return RoomOPResult.NotOwner
+        if (result == 'room full')
+            return RoomOPResult.RoomFull
+        
+        const _assert: true = result
+        return RoomOPResult.Success
+    }
+
+    return { info, tryJoin, tryCreate, tryLeave, tryStart, canJoin, isOwner, tryChangeSetting, trySendAction, actions, tryAddBot }
 })

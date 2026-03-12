@@ -1,18 +1,29 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue';
-import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
+import { RoomOPResult, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import { useRoomListStore } from '@/socket/Socket';
 import router from '@/misc/Router';
 import { ModalType, useModalStore } from '@/modals/ModalStore';
+import { PopupSeverity, usePopups } from '@/popup/Popup';
 
 const currentRoom = useCurrentRoomStore()
+const popups = usePopups()
 const roomList = useRoomListStore()
 const modalStore = useModalStore()
 
 async function tryJoin(roomId: string) {
     const result = await currentRoom.tryJoin(roomId)
-    // TODO
-    router.push('/room')
+    if (result == RoomOPResult.Success) {
+            router.push('/room')
+            return
+    }
+
+    popups.insert({
+        autoCloses: false,
+        message: `Joining failed with reason: ${RoomOPResult[result]}`,
+        severity: PopupSeverity.Info,
+        title: 'Joining failed'
+    })
 }
 
 onMounted(() => roomList.autoRefresh = true)
@@ -33,12 +44,12 @@ onUnmounted(() => roomList.autoRefresh = false)
     </div>
     <div v-for="room in roomList.lobbies" class="grid-columns default-grid-layout">
         <p>{{ room.name }}</p>
-        <p>{{ room.participants.length }} / ?</p>
+        <p>{{ room.participants.length }} / {{ room.scenario.players.maxAllowedCount }}</p>
         <p>{{ room.owner.name }}</p>
         <button
             class="default-button-colors"
             :title="`Join room ${room.name}`"
-            :disabled="!currentRoom.canJoin"
+            :disabled="!currentRoom.canJoin || room.participants.length >= room.scenario.players.maxAllowedCount"
             @click="() => tryJoin(room.id)">Join</button>
     </div>
     <div v-if="roomList.lobbies.length == 0">

@@ -1,6 +1,6 @@
 import { GameClientEventMap, GameServerEventMap, redactGameStateFor, RoomType, victoryPointsFromFull } from "shared";
 import { type Socket } from 'socket.io'
-import { endGame, games, participantsForRoom, usersForRoom } from "./RoomManager.js";
+import { endGame, gameRoomFor, participantsForRoom } from "./RoomManager.js";
 import { SocketDataType, SocketServerType } from "./Common.js";
 import { GameActionInfo, redactGameActionInfoFor, tryDoAction } from "shared/logic/GameAction.js";
 
@@ -11,7 +11,7 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
         if (socket.data.room == undefined)
             return cb('invalid socket state')
 
-        const room = games().find(x => x.id == socket.data.room![0])
+        const room = gameRoomFor(socket.data.room![0])
         if (room == undefined) {
             console.error(`Socket had access to deleted room ${socket.data}`)
             return cb('invalid socket state')
@@ -24,7 +24,7 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
         if (socket.data.room == undefined)
             return cb('invalid socket state')
 
-        const room = games().find(x => x.id == socket.data.room![0])
+        const room = gameRoomFor(socket.data.room![0])
         if (room == undefined) {
             console.error(`Socket had access to deleted room ${socket.data}`)
             return cb('invalid socket state')
@@ -53,7 +53,7 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
         if (socket.data.room == undefined)
             return cb('invalid socket state')
 
-        const room = games().find(x => x.id == socket.data.room![0])
+        const room = gameRoomFor(socket.data.room![0])
         if (room == undefined) {
             console.error(`Socket had access to deleted room ${socket.data}`)
             return cb('invalid socket state')
@@ -67,7 +67,8 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
             settings: room.settings,
             participants: participants,
             type: RoomType.InGame,
-            state: redactGameStateFor(room.state, socket.data.room[1])
+            state: redactGameStateFor(room.state, socket.data.room[1]),
+            scenario: room.scenario
         })
     })
 }

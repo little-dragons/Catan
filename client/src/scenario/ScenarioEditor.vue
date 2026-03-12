@@ -171,7 +171,8 @@ function makeScenario(): Scenario | undefined {
             maxAllowedCount: maxAllowedCount.value,
             minAllowedCount: minAllowedCount.value
         },
-        startingPhase: startingPhase.value
+        startingPhase: startingPhase.value,
+        devCardStacks: defaultScenario.devCardStacks
     }
 }
 function copyJSONToClipboard() {
