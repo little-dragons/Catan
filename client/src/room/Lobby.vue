@@ -4,6 +4,7 @@ import { RoomOPResult, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import router from '@/misc/Router';
 import { isValidSetting, type Settings } from 'shared/logic/Settings';
 import SideMenu from '@/misc/SideMenu.vue';
+import { participantName } from 'shared';
 
 const currentRoom = useCurrentRoomStore()
 
@@ -30,8 +31,8 @@ async function changeSetting<Key extends keyof Settings>(key: Key, value: string
             <div class="default-grid-header-layout grid-columns">
                 <p>User name</p>
             </div>
-            <div v-for="user in currentRoom.info?.users" class="grid-columns default-grid-layout">
-                <p>{{ user[0].name }}</p>
+            <div v-for="user in currentRoom.info?.participants" class="grid-columns default-grid-layout">
+                <p>{{ participantName(user[0]) }}</p>
             </div>
         </div>
         <SideMenu>

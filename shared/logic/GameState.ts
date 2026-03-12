@@ -96,21 +96,7 @@ export type FullGameState = Freeze<{
 
 export type AnyGameState = FullGameState | RedactedGameState | PublicGameState
 
-export function redactGameState(state: FullGameState): PublicGameState {
-    return {
-        board: state.board,
-        currentPlayer: state.currentPlayer,
-        players: state.players.map(redactPlayer),
-        phase: state.phase,
-        longestRoad: state.longestRoad,
-        devCardCount: 
-            state.devCards.knights +
-            state.devCards.monopoly +
-            state.devCards.roadBuilding +
-            state.devCards.victoryPoints +
-            state.devCards.yearOfPlenty
-    }
-}
+
 export function publicGameState(state: FullGameState): PublicGameState {
     return {
         ...state,
@@ -126,7 +112,7 @@ export function publicGameState(state: FullGameState): PublicGameState {
 
 export function redactGameStateFor(state: FullGameState, color: Color): RedactedGameState {
     return {
-        ...redactGameState(state),
+        ...publicGameState(state),
         self: state.players.find(player => player.color == color)!
     }
 }

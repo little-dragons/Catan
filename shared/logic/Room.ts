@@ -3,6 +3,7 @@ import { FullGameState, RedactedGameState } from './GameState.js';
 import { Color } from './Player.js';
 import { Settings } from './Settings.js';
 import { History, Statistics } from './History.js';
+import { Bot } from './Bots.js';
 
 export type RoomId = string
 export enum RoomType {
@@ -11,11 +12,28 @@ export enum RoomType {
     PostGame
 }
 
+export enum ParticipantType {
+    User, Bot
+}
+export type Participant = {
+    type: ParticipantType.User,
+    user: User
+} | {
+    type: ParticipantType.Bot
+    bot: Bot
+}
+export function participantName(p: Participant): string {
+    if (p.type == ParticipantType.User)
+        return p.user.name
+    else
+        return p.bot.name
+}
+
 type CommonRoom = {
     name: string
     id: RoomId
     owner: User
-    users: [User, Color][]
+    participants: [Participant, Color][]
     settings: Settings
 }
 export type LobbyRoom = {

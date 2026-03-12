@@ -1,13 +1,13 @@
-import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType, PostGameRoom, generateBoardFromScenario, defaultScenario } from "shared"
+import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType, PostGameRoom, generateBoardFromScenario, defaultScenario, ParticipantType, Participant } from "shared"
 import { type Socket } from 'socket.io'
 import { SocketDataType, SocketServerType } from "./Common.js"
 import { defaultSettings } from "shared/logic/Settings.js"
 import { v4 } from "uuid"
 
-type ServerLobbyRoom = Omit<LobbyRoom, 'users'>
-type ServerGameRoom = Omit<FullGameRoom, 'users'>
-type ServerPostGameRoom = Omit<PostGameRoom, 'users'>
-type ServerRoom = Omit<FullRoom, 'users'>
+type ServerLobbyRoom = Omit<LobbyRoom, 'participants'>
+type ServerGameRoom = Omit<FullGameRoom, 'participants'>
+type ServerPostGameRoom = Omit<PostGameRoom, 'participants'>
+type ServerRoom = Omit<FullRoom, 'participants'>
 
 const rooms = [] as ServerRoom[]
 
@@ -37,6 +37,9 @@ export function roomFor(roomId: RoomId) {
 }
 export async function usersForRoom(io: SocketServerType, roomId: RoomId) {
     return (await io.in(roomId).fetchSockets()).map(x => [x.data.user, x.data.room![1]] as [User, Color])
+}
+export async function participantsForRoom(io: SocketServerType, roomId: RoomId): Promise<[Participant, Color][]> {
+    return (await usersForRoom(io, roomId)).map(([user, color]) => [{type: ParticipantType.User, user}, color])
 }
 
 export async function initializeGame(io: SocketServerType, room: ServerLobbyRoom) {
@@ -114,13 +117,13 @@ async function joinRoom(io: SocketServerType, socket: RoomSocket, id: RoomId) {
     }
 
 
-    const otherUsers = await usersForRoom(io, id)
-    const usedColors = otherUsers.map(x => x[1])
+    const otherParticipants = await participantsForRoom(io, id)
+    const usedColors = otherParticipants.map(x => x[1])
     const remainingColors = allColors.filter(x => !usedColors.includes(x))
     socket.data.room = [id, remainingColors[Math.floor(Math.random() * remainingColors.length)]]
     socket.join(id)
     // this excludes the current socket instance, which is logical
-    socket.in(id).emit('userChange', (await usersForRoom(io, id)))
+    socket.in(id).emit('participantChange', await participantsForRoom(io, id))
 
     return room as ServerLobbyRoom
 }
@@ -151,8 +154,8 @@ async function leaveRoom(io: SocketServerType, socket: RoomSocket) {
     }
     else {
         socket.leave(socket.data.room[0])
-        const otherUsers = await usersForRoom(io, socket.data.room[0])
-        io.in(socket.data.room[0]).emit('userChange', otherUsers)
+        const otherParticipants = await participantsForRoom(io, socket.data.room[0])
+        io.in(socket.data.room[0]).emit('participantChange', otherParticipants)
         socket.data.room = undefined
     }
 
@@ -162,7 +165,11 @@ async function leaveRoom(io: SocketServerType, socket: RoomSocket) {
 
 export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
     socket.on('lobbyList', async cb => {
-        cb(await Promise.all(lobbies().map(async (x) => { return { ...x, users: (await usersForRoom(io, x.id)) } })))
+        cb(await Promise.all(lobbies().map(async (x) => { 
+            return { 
+                ...x, 
+                participants: await participantsForRoom(io, x.id)
+            } })))
     })
 
     socket.on('createAndJoin', async (name, cb) => {
@@ -170,8 +177,8 @@ export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
         if (res == 'invalid socket state' || res == 'room name in use')
             return cb(res)
 
-        const users = await usersForRoom(io, res.id)
-        cb({ ...res, users })
+        const participants = await participantsForRoom(io, res.id)
+        cb({ ...res, participants: participants })
     })
 
     socket.on('join', async (roomId, cb) => {
@@ -179,8 +186,8 @@ export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
         if (res == 'invalid room id' || res == 'invalid socket state')
             return cb(res)
 
-        const users = await usersForRoom(io, res.id)
-        return cb({ ...res, users })
+        const users = await participantsForRoom(io, res.id)
+        return cb({ ...res, participants: users })
     })
 
     socket.on('leave', async cb => {

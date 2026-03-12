@@ -1,6 +1,6 @@
 import { GameClientEventMap, GameServerEventMap, redactGameStateFor, RoomType, victoryPointsFromFull } from "shared";
 import { type Socket } from 'socket.io'
-import { endGame, games, usersForRoom } from "./RoomManager.js";
+import { endGame, games, participantsForRoom, usersForRoom } from "./RoomManager.js";
 import { SocketDataType, SocketServerType } from "./Common.js";
 import { GameActionInfo, redactGameActionInfoFor, tryDoAction } from "shared/logic/GameAction.js";
 
@@ -59,13 +59,13 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
             return cb('invalid socket state')
         }
         
-        const users = await usersForRoom(io, socket.data.room[0])
+        const participants = await participantsForRoom(io, socket.data.room[0])
         cb({
             id: room.id,
             name: room.name,
             owner: room.owner,
             settings: room.settings,
-            users: users,
+            participants: participants,
             type: RoomType.InGame,
             state: redactGameStateFor(room.state, socket.data.room[1])
         })

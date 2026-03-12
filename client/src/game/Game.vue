@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BuildingType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isActive, isInitial, type CardList, tryTransferCard, isRobbingDiscardingCards, validNewRobberPositions, allRobbableCrossings, isPreDiceRoll, allRobbableCrossingsExcept, type Board } from 'shared';
+import { BuildingType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isActive, isInitial, type CardList, tryTransferCard, isRobbingDiscardingCards, validNewRobberPositions, allRobbableCrossings, isPreDiceRoll, allRobbableCrossingsExcept, type Board, type Participant, participantName, ParticipantType } from 'shared';
 import { computed, ref, watchEffect, watch } from 'vue';
 import GameRenderer, { type ForbiddableButtons } from './GameRenderer.vue';
 import { type PlayerOverviewData } from '../game-components/PlayerOverviewRenderer.vue';
@@ -9,6 +9,7 @@ import type { TradeMenuRendererProps } from '../game-components/trade/TradeMenuR
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import type { DiscardMenuRendererProps } from '../game-components/DiscardRenderer.vue';
 import { isDevelopment } from '@/misc/Globals';
+import type { Bot } from 'shared/logic/Bots';
 
 const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
 
@@ -31,20 +32,20 @@ const forbiddableButtons = computed<ForbiddableButtons | undefined>(() => {
     }
 })
 
-const others = computed<[User, RedactedPlayer][]>(() => {
+const others = computed<[Participant, RedactedPlayer][]>(() => {
     if (state.value == undefined || room.info == undefined)
         return []
 
-    const otherUsers: [User, Color][] = room.info.users.filter(x => x[1] != state.value?.self.color)
-    return otherUsers.map(user => [user[0], state.value?.players.find(player => player.color == user[1])!] as [User, RedactedPlayer])
+    const otherUsers: [Participant, Color][] = room.info.participants.filter(x => x[1] != state.value?.self.color)
+    return otherUsers.map(user => [user[0], state.value?.players.find(player => player.color == user[1])!] as [Participant, RedactedPlayer])
 })
 
 const othersOverview = computed(() => {
     return others.value.map<PlayerOverviewData>(
-        ([user, player]) => {  
+        ([participant, player]) => {  
             return {
-                name: user.name,
-                isGuest: user.type == UserType.Guest,
+                name: participantName(participant),
+                isGuest: participant.type == ParticipantType.User ? participant.user.type == UserType.Guest : false,
                 color: player.color,
                 victoryPoints: victoryPointsFromRedacted(state.value!, player.color),
                 handCardsCount: player.handCardsCount,

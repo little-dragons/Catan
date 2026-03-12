@@ -134,11 +134,11 @@ export const useCurrentRoomStore = defineStore('room', () => {
         info.value = result
     })
 
-    socket.on('userChange', newUsers => {
+    socket.on('participantChange', newUsers => {
         if (info.value == undefined)
             return
 
-        info.value.users = newUsers
+        info.value.participants = newUsers
     })
 
     const actions = ref<PossiblyRedactedGameActionInfo[]>([])

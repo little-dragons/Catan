@@ -33,7 +33,7 @@ onUnmounted(() => roomList.autoRefresh = false)
     </div>
     <div v-for="room in roomList.lobbies" class="grid-columns default-grid-layout">
         <p>{{ room.name }}</p>
-        <p>{{ room.users.length }} / ?</p>
+        <p>{{ room.participants.length }} / ?</p>
         <p>{{ room.owner.name }}</p>
         <button
             class="default-button-colors"

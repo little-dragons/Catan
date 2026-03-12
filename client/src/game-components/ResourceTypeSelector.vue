@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import { type CardList, Resource, allResources, tryRemoveCard } from 'shared'
-import ResourceCardsRenderer from './cards/ResourceCardsRenderer.vue'
-import { computed, ref } from 'vue'
+import { Resource, allResources } from 'shared'
+import { ref } from 'vue'
 import { imageForResource } from '@/misc/CardTextures'
-import ok from '@/assets/ui/ok.svg'
-import error from '@/assets/ui/error.svg'
 
 defineEmits<{
     selected: [resources: Resource],

@@ -4,6 +4,7 @@ import { Settings } from "../logic/Settings.js"
 import { History } from "../logic/History.js"
 import { RedactedGameState } from "../logic/GameState.js"
 import { PossiblyRedactedGameActionInfo } from "../logic/GameAction.js"
+import { Participant } from "../logic/Room.js"
 
 export type ClientEventMap = GameClientEventMap & LobbyClientEventMap & RoomClientEventMap & LoginClientEventMap
 
@@ -14,7 +15,7 @@ export type GameClientEventMap = {
 
 export type RoomClientEventMap = {
     closed: () => void
-    userChange: (newUsers: [User, Color][]) => void
+    participantChange: (newUsers: [Participant, Color][]) => void
 }
 
 export type LobbyClientEventMap = {
