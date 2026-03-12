@@ -1,8 +1,8 @@
-import { GameClientEventMap, GameServerEventMap, redactGameStateFor, RoomType, victoryPointsFromFull } from "shared";
+import { Color, GameClientEventMap, GamePhaseType, GameServerEventMap, generateBotAction, redactGameStateFor, requireActionFrom, RoomType, victoryPointsFromFull } from "shared";
 import { type Socket } from 'socket.io'
-import { endGame, gameRoomFor, participantsForRoom } from "./RoomManager.js";
+import { endGame, gameRoomFor, participantsForRoom, ServerGameRoom } from "./RoomManager.js";
 import { SocketDataType, SocketServerType } from "./Common.js";
-import { GameActionInfo, redactGameActionInfoFor, tryDoAction } from "shared/logic/GameAction.js";
+import { GameActionInfo, GameActionInput, redactGameActionInfoFor, tryDoAction } from "shared/logic/GameAction.js";
 
 
 export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServerEventMap, GameClientEventMap, {}, SocketDataType>) {
@@ -20,6 +20,31 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
         cb(redactGameStateFor(room.state, socket.data.room[1]))
     })
 
+
+    function handleGameAction(room: ServerGameRoom, executor: Color, action: GameActionInput) {
+        const actionResult = tryDoAction(room.state, executor, action)
+        if (actionResult == undefined)
+            return 'action not allowed'
+
+        room.state = actionResult[0]
+        const gameAction = { type: action.type, input: action, response: actionResult[1] } as GameActionInfo
+        for (const s of io.of('/').adapter.rooms.get(room.id)!) {
+            const fullSocket = io.sockets.sockets.get(s)!
+            fullSocket.emit('gameEvent', redactGameStateFor(room.state, fullSocket.data.room![1]), 
+                redactGameActionInfoFor(gameAction, executor, fullSocket.data.room![1]))
+        }
+
+        return true
+    }
+
+    function checkAndHandleEndGame(io: SocketServerType, room: ServerGameRoom): boolean {
+        if (room.state.players.some(x => victoryPointsFromFull(room.state, x.color) >= room.settings.requiredVictoryPoints)) {
+            endGame(io, room)
+            return true
+        }
+        return false
+    }
+
     socket.on('gameAction', (action, cb) => {
         if (socket.data.room == undefined)
             return cb('invalid socket state')
@@ -30,22 +55,25 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
             return cb('invalid socket state')
         }
         
-        const actionResult = tryDoAction(room.state, socket.data.room[1], action)
-        if (actionResult == undefined)
-            return cb('action not allowed')
-        else {
-            room.state = actionResult[0]
-            const gameAction: GameActionInfo = { type: action.type, input: action, response: actionResult[1] } as GameActionInfo
-            for (const s of io.of('/').adapter.rooms.get(socket.data.room[0])!) {
-                const fullSocket = io.sockets.sockets.get(s)!
-                fullSocket.emit('gameEvent', redactGameStateFor(room.state, fullSocket.data.room![1]), redactGameActionInfoFor(gameAction, socket.data.room[1], fullSocket.data.room![1]))
-            }
-            cb(true)
+        const playerRes = handleGameAction(room, socket.data.room[1], action)
+        if (playerRes == 'action not allowed')
+            return cb(playerRes)
 
-            if (room.state.players.some(x => victoryPointsFromFull(room.state, x.color) >= room.settings.requiredVictoryPoints)) {
-                endGame(io, room)
-            }
-    
+        cb(true)
+        const ended = checkAndHandleEndGame(io, room)
+        if (ended) return
+
+        while (requireActionFrom(room.state).some(x => room.bots.some(([_, col]) => col == x))) {
+            const botColors = requireActionFrom(room.state).filter(x => room.bots.some(bot => bot[1] == x))
+            const botAction = generateBotAction(
+                                    room.bots.find(x => x[1] == botColors[0])![0], 
+                                    redactGameStateFor(room.state, botColors[0]))
+            
+            const res = handleGameAction(room, botColors[0], botAction)
+            if (res == 'action not allowed')
+                console.warn('Bot generated invalid action!', botAction)
+            const ended = checkAndHandleEndGame(io, room)
+            if (ended) return
         }
     })
 

@@ -769,22 +769,22 @@ export function tryDoBuyDevCard(state: FullGameState, executorColor: Color, acti
 
 export function tryDoAction<T extends GameActionType>(state: FullGameState, executor: Color,  action: GameActionInput): ResultType<T> {
     switch (action.type) {
-        case GameActionType.RollDice: return tryDoRollDice(state, executor, action)
-        case GameActionType.PlaceSettlement: return tryDoPlaceSettlement(state, executor, action)
-        case GameActionType.PlaceCity: return tryDoPlaceCity(state, executor, action)
-        case GameActionType.PlaceRoad: return tryDoPlaceRoad(state, executor, action)
-        case GameActionType.PlaceInitial: return tryDoPlaceInitial(state, executor, action)
-        case GameActionType.PlaceRobber: return tryDoPlaceRobber(state, executor, action)
-        case GameActionType.BankTrade: return tryDoBankTrade(state, executor, action)
-        case GameActionType.OfferTrade: return tryDoOfferTrade(state, executor, action)
+        case GameActionType.RollDice:         return tryDoRollDice(state, executor, action)
+        case GameActionType.PlaceSettlement:  return tryDoPlaceSettlement(state, executor, action)
+        case GameActionType.PlaceCity:        return tryDoPlaceCity(state, executor, action)
+        case GameActionType.PlaceRoad:        return tryDoPlaceRoad(state, executor, action)
+        case GameActionType.PlaceInitial:     return tryDoPlaceInitial(state, executor, action)
+        case GameActionType.PlaceRobber:      return tryDoPlaceRobber(state, executor, action)
+        case GameActionType.BankTrade:        return tryDoBankTrade(state, executor, action)
+        case GameActionType.OfferTrade:       return tryDoOfferTrade(state, executor, action)
         case GameActionType.AcceptTradeOffer: return tryDoAcceptTradeOffer(state, executor, action)
         case GameActionType.RejectTradeOffer: return tryDoRejectTradeOffer(state, executor, action)
-        case GameActionType.FinalizeTrade: return tryDoFinalizeTrade(state, executor, action)
-        case GameActionType.AbortTrade: return tryDoAbortTrade(state, executor, action)
-        case GameActionType.FinishTurn: return tryDoFinishTurn(state, executor, action)
-        case GameActionType.PlayDevCard: return tryDoPlayDevCard(state, executor, action)
+        case GameActionType.FinalizeTrade:    return tryDoFinalizeTrade(state, executor, action)
+        case GameActionType.AbortTrade:       return tryDoAbortTrade(state, executor, action)
+        case GameActionType.FinishTurn:       return tryDoFinishTurn(state, executor, action)
+        case GameActionType.PlayDevCard:      return tryDoPlayDevCard(state, executor, action)
         case GameActionType.DiscardResources: return tryDoDiscardResources(state, executor, action)
-        case GameActionType.BuyDevCard: return tryDoBuyDevCard(state, executor, action)
+        case GameActionType.BuyDevCard:       return tryDoBuyDevCard(state, executor, action)
     }
 
     // this is required because undefined is a possible return value for this function
@@ -911,3 +911,4 @@ export function redactGameActionInfoFor(gameActionInfo: GameActionInfo, executor
 
     return  { ...gameActionInfo, redacted: false }
 }
+

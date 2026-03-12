@@ -174,3 +174,10 @@ export function victoryPointsFromRedacted(state: RedactedGameState, color: Color
         // TODO hidden devcards
     }
 }
+
+
+export function requireActionFrom(state: FullGameState): Color[] {
+    if (isRobbingDiscardingCards(state.phase))
+        return state.players.filter(x => x.handCards.length > 7).map(x => x.color)
+    return [state.currentPlayer] 
+}

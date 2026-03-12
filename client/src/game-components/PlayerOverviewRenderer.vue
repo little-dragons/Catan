@@ -101,6 +101,9 @@ defineEmits<{
     grid-template-rows: 50% 50%;
 }
 
+/** Note that with the small caps font, the letters written in here are actually lowercase.
+ *  The numbers with this font use the same height as the non-capital letters so it looks nice.
+ */
 .grid > * {
     font-family: "Sedan SC", serif;
     text-align: end;

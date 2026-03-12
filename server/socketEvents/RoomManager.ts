@@ -5,10 +5,10 @@ import { defaultSettings } from "shared/logic/Settings.js"
 import { v4 } from "uuid"
 import { Bot, BotPersonality } from "shared/logic/Bots.js"
 
-type ServerLobbyRoom    = Omit<LobbyRoom, 'participants'>    & { bots : [Bot, Color][] }
-type ServerGameRoom     = Omit<FullGameRoom, 'participants'> & { bots : [Bot, Color][] }
-type ServerPostGameRoom = Omit<PostGameRoom, 'participants'> & { bots : [Bot, Color][] }
-type ServerRoom         = Omit<FullRoom, 'participants'>     & { bots : [Bot, Color][] }
+export type ServerLobbyRoom    = Omit<LobbyRoom, 'participants'>    & { bots : [Bot, Color][] }
+export type ServerGameRoom     = Omit<FullGameRoom, 'participants'> & { bots : [Bot, Color][] }
+export type ServerPostGameRoom = Omit<PostGameRoom, 'participants'> & { bots : [Bot, Color][] }
+export type ServerRoom         = Omit<FullRoom, 'participants'>     & { bots : [Bot, Color][] }
 
 const rooms = new Map<RoomId, ServerRoom>()
 

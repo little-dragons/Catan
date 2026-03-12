@@ -365,6 +365,7 @@ defineExpose({
 .devCards {
     flex: 0;
     margin-left: 10px;
+    min-width: 70px;
 }
 .buttons {
     width: max-content;
