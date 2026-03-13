@@ -1,7 +1,7 @@
-import type { Color } from "./Player.js"
-import { neighborTile, Orientation } from "./Orientation.js"
-import { Resource } from "./Resource.js"
-import { BuildingType } from "./Buildings.js"
+import type { Color } from "./Player"
+import { neighborTile, Orientation } from "./Orientation"
+import { Resource } from "./Resource"
+import { BuildingType } from "./Buildings"
 import { v4 } from "uuid"
 import { type Freeze } from "structurajs"
 

@@ -1,11 +1,11 @@
-import { type Board, type Coordinate, sameCoordinate, CoordinateTile, ResourceTileNumber, TileType, SpecialPorts, PortTile, LandTile, isLand, PortResource } from "./Board.js";
-import { type Distribution, foldDistribution, narrowDistribution } from "./Distribution.js";
-import { FullGameState, GamePhase, GamePhaseType, TurnPhaseType } from "./GameState.js";
-import { allOrientations, clockwise, counterclockwise, neighborTile } from "./Orientation.js";
-import { Color } from "./Player.js";
-import { Resource } from "./Resource.js";
+import { type Board, type Coordinate, sameCoordinate, CoordinateTile, ResourceTileNumber, TileType, SpecialPorts, PortTile, LandTile, isLand, PortResource } from "./Board";
+import { type Distribution, foldDistribution, narrowDistribution } from "./Distribution";
+import { FullGameState, GamePhase, GamePhaseType, TurnPhaseType } from "./GameState";
+import { allOrientations, clockwise, counterclockwise, neighborTile } from "./Orientation";
+import { Color } from "./Player";
+import { Resource } from "./Resource";
 import seedrandom from 'seedrandom'
-import { DistributedGeneration, IndexedGeneration, SelectGeneration, ScenarioTileGroup, GenerationMethod, Scenario, Seed, ScenarioStartingPhaseType, ScenarioRobberPlacement, ScenarioResourceNumberAssignmentMethod, ResourceNumberAssignmentInfo } from "./Scenario.js";
+import { DistributedGeneration, IndexedGeneration, SelectGeneration, ScenarioTileGroup, GenerationMethod, Scenario, Seed, ScenarioStartingPhaseType, ScenarioRobberPlacement, ScenarioResourceNumberAssignmentMethod, ResourceNumberAssignmentInfo } from "./Scenario";
 import { type Freeze } from "structurajs";
 
 export const defaultScenario: Scenario = {

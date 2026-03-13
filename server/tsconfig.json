@@ -4,9 +4,6 @@
             "path": "../shared"
         }
     ],
-    "ts-node": {
-        "esm": true
-    },
     "compilerOptions": {
         "composite": true,
         "target": "ESNext",

@@ -1,4 +1,4 @@
-import { db } from "./Connection.js";
+import { db } from "./Connection";
 
 export async function getUserFromDb(name: string) {
     return await db.selectFrom('members').where('name', '=', name).selectAll().executeTakeFirst()

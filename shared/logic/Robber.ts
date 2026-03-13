@@ -1,6 +1,6 @@
-import { Board, Coordinate, sameCoordinate, isLandTile, allCrossings, CoordinateTile, adjacentCrossings, crossingAdjacentToTile } from "./Board.js"
-import { type PublicGameState } from "./GameState.js"
-import { Color } from "./Player.js"
+import { Board, Coordinate, sameCoordinate, isLandTile, allCrossings, CoordinateTile, adjacentCrossings, crossingAdjacentToTile } from "./Board"
+import { type PublicGameState } from "./GameState"
+import { Color } from "./Player"
 
 export function validNewRobberPosition(board: Board, robberPositon: Coordinate): boolean {
     if (sameCoordinate(board.robber, robberPositon))

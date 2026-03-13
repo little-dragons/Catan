@@ -1,9 +1,9 @@
 import { v4 } from "uuid"
-import { Coordinate, PortResource, ResourceTileNumber, TileType } from "./Board.js"
-import { DevCardType } from "./GameAction.js"
-import { CardList, Resource } from "./Resource.js"
-import { Distribution } from "./Distribution.js"
-import { Orientation } from "./Orientation.js"
+import { Coordinate, PortResource, ResourceTileNumber, TileType } from "./Board"
+import { DevCardType } from "./GameAction"
+import { CardList, Resource } from "./Resource"
+import { Distribution } from "./Distribution"
+import { Orientation } from "./Orientation"
 import { type Freeze } from "structurajs"
 
 /**

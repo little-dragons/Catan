@@ -3,16 +3,14 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "tsn": "node --import 'data:text/javascript,import { register } from \"node:module\"; import { pathToFileURL } from \"node:url\"; register(\"ts-node/esm\", pathToFileURL(\"./\"));'",
-    "dev": "dotenvx run -f .env.development -- npm run tsn --watch Server.ts",
-    "prod": "dotenvx run -f .env.production -- npm run tsn Server.ts",
-    "migrate-dev": "dotenvx run -f .env.development -- npm run tsn database/MigrationsExecutor.ts && npm run generate-types-dev",
-    "migrate-prod": "dotenvx run -f .env.production -- npm run tsn database/MigrationsExecutor.ts && npm run generate-types-prod",
-    "remigrate-dev": "dotenvx run -f .env.development -- npm run tsn database/MigrationsExecutor.ts -remigrate && npm run generate-types-dev",
-    "force-remigrate-prod": "dotenvx run -f .env.production -- npm run tsn database/MigrationsExecutor.ts -remigrate && npm run generate-types-prod",
+    "dev": "dotenvx run -f .env.development -- tsx --watch Server.ts",
+    "prod": "dotenvx run -f .env.production -- tsx Server.ts",
+    "migrate-dev": "dotenvx run -f .env.development -- tsx database/MigrationsExecutor.ts && npm run generate-types-dev",
+    "migrate-prod": "dotenvx run -f .env.production -- tsx database/MigrationsExecutor.ts && npm run generate-types-prod",
+    "remigrate-dev": "dotenvx run -f .env.development -- tsx database/MigrationsExecutor.ts -remigrate && npm run generate-types-dev",
+    "force-remigrate-prod": "dotenvx run -f .env.production -- tsx database/MigrationsExecutor.ts -remigrate && npm run generate-types-prod",
     "generate-types-dev": "dotenvx run -f .env.development -- kysely-codegen --dialect sqlite --out-file database/DBTypes.d.ts",
-    "generate-types-prod": "dotenvx run -f .env.production -- kysely-codegen --dialect sqlite --out-file database/DBTypes.d.ts",
-    "build": "dotenvx run -f .env.production -- tsc --build"
+    "generate-types-prod": "dotenvx run -f .env.production -- kysely-codegen --dialect sqlite --out-file database/DBTypes.d.ts"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
@@ -28,6 +26,7 @@
     "better-sqlite3": "^11.0.0",
     "kysely": "^0.27.3",
     "typescript": "^5.7.2",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "tsx": "^4.21.0"
   }
 }

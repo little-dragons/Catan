@@ -1,10 +1,10 @@
-import { User } from "../authentication/User.js"
-import { Color } from "../logic/Player.js"
-import { Settings } from "../logic/Settings.js"
-import { History } from "../logic/History.js"
-import { RedactedGameState } from "../logic/GameState.js"
-import { PossiblyRedactedGameActionInfo } from "../logic/GameAction.js"
-import { Participant } from "../logic/Room.js"
+import { User } from "../authentication/User"
+import { Color } from "../logic/Player"
+import { Settings } from "../logic/Settings"
+import { History } from "../logic/History"
+import { RedactedGameState } from "../logic/GameState"
+import { PossiblyRedactedGameActionInfo } from "../logic/GameAction"
+import { Participant } from "../logic/Room"
 
 export type ClientEventMap = GameClientEventMap & LobbyClientEventMap & RoomClientEventMap & LoginClientEventMap
 

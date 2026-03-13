@@ -1,7 +1,7 @@
-import { adjacentColorsToTile, adjacentRoads, crossingAdjacentToTile, landTiles, sameCoordinate } from "./Board.js"
-import { availableBuildingPositions } from "./Buildings.js"
-import { GameActionInput, GameActionType } from "./GameAction.js"
-import { GamePhaseType, RedactedGameState, RobbingPhaseType, TurnPhaseType } from "./GameState.js"
+import { adjacentColorsToTile, adjacentRoads, landTiles, sameCoordinate } from "./Board"
+import { availableBuildingPositions } from "./Buildings"
+import { GameActionInput, GameActionType } from "./GameAction"
+import { GamePhaseType, RedactedGameState, RobbingPhaseType, TurnPhaseType } from "./GameState"
 
 export enum BotPersonality {
     Vincent

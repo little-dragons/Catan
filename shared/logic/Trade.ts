@@ -1,7 +1,7 @@
 import { Freeze } from "structurajs";
-import { Board, PortResource, portsForColor, SpecialPorts } from "./Board.js";
-import { Color } from "./Player.js";
-import { allResources, CardList, Resource, sameCards } from "./Resource.js";
+import { Board, PortResource, portsForColor, SpecialPorts } from "./Board";
+import { Color } from "./Player";
+import { allResources, CardList, Resource, sameCards } from "./Resource";
 
 
 export type TradeOffer = {

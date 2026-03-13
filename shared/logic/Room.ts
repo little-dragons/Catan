@@ -1,10 +1,10 @@
-import { User } from '../authentication/User.js';
-import { FullGameState, RedactedGameState } from './GameState.js';
-import { Color } from './Player.js';
-import { Settings } from './Settings.js';
-import { History, Statistics } from './History.js';
-import { Bot } from './Bots.js';
-import { Scenario } from './Scenario.js';
+import { User } from '../authentication/User';
+import { FullGameState, RedactedGameState } from './GameState';
+import { Color } from './Player';
+import { Settings } from './Settings';
+import { History, Statistics } from './History';
+import { Bot } from './Bots';
+import { Scenario } from './Scenario';
 
 export type RoomId = string
 export enum RoomType {

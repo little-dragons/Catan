@@ -1,4 +1,4 @@
-import { BuildingType, ConnectionType } from "./Buildings.js"
+import { BuildingType, ConnectionType } from "./Buildings"
 
 export enum Resource {
     Grain,

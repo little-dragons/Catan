@@ -2,9 +2,8 @@
 import Setting from './Setting.vue'
 import { RoomOPResult, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import router from '@/misc/Router';
-import { isValidSetting, type Settings } from 'shared/logic/Settings';
 import SideMenu from '@/misc/SideMenu.vue';
-import { cssColor, participantName, ParticipantType, UserType } from 'shared';
+import { cssColor, participantName, ParticipantType, UserType, isValidSetting, type Settings } from 'shared';
 
 const currentRoom = useCurrentRoomStore()
 

@@ -1,4 +1,4 @@
-import type { Coordinate } from "./Board.js"
+import type { Coordinate } from "./Board"
 
 export enum Orientation {
     LeftDown,

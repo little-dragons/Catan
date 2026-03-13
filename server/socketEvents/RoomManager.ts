@@ -1,9 +1,8 @@
 import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType, PostGameRoom, generateBoardFromScenario, defaultScenario, ParticipantType, Participant, generateStateFromScenario } from "shared"
 import { type Socket } from 'socket.io'
-import { SocketDataType, SocketServerType } from "./Common.js"
-import { defaultSettings } from "shared/logic/Settings.js"
+import { SocketDataType, SocketServerType } from "./Common"
+import { defaultSettings, Bot, BotPersonality } from "shared"
 import { v4 } from "uuid"
-import { Bot, BotPersonality } from "shared/logic/Bots.js"
 
 export type ServerLobbyRoom    = Omit<LobbyRoom, 'participants'>    & { bots : [Bot, Color][] }
 export type ServerGameRoom     = Omit<FullGameRoom, 'participants'> & { bots : [Bot, Color][] }

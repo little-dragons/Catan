@@ -1,8 +1,8 @@
 import { LoginClientEventMap, LoginServerEventMap, UserType, validUsername } from "shared";
-import { addUserToDb, getUserFromDb } from "../database/CommonQueries.js";
+import { addUserToDb, getUserFromDb } from "../database/CommonQueries";
 import bcrypt from 'bcrypt'
 import { type Socket } from 'socket.io'
-import { SocketDataType, SocketServerType } from "./Common.js";
+import { SocketDataType, SocketServerType } from "./Common";
 import { v4 } from "uuid";
 
 

@@ -1,6 +1,6 @@
 import { Freeze } from "structurajs"
-import { CardList } from "./Resource.js"
-import { DevCardType } from "./GameAction.js"
+import { CardList } from "./Resource"
+import { DevCardType } from "./GameAction"
 
 export type RedactedPlayer = Freeze<{
     color: Color,

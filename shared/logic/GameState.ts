@@ -1,10 +1,10 @@
-import { Board, Coordinate, mapFilter, Road, sameCoordinate } from "./Board.js"
-import { Color, FullPlayer, RedactedPlayer, redactPlayer } from "./Player.js"
-import { BuildingType } from "./Buildings.js"
+import { Board, Coordinate, mapFilter, Road, sameCoordinate } from "./Board"
+import { Color, FullPlayer, RedactedPlayer, redactPlayer } from "./Player"
+import { BuildingType } from "./Buildings"
 import { produce, type Freeze } from "structurajs"
-import { Resource } from "./Resource.js"
-import { OpenTradeOffer } from "./Trade.js"
-import { DevCardType } from "./GameAction.js"
+import { Resource } from "./Resource"
+import { OpenTradeOffer } from "./Trade"
+import { DevCardType } from "./GameAction"
 
 export enum GamePhaseType {
     Initial,
