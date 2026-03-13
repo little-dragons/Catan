@@ -2,14 +2,13 @@
   "name": "playwright-test",
   "version": "1.0.0",
   "scripts": {
-    "test": "playwright test"
+    "test": "bunx playwright test"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
-  "devDependencies": {
-    "@playwright/test": "^1.49.0",
-    "@types/node": "^22.10.1"
+  "dependencies": {
+    "@playwright/test": "^1.58.2"
   }
 }

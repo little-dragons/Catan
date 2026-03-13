@@ -1,4 +1,4 @@
-import { describe, expect, it } from '@jest/globals'
+import { describe, expect, it } from 'bun:test'
 import { Color, colorWithLongestRoad, longestRoadForColor } from 'shared'
 import { blueAndRedMoreTriangles, blueAndRedTriangle, complexBlueRoad, moreComplexBlueRoad, yellowAndGreenSameLength, yellowAndGreenSameLength2, yellowHasLongerThanGreen, yellowHasLongestRoad2Board, yellowHasLongestRoadBoard, yellowHasLongestRoadWithCycle } from './boardRules.setup'
 

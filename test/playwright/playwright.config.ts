@@ -9,13 +9,13 @@ export default defineConfig({
 
     webServer: [
         {
-            command: 'npm run dev',
+            command: 'bun run dev',
             cwd: '../../client/',
             url: 'http://localhost:5173',
             reuseExistingServer: !process.env.CI,
         },
         {
-            command: 'npm run dev',
+            command: 'bun run dev',
             cwd: '../../server/',
             port: 3000,
             reuseExistingServer: !process.env.CI,

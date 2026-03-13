@@ -120,6 +120,7 @@ defineEmits<{
     display: inline;
 }
 abbr[title] {
+    cursor: help;
     text-decoration: none;
 }
 </style>

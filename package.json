@@ -2,14 +2,12 @@
   "name": "catan",
   "version": "1.0.0",
   "scripts": {
-    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\"",
-    "prod": "concurrently \"cd server && npm run prod\" \"cd client && npm run prod\"",
-    "test:jest": "npm run test --prefix test/jest --",
-    "test:all": "npm run test --prefix test/playwright -- && npm run test --prefix test/jest --"
+    "dev": "concurrently \"cd server && bun run dev\" \"cd client && bun run dev\"",
+    "prod": "concurrently \"cd server && bun run prod\" \"cd client && bun run prod\"",
+    "test": "cd test/playwright && bun run test && cd ../logic && bun test"
   },
   "dependencies": {
     "concurrently": "^8.2.2"
   },
-  
-  "workspaces": [ "client", "shared", "server", "test/playwright", "test/jest" ]
+  "workspaces": ["client", "shared", "server", "test/playwright", "test/logic"]
 }

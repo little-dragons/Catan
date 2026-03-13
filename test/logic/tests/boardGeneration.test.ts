@@ -1,4 +1,4 @@
-import { describe, expect, it, jest } from '@jest/globals'
+import { describe, expect, it } from 'bun:test'
 import { allResources, availableBuildingPositions, Board, BoardSeed, clockwise, Coordinate, CoordinateTile,  defaultScenario, generateBoardFromScenario, neighborTile, Orientation, PortTile, randomBoardSeed, sameCoordinate, SpecialPorts, TileType } from 'shared'
 import { Seed } from 'shared/logic/Scenario'
 
