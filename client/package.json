@@ -13,6 +13,7 @@
     "shared": "^1.0.0",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
+    "structurajs": "^0.12.6",
     "uuid": "^10.0.0",
     "vue": "^3.4.21",
     "vue-router": "^4.3.0"
