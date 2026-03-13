@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import { BuildingType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isActive, isInitial, type CardList, tryTransferCard, isRobbingDiscardingCards, validNewRobberPositions, allRobbableCrossings, isPreDiceRoll, allRobbableCrossingsExcept, type Board, type Participant, participantName, ParticipantType } from 'catan-shared';
+import { BuildingType, canBuyDevCard, canFinishTurn, canOfferTrade, canPlaceRoad, canPlaceSettlement, DevCardType, GameActionType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isActive, isInitial, type CardList, tryTransferCard, isRobbingDiscardingCards, validNewRobberPositions, allRobbableCrossings, isPreDiceRoll, allRobbableCrossingsExcept, type Board, type Participant, participantName, ParticipantType } from 'catan-shared';
 import { computed, ref, watchEffect, watch } from 'vue';
 import GameRenderer, { type ForbiddableButtons } from './GameRenderer.vue';
 import { type PlayerOverviewData } from '../game-components/PlayerOverviewRenderer.vue';
 import { UserSelectionType } from '../game-components/board/UserSelection';
-import { canBuyDevCard, canFinishTurn, canOfferTrade, canPlaceRoad, canPlaceSettlement, DevCardType, GameActionType } from 'shared/logic/GameAction';
 import type { TradeMenuRendererProps } from '../game-components/trade/TradeMenuRenderer.vue';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import type { DiscardMenuRendererProps } from '../game-components/DiscardRenderer.vue';
 import { isDevelopment } from '@/misc/Globals';
-import type { Bot } from 'shared/logic/Bots';
 
 const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
 

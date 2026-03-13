@@ -5,7 +5,7 @@ import { useCurrentUserStore, UserStatus } from "./CurrentUserStore"
 import { socket } from "./Socket"
 import router from "@/misc/Router"
 import { PopupSeverity, usePopups } from "@/popup/Popup"
-import type { Settings } from "shared/logic/Settings"
+import type { Settings } from "catan-shared"
 
 
 export enum RoomOPResult {
