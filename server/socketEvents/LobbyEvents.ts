@@ -1,4 +1,4 @@
-import { allColors, LobbyClientEventMap, LobbyServerEventMap, RoomId } from 'shared';
+import { allColors, LobbyClientEventMap, LobbyServerEventMap, RoomId } from 'catan-shared';
 import { type Socket } from 'socket.io'
 import { initializeGame, lobbyRoomFor, participantsForRoom } from './RoomManager';
 import { SocketDataType, SocketServerType } from './Common';

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Resource, allResources } from 'shared'
+import { Resource, allResources } from 'catan-shared'
 import { ref } from 'vue'
 import { imageForResource } from '@/misc/CardTextures'
 

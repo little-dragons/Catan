@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { countDevCards, DevCardType } from 'shared';
+import { countDevCards, DevCardType } from 'catan-shared';
 import { type CardStackProps } from './CardStack.vue';
 import HorizontalCardStacks from './HorizontalCardStacks.vue';
 import { computed } from 'vue';

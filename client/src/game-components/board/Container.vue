@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Coordinate } from 'shared';
+import type { Coordinate } from 'catan-shared';
 import { svgViewboxStringFromTileCoords } from './Layout';
 
 defineProps<{

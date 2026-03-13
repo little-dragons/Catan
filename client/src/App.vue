@@ -3,7 +3,7 @@ import { RouterView } from 'vue-router'
 import { ref } from 'vue';
 import LoginModal from './modals/LoginModal.vue'
 import Popups from './popup/Popups.vue';
-import { UserType } from 'shared';
+import { UserType } from 'catan-shared';
 import { useCurrentRoomStore } from './socket/CurrentRoomStore';
 import { useCurrentUserStore, UserStatus } from './socket/CurrentUserStore';
 import { ModalType, useModalStore } from './modals/ModalStore';

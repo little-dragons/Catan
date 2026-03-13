@@ -1,4 +1,4 @@
-import { ClientEventMap, Color, PasswordNonce, RoomId, ServerEventMap, User } from "shared"
+import { ClientEventMap, Color, PasswordNonce, RoomId, ServerEventMap, User } from "catan-shared"
 import { type Server } from 'socket.io'
 
 export const isDevelopment = process.env.NODE_ENV == 'development'

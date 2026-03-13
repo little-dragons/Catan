@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { allResources, availableBuildingPositions, Board, BoardSeed, clockwise, Coordinate, CoordinateTile,  defaultScenario, generateBoardFromScenario, neighborTile, Orientation, PortTile, randomBoardSeed, sameCoordinate, SpecialPorts, TileType } from 'shared'
+import { allResources, availableBuildingPositions, Board, BoardSeed, clockwise, Coordinate, CoordinateTile,  defaultScenario, generateBoardFromScenario, neighborTile, Orientation, PortTile, randomBoardSeed, sameCoordinate, SpecialPorts, TileType } from 'catan-shared'
 import { Seed } from 'shared/logic/Scenario'
 
 describe('Default board generation', () => {

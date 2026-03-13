@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { type User, UserType } from "shared"
+import { type User, UserType } from "catan-shared"
 import { ref, computed } from "vue"
 import { socket } from "./Socket"
 import { useCurrentRoomStore } from "./CurrentRoomStore"

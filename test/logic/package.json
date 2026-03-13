@@ -9,9 +9,11 @@
     },
     "type": "module",
     "devDependencies": {
+        "@types/bun": "^1.3.10",
         "typescript": "^5.9.3"
     },
     "dependencies": {
+        "@types/seedrandom": "^3.0.8",
         "catan-shared": "link:catan-shared",
         "seedrandom": "^3.0.5"
     }

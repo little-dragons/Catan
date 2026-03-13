@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
 import seedrandom from 'seedrandom'
-import { allResources, Distribution, narrowDistribution, Resource, TileType } from 'shared'
+import { allResources, Distribution, narrowDistribution, Resource } from 'catan-shared'
 
 function testWithAllSeeds(lambda: (rng: () => number) => void) {
     lambda(seedrandom('seed1'))

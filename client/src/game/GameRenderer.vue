@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { Color, DevCardType, Resource, type Board, type CardList, type DieResult, type OpenTradeOffer, type TradeOffer } from 'shared';
+import { Color, DevCardType, Resource, type Board, type CardList, type DieResult, type OpenTradeOffer, type TradeOffer } from 'catan-shared';
 import { type InteractionPoints, type UserSelectionOptions, type UserSelectionResult } from '../game-components/board/UserSelection'
 import DiceRenderer from '../game-components/DiceRenderer.vue';
 import ResourceCardsRenderer from '../game-components/cards/ResourceCardsRenderer.vue';

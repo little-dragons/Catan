@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Color, type OpenTradeOffer } from 'shared';
+import { type Color, type OpenTradeOffer } from 'catan-shared';
 import OtherTradeOverview from './trade/OtherTradeOverview.vue';
 import PlayerIcon from './PlayerIcon.vue';
 

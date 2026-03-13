@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type CardList, Resource, allResources, tryRemoveCard } from 'shared'
+import { type CardList, Resource, allResources, tryRemoveCard } from 'catan-shared'
 import ResourceCardsRenderer from './cards/ResourceCardsRenderer.vue'
 import { computed, ref } from 'vue'
 import { imageForResource } from '@/misc/CardTextures'

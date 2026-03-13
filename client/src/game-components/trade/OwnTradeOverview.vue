@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { cssColor, Color, type OpenTradeOffer, TradeStatusByColor } from 'shared';
+import { cssColor, Color, type OpenTradeOffer, TradeStatusByColor } from 'catan-shared';
 import TradeOverview from './TradeOverview.vue';
 import PlayerTradeStatus from './PlayerTradeStatus.vue';
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CardList, Resource } from 'shared'
+import type { CardList, Resource } from 'catan-shared'
 import ResourceCardsRenderer from './cards/ResourceCardsRenderer.vue'
 import { computed } from 'vue'
 import ok from '@/assets/ui/ok.svg'

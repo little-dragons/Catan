@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { allResources, Resource } from 'shared';
+import { allResources, Resource } from 'catan-shared';
 import CardsRenderer from '../cards/ResourceCardsRenderer.vue';
 import { imageForResource } from '@/misc/CardTextures';
 import ResourceCardsRenderer from '../cards/ResourceCardsRenderer.vue';

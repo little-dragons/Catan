@@ -9,7 +9,7 @@ import roadBuildingCard from '@/assets/dev-cards/road-building-card.svg'
 import victoryPointCard from '@/assets/dev-cards/victory-point-card.svg'
 import yearOfPlentyCard from '@/assets/dev-cards/year-of-plenty-card.svg'
 
-import { DevCardType, Resource } from 'shared'
+import { DevCardType, Resource } from 'catan-shared'
 
 export function imageForResource(res: Resource): string {
     switch (res) {

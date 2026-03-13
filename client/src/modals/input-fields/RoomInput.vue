@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { validUsername } from 'shared';
+import { validUsername } from 'catan-shared';
 import CustomInput from './CustomInput.vue'
 import { computed, ref } from 'vue';
 

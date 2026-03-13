@@ -9,6 +9,7 @@
     "prod": "NODE_ENV=production SSL_DIR=\"/home/catan/ssl/letsencrypt\" bunx --bun vite --host -c vite.config.prod.ts"
   },
   "dependencies": {
+    "@types/bun": "^1.3.10",
     "catan-shared": "link:catan-shared",
     "pinia": "^3.0.4",
     "socket.io": "^4.8.3",

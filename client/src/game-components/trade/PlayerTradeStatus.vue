@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Color, TradeStatusByColor } from 'shared';
+import { type Color, TradeStatusByColor } from 'catan-shared';
 import Accepting from '@/assets/ui/ok.svg'
 import Rejecting from '@/assets/ui/error.svg'
 import Undecided from '@/assets/ui/questionmark.svg'

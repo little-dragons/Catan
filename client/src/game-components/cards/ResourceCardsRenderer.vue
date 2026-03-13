@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { countResources, Resource, type CardList } from 'shared';
+import { countResources, Resource, type CardList } from 'catan-shared';
 import { imageForResource } from '@/misc/CardTextures';
 import { type CardStackProps } from './CardStack.vue';
 import HorizontalCardStacks from './HorizontalCardStacks.vue';

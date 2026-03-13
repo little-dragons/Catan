@@ -1,4 +1,4 @@
-import { LoginClientEventMap, LoginServerEventMap, UserType, validUsername } from "shared";
+import { LoginClientEventMap, LoginServerEventMap, UserType, validUsername } from "catan-shared";
 import { addUserToDb, getUserFromDb } from "../database/CommonQueries";
 import bcrypt from 'bcrypt'
 import { type Socket } from 'socket.io'

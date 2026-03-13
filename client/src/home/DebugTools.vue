@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { v4 } from 'uuid';
-import { Color, defaultScenario, GamePhaseType, generateBoardFromScenario, Resource, TurnPhaseType, type Board, type History } from 'shared';
+import { Color, defaultScenario, GamePhaseType, generateBoardFromScenario, Resource, TurnPhaseType, type Board, type History } from 'catan-shared';
 import HistoryComponent from '@/game/History.vue';
 import { usePopups, PopupSeverity } from '@/popup/Popup';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';

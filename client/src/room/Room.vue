@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RoomType } from 'shared';
+import { RoomType } from 'catan-shared';
 import router from '@/misc/Router';
 import Lobby from './Lobby.vue';
 import Game from '@/game/Game.vue';

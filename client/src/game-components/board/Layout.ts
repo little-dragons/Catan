@@ -1,4 +1,4 @@
-import { portPoints, type Coordinate, type PortTile, type ResourceTileNumber, type Road } from "shared"
+import { portPoints, type Coordinate, type PortTile, type ResourceTileNumber, type Road } from "catan-shared"
 import { add, distance, lerp, middlepoint, opposite, perpendicular, withLength } from "./Vector"
 
 type Pixel = [number, number]

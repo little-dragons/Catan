@@ -3,7 +3,7 @@ import Setting from './Setting.vue'
 import { RoomOPResult, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import router from '@/misc/Router';
 import SideMenu from '@/misc/SideMenu.vue';
-import { cssColor, participantName, ParticipantType, UserType, isValidSetting, type Settings } from 'shared';
+import { cssColor, participantName, ParticipantType, UserType, isValidSetting, type Settings } from 'catan-shared';
 
 const currentRoom = useCurrentRoomStore()
 

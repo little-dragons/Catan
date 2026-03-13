@@ -1,4 +1,4 @@
-import { Color, GameClientEventMap, GameActionInfo, GameActionInput, redactGameActionInfoFor, tryDoAction, GameServerEventMap, generateBotAction, redactGameStateFor, requireActionFrom, RoomType, victoryPointsFromFull } from "shared";
+import { Color, GameClientEventMap, GameActionInfo, GameActionInput, redactGameActionInfoFor, tryDoAction, GameServerEventMap, generateBotAction, redactGameStateFor, requireActionFrom, RoomType, victoryPointsFromFull } from "catan-shared";
 import { type Socket } from 'socket.io'
 import { endGame, gameRoomFor, participantsForRoom, ServerGameRoom } from "./RoomManager";
 import { SocketDataType, SocketServerType } from "./Common";

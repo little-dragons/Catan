@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type CardList, Color, TradeStatusByColor } from 'shared';
+import { type CardList, Color, TradeStatusByColor } from 'catan-shared';
 import GreenArrow from '@/assets/ui/greenarrow.svg'
 import RedArrow from '@/assets/ui/redarrow.svg'
 import ResourceCardsRenderer from '../cards/ResourceCardsRenderer.vue';

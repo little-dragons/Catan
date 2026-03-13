@@ -1,8 +1,8 @@
 import { defineStore } from "pinia";
-import { type LobbyRoom, UserType, RoomType } from "shared";
+import { type LobbyRoom, UserType, RoomType } from "catan-shared";
 import { ref, watch, } from "vue";
 import { isDevelopment, isProduction } from "@/misc/Globals"
-import { SocketPort, type ClientEventMap, type ServerEventMap } from "shared"
+import { SocketPort, type ClientEventMap, type ServerEventMap } from "catan-shared"
 import { io, Socket } from "socket.io-client"
 
 let address: string = undefined!

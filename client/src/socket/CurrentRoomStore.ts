@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { type RedactedRoom, type RedactedGameState, RoomType, type GameActionInput, type PossiblyRedactedGameActionInfo } from "shared"
+import { type RedactedRoom, RoomType, type GameActionInput, type PossiblyRedactedGameActionInfo } from "catan-shared"
 import { ref, computed } from "vue"
 import { useCurrentUserStore, UserStatus } from "./CurrentUserStore"
 import { socket } from "./Socket"

@@ -5,7 +5,7 @@ import threeDie from '@/assets/dice/three-die.svg'
 import fourDie from '@/assets/dice/four-die.svg'
 import fiveDie from '@/assets/dice/five-die.svg'
 import sixDie from '@/assets/dice/six-die.svg'
-import type { DieResult } from 'shared'
+import type { DieResult } from 'catan-shared'
 
 function diceToIcon(die: DieResult): string {
     switch (die) {

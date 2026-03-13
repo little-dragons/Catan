@@ -1,4 +1,4 @@
-import { ClientEventMap, ServerEventMap, SocketPort } from "shared"
+import { ClientEventMap, ServerEventMap, SocketPort } from "catan-shared"
 import { Server } from "socket.io"
 import { createServer, Server as HttpsServer } from 'https'
 import { readFileSync } from  'fs'

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Color, cssColor } from 'shared';
+import { type Color, cssColor } from 'catan-shared';
 
 defineProps<{
     color: Color
