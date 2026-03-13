@@ -29,10 +29,10 @@ defineEmits<{
         <div class="box default-game-ui-props">
             <div class="username">{{ name }}<div v-if="currentPlayer" class="current-player"/></div>
             <div class="grid">
-                <div>{{ victoryPoints }} vp</div>
-                <div>{{ handCardsCount }} hc</div>
-                <div>{{ devCardsCount }} dc</div>
-                <div>{{ knightsPlayed }} kp</div>
+                <abbr :title="`${victoryPoints} Victory Points`">{{ victoryPoints }} <div>vp</div></abbr>
+                <abbr :title="`${handCardsCount} Hand cards`">{{ handCardsCount }} <div>hc</div></abbr>
+                <abbr :title="`${devCardsCount} Development cards`">{{ devCardsCount }} <div>dc</div></abbr>
+                <abbr :title="`${knightsPlayed} Knights played`">{{ knightsPlayed }} <div>kp</div></abbr>
             </div>
         </div>
         <OtherTradeOverview 
@@ -93,11 +93,11 @@ defineEmits<{
 
 .grid {
     display: grid;
-    margin-top: 5px;
-    margin-left: 25px;
-    height: 40px;
-    column-gap: 5px;
-    row-gap: 3px;
+    margin-top: 4px;
+    margin-left: 30px;
+    height: min-content;
+    column-gap: 2px;
+    row-gap: 2px;
     align-items: center;
     grid-template-columns: auto auto auto;
     grid-template-rows: 50% 50%;
@@ -108,11 +108,18 @@ defineEmits<{
  */
 .grid > * {
     font-family: "Sedan SC", serif;
+    display: block;
     text-align: end;
     border: var(--mute-border);
     border-radius: 2px;
-    margin-top: -1px;
     padding: 1px;
     background-color: rgba(255, 255, 255, 0.62);
+    user-select: none;
+}
+.grid > * > * {
+    display: inline;
+}
+abbr[title] {
+    text-decoration: none;
 }
 </style>

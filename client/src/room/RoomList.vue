@@ -53,7 +53,7 @@ onUnmounted(() => roomList.autoRefresh = false)
             @click="() => tryJoin(room.id)">Join</button>
     </div>
     <div v-if="roomList.lobbies.length == 0">
-        <p>Currently, there are no rooms. Create one at the top!</p>
+        <p>Currently, there are no open lobbies. Create one at the top!</p>
     </div>
 </template>
 
