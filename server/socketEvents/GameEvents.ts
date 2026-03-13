@@ -1,8 +1,7 @@
-import { Color, GameClientEventMap, GamePhaseType, GameServerEventMap, generateBotAction, redactGameStateFor, requireActionFrom, RoomType, victoryPointsFromFull } from "shared";
+import { Color, GameClientEventMap, GameActionInfo, GameActionInput, redactGameActionInfoFor, tryDoAction, GameServerEventMap, generateBotAction, redactGameStateFor, requireActionFrom, RoomType, victoryPointsFromFull } from "shared";
 import { type Socket } from 'socket.io'
 import { endGame, gameRoomFor, participantsForRoom, ServerGameRoom } from "./RoomManager";
 import { SocketDataType, SocketServerType } from "./Common";
-import { GameActionInfo, GameActionInput, redactGameActionInfoFor, tryDoAction } from "shared/logic/GameAction";
 
 
 export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServerEventMap, GameClientEventMap, {}, SocketDataType>) {

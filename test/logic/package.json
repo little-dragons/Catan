@@ -9,7 +9,10 @@
     },
     "type": "module",
     "devDependencies": {
-        "shared": "^1.0.0",
         "typescript": "^5.9.3"
+    },
+    "dependencies": {
+        "catan-shared": "link:catan-shared",
+        "seedrandom": "^3.0.5"
     }
 }

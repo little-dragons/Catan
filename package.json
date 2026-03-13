@@ -7,7 +7,7 @@
     "test": "cd test/playwright && bun run test && cd ../logic && bun test"
   },
   "dependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^9.2.1"
   },
   "workspaces": ["client", "shared", "server", "test/playwright", "test/logic"]
 }
