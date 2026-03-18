@@ -5714,3 +5714,550 @@ const moreComplexBlueRoadJSON = `
 `
 
 export const moreComplexBlueRoad = JSON.parse(moreComplexBlueRoadJSON) as Board
+
+
+
+const woolPortJSON = `{
+    "buildings": [
+        {
+            "color": 2,
+            "coord": [
+                6,
+                3
+            ],
+            "type": 0
+        },
+        {
+            "color": 3,
+            "coord": [
+                10,
+                2
+            ],
+            "type": 0
+        },
+        {
+            "color": 3,
+            "coord": [
+                10,
+                5
+            ],
+            "type": 0
+        },
+        {
+            "color": 2,
+            "coord": [
+                8,
+                4
+            ],
+            "type": 0
+        },
+        {
+            "color": 2,
+            "coord": [
+                11,
+                4
+            ],
+            "type": 0
+        },
+        {
+            "color": 2,
+            "coord": [
+                4,
+                3
+            ],
+            "type": 0
+        }
+    ],
+    "roads": [
+        {
+            "color": 2,
+            "coord": [
+                [
+                    6,
+                    3
+                ],
+                [
+                    5,
+                    3
+                ]
+            ]
+        },
+        {
+            "color": 3,
+            "coord": [
+                [
+                    10,
+                    2
+                ],
+                [
+                    9,
+                    2
+                ]
+            ]
+        },
+        {
+            "color": 3,
+            "coord": [
+                [
+                    10,
+                    5
+                ],
+                [
+                    9,
+                    5
+                ]
+            ]
+        },
+        {
+            "color": 2,
+            "coord": [
+                [
+                    8,
+                    4
+                ],
+                [
+                    9,
+                    4
+                ]
+            ]
+        },
+        {
+            "color": 3,
+            "coord": [
+                [
+                    11,
+                    2
+                ],
+                [
+                    10,
+                    2
+                ]
+            ]
+        },
+        {
+            "color": 2,
+            "coord": [
+                [
+                    10,
+                    4
+                ],
+                [
+                    9,
+                    4
+                ]
+            ]
+        },
+        {
+            "color": 2,
+            "coord": [
+                [
+                    11,
+                    4
+                ],
+                [
+                    10,
+                    4
+                ]
+            ]
+        },
+        {
+            "color": 3,
+            "coord": [
+                [
+                    10,
+                    3
+                ],
+                [
+                    10,
+                    2
+                ]
+            ]
+        },
+        {
+            "color": 3,
+            "coord": [
+                [
+                    8,
+                    2
+                ],
+                [
+                    9,
+                    2
+                ]
+            ]
+        },
+        {
+            "color": 2,
+            "coord": [
+                [
+                    12,
+                    4
+                ],
+                [
+                    11,
+                    4
+                ]
+            ]
+        },
+        {
+            "color": 3,
+            "coord": [
+                [
+                    9,
+                    1
+                ],
+                [
+                    9,
+                    2
+                ]
+            ]
+        },
+        {
+            "color": 2,
+            "coord": [
+                [
+                    4,
+                    3
+                ],
+                [
+                    5,
+                    3
+                ]
+            ]
+        },
+        {
+            "color": 3,
+            "coord": [
+                [
+                    11,
+                    5
+                ],
+                [
+                    10,
+                    5
+                ]
+            ]
+        }
+    ],
+    "robber": [
+        4,
+        1
+    ],
+    "tiles": [
+        {
+            "type": 1,
+            "number": 6,
+            "resource": 1,
+            "coord": [
+                4,
+                1
+            ]
+        },
+        {
+            "type": 1,
+            "number": 2,
+            "resource": 0,
+            "coord": [
+                3,
+                1
+            ]
+        },
+        {
+            "type": 1,
+            "number": 5,
+            "resource": 4,
+            "coord": [
+                2,
+                1
+            ]
+        },
+        {
+            "type": 1,
+            "number": 8,
+            "resource": 0,
+            "coord": [
+                2,
+                2
+            ]
+        },
+        {
+            "type": 1,
+            "number": 4,
+            "resource": 2,
+            "coord": [
+                1,
+                3
+            ]
+        },
+        {
+            "type": 1,
+            "number": 11,
+            "resource": 0,
+            "coord": [
+                2,
+                5
+            ]
+        },
+        {
+            "type": 1,
+            "number": 12,
+            "resource": 0,
+            "coord": [
+                3,
+                5
+            ]
+        },
+        {
+            "type": 1,
+            "number": 9,
+            "resource": 1,
+            "coord": [
+                4,
+                5
+            ]
+        },
+        {
+            "type": 1,
+            "number": 10,
+            "resource": 2,
+            "coord": [
+                5,
+                4
+            ]
+        },
+        {
+            "type": 1,
+            "number": 8,
+            "resource": 2,
+            "coord": [
+                5,
+                3
+            ]
+        },
+        {
+            "type": 1,
+            "number": 3,
+            "resource": 3,
+            "coord": [
+                5,
+                2
+            ]
+        },
+        {
+            "type": 1,
+            "number": 9,
+            "resource": 4,
+            "coord": [
+                4,
+                2
+            ]
+        },
+        {
+            "type": 1,
+            "number": 10,
+            "resource": 1,
+            "coord": [
+                3,
+                2
+            ]
+        },
+        {
+            "type": 1,
+            "number": 3,
+            "resource": 1,
+            "coord": [
+                2,
+                3
+            ]
+        },
+        {
+            "type": 1,
+            "number": 6,
+            "resource": 3,
+            "coord": [
+                3,
+                4
+            ]
+        },
+        {
+            "type": 1,
+            "number": 5,
+            "resource": 4,
+            "coord": [
+                4,
+                4
+            ]
+        },
+        {
+            "type": 1,
+            "number": 4,
+            "resource": 3,
+            "coord": [
+                4,
+                3
+            ]
+        },
+        {
+            "type": 1,
+            "number": 11,
+            "resource": 2,
+            "coord": [
+                3,
+                3
+            ]
+        },
+        {
+            "type": 2,
+            "coord": [
+                2,
+                4
+            ]
+        },
+        {
+            "type": 3,
+            "coord": [
+                3,
+                0
+            ]
+        },
+        {
+            "type": 3,
+            "coord": [
+                5,
+                0
+            ]
+        },
+        {
+            "type": 3,
+            "coord": [
+                6,
+                2
+            ]
+        },
+        {
+            "type": 3,
+            "coord": [
+                6,
+                4
+            ]
+        },
+        {
+            "type": 3,
+            "coord": [
+                5,
+                6
+            ]
+        },
+        {
+            "type": 3,
+            "coord": [
+                3,
+                6
+            ]
+        },
+        {
+            "type": 3,
+            "coord": [
+                1,
+                5
+            ]
+        },
+        {
+            "type": 3,
+            "coord": [
+                0,
+                3
+            ]
+        },
+        {
+            "type": 3,
+            "coord": [
+                1,
+                1
+            ]
+        },
+        {
+            "type": 0,
+            "orientation": 1,
+            "resource": 10,
+            "coord": [
+                2,
+                0
+            ]
+        },
+        {
+            "type": 0,
+            "orientation": 0,
+            "resource": 0,
+            "coord": [
+                4,
+                0
+            ]
+        },
+        {
+            "type": 0,
+            "orientation": 0,
+            "resource": 10,
+            "coord": [
+                5,
+                1
+            ]
+        },
+        {
+            "type": 0,
+            "orientation": 2,
+            "resource": 1,
+            "coord": [
+                6,
+                3
+            ]
+        },
+        {
+            "type": 0,
+            "orientation": 3,
+            "resource": 2,
+            "coord": [
+                5,
+                5
+            ]
+        },
+        {
+            "type": 0,
+            "orientation": 3,
+            "resource": 3,
+            "coord": [
+                4,
+                6
+            ]
+        },
+        {
+            "type": 0,
+            "orientation": 4,
+            "resource": 4,
+            "coord": [
+                2,
+                6
+            ]
+        },
+        {
+            "type": 0,
+            "orientation": 5,
+            "resource": 10,
+            "coord": [
+                1,
+                4
+            ]
+        },
+        {
+            "type": 0,
+            "orientation": 1,
+            "resource": 10,
+            "coord": [
+                1,
+                2
+            ]
+        }
+    ]
+}`
+
+export const woolPort = JSON.parse(woolPortJSON) as Board
