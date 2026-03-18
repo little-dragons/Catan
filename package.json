@@ -30,7 +30,6 @@
             "socket.io": "^4.8.3",
             "socket.io-client": "^4.8.3",
             "bcrypt": "^6.0.0",
-            "@dotenvx/dotenvx": "^1.54.1",
             "seedrandom": "^3.0.5",
             "structurajs": "^0.12.6",
             "typescript": "^5.9.3",
