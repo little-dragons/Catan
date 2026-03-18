@@ -39,11 +39,11 @@ export function isValidOffer(offered: CardList, desired: CardList) {
     return true
 }
 
-function freeResourcesBy(offered: CardList, ports: readonly PortResource[], resource: Resource) {
+function freeResourcesBy(offered: CardList, ports: Readonly<Record<PortResource, boolean>>, resource: Resource) {
     const offeredCount = offered.filter(x => x === resource).length
     const ratio = 
-        ports.includes(resource) ? 2 :
-        ports.includes(SpecialPorts.General) ? 3 :
+        ports[resource] ? 2 :
+        ports[SpecialPorts.General] ? 3 :
         4
 
     if (offeredCount % ratio !== 0)
@@ -52,7 +52,7 @@ function freeResourcesBy(offered: CardList, ports: readonly PortResource[], reso
     return offeredCount / ratio
 }
 
-function allFreeResources(offered: CardList, ports: readonly PortResource[]) {
+function allFreeResources(offered: CardList, ports: Readonly<Record<PortResource, boolean>>) {
     const allResults = allResources.map(x => freeResourcesBy(offered, ports, x))
     let sum = 0
     for (const res of allResults) {

@@ -4,6 +4,7 @@ import { Resource } from "./Resource"
 import { BuildingType } from "./Buildings"
 import { v4 } from "uuid"
 import { type Freeze } from "structurajs"
+import { addDistribution, Distribution, setRecord } from "./Distribution"
 
 // Coordinate has two meaning, depending on whether tiles or crossings are indexed.
 // The first coordinate always refers to the horizontal degree, left to right, the
@@ -40,10 +41,7 @@ export function isSeaTileType(type: TileType): type is SeaTileType {
 
 export enum SpecialPorts {
     // this is made such that the value of general is distinct from other resource values.
-    General = 
-        Object.values(Resource)
-        .filter(x => typeof x == 'number')
-        .reduce((a, b) => a + b, 0) + 1,
+    General = 10
 }
 
 export type PortResource = Resource | SpecialPorts
@@ -53,6 +51,20 @@ export type PortTile = {
     orientation: Orientation
 }
 export type ResourceTileNumber = 2 | 3 | 4 | 5 | 6 | 8 | 9 | 10 | 11 | 12
+export const ResourceTileNumberFrequencies: ReadonlyMap<ResourceTileNumber, number> = new Map([
+    [2,  1],
+    [12, 1],
+    [3,  2],
+    [11, 2],
+    [4,  3],
+    [10, 3],
+    [5,  4],
+    [9,  4],
+    [6,  5],
+    [8,  5],
+])
+export const ResourceTileNumberFrequenciesMax = 15
+
 export type ResourceTile = {
     type: TileType.Resource
     resource: Resource
@@ -130,15 +142,23 @@ export function crossingAdjacentToTile(crossing: Coordinate, tile: Coordinate): 
 export function landTiles(board: Board): Freeze<CoordinateTile[]> {
     return board.tiles.filter(x => isLandTile(x))
 }
+
 export function crossingAdjacentToLand(crossing: Coordinate, board: Board): boolean {
     return landTiles(board).some(x => crossingAdjacentToTile(crossing, x.coord))
 }
 
-function isPortPoint(tile: PortTile & { coord: Coordinate }, crossing: Coordinate) {
+function isPointForPort(tile: PortTile & { coord: Coordinate }, crossing: Coordinate) {
     return crossingAdjacentToTile(crossing, tile.coord) && crossingAdjacentToTile(crossing, neighborTile(tile.coord, tile.orientation))
 }
 export function portPoints(tile: PortTile & { coord: Coordinate }): [Coordinate, Coordinate] {
     return twoCrossingsFromTile(tile.coord, tile.orientation)
+}
+
+/**
+ * This function usually return just one resource, if at all. But it might be wise to keep it more general.
+ */
+export function portsForCoord(board: Board, coord: Coordinate): readonly PortResource[] {
+    return board.tiles.filter(x => x.type == TileType.Port).filter(x => isPointForPort(x, coord)).map(x => x.resource)
 }
 
 
@@ -264,17 +284,21 @@ export function mapFind<T, R>(array: Freeze<T[]>, finder: ((item: Freeze<T>) => 
     }
 }
 
-export function adjacentResourceTiles(cross: Coordinate, board: Board, number: ResourceTileNumber | undefined): readonly Resource[] {
+export function adjacentResourceTiles(cross: Coordinate, board: Board): readonly ResourceTile[] {
     return mapFilter(
         adjacentTiles(cross), 
         coord => 
             mapFind(
                 board.tiles, 
-                tile => sameCoordinate(tile.coord, coord) &&
-                tile.type == TileType.Resource &&
-                (number != undefined ? tile.number == number : true) ? tile : undefined)
-            ?.resource
+                tile => sameCoordinate(tile.coord, coord) && tile.type == TileType.Resource 
+                ? tile : undefined)
         )
+}
+export function adjacentResources(cross: Coordinate, board: Board, number: ResourceTileNumber | undefined): readonly Resource[] {
+    if (number == undefined)
+        return adjacentResourceTiles(cross, board).map(x => x.resource)
+    else
+        return adjacentResourceTiles(cross, board).filter(x => x.number == number).map(x => x.resource)
 }
 
 export function gainedResources(board: Board, color: Color, number: ResourceTileNumber): Resource[] {
@@ -283,7 +307,7 @@ export function gainedResources(board: Board, color: Color, number: ResourceTile
         if (building.color != color)
             continue
 
-        const resources = adjacentResourceTiles(building.coord, board, number)
+        const resources = adjacentResources(building.coord, board, number)
         if (building.type == BuildingType.Settlement)
             accumulated = accumulated.concat(resources)
         if (building.type == BuildingType.City) {
@@ -295,11 +319,20 @@ export function gainedResources(board: Board, color: Color, number: ResourceTile
     return accumulated
 }
 
-export function portsForColor(board: Board, color: Color): readonly PortResource[] {
-    const ports = mapFilter(board.tiles, x => x.type == TileType.Port ? x as Freeze<PortTile & { coord: Coordinate }> : undefined)
-    const buildingCoords = board.buildings.filter(x => x.color == color).map(x => x.coord)
-    const adjacentPorts = ports.filter(port => buildingCoords.some(cross => isPortPoint(port, cross)))
-    return adjacentPorts.map(x => x.resource)
+export function hasColorPort(board: Board, color: Color, res: PortResource): boolean {
+    const ports = board.tiles.filter(x => x.type == TileType.Port)
+    return board.buildings.some(x => x.color == color && ports.some(port => isPointForPort(port, x.coord)))
+}
+
+export function portsForColor(board: Board, color: Color): Record<PortResource, boolean> {
+    return {
+        [Resource.Brick]: hasColorPort(board, color, Resource.Brick),
+        [Resource.Lumber]: hasColorPort(board, color, Resource.Lumber),
+        [Resource.Grain]: hasColorPort(board, color, Resource.Grain),
+        [Resource.Wool]: hasColorPort(board, color, Resource.Wool),
+        [Resource.Ore]: hasColorPort(board, color, Resource.Ore),
+        [SpecialPorts.General]: hasColorPort(board, color, SpecialPorts.General)
+    }
 }
 
 
@@ -408,3 +441,33 @@ export function colorWithLongestRoad(board: Board, currentHolder: Color | undefi
     return highestColors[0]
 }
 
+
+export function resourceFrequencyForBuilding(board: Board, building: { coord: Coordinate, type: BuildingType }): Distribution<Resource> {
+    let ret: Distribution<Resource> = {
+        [Resource.Brick]: 0,
+        [Resource.Lumber]: 0,
+        [Resource.Wool]: 0,
+        [Resource.Ore]: 0,
+        [Resource.Grain]: 0,
+    }
+    
+    
+    const adjacent = adjacentResourceTiles(building.coord, board)
+    const mult = building.type == BuildingType.City ? 2 : 1
+    for (var {number, resource} of adjacent)
+        ret = setRecord(ret, resource, ret[resource] + mult * ResourceTileNumberFrequencies.get(number)!)
+
+    return ret
+}
+
+export function resourceFrequenciesForColor(board: Board, color: Color): Distribution<Resource> {
+    let ret: Distribution<Resource> = {
+        [Resource.Brick]: 0,
+        [Resource.Lumber]: 0,
+        [Resource.Wool]: 0,
+        [Resource.Ore]: 0,
+        [Resource.Grain]: 0,
+    }
+
+    return board.buildings.filter(x => x.color == color).reduce((s, v) => addDistribution(s, resourceFrequencyForBuilding(board, v)), ret)
+}

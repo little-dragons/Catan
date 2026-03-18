@@ -1,11 +1,4 @@
-/**
- * This distribution type is supposed to be supplied an enum: then, it maps the values of 
- * the enum to a number. Note that an enum relying on strings are not supported. The current
- * solution only supports enums on numbers.
- */
-export type Distribution<T extends keyof any> = {
-    readonly [P in T as Extract<P, number>]: number
-}
+export type Distribution<T extends keyof any> = Readonly<Record<T, number>>
 
 // this function decreases counts for elements of the distribution
 // while keeping the ratios intact
@@ -52,11 +45,31 @@ export function narrowDistribution<Keys extends keyof any>(dist: Distribution<Ke
     return Object.fromEntries<number>(keys.map(key => [key, Math.floor(dist[key] * ratio) + (chosen.includes(key) ? 1 : 0)])) as Distribution<Keys>
 }
 
-export function foldDistribution<Keys extends keyof any, T>(dist: Distribution<Keys>, folder: (state: T, pair: [Keys , number]) => T, initial: T): T {
+export function foldRecord<Keys extends keyof any, X, T>(dist: Readonly<Record<Keys, X>>, folder: (state: T, pair: [Keys , X]) => T, initial: T): T {
     const keys = Object.keys(dist).map(Number) as (keyof Distribution<Keys>)[]
     return keys.reduce<T>((s, key) => folder(s, [key, dist[key]]), initial)
 }
 
 export function sumDistribution<Keys extends keyof any>(dist: Distribution<Keys>): number {
-    return foldDistribution(dist, (s, [_ , v]) => s + v, 0)
+    return foldRecord(dist, (s, [_ , v]) => s + v, 0)
+}
+
+export function addDistribution<Keys extends keyof any>(dist1: Distribution<Keys>, dist2: Distribution<Keys>): Distribution<Keys> {
+    const keys = Object.keys(dist1).map(Number) as (keyof Distribution<Keys>)[]
+    return Object.fromEntries<number>(keys.map(key => [key, dist1[key] + dist2[key]])) as Distribution<Keys>
+}
+
+export function countbyRecord<Keys extends keyof any, X>(dist: Readonly<Record<Keys, X>>, pred: ((x: X) => boolean)): number {
+    return foldRecord(dist, (s, [_, v]) => pred(v) ? s + 1 : s, 0)
+}
+export function popcountDistribution<Keys extends keyof any>(dist: Distribution<Keys>): number {
+    return countbyRecord(dist, val => val != 0)
+}
+
+
+export function setRecord<Keys extends keyof any, X>(dist: Readonly<Record<Keys, X>>, key: Keys, value: X): Readonly<Record<Keys, X>> {
+    return {
+        ...dist,
+        [key]: value
+    }
 }

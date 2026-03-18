@@ -1,5 +1,5 @@
 import { type Board, type Coordinate, sameCoordinate, CoordinateTile, ResourceTileNumber, TileType, SpecialPorts, PortTile, LandTile, isLand, PortResource } from "./Board";
-import { type Distribution, foldDistribution, narrowDistribution } from "./Distribution";
+import { type Distribution, foldRecord, narrowDistribution } from "./Distribution";
 import { FullGameState, GamePhase, GamePhaseType, TurnPhaseType } from "./GameState";
 import { allOrientations, clockwise, counterclockwise, neighborTile } from "./Orientation";
 import { Color } from "./Player";
@@ -190,12 +190,12 @@ function isGenerationFailure(value: any): value is GenerationFailure {
  */
 function retrieveDistributedGeneration<Keys extends keyof any>(dist: DistributedGeneration<Keys>, target: number, rng: () => number) {
     const narrowed = narrowDistribution(dist.data, target, rng)
-    const count = foldDistribution(narrowed, (s, [_, v]) => s + v, 0)
+    const count = foldRecord(narrowed, (s, [_, v]) => s + v, 0)
     if (count != target)
         return GenerationFailure.SourceDistributionTooSmall
 
     // narrowed contains the correct items, but they have to be sorted randomly
-    const items = foldDistribution<Keys, Keys[]>(narrowed, (s, [k, v]) => 
+    const items = foldRecord<Keys, Keys[]>(narrowed, (s, [k, v]) => 
         s.concat(new Array(v).fill(k)), [])
     return items.toSorted(() => rng() - 0.5)
 }

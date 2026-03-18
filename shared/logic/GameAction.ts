@@ -1,5 +1,5 @@
 import { produce, unfreeze } from "structurajs"
-import { adjacentResourceTiles, adjacentRoads, availableRoadPositions, colorWithLongestRoad, Coordinate, gainedResources, isAvailableRoadPosition, ResourceTileNumber, Road, sameCoordinate, sameRoad } from "./Board"
+import { adjacentResources, adjacentRoads, availableRoadPositions, colorWithLongestRoad, Coordinate, gainedResources, isAvailableRoadPosition, ResourceTileNumber, Road, sameCoordinate, sameRoad } from "./Board"
 import { BuildingType, ConnectionType, availableBuildingPositions, isAvailableBuildingPosition } from "./Buildings"
 import { FullGameState, nextTurn, GamePhaseType, DieResult, isPreDiceRoll, TurnPhaseType, isActive, isInitial, isRobbingDiscardingCards, isRobbingMovingRobber, RobbingPhaseType, RedactedGameState, publicGameState } from "./GameState"
 import { Color } from "./Player"
@@ -325,7 +325,7 @@ function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: G
     
     const newCards = 
         state.phase.forward ? [] :
-        adjacentResourceTiles(action.settlement, state.board, undefined)
+        adjacentResources(action.settlement, state.board, undefined)
 
     const newPlayers = state.players.map(({ color, handCards, devCards, knightsPlayed }) => {
         if (color == executorColor)
