@@ -4,11 +4,11 @@
   "type": "module",
   "scripts": {
     "dev": "NODE_ENV=development bun --hot Server.ts",
-    "prod": "NODE_ENV=productionbun Server.ts",
+    "prod": "NODE_ENV=production bun Server.ts",
     "migrate-dev": "NODE_ENV=development bun database/MigrationsExecutor.ts && bun run generate-types-dev",
-    "migrate-prod": "NODE_ENV=productionbun database/MigrationsExecutor.ts && bun run generate-types-prod",
+    "migrate-prod": "NODE_ENV=production bun database/MigrationsExecutor.ts && bun run generate-types-prod",
     "remigrate-dev": "NODE_ENV=development bun database/MigrationsExecutor.ts -remigrate && bun run generate-types-dev",
-    "force-remigrate-prod": "NODE_ENV=productionbun database/MigrationsExecutor.ts -remigrate && bun run generate-types-prod",
+    "force-remigrate-prod": "NODE_ENV=production bun database/MigrationsExecutor.ts -remigrate && bun run generate-types-prod",
     "generate-types-dev": "NODE_ENV=development kysely-codegen --dialect sqlite --out-file database/DBTypes.d.ts",
     "generate-types-prod": "NODE_ENV=production kysely-codegen --dialect sqlite --out-file database/DBTypes.d.ts"
   },
