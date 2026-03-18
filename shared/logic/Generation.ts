@@ -195,7 +195,7 @@ function retrieveDistributedGeneration<Keys extends keyof any>(dist: Distributed
         return GenerationFailure.SourceDistributionTooSmall
 
     // narrowed contains the correct items, but they have to be sorted randomly
-    const items = foldRecord<Keys, Keys[]>(narrowed, (s, [k, v]) => 
+    const items = foldRecord<Keys, number, Keys[]>(narrowed, (s, [k, v]) => 
         s.concat(new Array(v).fill(k)), [])
     return items.toSorted(() => rng() - 0.5)
 }
