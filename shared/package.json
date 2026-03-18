@@ -4,15 +4,15 @@
   "type": "module",
   "scripts": {},
   "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/seedrandom": "^3.0.8",
-    "@types/uuid": "^11.0.0",
-    "typescript": "^5.9.3"
+    "@types/bcrypt": "catalog:shared",
+    "@types/seedrandom": "catalog:shared",
+    "@types/uuid": "catalog:shared",
+    "typescript": "catalog:shared"
   },
   "dependencies": {
-    "bcrypt": "^6.0.0",
-    "seedrandom": "^3.0.5",
-    "structurajs": "^0.12.6",
-    "uuid": "^13.0.0"
+    "bcrypt": "catalog:shared",
+    "seedrandom": "catalog:shared",
+    "structurajs": "catalog:shared",
+    "uuid": "catalog:shared"
   }
 }

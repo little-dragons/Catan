@@ -13,3 +13,6 @@ bun run dev
 ```
 
 The three steps in the middle are to ensure that you have a valid database where persitent data is stored for the server.
+
+
+Currently, there seems to be an issue with `structurajs` (see a [corresponding pull request](https://github.com/giusepperaso/structura.js/pull/118))

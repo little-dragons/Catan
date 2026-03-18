@@ -13,21 +13,21 @@
     "generate-types-prod": "dotenvx run -f .env.production -- kysely-codegen --dialect sqlite --out-file database/DBTypes.d.ts"
   },
   "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/bun": "^1.3.10",
-    "@types/uuid": "^11.0.0",
-    "kysely-codegen": "^0.20.0"
+    "@types/bcrypt": "catalog:shared",
+    "@types/bun": "catalog:shared",
+    "@types/uuid": "catalog:shared",
+    "kysely-codegen": "catalog:backend"
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "^1.54.1",
-    "@socket.io/admin-ui": "^0.5.1",
-    "bcrypt": "^6.0.0",
-    "better-sqlite3": "^12.6.2",
+    "@dotenvx/dotenvx": "catalog:shared",
+    "@socket.io/admin-ui": "catalog:backend",
+    "bcrypt": "catalog:shared",
+    "better-sqlite3": "catalog:backend",
     "catan-shared": "link:catan-shared",
-    "kysely": "^0.28.11",
-    "kysely-bun-sqlite": "^0.4.0",
-    "socket.io": "^4.8.3",
-    "typescript": "^5.9.3",
-    "uuid": "^13.0.0"
+    "kysely": "catalog:backend",
+    "kysely-bun-sqlite": "catalog:backend",
+    "socket.io": "catalog:shared",
+    "typescript": "catalog:shared",
+    "uuid": "catalog:shared"
   }
 }

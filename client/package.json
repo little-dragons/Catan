@@ -9,24 +9,21 @@
     "prod": "NODE_ENV=production SSL_DIR=\"/home/catan/ssl/letsencrypt\" bunx --bun vite --host -c vite.config.prod.ts"
   },
   "dependencies": {
-    "@types/bun": "^1.3.10",
+    "@types/bun": "catalog:shared",
     "catan-shared": "link:catan-shared",
-    "pinia": "^3.0.4",
-    "socket.io": "^4.8.3",
-    "socket.io-client": "^4.8.3",
-    "structurajs": "^0.12.6",
-    "uuid": "^13.0.0",
+    "structurajs": "catalog:shared",
+    "socket.io": "catalog:shared",
+    "socket.io-client": "catalog:shared",
+    "uuid": "catalog:shared",
     "vue": "^3.5.30",
-    "vue-router": "^5.0.3"
+    "vue-router": "^5.0.3",
+    "pinia": "^3.0.4"
   },
   "devDependencies": {
-    "@tsconfig/node20": "^20.1.9",
-    "@types/node": "^25.5.0",
     "@vitejs/plugin-vue": "^6.0.5",
     "@vue/tsconfig": "^0.9.0",
-    "typescript": "~5.9.3",
+    "typescript": "catalog:shared",
     "vite": "^8.0.0",
-    "vite-plugin-vue-devtools": "^8.1.0",
-    "vue-tsc": "^3.2.5"
+    "vite-plugin-vue-devtools": "^8.1.0"
   }
 }

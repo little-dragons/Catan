@@ -9,5 +9,33 @@
   "dependencies": {
     "concurrently": "^9.2.1"
   },
-  "workspaces": ["client", "shared", "server", "test/playwright", "test/logic"]
+  "workspaces": {
+    "packages": ["client", "shared", "server", "test/playwright", "test/logic"],
+    "catalogs": {
+        "frontend": {
+
+        },
+        "backend": {
+            "kysely-codegen": "^0.20.0",
+            "@socket.io/admin-ui": "^0.5.1",
+            "better-sqlite3": "^12.6.2",
+            "kysely": "^0.28.11",
+            "kysely-bun-sqlite": "^0.4.0"
+        },
+        "shared": {
+            "@types/bun": "^1.3.10",
+            "@types/uuid": "^11.0.0",
+            "@types/seedrandom": "^3.0.8",
+            "@types/bcrypt": "^6.0.0",
+            "socket.io": "^4.8.3",
+            "socket.io-client": "^4.8.3",
+            "bcrypt": "^6.0.0",
+            "@dotenvx/dotenvx": "^1.54.1",
+            "seedrandom": "^3.0.5",
+            "structurajs": "^0.12.6",
+            "typescript": "^5.9.3",
+            "uuid": "^13.0.0"
+        }
+    }
+  }
 }
