@@ -9,8 +9,8 @@
     "migrate-prod": "NODE_ENV=production bun database/MigrationsExecutor.ts && bun run generate-types-prod",
     "remigrate-dev": "NODE_ENV=development bun database/MigrationsExecutor.ts -remigrate && bun run generate-types-dev",
     "force-remigrate-prod": "NODE_ENV=production bun database/MigrationsExecutor.ts -remigrate && bun run generate-types-prod",
-    "generate-types-dev": "NODE_ENV=development kysely-codegen --dialect sqlite --out-file database/DBTypes.d.ts",
-    "generate-types-prod": "NODE_ENV=production kysely-codegen --dialect sqlite --out-file database/DBTypes.d.ts"
+    "generate-types-dev": "kysely-codegen --env-file=.env.development --dialect sqlite --out-file database/DBTypes.d.ts",
+    "generate-types-prod": "kysely-codegen --env-file=.env.production --dialect sqlite --out-file database/DBTypes.d.ts"
   },
   "devDependencies": {
     "@types/bcrypt": "catalog:shared",
