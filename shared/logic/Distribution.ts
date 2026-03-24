@@ -1,3 +1,6 @@
+/**
+ * Only use this with enums backed by numbers.
+ */
 export type Distribution<T extends keyof any> = Readonly<Record<T, number>>
 
 // this function decreases counts for elements of the distribution
@@ -49,9 +52,19 @@ export function foldRecord<Keys extends keyof any, X, T>(dist: Readonly<Record<K
     const keys = Object.keys(dist).map(Number) as (keyof Distribution<Keys>)[]
     return keys.reduce<T>((s, key) => folder(s, [key, dist[key]]), initial)
 }
+export function mapRecord<Keys extends keyof any, X, T>(dist: Readonly<Record<Keys, X>>, mapper: (pair: [Keys , X]) => T): Readonly<Record<Keys, T>> {
+    const keys = Object.keys(dist) as (keyof Distribution<Keys>)[]
+    return Object.fromEntries(keys.map(key => [key, mapper([key, dist[key]])])) as Readonly<Record<Keys, T>>
+}
+export function sumbyRecord<Keys extends keyof any, X>(dist: Readonly<Record<Keys, X>>, by: (pair: [Keys , X]) => number): number {
+    return foldRecord(dist, (s, val) => s + by(val), 0)
+}
+export function downcastRecord<Keys extends keyof any, X>(dist: Readonly<Record<Keys, X>>, keys: readonly Keys[]): Readonly<Record<Keys, X>> {
+    return Object.fromEntries(keys.map(key => [key, dist[key]])) as Readonly<Record<Keys, X>>
+}
 
 export function sumDistribution<Keys extends keyof any>(dist: Distribution<Keys>): number {
-    return foldRecord(dist, (s, [_ , v]) => s + v, 0)
+    return sumbyRecord(dist, ([_ , v]) => v)
 }
 
 export function addDistribution<Keys extends keyof any>(dist1: Distribution<Keys>, dist2: Distribution<Keys>): Distribution<Keys> {

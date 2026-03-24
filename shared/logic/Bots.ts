@@ -1,17 +1,17 @@
 import { Freeze } from "structurajs"
-import { adjacentColorsToTile, adjacentRoads, availableRoadPositions, Coordinate, landTiles, portsForCoord, portsForColor, resourceFrequenciesForColor, resourceFrequencyForBuilding, sameCoordinate } from "./Board"
+import { adjacentColorsToTile, adjacentRoads, availableRoadPositions, Coordinate, landTiles, portsForCoord, portsForColor, resourceFrequenciesForColor, resourceFrequencyForBuilding, sameCoordinate, SpecialPorts, Board } from "./Board"
 import { availableBuildingPositions, BuildingType, ConnectionType } from "./Buildings"
-import { GameActionInput, GameActionType } from "./GameAction"
-import { GamePhaseType, RedactedGameState, RobbingPhaseType, TurnPhaseType } from "./GameState"
-import { allResources, buildingCost, CardList, connectionCost, tryRemoveCards, tryTransferCard } from "./Resource"
+import { GameActionInput, GameActionType, tryDoPlaceInitialRedacted } from "./GameAction"
+import { GamePhaseType, RedactedGameState, RobbingPhaseType, TurnPhaseType, victoryPointsFromRedacted } from "./GameState"
+import { allResources, buildingCost, CardList, connectionCost, Resource, tryRemoveCards, tryTransferCard } from "./Resource"
 import { Color } from "./Player"
-import { addDistribution, popcountDistribution, sumDistribution } from "./Distribution"
+import { addDistribution, Distribution, downcastRecord, foldRecord, mapRecord, popcountDistribution, sumbyRecord, sumDistribution } from "./Distribution"
 
 export enum BotPersonality {
     Vincent // The trader
 }
 
-export type BotWeights = {
+export type BotWeights = Freeze<{
     /**
      * Using {@link resourceFrequenciesForColor} and {@link sumDistribution}, we can calulate the overall income for a player.
      * Multiplying the income with this gives the score.
@@ -19,17 +19,19 @@ export type BotWeights = {
     resourceFrequencies: number
     /**
      * Using {@link resourceFrequenciesForColor} and {@link popcountDistribution}, we can calculate the income diversity for a player.
-     * This map gives weights for each diversity level (= count of resources accessible)
+     * This map gives weights for each number of accessible resources
      */
     resourceDiversity: [number, number, number, number, number]
-    portAffinity: number
-}
+    tradeVolume: number
+    victoryPoints: number
+}>
 
 export const weightMap: Freeze<Record<BotPersonality, BotWeights>> = {
     [BotPersonality.Vincent] : {
         resourceFrequencies: 1,
         resourceDiversity: [0, 0, 0.2, 0.5, 0.6],
-        portAffinity: 1.5,
+        tradeVolume: 1,
+        victoryPoints: 1
     }
 }
 
@@ -56,44 +58,63 @@ function cardsToDiscard(bot: Bot, state: RedactedGameState): CardList {
     return discarded
 }
 
-function scoreBoard(bot: Bot, state: RedactedGameState, coord: Coordinate): number {
-    const resourceFrequencies = resourceFrequenciesForColor(state.board, state.self.color)
-    const resourceDiversityScore = weightMap[bot.personality].resourceDiversity[popcountDistribution(resourceFrequencies)]
-    const resourceFrequencyScore = weightMap[bot.personality].resourceFrequencies * sumDistribution(resourceFrequencies)
 
-    const ports = portsForColor(state.board, state.self.color)
+export function resourceDiversityScore(mult: BotWeights['resourceDiversity'], board: Board, color: Color): number {
+    const resourceFrequencies = resourceFrequenciesForColor(board, color)
+    return mult[popcountDistribution(resourceFrequencies)]
+}
 
+export function resourceFrequencyScore(mult: BotWeights['resourceFrequencies'], board: Board, color: Color): number {
+    const resourceFrequencies = resourceFrequenciesForColor(board, color)
+    const resourceSum = sumDistribution(resourceFrequencies)
+    return mult * resourceSum
+}
 
-    return resourceDiversityScore + resourceFrequencyScore
+export function victoryPointsScore(mult: BotWeights['victoryPoints'], state: RedactedGameState): number {
+    return victoryPointsFromRedacted(state, state.self.color) * mult
+}
+
+export function tradeVolume(board: Board, color: Color): Distribution<Resource> {
+    const resourceFrequencies = resourceFrequenciesForColor(board, color)
+    const ports = portsForColor(board, color)
+
+    return mapRecord(resourceFrequencies, ([res, num]) => {
+        if (ports[res])
+            return num / 2
+        else if (ports[SpecialPorts.General])
+            return num / 3
+        else 
+            return num / 4
+    })
+}
+
+export function tradeVolumeScore(mult: BotWeights['tradeVolume'], board: Board, color: Color): number {
+    return sumDistribution(tradeVolume(board, color)) * mult
 }
 
 
-function scoreInitialSettlement(bot: Bot, state: RedactedGameState, coord: Coordinate): number {
+export function scoreState(bot: Bot, state: RedactedGameState): number {
     const weights = weightMap[bot.personality]
-
-    const oldDistribution = resourceFrequenciesForColor(state.board, state.self.color)
-    const newDistribution = resourceFrequencyForBuilding(state.board, { coord, type: BuildingType.Settlement })
-    const distribution = addDistribution(oldDistribution, newDistribution)
-
-    const coveredResources = popcountDistribution(distribution)
-    const resourceDiversity = weights.resourceDiversity[coveredResources]
-
-    const resourceFrequencies = sumDistribution(distribution) * weights.resourceFrequencies
-
-    
-    
-
-    return resourceFrequencies + resourceDiversity
+    return resourceDiversityScore(weights.resourceDiversity, state.board, state.self.color) 
+         + resourceFrequencyScore(weights.resourceFrequencies, state.board, state.self.color) 
+         + tradeVolumeScore(weights.tradeVolume, state.board, state.self.color)
+         + victoryPointsScore(weights.victoryPoints, state)
 }
+
 
 function initialSettlementPlacement(bot: Bot, state: RedactedGameState): Freeze<[Coordinate, [Coordinate, Coordinate]]> {
-    const settlements = availableBuildingPositions(state.board, undefined)
-                            .toSorted((a, b) => scoreInitialSettlement(bot, state, b) - scoreInitialSettlement(bot, state, a))
-    const settlement = settlements[0]
+    const options = availableBuildingPositions(state.board, undefined)
+                    .flatMap(set => adjacentRoads(set).map(road => {
+                        return {
+                            settlement: set,
+                            road: road,
+                            score: scoreState(bot, tryDoPlaceInitialRedacted(state, set, road)!)
+                        }
+                    }))
 
-    const road = adjacentRoads(settlement)[0]
+    const best = options.sort((a, b) => b.score - a.score)[0]
 
-    return [settlement, road]
+    return [best.settlement, best.road]
 }
 
 export function placeRobber(bot: Bot, state: RedactedGameState): [Coordinate, Color | undefined] {
@@ -114,7 +135,7 @@ export function activeAction(bot: Bot, state: RedactedGameState): GameActionInpu
     }
 
     const possibleRoads = availableRoadPositions(state.board, state.self.color)
-    if (possibleRoads.length > 0 && tryRemoveCards(state.self.handCards, connectionCost(ConnectionType.Road)) != undefined) {
+    if (possibleSettlements.length == 0 && possibleRoads.length > 0 && tryRemoveCards(state.self.handCards, connectionCost(ConnectionType.Road)) != undefined) {
         return {
             type: GameActionType.PlaceRoad,
             coordinates: possibleRoads[0]

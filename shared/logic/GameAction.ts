@@ -335,7 +335,7 @@ function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: G
     })
 
     
-    const [nextColor, nextPhase] = nextTurn(publicGameState(state))
+    const [nextColor, nextPhase] = nextTurn(state)
     const newBoard = produce(state.board, board => {
         board.buildings.push({ color: executorColor, coord: unfreeze(action.settlement), type: BuildingType.Settlement })
         board.roads.push({ color: executorColor, coord: unfreeze(action.road) })
@@ -350,6 +350,40 @@ function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: G
         devCards: state.devCards,
         knightForce: undefined
     }, undefined]
+}
+export function tryDoPlaceInitialRedacted(state: RedactedGameState, settlement: Coordinate, road: Road): RedactedGameState | undefined {
+        if (!isInitial(state.phase))
+        return undefined
+    
+    if (!isAvailableBuildingPosition(settlement, state.board, undefined))
+        return undefined
+
+    if (!adjacentRoads(settlement).some(x => sameRoad(x, road)))
+        return undefined
+    
+    const newCards = 
+        state.phase.forward ? [] :
+        adjacentResources(settlement, state.board, undefined)
+    
+    const [nextColor, nextPhase] = nextTurn(state)
+    const newBoard = produce(state.board, board => {
+        board.buildings.push({ color: state.self.color, coord: unfreeze(settlement), type: BuildingType.Settlement })
+        board.roads.push({ color: state.self.color, coord: unfreeze(road) })
+        return board
+    })
+    return {
+        currentPlayer: nextColor,
+        phase: nextPhase,
+        players: state.players,
+        board: newBoard,
+        longestRoad: undefined,
+        knightForce: undefined,
+        self: {
+            ...state.self,
+            handCards: newCards
+        },
+        devCardCount: state.devCardCount
+    }
 }
 function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceRobber]): ResultType<GameActionType.PlaceRobber> {
 
