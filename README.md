@@ -1,7 +1,25 @@
-Settlers of Catan, as implemented by the contributors which can be seen on the right.
+# Settlers of Catan
 
-All rights reserved, except of course, the game idea.
+## Current state
 
+The game is fully playable:
+
+![A game in progress](meta/FullGame.png)
+
+Graphically, a lot could be improved, but that is fine-tuning. The implementation works very well and is easily extensible. Currently, a scenario editor as well as bots are being worked on.
+
+![An example of the scenario editor](meta/ScenarioEditorIdea.png)
+
+The scenario editor needs a little bit more thought, but the concept of scenarios works wonderfully already (and is in fact used to generate the default board).
+
+Bots are interesting to implement as their weights are very expressive and the developer can be very creative on which metrics to implement and how to weigh them.
+
+Member registration is done, and even the SQL queries are statically typed using [Kysely](https://github.com/kysely-org/kysely).
+
+![An example of logging in with a user account](meta/LoginModal.png).
+
+
+## Running this project
 
 This project runs with `bun`. To use the project, clone it, then
 ```sh
@@ -13,6 +31,3 @@ bun run dev
 ```
 
 The three steps in the middle are to ensure that you have a valid database where persitent data is stored for the server.
-
-
-Currently, there seems to be an issue with `structurajs` (see a [corresponding pull request](https://github.com/giusepperaso/structura.js/pull/118))

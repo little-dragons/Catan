@@ -362,8 +362,12 @@ defineExpose({
     min-width: min-content;
 }
 
+.cardRenderers > :first-child {
+    flex: 3;
+}
+
 .devCards {
-    flex: 0;
+    flex: 1 70px;
     margin-left: 10px;
     min-width: 70px;
 }

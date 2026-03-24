@@ -33,7 +33,7 @@ defineEmits<{
             <PlayerTradeStatus 
                 v-for="other in others"
                 :color="other.color"
-                icon="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Obama_family_dog_in_the_Rose_Garden_%28cropped%29.jpg/640px-Obama_family_dog_in_the_Rose_Garden_%28cropped%29.jpg"
+                icon="https://upload.wikimedia.org/wikipedia/commons/0/0c/250227nanami.jpg"
                 :status="other.status"
                 :enabled="other.enabled"
                 @status-clicked="() => $emit('acceptColor', other.color)"
