@@ -320,7 +320,7 @@ export function gainedResources(board: Board, color: Color, number: ResourceTile
 }
 
 export function hasColorPort(board: Board, color: Color, res: PortResource): boolean {
-    const ports = board.tiles.filter(x => x.type == TileType.Port)
+    const ports = board.tiles.filter(x => x.type == TileType.Port).filter(x => x.resource == res)
     return board.buildings.some(x => x.color == color && ports.some(port => isPointForPort(port, x.coord)))
 }
 
