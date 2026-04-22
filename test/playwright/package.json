@@ -1,5 +1,5 @@
 {
-  "name": "playwright-test",
+  "name": "catan-test-playwright",
   "version": "1.0.0",
   "scripts": {
     "test": "bunx playwright test"

@@ -2,12 +2,9 @@
   "name": "catan",
   "version": "1.0.0",
   "scripts": {
-    "dev": "concurrently \"cd server && bun run dev\" \"cd client && bun run dev\"",
-    "prod": "concurrently \"cd server && bun run prod\" \"cd client && bun run prod\"",
-    "test": "cd test/playwright && bun run test && cd ../logic && bun test"
-  },
-  "dependencies": {
-    "concurrently": "^9.2.1"
+    "dev": "FORCE_COLOR=1 bun run --filter '{catan-client,catan-server}' dev",
+    "prod": "FORCE_COLOR=1 bun run --filter '{catan-client,catan-server}' prod",
+    "test": "FORCE_COLOR=1 bun run --filter '{catan-test-}*' --sequential test"
   },
   "workspaces": {
     "packages": ["client", "shared", "server", "test/playwright", "test/logic"],
