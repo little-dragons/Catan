@@ -62,12 +62,16 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
         const ended = checkAndHandleEndGame(io, room)
         if (ended) return
 
+
         while (requireActionFrom(room.state).some(x => room.bots.some(([_, col]) => col == x))) {
             const botColors = requireActionFrom(room.state).filter(x => room.bots.some(bot => bot[1] == x))
             const botAction = generateBotAction(
                                     room.bots.find(x => x[1] == botColors[0])![0], 
                                     redactGameStateFor(room.state, botColors[0]))
-            
+            if (botAction == undefined) {
+                console.warn('Bot generated an undefined action!')
+                continue
+            }
             const res = handleGameAction(room, botColors[0], botAction)
             if (res == 'action not allowed')
                 console.warn('Bot generated invalid action!', botAction)

@@ -2,7 +2,7 @@ import { Freeze } from "structurajs"
 import { adjacentColorsToTile, adjacentRoads, availableRoadPositions, Coordinate, landTiles, portsForCoord, portsForColor, resourceFrequenciesForColor, resourceFrequencyForBuilding, sameCoordinate, SpecialPorts, Board } from "./Board"
 import { availableBuildingPositions, BuildingType, ConnectionType } from "./Buildings"
 import { GameActionInput, GameActionType, tryDoPlaceInitialRedacted } from "./GameAction"
-import { GamePhaseType, RedactedGameState, RobbingPhaseType, TurnPhaseType, victoryPointsFromRedacted } from "./GameState"
+import { GamePhaseType, isRobbingDiscardingCards, RedactedGameState, RobbingPhaseType, TurnPhaseType, victoryPointsFromRedacted, requireActionFrom } from "./GameState"
 import { allResources, buildingCost, CardList, connectionCost, Resource, tryRemoveCards, tryTransferCard } from "./Resource"
 import { Color } from "./Player"
 import { addDistribution, Distribution, downcastRecord, foldRecord, mapRecord, popcountDistribution, sumbyRecord, sumDistribution } from "./Distribution"
@@ -146,7 +146,23 @@ export function activeAction(bot: Bot, state: RedactedGameState): GameActionInpu
     }
 }
 
-export function generateBotAction(bot: Bot, state: RedactedGameState): GameActionInput {
+/**
+ * Generates the next action for the bot. A sensical precondition is that {@link requireActionFrom} is valid for {@link state~self~color}.
+ * @param bot The bot parameters.
+ * @param state It is assumed that the state is redacted for the bot, such that {@link state~self~color} is the color of the bot.
+ * @returns `undefined` if the bot cannot generate an action, otherwise a valid action.
+ */
+export function generateBotAction(bot: Bot, state: RedactedGameState): GameActionInput | undefined {
+    if (isRobbingDiscardingCards(state.phase) && state.phase.playersLeftToDiscard.includes(state.self.color)) {
+        return {
+            type: GameActionType.DiscardResources,
+            resources: cardsToDiscard(bot, state)
+        }
+    }
+
+    if (state.currentPlayer != state.self.color)
+        return undefined
+
     if (state.phase.type == GamePhaseType.Initial) {
         const [settlement, road] = initialSettlementPlacement(bot, state)
         return {
@@ -158,7 +174,7 @@ export function generateBotAction(bot: Bot, state: RedactedGameState): GameActio
     
     switch (state.phase.subtype) {
         case TurnPhaseType.Robbing: {
-            if (state.phase.robtype == RobbingPhaseType.DiscardingCards) {
+            if (state.phase.robtype == RobbingPhaseType.DiscardingCards && state.phase.playersLeftToDiscard.includes(state.self.color)) {
                 return {
                     type: GameActionType.DiscardResources,
                     resources: cardsToDiscard(bot, state)
