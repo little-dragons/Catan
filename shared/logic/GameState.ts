@@ -191,8 +191,8 @@ export function victoryPointsFromRedacted(state: RedactedGameState, color: Color
 }
 
 
-export function requireActionFrom(state: FullGameState): Color[] {
+export function requireActionFrom(state: FullGameState): readonly Color[] {
     if (isRobbingDiscardingCards(state.phase))
-        return state.players.filter(x => x.handCards.length > 7).map(x => x.color)
+        return state.phase.playersLeftToDiscard
     return [state.currentPlayer] 
 }
