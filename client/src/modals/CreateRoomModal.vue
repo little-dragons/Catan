@@ -18,7 +18,7 @@ async function buttonClick() {
     if (roomInput.value?.result == null)
         return
 
-    const res = await currentRoom.tryCreate(roomInput.value.result)
+    const res = await currentRoom.tryCreateOnline(roomInput.value.result)
     switch (res) {
         case RoomOPResult.Success:
             modalStore.value = undefined

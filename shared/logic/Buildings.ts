@@ -1,4 +1,4 @@
-import { Board, Coordinate, adjacentCrossings, adjacentRoads, allCrossings, crossingAdjacentToLand, sameCoordinate, sameRoad} from "./Board";
+import { type Board, type Coordinate, adjacentCrossings, adjacentRoads, allCrossings, crossingAdjacentToLand, sameCoordinate, sameRoad} from "./Board";
 import { Color } from "./Player";
 
 export enum BuildingType {

@@ -17,9 +17,9 @@ watch(roomStore, () => {
 </script>
 
 <template>
-    <Lobby v-if="roomStore.info?.type === RoomType.Lobby"/>
-    <Game v-else-if="roomStore.info?.type === RoomType.InGame" />
-    <History v-else-if="roomStore.info?.type === RoomType.PostGame" :history="roomStore.info.history" />
+    <Lobby v-if="roomStore.info?.room.type === RoomType.Lobby"/>
+    <Game v-else-if="roomStore.info?.room.type === RoomType.InGame" />
+    <History v-else-if="roomStore.info?.room.type === RoomType.PostGame" :history="roomStore.info.room.history" />
     <p v-else>This is not supposed to be shown. Try reloading the page.</p>
 </template>
 

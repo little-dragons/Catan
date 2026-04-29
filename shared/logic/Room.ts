@@ -1,10 +1,10 @@
-import { User } from '../authentication/User';
-import { FullGameState, RedactedGameState } from './GameState';
-import { Color } from './Player';
-import { Settings } from './Settings';
-import { History, Statistics } from './History';
-import { Bot } from './Bots';
-import { Scenario } from './Scenario';
+import { type User } from '../authentication/User';
+import { type FullGameState, type RedactedGameState } from './GameState';
+import { type Color } from './Player';
+import { type Settings } from './Settings';
+import { type History } from './History';
+import { type Bot } from './Bots';
+import { type Scenario } from './Scenario';
 
 export type RoomId = string
 export enum RoomType {
@@ -19,9 +19,11 @@ export enum ParticipantType {
 export type Participant = {
     type: ParticipantType.User,
     user: User
+    color: Color
 } | {
     type: ParticipantType.Bot
     bot: Bot
+    color: Color
 }
 export function participantName(p: Participant): string {
     if (p.type == ParticipantType.User)
@@ -34,7 +36,7 @@ type CommonRoom = {
     name: string
     id: RoomId
     owner: User
-    participants: [Participant, Color][]
+    participants: Participant[]
     settings: Settings
     scenario: Scenario
 }

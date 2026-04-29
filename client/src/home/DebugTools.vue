@@ -15,7 +15,7 @@ const currentRoom = useCurrentRoomStore()
 
 async function debugLogin() {
     await currentUser.tryGuestLogin(`debugUser${v4().substring(0, 5)}`)
-    await currentRoom.tryCreate(`debugRoom${v4().substring(0, 5)}`)
+    await currentRoom.tryCreateOnline(`debugRoom${v4().substring(0, 5)}`)
     router.push({ name: 'room' })
 }
 

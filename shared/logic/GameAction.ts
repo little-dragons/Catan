@@ -1,10 +1,10 @@
 import { produce, unfreeze } from "structurajs"
-import { adjacentResources, adjacentRoads, availableRoadPositions, colorWithLongestRoad, Coordinate, gainedResources, isAvailableRoadPosition, ResourceTileNumber, Road, sameCoordinate, sameRoad } from "./Board"
+import { adjacentResources, adjacentRoads, availableRoadPositions, colorWithLongestRoad, type Coordinate, gainedResources, isAvailableRoadPosition, type ResourceTileNumber, type Road, sameCoordinate, sameRoad } from "./Board"
 import { BuildingType, ConnectionType, availableBuildingPositions, isAvailableBuildingPosition } from "./Buildings"
-import { FullGameState, nextTurn, GamePhaseType, DieResult, isPreDiceRoll, TurnPhaseType, isActive, isInitial, isRobbingDiscardingCards, isRobbingMovingRobber, RobbingPhaseType, RedactedGameState, publicGameState } from "./GameState"
+import { type FullGameState, nextTurn, GamePhaseType, type DieResult, isPreDiceRoll, TurnPhaseType, isActive, isInitial, isRobbingDiscardingCards, isRobbingMovingRobber, RobbingPhaseType, type RedactedGameState, publicGameState } from "./GameState"
 import { Color } from "./Player"
 import { addCards, buildingCost, connectionCost, devCardCost, Resource, tryRemoveCards } from "./Resource"
-import { canTradeWithBank, FinalizedTrade, isValidOffer, OpenTradeOffer, sameTradeOffer, TradeOffer, TradeStatusByColor } from "./Trade"
+import { canTradeWithBank, type FinalizedTrade, isValidOffer, type OpenTradeOffer, sameTradeOffer, type TradeOffer, TradeStatusByColor } from "./Trade"
 import { allRobbableCrossings, allRobbableCrossingsExcept, robbableCrossingsForColor, validNewRobberPosition } from "./Robber"
 
 

@@ -54,24 +54,24 @@ function handleClickEvent(point: UserSelectionDataType<UserSelectionType>, mouse
             v-if="interactionPoints.type == UserSelectionType.Crossing"
             v-for="point in interactionPoints.positions" 
             :position="crossingPosition(point)"
-            @click="ev => handleClickEvent(point, ev)"
-            @keydown="ev => handleKeyEvent(point, ev)"
+            @click="(ev: MouseEvent) => handleClickEvent(point, ev)"
+            @keydown="(ev: KeyboardEvent) => handleKeyEvent(point, ev)"
         />
 
         <InteractionPoint 
             v-if="interactionPoints.type == UserSelectionType.Tile"
             v-for="point in interactionPoints.positions" 
             :position="tileCenter(point)"
-            @click="ev => handleClickEvent(point, ev)"
-            @keydown="ev => handleKeyEvent(point, ev)"
+            @click="(ev: MouseEvent) => handleClickEvent(point, ev)"
+            @keydown="(ev: KeyboardEvent) => handleKeyEvent(point, ev)"
         />
         
         <InteractionPoint 
             v-if="interactionPoints.type == UserSelectionType.Connection"
             v-for="road in interactionPoints.positions" 
             :position="roadCenter(road)"
-            @click="ev => handleClickEvent(road, ev)"
-            @keydown="ev => handleKeyEvent(road, ev)"
+            @click="(ev: MouseEvent) => handleClickEvent(road, ev)"
+            @keydown="(ev: KeyboardEvent) => handleKeyEvent(road, ev)"
         />
     </g>
 </template>

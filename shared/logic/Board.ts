@@ -4,7 +4,7 @@ import { Resource } from "./Resource"
 import { BuildingType } from "./Buildings"
 import { v4 } from "uuid"
 import { type Freeze } from "structurajs"
-import { addDistribution, Distribution, setRecord } from "./Distribution"
+import { addDistribution, type Distribution, setRecord } from "./Distribution"
 
 // Coordinate has two meaning, depending on whether tiles or crossings are indexed.
 // The first coordinate always refers to the horizontal degree, left to right, the

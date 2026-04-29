@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Setting from './Setting.vue'
-import { RoomOPResult, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
+import { RoomLocation, RoomOPResult, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import router from '@/misc/Router';
 import SideMenu from '@/misc/SideMenu.vue';
 import { cssColor, participantName, ParticipantType, UserType, isValidSetting, type Settings } from 'catan-shared';
@@ -24,7 +24,8 @@ async function changeSetting<Key extends keyof Settings>(key: Key, value: string
 </script>
 
 <template>
-    <h1>Lobby - {{ currentRoom.info!.name }}</h1>
+    <h1 v-if="currentRoom.info?.type == RoomLocation.Online">Lobby - {{ currentRoom.info.room.name }}</h1>
+    <h1 v-else-if="currentRoom.info?.type == RoomLocation.Offline">Lobby - Offline</h1>
     <div class="container">
         <div>            
             <div class="default-grid-header-layout grid-columns">
@@ -32,15 +33,15 @@ async function changeSetting<Key extends keyof Settings>(key: Key, value: string
                 <p>Type</p>
                 <p>Color</p>
             </div>
-            <div v-for="user in currentRoom.info?.participants" class="default-grid-layout grid-columns">
-                <p>{{ participantName(user[0]) }}</p>
-                <p>{{ user[0].type == ParticipantType.Bot ? 'Bot' : user[0].user.type == UserType.Member ? 'Member' : 'Guest' }}</p>
-                <p class="color-icon" :style="`background-color: ${cssColor(user[1])}`"></p>
+            <div v-for="user in currentRoom.info?.room.participants" class="default-grid-layout grid-columns">
+                <p>{{ participantName(user) }}</p>
+                <p>{{ user.type == ParticipantType.Bot ? 'Bot' : user.user.type == UserType.Member ? 'Member' : 'Guest' }}</p>
+                <p class="color-icon" :style="`background-color: ${cssColor(user.color)}`"></p>
             </div>
             <button 
                 class="bot-button"
                 :title="currentRoom.isOwner ? 'Add bot' : 'Only the owner can add a bot'"
-                :disabled="!currentRoom.isOwner || currentRoom.info!.participants.length >= currentRoom.info!.scenario.players.maxAllowedCount"
+                :disabled="!currentRoom.isOwner || currentRoom.info!.room.participants.length >= currentRoom.info!.room.scenario.players.maxAllowedCount"
                 @click="currentRoom.tryAddBot()">
                 Add bot
             </button>
@@ -48,17 +49,17 @@ async function changeSetting<Key extends keyof Settings>(key: Key, value: string
         <SideMenu>
             <Setting 
                 name="Required victory points" 
-                :initial="currentRoom.info!.settings.requiredVictoryPoints.toString()"
+                :initial="currentRoom.info!.room.settings.requiredVictoryPoints.toString()"
                 :isValid="val => isValidSetting('requiredVictoryPoints', val) != undefined"
                 :update="currentRoom.isOwner ? (val => changeSetting('requiredVictoryPoints', val)) : undefined"/>
             <Setting 
                 name="Minimal longest road" 
-                :initial="currentRoom.info!.settings.longestRoadMinimum.toString()"
+                :initial="currentRoom.info!.room.settings.longestRoadMinimum.toString()"
                 :isValid="val => isValidSetting('longestRoadMinimum', val) != undefined"
                 :update="currentRoom.isOwner ? (val => changeSetting('longestRoadMinimum', val)) : undefined"/>
             <Setting 
                 name="Seed" 
-                :initial="currentRoom.info!.settings.seed"
+                :initial="currentRoom.info!.room.settings.seed"
                 :isValid="val => isValidSetting('seed', val) != undefined"
                 :update="currentRoom.isOwner ? (val => changeSetting('seed', val)) : undefined"/>
 

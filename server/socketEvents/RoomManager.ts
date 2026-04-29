@@ -36,10 +36,10 @@ type RoomSocket = Socket<RoomServerEventMap, RoomClientEventMap, {}, SocketDataT
 export async function usersForRoom(io: SocketServerType, roomId: RoomId) {
     return (await io.in(roomId).fetchSockets()).map(x => [x.data.user, x.data.room![1]] as [User, Color])
 }
-export async function participantsForRoom(io: SocketServerType, roomId: RoomId): Promise<[Participant, Color][]> {
-    const users = (await io.in(roomId).fetchSockets()).map<[Participant, Color]>(x => 
-                        [{ type: ParticipantType.User, user: x.data.user! }, x.data.room![1]])
-    const bots = rooms.get(roomId)?.bots.map<[Participant, Color]>(([bot, col]) => [{ type: ParticipantType.Bot, bot: bot }, col])
+export async function participantsForRoom(io: SocketServerType, roomId: RoomId): Promise<Participant[]> {
+    const users = (await io.in(roomId).fetchSockets()).map<Participant>(x => 
+                        { return { type: ParticipantType.User, user: x.data.user!, color: x.data.room![1] } })
+    const bots = rooms.get(roomId)?.bots.map<Participant>(bot => { return { type: ParticipantType.Bot, bot: bot[0], color: bot[1] } })
     return users.concat(bots ?? [])
 }
 
@@ -50,7 +50,7 @@ export async function initializeGame(io: SocketServerType, room: ServerLobbyRoom
     }
     const participants = await participantsForRoom(io, room.id)
     // TODO correct current player
-    const state = generateStateFromScenario(room.scenario, participants.map(x => x[1]), participants[0][1], room.settings.seed)
+    const state = generateStateFromScenario(room.scenario, participants.map(x => x.color), participants[0].color, room.settings.seed)
     if (state == undefined)
         return 'could not generate state'
 
@@ -110,7 +110,7 @@ async function joinRoom(io: SocketServerType, socket: RoomSocket, id: RoomId) {
 
 
     const otherParticipants = await participantsForRoom(io, id)
-    const usedColors = otherParticipants.map(x => x[1])
+    const usedColors = otherParticipants.map(x => x.color)
     const remainingColors = allColors.filter(x => !usedColors.includes(x))
     socket.data.room = [id, remainingColors[Math.floor(Math.random() * remainingColors.length)]]
     socket.join(id)
@@ -205,7 +205,7 @@ export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
         if (participants.length >= room.scenario.players.maxAllowedCount)
             return cb('room full')
 
-        const freeColors = allColors.filter(x => !participants.some(([_, col]) => x == col))
+        const freeColors = allColors.filter(x => !participants.some(p => x == p.color))
         const botColor = freeColors[Math.floor(Math.random() * freeColors.length)]
         room.bots.push([{
             name: 'Vincent',

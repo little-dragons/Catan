@@ -1,5 +1,5 @@
-import { Freeze } from "structurajs"
-import { CardList } from "./Resource"
+import { type Freeze } from "structurajs"
+import { type CardList } from "./Resource"
 import { DevCardType } from "./GameAction"
 
 export type RedactedPlayer = Freeze<{

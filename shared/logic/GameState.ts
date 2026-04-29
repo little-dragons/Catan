@@ -1,9 +1,8 @@
-import { Board, Coordinate, mapFilter, Road, sameCoordinate } from "./Board"
-import { Color, FullPlayer, RedactedPlayer, redactPlayer } from "./Player"
+import { type Board } from "./Board"
+import { Color, type FullPlayer, type RedactedPlayer, redactPlayer } from "./Player"
 import { BuildingType } from "./Buildings"
-import { produce, type Freeze } from "structurajs"
-import { Resource } from "./Resource"
-import { OpenTradeOffer } from "./Trade"
+import { type Freeze } from "structurajs"
+import { type OpenTradeOffer } from "./Trade"
 import { DevCardType } from "./GameAction"
 
 export enum GamePhaseType {

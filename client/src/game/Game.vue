@@ -5,14 +5,14 @@ import GameRenderer, { type ForbiddableButtons } from './GameRenderer.vue';
 import { type PlayerOverviewData } from '../game-components/PlayerOverviewRenderer.vue';
 import { UserSelectionType } from '../game-components/board/UserSelection';
 import type { TradeMenuRendererProps } from '../game-components/trade/TradeMenuRenderer.vue';
-import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
+import { RoomLocation, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import type { DiscardMenuRendererProps } from '../game-components/DiscardRenderer.vue';
 import { isDevelopment } from '@/misc/Globals';
 
 const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
 
 const room = useCurrentRoomStore()
-const state = computed(() => room.info?.type == RoomType.InGame ? room.info.state : undefined)
+const state = computed(() => room.info?.room.type == RoomType.InGame ? room.info?.room.state : undefined)
 const customBoard = ref<Board | undefined>(undefined)
 
 const forbiddableButtons = computed<ForbiddableButtons | undefined>(() => {
@@ -34,8 +34,8 @@ const others = computed<[Participant, RedactedPlayer][]>(() => {
     if (state.value == undefined || room.info == undefined)
         return []
 
-    const otherUsers: [Participant, Color][] = room.info.participants.filter(x => x[1] != state.value?.self.color)
-    return otherUsers.map(user => [user[0], state.value?.players.find(player => player.color == user[1])!] as [Participant, RedactedPlayer])
+    const otherUsers: Participant[] = room.info.room.participants.filter(x => x.color != state.value?.self.color)
+    return otherUsers.map(user => [user, state.value?.players.find(player => player.color == user.color)!] as [Participant, RedactedPlayer])
 })
 
 const othersOverview = computed(() => {

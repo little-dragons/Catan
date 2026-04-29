@@ -1,9 +1,9 @@
-import { LobbyRoom, RedactedGameRoom, RoomId } from "../logic/Room"
-import { RedactedGameState } from "../logic/GameState"
-import { Settings } from "../logic/Settings"
-import { GameActionInput } from "../logic/GameAction"
-import { User } from "../authentication/User"
-import { PasswordNonce } from "../authentication/Password"
+import type { LobbyRoom, RedactedGameRoom, RoomId } from "../logic/Room"
+import type { RedactedGameState } from "../logic/GameState"
+import type { Settings } from "../logic/Settings"
+import type { GameActionInput } from "../logic/GameAction"
+import type { User } from "../authentication/User"
+import type { PasswordNonce } from "../authentication/Password"
 
 export type GuestLoginError = 'name in use' | 'name not allowed'
 export type MemberLoginError = 'invalid password' | 'name unknown' | 'already logged in'

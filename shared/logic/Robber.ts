@@ -1,4 +1,4 @@
-import { Board, Coordinate, sameCoordinate, isLandTile, allCrossings, CoordinateTile, adjacentCrossings, crossingAdjacentToTile } from "./Board"
+import { type Board, type Coordinate, sameCoordinate, isLandTile, type CoordinateTile, crossingAdjacentToTile } from "./Board"
 import { type PublicGameState } from "./GameState"
 import { Color } from "./Player"
 

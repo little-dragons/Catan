@@ -1,11 +1,11 @@
-import { Freeze } from "structurajs"
-import { adjacentColorsToTile, adjacentRoads, availableRoadPositions, Coordinate, landTiles, portsForCoord, portsForColor, resourceFrequenciesForColor, resourceFrequencyForBuilding, sameCoordinate, SpecialPorts, Board } from "./Board"
+import { type Freeze } from "structurajs"
+import { adjacentColorsToTile, adjacentRoads, availableRoadPositions, type Coordinate, landTiles, portsForColor, resourceFrequenciesForColor, sameCoordinate, SpecialPorts, type Board } from "./Board"
 import { availableBuildingPositions, BuildingType, ConnectionType } from "./Buildings"
-import { GameActionInput, GameActionType, tryDoPlaceInitialRedacted } from "./GameAction"
-import { GamePhaseType, isRobbingDiscardingCards, RedactedGameState, RobbingPhaseType, TurnPhaseType, victoryPointsFromRedacted, requireActionFrom } from "./GameState"
-import { allResources, buildingCost, CardList, connectionCost, Resource, tryRemoveCards, tryTransferCard } from "./Resource"
+import { type GameActionInput, GameActionType, tryDoPlaceInitialRedacted } from "./GameAction"
+import { GamePhaseType, isRobbingDiscardingCards, type RedactedGameState, RobbingPhaseType, TurnPhaseType, victoryPointsFromRedacted, requireActionFrom } from "./GameState"
+import { buildingCost, type CardList, connectionCost, Resource, tryRemoveCards, tryTransferCard } from "./Resource"
 import { Color } from "./Player"
-import { addDistribution, Distribution, downcastRecord, foldRecord, mapRecord, popcountDistribution, sumbyRecord, sumDistribution } from "./Distribution"
+import { type Distribution, mapRecord, popcountDistribution, sumDistribution } from "./Distribution"
 
 export enum BotPersonality {
     Vincent // The trader
