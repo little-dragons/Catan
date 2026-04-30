@@ -6,7 +6,7 @@ import { Color } from "./Player";
 import { Resource } from "./Resource";
 import seedrandom from 'seedrandom'
 import { type DistributedGeneration, type IndexedGeneration, type SelectGeneration, type ScenarioTileGroup, GenerationMethod, type Scenario, type Seed, ScenarioStartingPhaseType, ScenarioRobberPlacement, ScenarioResourceNumberAssignmentMethod, type ResourceNumberAssignmentInfo } from "./Scenario";
-import { type Freeze } from "structurajs";
+import { type Pure } from "../Pure";
 
 export const defaultScenario: Scenario = {
     players: {
@@ -209,7 +209,7 @@ function retrieveIndexedGeneration<T>(dist: IndexedGeneration<T>, rng: () => num
     if (indices.slice(0, source.length).some(i => i >= source.length))
         return GenerationFailure.IndicesOutOfRange
 
-    return source.map<Freeze<T>>((_value, i) => source[indices[i]])
+    return source.map<Pure<T>>((_value, i) => source[indices[i]])
 }
 function retrieveSelectGeneration<T>(dist: SelectGeneration<T>, rng: () => number) {
     if (dist.data.length == 0)

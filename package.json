@@ -26,7 +26,6 @@
         "socket.io-client": "^4.8.3",
         "bcrypt": "^6.0.0",
         "seedrandom": "^3.0.5",
-        "structurajs": "^0.12.8",
         "typescript": "^5.9.3",
         "uuid": "^13.0.0"
       }

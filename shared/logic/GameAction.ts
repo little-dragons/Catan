@@ -1,4 +1,3 @@
-import { produce, unfreeze } from "structurajs"
 import { adjacentResources, adjacentRoads, availableRoadPositions, colorWithLongestRoad, type Coordinate, gainedResources, isAvailableRoadPosition, type ResourceTileNumber, type Road, sameCoordinate, sameRoad } from "./Board"
 import { BuildingType, ConnectionType, availableBuildingPositions, isAvailableBuildingPosition } from "./Buildings"
 import { type FullGameState, nextTurn, GamePhaseType, type DieResult, isPreDiceRoll, TurnPhaseType, isActive, isInitial, isRobbingDiscardingCards, isRobbingMovingRobber, RobbingPhaseType, type RedactedGameState, publicGameState } from "./GameState"
@@ -256,11 +255,10 @@ function tryDoPlaceSettlement(state: FullGameState, executorColor: Color, action
     if (newCards == undefined)
         return undefined
 
-    return [produce(state, newState => {
-        newState.players[executorIdx].handCards = unfreeze(newCards)
-        newState.board.buildings.push({ color: executorColor, coord: unfreeze(action.coordinate), type: BuildingType.Settlement })
-        return newState
-    }), undefined]
+    return [{ ...state,
+        board: { ...state.board, buildings: [{ color: executorColor, coord: action.coordinate, type: BuildingType.Settlement }, ...state.board.buildings] },
+        players: state.players.with(executorIdx, { ...state.players[executorIdx], handCards: newCards })
+    }, undefined]
 }
 function tryDoPlaceCity(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceCity]): ResultType<GameActionType.PlaceCity> {
     if (!isActive(state.phase) || executorColor != state.currentPlayer)
@@ -283,10 +281,14 @@ function tryDoPlaceCity(state: FullGameState, executorColor: Color, action: Game
     if (newCards == undefined)
         return undefined
 
-    return [produce(state, newState => {
-        newState.players[executorIdx].handCards = unfreeze(newCards)
-        newState.board.buildings[validSettlementIdx] = { color: executorColor, coord: unfreeze(action.coordinate), type: BuildingType.City }
-    }), undefined]
+    return [{ ...state,
+        board: { ...state.board, buildings: state.board.buildings.with(validSettlementIdx, { color: executorColor, coord: action.coordinate, type: BuildingType.City })},
+        players: state.players.with(executorIdx, { ...state.players[executorIdx], handCards: newCards })
+    }, undefined]
+    // return [refine(state, newState => {
+    //     newState.players[executorIdx].handCards = unfreeze(newCards)
+    //     newState.board.buildings[validSettlementIdx] = { color: executorColor, coord: unfreeze(action.coordinate), type: BuildingType.City }
+    // }), undefined]
 }
 function tryDoPlaceRoad(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceRoad]): ResultType<GameActionType.PlaceRoad> {
     if (!isActive(state.phase) || executorColor != state.currentPlayer)
@@ -304,14 +306,15 @@ function tryDoPlaceRoad(state: FullGameState, executorColor: Color, action: Game
         return undefined
 
     // check for longest road
-    const newBoard = produce(state.board, newBoard => { newBoard.roads.push({ color: executorColor, coord: unfreeze(action.coordinates) }) })
+    // const newBoard = refine(state.board, d => { d.roads.push({ color: executorColor, coord: unfreeze(action.coordinates) }) })
+    const newBoard = { ...state.board, roads: state.board.roads.concat({ color: executorColor, coord: action.coordinates }) }
     const longestRoad = colorWithLongestRoad(newBoard, state.longestRoad)
 
-    return [produce(state, newState => {
-        newState.players[executorIdx].handCards = unfreeze(newCards)
-        newState.board.roads.push({ color: executorColor, coord: unfreeze(action.coordinates) })
-        newState.longestRoad = longestRoad
-    }), undefined]
+    return [{ ...state,
+        longestRoad,
+        board: { ...state.board, roads: state.board.roads.concat([{ color: executorColor, coord: action.coordinates }])  },
+        players: state.players.with(executorIdx, { ...state.players[executorIdx], handCards: newCards })
+    }, undefined]
 }
 function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceInitial]): ResultType<GameActionType.PlaceInitial> {
     if (!isInitial(state.phase) || executorColor != state.currentPlayer)
@@ -336,11 +339,11 @@ function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: G
 
     
     const [nextColor, nextPhase] = nextTurn(state)
-    const newBoard = produce(state.board, board => {
-        board.buildings.push({ color: executorColor, coord: unfreeze(action.settlement), type: BuildingType.Settlement })
-        board.roads.push({ color: executorColor, coord: unfreeze(action.road) })
-        return board
-    })
+    const newBoard = {
+        ...state.board,
+        buildings: [{ color: executorColor, coord: action.settlement, type: BuildingType.Settlement }, ...state.board.buildings],
+        roads: [{ color: executorColor, coord: action.road }, ...state.board.roads]
+    }
     return [{
         currentPlayer: nextColor,
         phase: nextPhase,
@@ -366,11 +369,15 @@ export function tryDoPlaceInitialRedacted(state: RedactedGameState, settlement: 
         adjacentResources(settlement, state.board, undefined)
     
     const [nextColor, nextPhase] = nextTurn(state)
-    const newBoard = produce(state.board, board => {
-        board.buildings.push({ color: state.self.color, coord: unfreeze(settlement), type: BuildingType.Settlement })
-        board.roads.push({ color: state.self.color, coord: unfreeze(road) })
-        return board
-    })
+    const newBoard = { ...state.board,
+        buildings: state.board.buildings.concat({ color: state.self.color, coord: settlement, type: BuildingType.Settlement }),
+        roads: state.board.roads.concat({ color: state.self.color, coord: road })
+    }
+    // const newBoard = refine(state.board, board => {
+    //     board.buildings.push({ color: state.self.color, coord: unfreeze(settlement), type: BuildingType.Settlement })
+    //     board.roads.push({ color: state.self.color, coord: unfreeze(road) })
+    //     return board
+    // })
     return {
         currentPlayer: nextColor,
         phase: nextPhase,
@@ -418,10 +425,12 @@ function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: Ga
                 subtype: TurnPhaseType.Active,
                 tradeOffers: []
             },
-            players: produce(state.players, x => {
-                x[robbedPlayerIdx].handCards = robbedPlayerCards.toSpliced(robbedResourceIdx, 1)
-                x[executorIdx].handCards.push(robbedResource)
-            }),
+            players: state.players.with(robbedPlayerIdx, { ...state.players[robbedPlayerIdx], handCards: robbedPlayerCards.toSpliced(robbedResourceIdx, 1) })
+                                  .with(executorIdx, { ...state.players[executorIdx], handCards: state.players[executorIdx].handCards.concat(robbedResource)}),
+                // refine(state.players, x => {
+                // x[robbedPlayerIdx].handCards = robbedPlayerCards.toSpliced(robbedResourceIdx, 1)
+                // x[executorIdx].handCards.push(robbedResource)
+            // }),
             board: {...state.board,
                 robber: action.coordinate
             }
@@ -459,9 +468,9 @@ function tryDoBankTrade(state: FullGameState, executorColor: Color, action: Game
 
     const newCards = cardsAfterPayment.concat(action.desiredCards)
 
-    return [produce(state, newState => {
-        newState.players[executorIdx].handCards = newCards
-    }), undefined]
+    return [{ ...state,
+        players: state.players.with(executorIdx, { ...state.players[executorIdx], handCards: newCards })
+    }, undefined]
 }
 function tryDoOfferTrade(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.OfferTrade]): ResultType<GameActionType.OfferTrade> {
     const executorIdx = state.players.findIndex(x => x.color == executorColor)
@@ -500,29 +509,29 @@ function tryDoAcceptTradeOffer(state: FullGameState, executorColor: Color, actio
         return undefined
 
     const partnerCards = state.players[executorIdx].handCards
-    const tradeOffer = state.phase.tradeOffers.find(x => sameTradeOffer(x, action.trade))
-    
-    if (tradeOffer == undefined)
+    const tradeOfferIdx = state.phase.tradeOffers.findIndex(x => sameTradeOffer(x, action.trade))
+    if (tradeOfferIdx < 0)
         return undefined
+    
+    const tradeOffer = state.phase.tradeOffers[tradeOfferIdx]
     if (tryRemoveCards(partnerCards, action.trade.desiredCards) == undefined)
         return undefined
 
-    const currentStatus = tradeOffer.otherColors.find(x => x.color == executorColor)?.status
-    if (currentStatus == undefined)
+    const otherColorsExecIdx = tradeOffer.otherColors.findIndex(x => x.color == executorColor)
+    if (otherColorsExecIdx < 0)
         return undefined
 
     return [{
         ...state,
         phase: {
             ...state.phase,
-            tradeOffers: produce(state.phase.tradeOffers, to => { 
-                to
-                    .find(x => sameTradeOffer(x, action.trade))!
-                    .otherColors
-                    .find(y => y.color == executorColor)!
-                    .status = TradeStatusByColor.Accepting
-                return to 
-            })
+            tradeOffers: 
+                state.phase.tradeOffers.with(tradeOfferIdx, { ...tradeOffer, 
+                                                otherColors: tradeOffer.otherColors.with(otherColorsExecIdx, {
+                                                    ...tradeOffer.otherColors[otherColorsExecIdx],
+                                                    status: TradeStatusByColor.Accepting
+                                            }) 
+                                        })
         }
     }, undefined]
 }
@@ -530,27 +539,27 @@ function tryDoRejectTradeOffer(state: FullGameState, executorColor: Color, actio
     if (!isActive(state.phase) || executorColor == state.currentPlayer)
         return undefined
 
-    const tradeOffer = state.phase.tradeOffers.find(x => sameTradeOffer(x, action.trade))
-    
-    if (tradeOffer == undefined)
+    const tradeOfferIdx = state.phase.tradeOffers.findIndex(x => sameTradeOffer(x, action.trade))
+    if (tradeOfferIdx < 0)
         return undefined
+    
+    const tradeOffer = state.phase.tradeOffers[tradeOfferIdx]
 
-    const currentStatus = tradeOffer.otherColors.find(x => x.color == executorColor)?.status
-    if (currentStatus == undefined)
+    const otherColorsExecIdx = tradeOffer.otherColors.findIndex(x => x.color == executorColor)
+    if (otherColorsExecIdx < 0)
         return undefined
 
     return [{
         ...state,
         phase: {
             ...state.phase,
-            tradeOffers: produce(state.phase.tradeOffers, to => { 
-                to
-                    .find(x => sameTradeOffer(x, action.trade))!
-                    .otherColors
-                    .find(y => y.color == executorColor)!
-                    .status = TradeStatusByColor.Rejecting
-                return to 
-            })
+            tradeOffers:
+                state.phase.tradeOffers.with(tradeOfferIdx, { ...tradeOffer, 
+                                                otherColors: tradeOffer.otherColors.with(otherColorsExecIdx, {
+                                                    ...tradeOffer.otherColors[otherColorsExecIdx],
+                                                    status: TradeStatusByColor.Rejecting
+                                            }) 
+                                        })
         }
     }, undefined]
 
@@ -570,26 +579,23 @@ function tryDoFinalizeTrade(state: FullGameState, executorColor: Color, action: 
     if (!tradeObj.otherColors.some(x => x.color == partnerColor && x.status == TradeStatusByColor.Accepting))
         return undefined
 
-    const partnerCards = state.players.find(x => x.color == partnerColor)
-    if (partnerCards == undefined)
+    const partnerIdx = state.players.findIndex(x => x.color == partnerColor)
+    if (partnerIdx < 0 == undefined)
         return undefined
+    const partner = state.players[partnerIdx]
 
-    const newPartnerCards = tryRemoveCards(partnerCards.handCards, tradeObj.desiredCards)
+    const newPartnerCards = tryRemoveCards(partner.handCards, tradeObj.desiredCards)
     const newPlayerCards = tryRemoveCards(state.players[executorIdx].handCards, tradeObj.offeredCards)
     if (newPartnerCards == undefined ||
         newPlayerCards == undefined)
         return undefined
 
-    return [{
-        ...state,
-        players: produce(state.players, newPlayers => {
-            newPlayers.find(x => x.color == partnerColor)!.handCards = unfreeze(addCards(newPartnerCards, tradeObj.offeredCards))
-            newPlayers[executorIdx].handCards = unfreeze(addCards(newPlayerCards, tradeObj.desiredCards))
-            return newPlayers
-        }),
+    return [{ ...state,
+        players: state.players.with(executorIdx, { ...state.players[executorIdx], handCards: addCards(newPlayerCards, tradeObj.desiredCards) })
+                              .with(partnerIdx, { ...state.players[partnerIdx], handCards: addCards(newPartnerCards, tradeObj.offeredCards) }),
         phase: {
             ...state.phase,
-            tradeOffers: produce(state.phase.tradeOffers, to => to.toSpliced(to.findIndex(x => sameTradeOffer(x, tradeObj)), 1))
+            tradeOffers: state.phase.tradeOffers.toSpliced(state.phase.tradeOffers.findIndex(x => sameTradeOffer(x, tradeObj)), 1)
         }
     }, undefined]
 }
@@ -602,11 +608,10 @@ function tryDoAbortTrade(state: FullGameState, executorColor: Color, action: Gam
     if (tradeOffer == undefined || tradeOffer.offeringColor != executorColor)
         return undefined
 
-    return [{
-        ...state,
+    return [{...state,
         phase: {
             ...state.phase,
-            tradeOffers: produce(state.phase.tradeOffers, to => to.toSpliced(to.findIndex(x => sameTradeOffer(x, tradeOffer)), 1))
+            tradeOffers: state.phase.tradeOffers.toSpliced(state.phase.tradeOffers.findIndex(x => sameTradeOffer(x, tradeOffer)), 1)
         }
     }, undefined]
 }
@@ -653,12 +658,13 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
                 if (allRobbableCrossingsExcept(publicGameState(state), action.newPosition, executorColor).size != 0)
                     return undefined
 
-                return [produce(state, newState => {
-                    newState.board.robber = unfreeze(action.newPosition)
-                    newState.players[executorIdx].devCards = newDevCards
-                    newState.players[executorIdx].knightsPlayed = newState.players[executorIdx].knightsPlayed + 1
-                    newState.knightForce = newKnightForce
-                }), undefined]
+                return [{ ...state,
+                    knightForce: newKnightForce,
+                    board: { ...state.board, robber: action.newPosition },
+                    players: state.players.with(executorIdx, { ...state.players[executorIdx], 
+                                                               devCards: newDevCards, 
+                                                               knightsPlayed: state.players[executorIdx].knightsPlayed + 1})
+                }, undefined]
 
             }
             else {
@@ -677,25 +683,27 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
                 const newRobbedPlayerCards = robbedPlayerCards.toSpliced(robbedResourceIdx, 1)
                 const newExecutorCards = state.players[executorIdx].handCards.concat([robbedResource])
 
-                return [produce(state, newState => {
-                    newState.players[robbedPlayerIdx].handCards = unfreeze(newRobbedPlayerCards)
-                    newState.players[executorIdx].handCards = unfreeze(newExecutorCards)
-                    newState.board.robber = unfreeze(action.newPosition)
-                    newState.players[executorIdx].devCards = newDevCards
-                    newState.players[executorIdx].knightsPlayed = newState.players[executorIdx].knightsPlayed + 1
-                    newState.knightForce = newKnightForce
-                }), { robbedCard: robbedResource }]
+                return [{ ...state, 
+                    board: { ...state.board, robber: action.newPosition },
+                    knightForce: newKnightForce,
+                    players: state.players.with(executorIdx, { handCards: newExecutorCards, 
+                                                               devCards: newDevCards, 
+                                                               knightsPlayed: state.players[executorColor].knightsPlayed + 1,
+                                                               color: executorColor })
+                                          .with(robbedPlayerIdx, { ...state.players[robbedPlayerIdx], handCards: newRobbedPlayerCards })
+                }, { robbedCard: robbedResource }]
             }
         }
         case DevCardType.YearOfPlenty: {
-            return [produce(state, newState => {
-                newState.players[executorIdx].handCards = [...action.resources, ...state.players[executorIdx].handCards]
-                newState.players[executorIdx].devCards = newDevCards
-            }), undefined]
+            return [{ ...state, 
+                players: state.players.with(executorIdx, { ...state.players[executorIdx], 
+                    handCards: state.players[executorIdx].handCards.concat(action.resources),
+                    devCards: newDevCards })
+            }, undefined]
         }
         case DevCardType.Monopoly: {
-            return [produce(state, newState => {
-                newState.players = newState.players.map(player => {
+            return [{ ...state,
+                players: state.players.map(player => {
                     if (player.color == executorColor)
                         return { 
                             ...player,
@@ -710,27 +718,27 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
                     else
                         return { ...player, handCards: player.handCards.filter(x => x != action.resource)}
                 })
-            }), undefined]
+            }, undefined]
         }
         case DevCardType.RoadBuilding: 
             if (!isAvailableRoadPosition(state.board, action.roads[0], executorColor))
                 return undefined
 
-            const firstRoadBoard = produce(state.board, newBoard => {
-                newBoard.roads.push({ color: executorColor, coord: unfreeze(action.roads[0]) })
-            })
+            const firstRoadBoard = { ...state.board, 
+                roads: state.board.roads.concat({ color: executorColor, coord: action.roads[0] })
+            }
 
             if (!isAvailableRoadPosition(firstRoadBoard, action.roads[1], executorColor))
                 return undefined
             
-            const secondRoadBoard = produce(firstRoadBoard, newBoard => {
-                newBoard.roads.push({ color: executorColor, coord: unfreeze(action.roads[1]) })
-            })
+            const secondRoadBoard = { ...state.board, 
+                roads: state.board.roads.concat({ color: executorColor, coord: action.roads[1] })
+            }
 
-            return [produce(state, newState => {
-                newState.board = unfreeze(secondRoadBoard)
-                newState.players[executorIdx].devCards = newDevCards
-            }), undefined]
+            return [{ ...state,
+                board: secondRoadBoard,
+                players: state.players.with(executorIdx, { ...state.players[executorIdx], devCards: newDevCards })
+            }, undefined]
     }
 }
 function tryDoDiscardResources(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.DiscardResources]): ResultType<GameActionType.DiscardResources> {
@@ -752,9 +760,7 @@ function tryDoDiscardResources(state: FullGameState, executorColor: Color, actio
     if (newResources == undefined)
         return undefined
 
-    const newPlayers = produce(state.players, x => {
-        x[executorIdx].handCards = unfreeze(newResources)
-    })
+    const newPlayers = state.players.with(executorIdx, { ...state.players[executorIdx], handCards: newResources})
 
     if (state.phase.playersLeftToDiscard.length == 1)
         return [{ ...state,
@@ -809,10 +815,11 @@ export function tryDoBuyDevCard(state: FullGameState, executorColor: Color, acti
     if (receivedCard == undefined)
         receivedCard = DevCardType.Knight
 
-    return [produce(state, newState => {
-        newState.players[executorIdx].handCards = unfreeze(newCards)
-        newState.players[executorIdx].devCards.push(receivedCard)
-    }), { cardType: receivedCard }]
+    return [{ ...state, 
+        players: state.players.with(executorIdx, { ...state.players[executorIdx], 
+            handCards: newCards,
+            devCards: state.players[executorIdx].devCards.concat(receivedCard) })
+    }, { cardType: receivedCard }]
 }
 
 export function tryDoAction<T extends GameActionType>(state: FullGameState, executor: Color,  action: GameActionInput): ResultType<T> {

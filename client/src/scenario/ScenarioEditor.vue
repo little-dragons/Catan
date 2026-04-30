@@ -8,7 +8,7 @@ import InputGroup from '@/modals/input-fields/InputGroup.vue';
 import IntegerInput from '@/modals/input-fields/IntegerInput.vue';
 import LabeledInput from '@/modals/input-fields/LabeledInput.vue';
 import { type Coordinate, defaultScenario, type Distribution, GenerationMethod, sameCoordinate, type Scenario, ScenarioRobberPlacement, ScenarioStartingPhaseType, sumDistribution, TileType } from 'catan-shared';
-import { type Freeze } from 'structurajs';
+import { type Pure } from 'structurajs';
 import { computed, ref } from 'vue';
 import Setting from '@/room/Setting.vue';
 import FixedSelectionList from '@/modals/input-fields/FixedSelectionList.vue';

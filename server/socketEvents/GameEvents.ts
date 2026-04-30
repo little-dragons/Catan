@@ -1,4 +1,4 @@
-import { Color, GameClientEventMap, GameActionInfo, GameActionInput, redactGameActionInfoFor, tryDoAction, GameServerEventMap, generateBotAction, redactGameStateFor, requireActionFrom, RoomType, victoryPointsFromFull } from "catan-shared";
+import { Color, GameClientEventMap, GameActionInfo, GameActionInput, redactGameActionInfoFor, tryDoAction, GameServerEventMap, generateBotAction, redactGameStateFor, requireActionFrom, RoomType, victoryPointsFromFull, winners } from "catan-shared";
 import { type Socket } from 'socket.io'
 import { endGame, gameRoomFor, participantsForRoom, ServerGameRoom } from "./RoomManager";
 import { SocketDataType, SocketServerType } from "./Common";
@@ -37,7 +37,7 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
     }
 
     function checkAndHandleEndGame(io: SocketServerType, room: ServerGameRoom): boolean {
-        if (room.state.players.some(x => victoryPointsFromFull(room.state, x.color) >= room.settings.requiredVictoryPoints)) {
+        if (winners(room.state, room.settings.requiredVictoryPoints).length > 0) {
             endGame(io, room)
             return true
         }

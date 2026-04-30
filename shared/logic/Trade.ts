@@ -1,4 +1,4 @@
-import { type Freeze } from "structurajs";
+import { type Pure } from "../Pure";
 import { type Board, type PortResource, portsForColor, SpecialPorts } from "./Board";
 import { Color } from "./Player";
 import { allResources, type CardList, Resource, sameCards } from "./Resource";
@@ -14,7 +14,7 @@ export enum TradeStatusByColor {
     Accepting, Rejecting, Undecided
 }
 export type OpenTradeOffer = TradeOffer & {
-    otherColors: Freeze<{
+    otherColors: Pure<{
         color: Color,
         status: TradeStatusByColor
     }[]>

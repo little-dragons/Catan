@@ -39,18 +39,16 @@ defineProps<{
         title="Roll dice!"
         tabindex="1">
         <svg ref="svg" viewBox="0 0 80 40">
-            <image
-                x="0"
-                y="0"
-                width="40"
-                height="40"
-                :href="diceToIcon(dice[0])"/>
-            <image
-                x="40"
-                y="0"
-                width="40"
-                height="40"
-                :href="diceToIcon(dice[1])"/>
+            <image x="0"
+                   y="0"
+                   width="40"
+                   height="40"
+                   :href="diceToIcon(dice[0])"/>
+            <image x="40"
+                   y="0"
+                   width="40"
+                   height="40"
+                   :href="diceToIcon(dice[1])"/>
         </svg>
     </button>
 </template>

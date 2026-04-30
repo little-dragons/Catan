@@ -1,9 +1,9 @@
 import { type Board } from "./Board"
 import { Color, type FullPlayer, type RedactedPlayer, redactPlayer } from "./Player"
 import { BuildingType } from "./Buildings"
-import { type Freeze } from "structurajs"
 import { type OpenTradeOffer } from "./Trade"
 import { DevCardType } from "./GameAction"
+import { Pure } from "../Pure"
 
 export enum GamePhaseType {
     Initial,
@@ -18,14 +18,14 @@ export enum RobbingPhaseType {
 
 export type DieResult = 1 | 2 | 3 | 4 | 5 | 6
 
-export type InitialPhase = Freeze<{
+export type InitialPhase = Pure<{
     type: GamePhaseType.Initial
     forward: boolean
 }>
 export function isInitial(phase: GamePhase): phase is InitialPhase {
     return phase.type == GamePhaseType.Initial
 }
-export type PreDiceRollPhase = Freeze<{
+export type PreDiceRollPhase = Pure<{
     type: GamePhaseType.Turns
     subtype: TurnPhaseType.PreDiceRoll
 }>
@@ -33,13 +33,13 @@ export function isPreDiceRoll(phase: GamePhase): phase is PreDiceRollPhase {
     return phase.type == GamePhaseType.Turns && phase.subtype == TurnPhaseType.PreDiceRoll
 }
 export type RobbingPhase = DiscardingCardsRobberPhase | MovingRobberPhase
-export type DiscardingCardsRobberPhase = Freeze<{
+export type DiscardingCardsRobberPhase = Pure<{
     type: GamePhaseType.Turns
     subtype: TurnPhaseType.Robbing
     robtype: RobbingPhaseType.DiscardingCards
     playersLeftToDiscard: Color[]
 }>
-export type MovingRobberPhase = Freeze<{
+export type MovingRobberPhase = Pure<{
     type: GamePhaseType.Turns
     subtype: TurnPhaseType.Robbing
     robtype: RobbingPhaseType.MovingRobber
@@ -55,7 +55,7 @@ export function isRobbingDiscardingCards(phase: GamePhase): phase is DiscardingC
 }
 
 
-export type ActivePhase = Freeze<{
+export type ActivePhase = Pure<{
     type: GamePhaseType.Turns
     subtype: TurnPhaseType.Active
     tradeOffers: OpenTradeOffer[]
@@ -67,7 +67,7 @@ export function isActive(phase: GamePhase): phase is ActivePhase {
 export type GamePhase =
     InitialPhase | PreDiceRollPhase | RobbingPhase | ActivePhase
 
-export type PublicGameState = Freeze<{
+export type PublicGameState = Pure<{
     phase: GamePhase
     board: Board
     currentPlayer: Color
@@ -76,11 +76,11 @@ export type PublicGameState = Freeze<{
     players: RedactedPlayer[]
     devCardCount: number
 }>
-export type RedactedGameState = Freeze<PublicGameState & {
+export type RedactedGameState = Pure<PublicGameState & {
     self: FullPlayer
 }>
 
-export type FullGameState = Freeze<{
+export type FullGameState = Pure<{
     phase: GamePhase,
     board: Board
     currentPlayer: Color
@@ -189,9 +189,18 @@ export function victoryPointsFromRedacted(state: RedactedGameState, color: Color
            hiddenVpCards
 }
 
+/**
+ * Returns a list of winners, that is the colors of participants who have enough victory points.
+ * @param threshold The number of victory points to achieve.
+ * @returns An empty list if no one has the required victory points. Otherwise, every participant who has enough victory points.
+ */
+export function winners(state: FullGameState, threshold: number): Color[] {
+    return state.players.map(x => x.color).filter(player => victoryPointsFromFull(state, player) >= threshold)
+}
 
 export function requireActionFrom(state: FullGameState): readonly Color[] {
     if (isRobbingDiscardingCards(state.phase))
         return state.phase.playersLeftToDiscard
     return [state.currentPlayer] 
 }
+

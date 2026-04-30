@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {},
   "devDependencies": {
+    "@types/bun": "catalog:shared",
     "@types/bcrypt": "catalog:shared",
     "@types/seedrandom": "catalog:shared",
     "@types/uuid": "catalog:shared",
@@ -12,7 +13,6 @@
   "dependencies": {
     "bcrypt": "catalog:shared",
     "seedrandom": "catalog:shared",
-    "structurajs": "catalog:shared",
     "uuid": "catalog:shared"
   }
 }

@@ -14,7 +14,6 @@
         "pinia": "^3.0.4",
         "socket.io": "catalog:shared",
         "socket.io-client": "catalog:shared",
-        "structurajs": "catalog:shared",
         "uuid": "catalog:shared",
         "vue": "^3.5.30",
         "vue-router": "^5.0.4",
@@ -54,11 +53,11 @@
       "dependencies": {
         "bcrypt": "catalog:shared",
         "seedrandom": "catalog:shared",
-        "structurajs": "catalog:shared",
         "uuid": "catalog:shared",
       },
       "devDependencies": {
         "@types/bcrypt": "catalog:shared",
+        "@types/bun": "catalog:shared",
         "@types/seedrandom": "catalog:shared",
         "@types/uuid": "catalog:shared",
         "typescript": "catalog:shared",
@@ -107,7 +106,6 @@
       "seedrandom": "^3.0.5",
       "socket.io": "^4.8.3",
       "socket.io-client": "^4.8.3",
-      "structurajs": "^0.12.8",
       "typescript": "^5.9.3",
       "uuid": "^13.0.0",
     },
@@ -622,8 +620,6 @@
     "string_decoder": ["string_decoder@1.3.0", "", { "dependencies": { "safe-buffer": "~5.2.0" } }, "sha512-hkRX8U1WjJFd8LsDJ2yQ/wWWxaopEsABU1XfkM8A+j0+85JAGppt16cr1Whg6KIbb4okU6Mql6BOj+uup/wKeA=="],
 
     "strip-json-comments": ["strip-json-comments@2.0.1", "", {}, "sha512-4gB8na07fecVVkOI6Rs4e7T6NOTki5EmL7TUduTs6bu3EdnSycntVJ4re8kgZA+wx9IueI2Y11bfbgwtzuE0KQ=="],
-
-    "structurajs": ["structurajs@0.12.8", "", {}, "sha512-5flVb7TnOXGwrcarG8w53NicJzwr948HIOuQqFOlYXJXcGHPHeXCW2wJNeTrObWQJJZ0Yl1vcspYyMDVYOr+Ng=="],
 
     "superjson": ["superjson@2.2.6", "", { "dependencies": { "copy-anything": "^4" } }, "sha512-H+ue8Zo4vJmV2nRjpx86P35lzwDT3nItnIsocgumgr0hHMQ+ZGq5vrERg9kJBo5AWGmxZDhzDo+WVIJqkB0cGA=="],
 

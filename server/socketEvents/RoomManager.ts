@@ -1,4 +1,4 @@
-import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType, PostGameRoom, generateBoardFromScenario, defaultScenario, ParticipantType, Participant, generateStateFromScenario } from "catan-shared"
+import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType, PostGameRoom, generateBoardFromScenario, defaultScenario, ParticipantType, Participant, generateStateFromScenario, randomUnusedColor } from "catan-shared"
 import { type Socket } from 'socket.io'
 import { SocketDataType, SocketServerType } from "./Common"
 import { defaultSettings, Bot, BotPersonality } from "catan-shared"
@@ -205,12 +205,11 @@ export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
         if (participants.length >= room.scenario.players.maxAllowedCount)
             return cb('room full')
 
-        const freeColors = allColors.filter(x => !participants.some(p => x == p.color))
-        const botColor = freeColors[Math.floor(Math.random() * freeColors.length)]
         room.bots.push([{
             name: 'Vincent',
             personality: BotPersonality.Vincent
-        }, botColor])
+        }, randomUnusedColor(participants.map(x => x.color))!
+        ])
         
         socket.emit('participantChange', await participantsForRoom(io, room.id))
         socket.in(room.id).emit('participantChange', await participantsForRoom(io, room.id))

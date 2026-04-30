@@ -3,8 +3,8 @@ import { neighborTile, Orientation } from "./Orientation"
 import { Resource } from "./Resource"
 import { BuildingType } from "./Buildings"
 import { v4 } from "uuid"
-import { type Freeze } from "structurajs"
 import { addDistribution, type Distribution, setRecord } from "./Distribution"
+import { Pure } from "../Pure"
 
 // Coordinate has two meaning, depending on whether tiles or crossings are indexed.
 // The first coordinate always refers to the horizontal degree, left to right, the
@@ -15,11 +15,11 @@ import { addDistribution, type Distribution, setRecord } from "./Distribution"
 // at 0 to the left, while the second has half a tile offset into the x-axis.
 // A good starting point for examples is the function `neighborTile`
 
-export type Coordinate = Freeze<[number, number]>
+export type Coordinate = Pure<[number, number]>
 export function sameCoordinate(c1: Coordinate, c2: Coordinate) {
     return c1[0] == c2[0] && c1[1] == c2[1]
 }
-export type Road = Freeze<[Coordinate, Coordinate]>
+export type Road = Pure<[Coordinate, Coordinate]>
 export function sameRoad(r1: Road, r2: Road) {
     return sameCoordinate(r1[0], r2[0]) && sameCoordinate(r1[1], r2[1]) || sameCoordinate(r1[0], r2[1]) && sameCoordinate(r1[1], r2[0])
 }
@@ -89,7 +89,7 @@ export function randomBoardSeed(): BoardSeed {
 }
 
 
-export type Board = Freeze<{
+export type Board = Pure<{
     tiles: CoordinateTile[]
     roads: { color: Color, coord: Road }[]
     robber: Coordinate
@@ -139,7 +139,7 @@ export function crossingAdjacentToTile(crossing: Coordinate, tile: Coordinate): 
     return allowedX.includes(crossing[0]) && allowedY.includes(crossing[1])
 }
 
-export function landTiles(board: Board): Freeze<CoordinateTile[]> {
+export function landTiles(board: Board): Pure<CoordinateTile[]> {
     return board.tiles.filter(x => isLandTile(x))
 }
 
@@ -266,8 +266,8 @@ function adjacentTiles(cross: Coordinate): readonly Coordinate[] {
     }
 }
 
-export function mapFilter<T, R>(array: Freeze<T[]>, mapper: ((item: Freeze<T>) => Freeze<R | undefined>)): Freeze<R[]> {
-    let res: Freeze<R[]> = []
+export function mapFilter<T, R>(array: Pure<T[]>, mapper: ((item: Pure<T>) => Pure<R | undefined>)): Pure<R[]> {
+    let res: Pure<R[]> = []
     for (const item of array) {
         const mapped = mapper(item)
         if (mapped != undefined)
@@ -276,7 +276,7 @@ export function mapFilter<T, R>(array: Freeze<T[]>, mapper: ((item: Freeze<T>) =
     return res
 }
 
-export function mapFind<T, R>(array: Freeze<T[]>, finder: ((item: Freeze<T>) => Freeze<R |  undefined>)): Freeze<R | undefined> {
+export function mapFind<T, R>(array: Pure<T[]>, finder: ((item: Pure<T>) => Pure<R |  undefined>)): Pure<R | undefined> {
     for (const item of array) {
         const mapped = finder(item)
         if (mapped != undefined)

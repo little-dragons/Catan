@@ -1,4 +1,3 @@
-import { type Freeze } from "structurajs"
 import { adjacentColorsToTile, adjacentRoads, availableRoadPositions, type Coordinate, landTiles, portsForColor, resourceFrequenciesForColor, sameCoordinate, SpecialPorts, type Board } from "./Board"
 import { availableBuildingPositions, BuildingType, ConnectionType } from "./Buildings"
 import { type GameActionInput, GameActionType, tryDoPlaceInitialRedacted } from "./GameAction"
@@ -6,12 +5,13 @@ import { GamePhaseType, isRobbingDiscardingCards, type RedactedGameState, Robbin
 import { buildingCost, type CardList, connectionCost, Resource, tryRemoveCards, tryTransferCard } from "./Resource"
 import { Color } from "./Player"
 import { type Distribution, mapRecord, popcountDistribution, sumDistribution } from "./Distribution"
+import { Pure } from "../Pure"
 
 export enum BotPersonality {
     Vincent // The trader
 }
 
-export type BotWeights = Freeze<{
+export type BotWeights = Pure<{
     /**
      * Using {@link resourceFrequenciesForColor} and {@link sumDistribution}, we can calulate the overall income for a player.
      * Multiplying the income with this gives the score.
@@ -26,7 +26,7 @@ export type BotWeights = Freeze<{
     victoryPoints: number
 }>
 
-export const weightMap: Freeze<Record<BotPersonality, BotWeights>> = {
+export const weightMap: Pure<Record<BotPersonality, BotWeights>> = {
     [BotPersonality.Vincent] : {
         resourceFrequencies: 1,
         resourceDiversity: [0, 0, 0.2, 0.5, 0.6],
@@ -102,7 +102,7 @@ export function scoreState(bot: Bot, state: RedactedGameState): number {
 }
 
 
-function initialSettlementPlacement(bot: Bot, state: RedactedGameState): Freeze<[Coordinate, [Coordinate, Coordinate]]> {
+function initialSettlementPlacement(bot: Bot, state: RedactedGameState): Pure<[Coordinate, [Coordinate, Coordinate]]> {
     const options = availableBuildingPositions(state.board, undefined)
                     .flatMap(set => adjacentRoads(set).map(road => {
                         return {

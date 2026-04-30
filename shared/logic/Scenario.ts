@@ -4,7 +4,7 @@ import { DevCardType } from "./GameAction"
 import { type CardList, Resource } from "./Resource"
 import { type Distribution } from "./Distribution"
 import { Orientation } from "./Orientation"
-import { type Freeze } from "structurajs"
+import { type Pure } from "../Pure"
 
 /**
  * Generally, scenario generation should be versatile. It has to combine randomness with 
@@ -35,11 +35,11 @@ export enum GenerationMethod {
 }
 
 
-export type SelectGeneration<T> = Freeze<{
+export type SelectGeneration<T> = Pure<{
     method: GenerationMethod.SelectOne
     data: readonly T[]
 }>
-export type FixedGeneration<T> = Freeze<{
+export type FixedGeneration<T> = Pure<{
     method: GenerationMethod.Fixed
     data: T
 }>
@@ -47,7 +47,7 @@ export type DistributedGeneration<T extends keyof any> = {
     method: GenerationMethod.Distribution
     data: Distribution<T>
 }
-export type IndexedGeneration<T> = Freeze<{
+export type IndexedGeneration<T> = Pure<{
     method: GenerationMethod.Indexed
     data: {
         source: readonly T[]
@@ -68,7 +68,7 @@ export enum ScenarioResourceNumberAssignmentMethod {
     CirclingOut,
 }
 
-export type ResourceNumberAssignmentInfo = Freeze<({
+export type ResourceNumberAssignmentInfo = Pure<({
     method: ScenarioResourceNumberAssignmentMethod.Zipped,
 } | {
     method: ScenarioResourceNumberAssignmentMethod.CirclingOut,
@@ -84,7 +84,7 @@ export type ResourceNumberAssignmentInfo = Freeze<({
         | SelectGeneration<ResourceTileNumber[]>
 }>
 
-export type ScenarioTileGroup = Freeze<{
+export type ScenarioTileGroup = Pure<{
     coordinates: 
         | SelectGeneration<Coordinate[]>
     tileTypes:
@@ -116,7 +116,7 @@ export enum ScenarioRobberPlacement {
  * If several tile groups generate tiles for the same coordinate, the tile group later in
  * the list has priority.
  */
-export type Scenario = Freeze<{
+export type Scenario = Pure<{
     board: {
         robber: {
             type: ScenarioRobberPlacement.RandomDesert

@@ -14,8 +14,8 @@ const modalStore = useModalStore()
 async function tryJoin(roomId: string) {
     const result = await currentRoom.tryJoin(roomId)
     if (result == RoomOPResult.Success) {
-            router.push('/room')
-            return
+        router.push('/room')
+        return
     }
 
     popups.insert({
@@ -26,14 +26,25 @@ async function tryJoin(roomId: string) {
     })
 }
 
+function tryCreateOfflineAndMove() {
+    const res = currentRoom.tryCreateOffline()
+    if (res == RoomOPResult.Success) {
+        router.push('/room')
+        return
+    }
+
+    
+}
+
 onMounted(() => roomList.autoRefresh = true)
 onUnmounted(() => roomList.autoRefresh = false)
 </script>
 
 <template>
     <h1>Room list</h1>
-    <input type="button" value="Create New Room" @click="() => modalStore.value = ModalType.CreateRoom" :disabled="!currentRoom.canJoin"
+    <input type="button" value="Create New Room" @click="() => modalStore.value = ModalType.CreateRoom" :disabled="!currentRoom.canJoinOnline"
         title="Create New Room" />
+    <input type="button" value="Create Offline Room" @click="tryCreateOfflineAndMove" :disabled="currentRoom.info != undefined"/>
     <input type="button" value="Refresh" @click="roomList.update"/>
     <input type="checkbox" id="autoRefresh" value="Refresh" v-model="roomList.autoRefresh"/>
     <label for="autoRefresh">Auto refresh</label>
@@ -49,7 +60,7 @@ onUnmounted(() => roomList.autoRefresh = false)
         <button
             class="default-button-colors"
             :title="`Join room ${room.name}`"
-            :disabled="!currentRoom.canJoin || room.participants.length >= room.scenario.players.maxAllowedCount"
+            :disabled="!currentRoom.canJoinOnline || room.participants.length >= room.scenario.players.maxAllowedCount"
             @click="() => tryJoin(room.id)">Join</button>
     </div>
     <div v-if="roomList.lobbies.length == 0">

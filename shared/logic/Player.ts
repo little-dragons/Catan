@@ -1,15 +1,15 @@
-import { type Freeze } from "structurajs"
 import { type CardList } from "./Resource"
 import { DevCardType } from "./GameAction"
+import { Pure } from "../Pure"
 
-export type RedactedPlayer = Freeze<{
+export type RedactedPlayer = Pure<{
     color: Color,
     handCardsCount: number,
     devCardsCount: number,
     knightsPlayed: number
 }>
 
-export type FullPlayer = Freeze<{
+export type FullPlayer = Pure<{
     color: Color,
     handCards: CardList,
     devCards: DevCardType[],
@@ -29,6 +29,25 @@ export enum Color {
     Yellow, Orange, Red, Green, Blue
 }
 export const allColors: readonly Color[] = [Color.Yellow, Color.Orange, Color.Red, Color.Green, Color.Blue]
+
+/**
+ * Calculates all unused colors from the set of already used colors.
+ */
+export function unusedColors(used: readonly Color[]): Color[] {
+    return allColors.filter(x => !used.includes(x))
+}
+
+/**
+ * Returns some unused color given a set of already used colors.
+ * @returns `undefined` if all colors are already used.
+ */
+export function randomUnusedColor(used: readonly Color[]): Color | undefined {
+    const free = unusedColors(used)
+    if (free.length == 0)
+        return undefined
+    
+    return free[Math.floor(free.length * Math.random())]
+}
 
 export function cssColor(c: Color) {
     switch (c) {
