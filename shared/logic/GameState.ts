@@ -3,7 +3,7 @@ import { Color, type FullPlayer, type RedactedPlayer, redactPlayer } from "./Pla
 import { BuildingType } from "./Buildings"
 import { type OpenTradeOffer } from "./Trade"
 import { DevCardType } from "./GameAction"
-import { Pure } from "../Pure"
+import { type Pure } from "../Pure"
 
 export enum GamePhaseType {
     Initial,

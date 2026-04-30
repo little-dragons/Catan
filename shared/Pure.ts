@@ -47,8 +47,3 @@ export type Unpure<T> = T extends Primitive
   ? UnpureObject<T>
   : T;
 
-export function refine<T>(val: Pure<T>, refiner: (draft: Unpure<T>) => void): Pure<T> {
-    const oldval = structuredClone(val) as Unpure<T>
-    refiner(oldval)
-    return oldval as Pure<T>
-}

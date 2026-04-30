@@ -1,6 +1,6 @@
 import { type CardList } from "./Resource"
 import { DevCardType } from "./GameAction"
-import { Pure } from "../Pure"
+import { type Pure } from "../Pure"
 
 export type RedactedPlayer = Pure<{
     color: Color,

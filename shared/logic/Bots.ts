@@ -5,7 +5,7 @@ import { GamePhaseType, isRobbingDiscardingCards, type RedactedGameState, Robbin
 import { buildingCost, type CardList, connectionCost, Resource, tryRemoveCards, tryTransferCard } from "./Resource"
 import { Color } from "./Player"
 import { type Distribution, mapRecord, popcountDistribution, sumDistribution } from "./Distribution"
-import { Pure } from "../Pure"
+import { type Pure } from "../Pure"
 
 export enum BotPersonality {
     Vincent // The trader
