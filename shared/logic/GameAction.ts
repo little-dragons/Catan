@@ -1,4 +1,4 @@
-import { adjacentResources, adjacentRoads, availableRoadPositions, colorWithLongestRoad, type Coordinate, gainedResources, isAvailableRoadPosition, type ResourceTileNumber, type Road, sameCoordinate, sameRoad } from "./Board"
+import { adjacentResources, adjacentRoads, availableRoadPositions, colorWithLongestRoad, type Coordinate, gainedResources, isAvailableRoadPosition, type ResourceTileNumber, type Road, roadAdjacentToLand, sameCoordinate, sameRoad } from "./Board"
 import { BuildingType, ConnectionType, availableBuildingPositions, isAvailableBuildingPosition } from "./Buildings"
 import { type FullGameState, nextTurn, GamePhaseType, type DieResult, isPreDiceRoll, TurnPhaseType, isActive, isInitial, isRobbingDiscardingCards, isRobbingMovingRobber, RobbingPhaseType, type RedactedGameState, publicGameState } from "./GameState"
 import { Color } from "./Player"
@@ -328,6 +328,9 @@ function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: G
         return undefined
 
     if (!adjacentRoads(action.settlement).some(x => sameRoad(x, action.road)))
+        return undefined
+
+    if (!roadAdjacentToLand(state.board, action.road))
         return undefined
     
     const newCards = 

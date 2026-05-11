@@ -181,7 +181,7 @@ export function adjacentCrossings(crossing: Coordinate) {
 }
 
 export function adjacentRoads(crossing: Coordinate) {
-    return adjacentCrossings(crossing).map(other => [crossing, other] as Road)
+    return adjacentCrossings(crossing).map<Road>(other => [crossing, other])
 }
 
 export function adjacentColorsToTile(board: Board, tile: Coordinate): readonly Color[] {
@@ -198,36 +198,56 @@ function crossingsForColor(board: Board, color: Color) {
     return allCrossings.filter((val, idx) => allCrossings.findIndex(x => sameCoordinate(x, val)) == idx)
 }
 
+/**
+ * Checks whether a given road connects to land on at least one side.
+ */
+export function roadAdjacentToLand(board: Board, road: Road) {
+    const sideCoords = adjacentTiles(road[0]).filter(tile => adjacentTiles(road[1]).some(tile2 => sameCoordinate(tile, tile2)))
+    return board.tiles.some(x => sideCoords.some(y => sameCoordinate(x.coord, y)) && isLandTile(x))
+}
+
+/**
+ * Checks if a given road is allowed to be built by a given color. It assumes active turns. That means it also checks for connectedness to already 
+ * exisiting structures, as well as other sanity checks like if the road is correctly formed, whether the road is already built and that it is 
+ * adjacent to land.
+ * @param board The current board state.
+ * @param road The road to be built.
+ * @param color The color wanting to build the road.
+ */
+export function isAvailableRoadPosition(board: Board, road: Road, color: Color) {
+    // road crossings not adjacent
+    if (!adjacentCrossings(road[0]).some(x => sameCoordinate(x, road[1])))
+        return false
+
+    // not connected to buildings of that color
+    const connected = crossingsForColor(board, color).some(coord => sameCoordinate(coord, road[0]) || sameCoordinate(coord, road[1]))
+    if (!connected)
+        return false
+
+    // already built
+    if (board.roads.some(x => sameRoad(x.coord, road)))
+        return false
+
+    if (!roadAdjacentToLand(board, road))
+        return false
+    
+    return true
+}
+
+/**
+ * Returns all roads satisfying {@link isAvailableRoadPosition}.
+ */
 export function availableRoadPositions(board: Board, color: Color) {
     // this can include duplicates of the form [c1, c2], [c2, c1]
     const allPotentialRoads: Road[] = 
         crossingsForColor(board, color)
-        .flatMap(crossing => adjacentCrossings(crossing).map(other => [other, crossing]))
+        .flatMap(adjacentRoads)
 
-    // TODO maybe include robber?
     return allPotentialRoads
         // remove duplicates
         .filter((val, idx) => allPotentialRoads.findIndex(x => sameRoad(x, val)) == idx)
-        // remove already built roads
-        .filter(road => !board.roads.some(other => sameRoad(road, other.coord)))
+        .filter(road => isAvailableRoadPosition(board, road, color))
 }
-
-export function isAvailableRoadPosition(board: Board, road: Road, color: Color) {
-    if (!adjacentCrossings(road[0]).some(x => sameCoordinate(x, road[1])))
-        return false
-
-    const allCrossings = crossingsForColor(board, color)
-    const coordinates = 
-        allCrossings.some(x => sameCoordinate(x, road[0])) ? [road[0], road[1]] :
-        allCrossings.some(x => sameCoordinate(x, road[1])) ? [road[1], road[0]] :
-        undefined
-
-    if (coordinates == undefined)
-        return false
-
-    return true
-}
-
 
 
 
@@ -311,8 +331,7 @@ export function gainedResources(board: Board, color: Color, number: ResourceTile
         if (building.type == BuildingType.Settlement)
             accumulated = accumulated.concat(resources)
         if (building.type == BuildingType.City) {
-            accumulated = accumulated.concat(resources)
-            accumulated = accumulated.concat(resources)
+            accumulated = accumulated.concat(resources).concat(resources)
         }
     }
 
