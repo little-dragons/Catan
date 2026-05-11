@@ -6,6 +6,10 @@ import { addCards, buildingCost, connectionCost, devCardCost, Resource, tryRemov
 import { canTradeWithBank, type FinalizedTrade, isValidOffer, type OpenTradeOffer, sameTradeOffer, type TradeOffer, TradeStatusByColor } from "./Trade"
 import { allRobbableCrossings, allRobbableCrossingsExcept, robbableCrossingsForColor, validNewRobberPosition } from "./Robber"
 
+function withPatch<T>(arr: readonly T[], index: number, patch: Partial<T>): T[] {
+    return arr.with(index, { ...arr[index], ...patch });
+}
+
 
 export enum DevCardType {
     Knight,
@@ -257,7 +261,7 @@ function tryDoPlaceSettlement(state: FullGameState, executorColor: Color, action
 
     return [{ ...state,
         board: { ...state.board, buildings: [{ color: executorColor, coord: action.coordinate, type: BuildingType.Settlement }, ...state.board.buildings] },
-        players: state.players.with(executorIdx, { ...state.players[executorIdx], handCards: newCards })
+        players: withPatch(state.players, executorIdx, { handCards: newCards })
     }, undefined]
 }
 function tryDoPlaceCity(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceCity]): ResultType<GameActionType.PlaceCity> {
@@ -283,7 +287,7 @@ function tryDoPlaceCity(state: FullGameState, executorColor: Color, action: Game
 
     return [{ ...state,
         board: { ...state.board, buildings: state.board.buildings.with(validSettlementIdx, { color: executorColor, coord: action.coordinate, type: BuildingType.City })},
-        players: state.players.with(executorIdx, { ...state.players[executorIdx], handCards: newCards })
+        players: withPatch(state.players, executorIdx, { handCards: newCards })
     }, undefined]
     // return [refine(state, newState => {
     //     newState.players[executorIdx].handCards = unfreeze(newCards)
@@ -313,7 +317,7 @@ function tryDoPlaceRoad(state: FullGameState, executorColor: Color, action: Game
     return [{ ...state,
         longestRoad,
         board: { ...state.board, roads: state.board.roads.concat([{ color: executorColor, coord: action.coordinates }])  },
-        players: state.players.with(executorIdx, { ...state.players[executorIdx], handCards: newCards })
+        players: withPatch(state.players, executorIdx, { handCards: newCards })
     }, undefined]
 }
 function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceInitial]): ResultType<GameActionType.PlaceInitial> {
@@ -425,15 +429,13 @@ function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: Ga
                 subtype: TurnPhaseType.Active,
                 tradeOffers: []
             },
-            players: state.players.with(robbedPlayerIdx, { ...state.players[robbedPlayerIdx], handCards: robbedPlayerCards.toSpliced(robbedResourceIdx, 1) })
-                                  .with(executorIdx, { ...state.players[executorIdx], handCards: state.players[executorIdx].handCards.concat(robbedResource)}),
-                // refine(state.players, x => {
-                // x[robbedPlayerIdx].handCards = robbedPlayerCards.toSpliced(robbedResourceIdx, 1)
-                // x[executorIdx].handCards.push(robbedResource)
-            // }),
-            board: {...state.board,
-                robber: action.coordinate
-            }
+            players: 
+                withPatch(
+                    withPatch(state.players, robbedPlayerIdx, { handCards: robbedPlayerCards.toSpliced(robbedResourceIdx, 1) }),
+                    executorIdx, 
+                    { handCards: state.players[executorIdx].handCards.concat(robbedResource)}
+                ),
+            board: {...state.board, robber: action.coordinate }
         }, { robbedResource }]
     }
     else if (allRobbableCrossings(publicGameState(state), action.coordinate).size == 0)
@@ -469,7 +471,7 @@ function tryDoBankTrade(state: FullGameState, executorColor: Color, action: Game
     const newCards = cardsAfterPayment.concat(action.desiredCards)
 
     return [{ ...state,
-        players: state.players.with(executorIdx, { ...state.players[executorIdx], handCards: newCards })
+        players: withPatch(state.players, executorIdx, { handCards: newCards })
     }, undefined]
 }
 function tryDoOfferTrade(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.OfferTrade]): ResultType<GameActionType.OfferTrade> {
@@ -526,12 +528,9 @@ function tryDoAcceptTradeOffer(state: FullGameState, executorColor: Color, actio
         phase: {
             ...state.phase,
             tradeOffers: 
-                state.phase.tradeOffers.with(tradeOfferIdx, { ...tradeOffer, 
-                                                otherColors: tradeOffer.otherColors.with(otherColorsExecIdx, {
-                                                    ...tradeOffer.otherColors[otherColorsExecIdx],
-                                                    status: TradeStatusByColor.Accepting
-                                            }) 
-                                        })
+                withPatch(state.phase.tradeOffers, tradeOfferIdx, { 
+                    otherColors: withPatch(tradeOffer.otherColors, otherColorsExecIdx, { status: TradeStatusByColor.Accepting }) 
+                })
         }
     }, undefined]
 }
@@ -554,12 +553,9 @@ function tryDoRejectTradeOffer(state: FullGameState, executorColor: Color, actio
         phase: {
             ...state.phase,
             tradeOffers:
-                state.phase.tradeOffers.with(tradeOfferIdx, { ...tradeOffer, 
-                                                otherColors: tradeOffer.otherColors.with(otherColorsExecIdx, {
-                                                    ...tradeOffer.otherColors[otherColorsExecIdx],
-                                                    status: TradeStatusByColor.Rejecting
-                                            }) 
-                                        })
+                withPatch(state.phase.tradeOffers, tradeOfferIdx, {
+                    otherColors: withPatch(tradeOffer.otherColors, otherColorsExecIdx, { status: TradeStatusByColor.Rejecting })
+                })
         }
     }, undefined]
 
@@ -591,8 +587,11 @@ function tryDoFinalizeTrade(state: FullGameState, executorColor: Color, action: 
         return undefined
 
     return [{ ...state,
-        players: state.players.with(executorIdx, { ...state.players[executorIdx], handCards: addCards(newPlayerCards, tradeObj.desiredCards) })
-                              .with(partnerIdx, { ...state.players[partnerIdx], handCards: addCards(newPartnerCards, tradeObj.offeredCards) }),
+        players: 
+            withPatch(
+                withPatch(state.players, executorIdx, { handCards: addCards(newPlayerCards, tradeObj.desiredCards) }),
+                partnerIdx,
+                { handCards: addCards(newPartnerCards, tradeObj.offeredCards) }),
         phase: {
             ...state.phase,
             tradeOffers: state.phase.tradeOffers.toSpliced(state.phase.tradeOffers.findIndex(x => sameTradeOffer(x, tradeObj)), 1)
@@ -661,9 +660,10 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
                 return [{ ...state,
                     knightForce: newKnightForce,
                     board: { ...state.board, robber: action.newPosition },
-                    players: state.players.with(executorIdx, { ...state.players[executorIdx], 
-                                                               devCards: newDevCards, 
-                                                               knightsPlayed: state.players[executorIdx].knightsPlayed + 1})
+                    players: withPatch(state.players, executorIdx, {
+                                devCards: newDevCards, 
+                                knightsPlayed: state.players[executorIdx].knightsPlayed + 1
+                    })
                 }, undefined]
 
             }
@@ -686,19 +686,25 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
                 return [{ ...state, 
                     board: { ...state.board, robber: action.newPosition },
                     knightForce: newKnightForce,
-                    players: state.players.with(executorIdx, { handCards: newExecutorCards, 
-                                                               devCards: newDevCards, 
-                                                               knightsPlayed: state.players[executorColor].knightsPlayed + 1,
-                                                               color: executorColor })
-                                          .with(robbedPlayerIdx, { ...state.players[robbedPlayerIdx], handCards: newRobbedPlayerCards })
+                    players: withPatch(
+                        state.players,
+                        robbedPlayerIdx,
+                        { handCards: newRobbedPlayerCards }
+                    ).with(executorIdx, { 
+                        handCards: newExecutorCards, 
+                        devCards: newDevCards, 
+                        knightsPlayed: state.players[executorColor].knightsPlayed + 1,
+                        color: executorColor
+                    })
                 }, { robbedCard: robbedResource }]
             }
         }
         case DevCardType.YearOfPlenty: {
             return [{ ...state, 
-                players: state.players.with(executorIdx, { ...state.players[executorIdx], 
+                players: withPatch(state.players, executorIdx, {
                     handCards: state.players[executorIdx].handCards.concat(action.resources),
-                    devCards: newDevCards })
+                    devCards: newDevCards 
+                })
             }, undefined]
         }
         case DevCardType.Monopoly: {
@@ -737,7 +743,7 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
 
             return [{ ...state,
                 board: secondRoadBoard,
-                players: state.players.with(executorIdx, { ...state.players[executorIdx], devCards: newDevCards })
+                players: withPatch(state.players, executorIdx, { devCards: newDevCards })
             }, undefined]
     }
 }
@@ -760,7 +766,7 @@ function tryDoDiscardResources(state: FullGameState, executorColor: Color, actio
     if (newResources == undefined)
         return undefined
 
-    const newPlayers = state.players.with(executorIdx, { ...state.players[executorIdx], handCards: newResources})
+    const newPlayers = withPatch(state.players, executorIdx, { handCards: newResources})
 
     if (state.phase.playersLeftToDiscard.length == 1)
         return [{ ...state,
@@ -816,9 +822,10 @@ export function tryDoBuyDevCard(state: FullGameState, executorColor: Color, acti
         receivedCard = DevCardType.Knight
 
     return [{ ...state, 
-        players: state.players.with(executorIdx, { ...state.players[executorIdx], 
+        players: withPatch(state.players, executorIdx, {
             handCards: newCards,
-            devCards: state.players[executorIdx].devCards.concat(receivedCard) })
+            devCards: state.players[executorIdx].devCards.concat(receivedCard) 
+        })
     }, { cardType: receivedCard }]
 }
 
