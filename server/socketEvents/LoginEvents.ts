@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt'
 import { type Socket } from 'socket.io'
 import { SocketDataType, SocketServerType } from "./Common";
 import { v4 } from "uuid";
+import typia from "typia";
 
 
 
@@ -24,6 +25,11 @@ async function nameAllowed(io: SocketServerType, name: string) {
 type LoginSocket = Socket<LoginServerEventMap, LoginClientEventMap, {}, SocketDataType>
 export function acceptLoginEvents(io: SocketServerType, socket: LoginSocket) {
     socket.on('guestLogin', async (name, cb) => {
+        if (!typia.is(name) && typeof cb != 'function') {
+            console.warn('invalid arguments:', name, cb)
+            return (cb as any)('invalid arguments')
+        }
+
         if (socket.data.user != undefined)
             return cb('invalid socket state')
 
@@ -36,6 +42,11 @@ export function acceptLoginEvents(io: SocketServerType, socket: LoginSocket) {
     })
 
     socket.on('registerMember', async (name, password, cb) => {
+        if (!typia.is(name) && !typia.is(password) && typeof cb != 'function') {
+            console.warn('invalid arguments:', name, password, cb)
+            return (cb as any)('invalid arguments')
+        }
+
         if (socket.data.user != undefined)
             return cb('invalid socket state')
 
@@ -52,6 +63,11 @@ export function acceptLoginEvents(io: SocketServerType, socket: LoginSocket) {
     })
 
     socket.on('requestMemberLoginData', async (name, cb) => {
+        if (!typia.is(name) && typeof cb != 'function') {
+            console.warn('invalid arguments:', name, cb)
+            return (cb as any)('invalid arguments')
+        }
+
         if (socket.data.user != undefined)
             return cb('invalid socket state')
 
@@ -66,6 +82,11 @@ export function acceptLoginEvents(io: SocketServerType, socket: LoginSocket) {
     })
 
     socket.on('memberLogin', async (name, password, nonce, cb) => {
+        if (!typia.is(name) && !typia.is(password) && !typia.is(nonce) && typeof cb != 'function') {
+            console.warn('invalid arguments:', name, password, nonce, cb)
+            return (cb as any)('invalid arguments')
+        }
+
         if (socket.data.user != undefined)
             return cb('invalid socket state')
 
@@ -87,6 +108,10 @@ export function acceptLoginEvents(io: SocketServerType, socket: LoginSocket) {
     })
 
     socket.on('logout', cb => {
+        if (typeof cb != 'function') {
+            console.warn('invalid arguments:', cb)
+            return (cb as any)('invalid arguments')
+        }
         if (socket.data.user == undefined)
             return cb('invalid socket state')
 
@@ -95,5 +120,12 @@ export function acceptLoginEvents(io: SocketServerType, socket: LoginSocket) {
         return cb(true)
     })
 
-    socket.on('socketState', cb => cb(socket.data))
+    socket.on('socketState', cb => {        
+        if (typeof cb != 'function') {
+            console.warn('invalid arguments:', cb)
+            return (cb as any)('invalid arguments')
+        }
+
+        return cb(socket.data)
+    })
 }

@@ -731,8 +731,8 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
             if (!isAvailableRoadPosition(firstRoadBoard, action.roads[1], executorColor))
                 return undefined
             
-            const secondRoadBoard = { ...state.board, 
-                roads: state.board.roads.concat({ color: executorColor, coord: action.roads[1] })
+            const secondRoadBoard = { ...firstRoadBoard, 
+                roads: firstRoadBoard.roads.concat({ color: executorColor, coord: action.roads[1] })
             }
 
             return [{ ...state,

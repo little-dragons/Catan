@@ -3,6 +3,7 @@ import { type Socket } from 'socket.io'
 import { SocketDataType, SocketServerType } from "./Common"
 import { defaultSettings, Bot, BotPersonality } from "catan-shared"
 import { v4 } from "uuid"
+import typia from "typia"
 
 export type ServerLobbyRoom    = Omit<LobbyRoom, 'participants'>    & { bots : [Bot, Color][] }
 export type ServerGameRoom     = Omit<FullGameRoom, 'participants'> & { bots : [Bot, Color][] }
@@ -158,6 +159,11 @@ async function leaveRoom(io: SocketServerType, socket: RoomSocket) {
 
 export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
     socket.on('lobbyList', async cb => {
+        if (typeof cb != 'function') {
+            console.warn('invalid arguments:', cb)
+            return (cb as any)('invalid arguments')
+        }
+
         cb(await Promise.all(Array.from(rooms.values()).filter(isLobby).map<Promise<LobbyRoom>>(async (x) => { 
             return { 
                 ...x,
@@ -166,6 +172,11 @@ export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
     })
 
     socket.on('createAndJoin', async (name, cb) => {
+        if (!typia.is(name) && typeof cb != 'function') {
+            console.warn('invalid arguments:', name, cb)
+            return (cb as any)('invalid arguments')
+        }
+
         const res = createRoom(socket, name)
         if (res == 'invalid socket state' || res == 'room name in use')
             return cb(res)
@@ -175,6 +186,11 @@ export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
     })
 
     socket.on('join', async (roomId, cb) => {
+        if (!typia.is(roomId) && typeof cb != 'function') {
+            console.warn('invalid arguments:', roomId, cb)
+            return (cb as any)('invalid arguments')
+        }
+
         if (!rooms.has(roomId))
             return cb('invalid room id')
 
@@ -191,6 +207,11 @@ export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
 
 
     socket.on('addBot', async cb => {
+        if (typeof cb != 'function') {
+            console.warn('invalid arguments:', cb)
+            return (cb as any)('invalid arguments')
+        }
+
         if (socket.data.room == undefined)
             return cb('invalid socket state')
 
@@ -216,6 +237,11 @@ export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
     })
 
     socket.on('leave', async cb => {
+        if (typeof cb != 'function') {
+            console.warn('invalid arguments:', cb)
+            return (cb as any)('invalid arguments')
+        }
+
         cb(await leaveRoom(io, socket))
     })
 }

@@ -1,11 +1,17 @@
-import { allColors, LobbyClientEventMap, LobbyServerEventMap, RoomId } from 'catan-shared';
+import { allColors, isValidSetting, LobbyClientEventMap, LobbyServerEventMap, RoomId } from 'catan-shared';
 import { type Socket } from 'socket.io'
 import { initializeGame, lobbyRoomFor, participantsForRoom } from './RoomManager';
 import { SocketDataType, SocketServerType } from './Common';
+import typia from 'typia';
 
 type LobbySocket = Socket<LobbyServerEventMap, LobbyClientEventMap, {}, SocketDataType>
 export function acceptLobbyEvents(server: SocketServerType, socket: LobbySocket) {
     socket.on('startGame', async cb => {
+        if (typeof cb != 'function') {
+            console.warn('invalid arguments:', cb)
+            return (cb as any)('invalid arguments')
+        }
+
         if (socket.data.room == undefined)
             return cb('invalid socket state')
 
@@ -30,6 +36,23 @@ export function acceptLobbyEvents(server: SocketServerType, socket: LobbySocket)
 
 
     socket.on('changeSettings', (property, value, cb) => {
+        if (typeof cb != 'function') {
+            console.warn('invalid arguments:', cb)
+            return (cb as any)('invalid arguments')
+        }
+        switch (property) {
+            case 'longestRoadMinimum':
+                if (!typia.is(value)) return (cb as any)('invalid arguments')
+                else break
+            case 'requiredVictoryPoints':
+                if (!typia.is(value)) return (cb as any)('invalid arguments')
+                else break
+            case 'seed': 
+                if (!typia.is(value)) return (cb as any)('invalid arguments')
+                else break
+            default: return (cb as any)('invalid arguments')
+        }
+
         if (socket.data.room == undefined)
             return cb('invalid socket state')
 

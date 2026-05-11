@@ -306,8 +306,7 @@ export const useCurrentRoomStore = defineStore('room', () => {
                     break
 
                 const botaction = generateBotAction(actionableBots[0].bot, redactGameStateFor(state, actionableBots[0].color))
-                executor = actionableBots[0].color
-                if (botaction == undefined) {                        
+                if (botaction == undefined) {
                     popups.insert({
                         autoCloses: false,
                         title: "Bot failure",
@@ -316,6 +315,7 @@ export const useCurrentRoomStore = defineStore('room', () => {
                     })
                     break
                 }
+                executor = actionableBots[0].color
                 action = botaction
             }
 

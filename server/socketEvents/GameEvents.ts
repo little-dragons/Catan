@@ -2,11 +2,17 @@ import { Color, GameClientEventMap, GameActionInfo, GameActionInput, redactGameA
 import { type Socket } from 'socket.io'
 import { endGame, gameRoomFor, participantsForRoom, ServerGameRoom } from "./RoomManager";
 import { SocketDataType, SocketServerType } from "./Common";
+import typia from "typia";
 
 
 export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServerEventMap, GameClientEventMap, {}, SocketDataType>) {
 
     socket.on('gameState', (cb) => {
+        if (typeof cb != 'function') {
+            console.warn('invalid arguments:', cb)
+            return (cb as any)('invalid arguments')
+        }
+
         if (socket.data.room == undefined)
             return cb('invalid socket state')
 
@@ -45,6 +51,11 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
     }
 
     socket.on('gameAction', (action, cb) => {
+        if (!typia.is(action) && typeof cb != 'function') {
+            console.warn('invalid arguments:', action, cb)
+            return (cb as any)('invalid arguments')
+        }
+
         if (socket.data.room == undefined)
             return cb('invalid socket state')
 
@@ -81,6 +92,11 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
     })
 
     socket.on('fullGameRoom', async cb => {
+        if (typeof cb != 'function') {
+            console.warn('invalid arguments:', cb)
+            return (cb as any)('invalid arguments')
+        }
+
         if (socket.data.room == undefined)
             return cb('invalid socket state')
 

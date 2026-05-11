@@ -22,11 +22,13 @@
     "@socket.io/admin-ui": "catalog:backend",
     "bcrypt": "catalog:shared",
     "better-sqlite3": "catalog:backend",
+    "bun-plugin-typia": "^0.1.0",
     "catan-shared": "link:catan-shared",
     "kysely": "catalog:backend",
     "kysely-bun-sqlite": "catalog:backend",
     "socket.io": "catalog:shared",
     "typescript": "catalog:shared",
+    "typia": "^12.1.1",
     "uuid": "catalog:shared"
   }
 }
