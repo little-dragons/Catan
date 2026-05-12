@@ -6,20 +6,21 @@ import { v4 } from "uuid"
 import { addDistribution, type Distribution, setRecord } from "./Distribution"
 import { type Pure } from "../Pure"
 
-// Coordinate has two meaning, depending on whether tiles or crossings are indexed.
-// The first coordinate always refers to the horizontal degree, left to right, the
-// second is vertical, top to bottom.
-// To tile correctly, each horizontally adjacent tile has a vertical offset to its
-// predecessor, this still counts as being in the same row.
-// Each row (for tiles) also has a horizontal offset. The first row starts completely
-// at 0 to the left, while the second has half a tile offset into the x-axis.
-// A good starting point for examples is the function `neighborTile`
-
-export type Coordinate = Pure<[number, number]>
+/**
+ * Coordinate has two meaning, depending on whether tiles or crossings are indexed.
+ * The first coordinate always refers to the horizontal degree, left to right, the
+ * second is vertical, top to bottom.
+ * To tile correctly, each horizontally adjacent tile has a vertical offset to its
+ * predecessor, this still counts as being in the same row.
+ * Each row (for tiles) also has a horizontal offset. The first row starts completely
+ * at 0 to the left, while the second has half a tile offset into the x-axis.
+ * A good starting point for examples is the function {@link neighborTile}
+ */
+export type Coordinate = readonly [number, number]
 export function sameCoordinate(c1: Coordinate, c2: Coordinate) {
     return c1[0] == c2[0] && c1[1] == c2[1]
 }
-export type Road = Pure<[Coordinate, Coordinate]>
+export type Road = readonly [Coordinate, Coordinate]
 export function sameRoad(r1: Road, r2: Road) {
     return sameCoordinate(r1[0], r2[0]) && sameCoordinate(r1[1], r2[1]) || sameCoordinate(r1[0], r2[1]) && sameCoordinate(r1[1], r2[0])
 }
@@ -161,7 +162,11 @@ export function portsForCoord(board: Board, coord: Coordinate): readonly PortRes
     return board.tiles.filter(x => x.type == TileType.Port).filter(x => isPointForPort(x, coord)).map(x => x.resource)
 }
 
-
+/**
+ * There are two kinds of crossing in a hexagonal grid. Each crossing has three roads, but in one kind the 
+ * crossing has a road down and two slightly upwards (left and right), and in the other case, one road is straight up
+ * and the other two roads are slightly downwards. This function checks which is the case.
+ */
 function isCrossingWithRoadUp(crossing: Coordinate): boolean {
     function logicalXor(a: boolean, b: boolean) {
         return a && !b || b && !a
@@ -170,8 +175,11 @@ function isCrossingWithRoadUp(crossing: Coordinate): boolean {
 }
 
 
+/**
+ * Returns all crossings which could be connected by a single road to a given crossing. The output is not sanitzied in any way.
+ * It could return crossing with negative indices or crossings which are not actually contained by a board.
+ */
 export function adjacentCrossings(crossing: Coordinate) {
-    //TODO generated positions may be negative or otherwise out of bounds
     const left: Coordinate = [crossing[0] - 1, crossing[1]]
     const right: Coordinate = [crossing[0] + 1, crossing[1]]
 
@@ -180,6 +188,10 @@ export function adjacentCrossings(crossing: Coordinate) {
     return [left, right, vertical]
 }
 
+/**
+ * Generates all roads directly adjacent to a given crossing. The roads are not checked to satisfy
+ * any constraint and might be out-of-bounds or might not be adjacent to land tiles.
+ */
 export function adjacentRoads(crossing: Coordinate) {
     return adjacentCrossings(crossing).map<Road>(other => [crossing, other])
 }
@@ -203,7 +215,7 @@ function crossingsForColor(board: Board, color: Color) {
  */
 export function roadAdjacentToLand(board: Board, road: Road) {
     const sideCoords = adjacentTiles(road[0]).filter(tile => adjacentTiles(road[1]).some(tile2 => sameCoordinate(tile, tile2)))
-    return board.tiles.some(x => sideCoords.some(y => sameCoordinate(x.coord, y)) && isLandTile(x))
+    return landTiles(board).some(x => sideCoords.some(y => sameCoordinate(x.coord, y)))
 }
 
 /**
@@ -238,22 +250,24 @@ export function isAvailableRoadPosition(board: Board, road: Road, color: Color) 
  * Returns all roads satisfying {@link isAvailableRoadPosition}.
  */
 export function availableRoadPositions(board: Board, color: Color) {
-    // this can include duplicates of the form [c1, c2], [c2, c1]
     const allPotentialRoads: Road[] = 
         crossingsForColor(board, color)
+        // this can include duplicates of the form [c1, c2], [c2, c1]
         .flatMap(adjacentRoads)
-
-    return allPotentialRoads
         // remove duplicates
         .filter((val, idx) => allPotentialRoads.findIndex(x => sameRoad(x, val)) == idx)
+
+    return allPotentialRoads
         .filter(road => isAvailableRoadPosition(board, road, color))
 }
 
 
-
+/**
+ * Generate all tile coordinates adjacent to a given crossing coordinate.
+ * The returned coordinates are not sanitized or checked against any other constraint.
+ */
 function adjacentTiles(cross: Coordinate): readonly Coordinate[] {
     // draw it out to understand it
-    //TODO generated positions may be negative or otherwise out of bounds
 
     const oneTileAbove = !isCrossingWithRoadUp(cross)
     if (oneTileAbove) {
