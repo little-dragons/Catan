@@ -155,8 +155,8 @@ export const minInteractionPointRadius = tileRadius * 0.25
 export const maxInteractionPointRadius = tileRadius * 0.325
 export const robberHeight = tileRadius * 0.7
 export const robberWidth = tileRadius * 0.4
-export const buildingHeight = tileRadius * 0.5
-export const buildingWidth = tileRadius * 0.5
+export const settlementSize = tileRadius * 0.5
+export const citySize = tileRadius * 0.7
 
 
 function segment(start: Pixel, end: Pixel, width: number): Pixel[] {

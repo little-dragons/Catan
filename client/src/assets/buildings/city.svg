@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
-<svg width="170" height="139" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+<svg id="city" viewbox="0 0 170 139" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
  <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
  <g class="layer">
   <title>Layer 1</title>
-  <path d="m42.36,134.68c-0.36,0.83 92.14,1.66 92.32,-0.29c0.18,-1.95 -0.18,-51.12 -1.43,-52.24c-1.25,-1.12 -34.24,-0.95 -34.24,-0.95c0,0 -0.72,-36.07 -0.72,-39.81c0,-3.73 -26.53,-37.32 -27.61,-37.73c-1.08,-0.41 -27.61,36.49 -28.15,39.1c-0.54,2.61 -0.18,91.93 -0.18,91.93z" fill="#2e80d5" id="svg_13" stroke="#000000" stroke-width="2"/>
+  <path d="m42.36,134.68c-0.36,0.83 92.14,1.66 92.32,-0.29c0.18,-1.95 -0.18,-51.12 -1.43,-52.24c-1.25,-1.12 -34.24,-0.95 -34.24,-0.95c0,0 -0.72,-36.07 -0.72,-39.81c0,-3.73 -26.53,-37.32 -27.61,-37.73c-1.08,-0.41 -27.61,36.49 -28.15,39.1c-0.54,2.61 -0.18,91.93 -0.18,91.93z" fill="currentColor" id="svg_13" stroke="#000000" stroke-width="2"/>
   <path d="m63.91,131.71l0,0l0,0c0,0 0,0 0,0c0,0 0,0 0,0l0,0z" fill="#000000" id="svg_14" stroke="#000000" stroke-width="5"/>
   <path d="m65.3,70.06l0,0l0,0c0,0 0,0 0,0c0,0 0,0 0,0l0,0z" fill="#000000" id="svg_16" stroke="#000000" stroke-width="5"/>
   <path d="m62.87,131.65l0,0l0,0c0,0 0,0 0,0c0,0 0,0 0,0l0,0z" fill="#000000" id="svg_18" stroke="#000000" stroke-width="5"/>

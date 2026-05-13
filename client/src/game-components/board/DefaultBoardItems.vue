@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { cssColor, BuildingType, Color, Resource, type Board, type PortTile, type Tile, TileType, SpecialPorts } from 'catan-shared';
-import { tilePath, svgPath, segmentedPortPaths, buildingWidth, buildingHeight, tileCenter, robberHeight, robberWidth, roadCorners, tileNumberPosition, tileNumberFontSize, crossingPosition, tilePortPosition, tilePortIconSize, tileResourceIconPosition, tileResourceIconSize } from './Layout';
+import { tilePath, svgPath, segmentedPortPaths, tileCenter, robberHeight, robberWidth, roadCorners, tileNumberPosition, tileNumberFontSize, crossingPosition, tilePortPosition, tilePortIconSize, tileResourceIconPosition, tileResourceIconSize, settlementSize, citySize } from './Layout';
 
 import robber from '@/assets/board/robber.svg'
 
@@ -18,16 +18,8 @@ import ore from '@/assets/resources/ore.svg'
 import wool from '@/assets/resources/wool.svg'
 import desert from '@/assets/board/desert.svg'
 
-import blueCity from '@/assets/buildings/blue-city.svg'
-import blueSettlement from '@/assets/buildings/blue-settlement.svg'
-import greenCity from '@/assets/buildings/green-city.svg'
-import greenSettlement from '@/assets/buildings/green-settlement.svg'
-import orangeCity from '@/assets/buildings/orange-city.svg'
-import orangeSettlement from '@/assets/buildings/orange-settlement.svg'
-import redCity from '@/assets/buildings/red-city.svg'
-import redSettlement from '@/assets/buildings/red-settlement.svg'
-import yellowCity from '@/assets/buildings/yellow-city.svg'
-import yellowSettlement from '@/assets/buildings/yellow-settlement.svg'
+import settlementSvg from '@/assets/buildings/settlement.svg?raw'
+import citySvg from '@/assets/buildings/city.svg?raw'
 
 function resourceToIcon(resource: Resource): string {
     switch (resource) {
@@ -81,28 +73,6 @@ function portToIcon(port: PortTile): string {
             return generalPort
     }
 }
-function buildingForColor(color: Color, type: BuildingType): string {
-    switch (type) {
-        case BuildingType.City:
-            switch (color) {
-                case Color.Yellow: return yellowCity
-                case Color.Orange: return orangeCity
-                case Color.Red: return redCity
-                case Color.Green: return greenCity
-                case Color.Blue: return blueCity
-            }
-        
-        case BuildingType.Settlement:
-            switch (color) {
-                case Color.Yellow: return yellowSettlement
-                case Color.Orange: return orangeSettlement
-                case Color.Red: return redSettlement
-                case Color.Green: return greenSettlement
-                case Color.Blue: return blueSettlement
-            }
-    }
-}
-
 
 defineProps<{
     board: Board
@@ -110,6 +80,8 @@ defineProps<{
 
 </script>
 <template>
+    <defs v-html="settlementSvg"/>
+    <defs v-html="citySvg"/>
     <g id="tiles">
         <g v-for="tile in board.tiles">
             <path
@@ -149,7 +121,10 @@ defineProps<{
     <g id="roads">
         <path v-for="road in board.roads"
             :d="svgPath(roadCorners(road.coord))"
-            :fill="cssColor(road.color)"/>
+            :fill="cssColor(road.color)"
+            stroke="black"
+            stroke-width="2"
+            paint-order="stroke"/>
     </g>
     <image id="robber"
         :x="tileCenter(board.robber)[0] - robberWidth / 2"
@@ -158,12 +133,22 @@ defineProps<{
         :height="robberHeight"
         :href="robber"/>
     <g id="buildings">
-        <image v-for="building in board.buildings" 
-            :x="crossingPosition(building.coord)[0] - buildingWidth / 2"
-            :y="crossingPosition(building.coord)[1] - buildingHeight / 2"
-            :width="buildingWidth"
-            :height="buildingHeight"
-            :href="buildingForColor(building.color, building.type)"/>
+        <use v-for="building in board.buildings.filter(x => x.type == BuildingType.Settlement)"
+            :x="crossingPosition(building.coord)[0] - settlementSize / 2"
+            :y="crossingPosition(building.coord)[1] - settlementSize / 2"
+            :width="settlementSize"
+            :height="settlementSize"
+            :color="cssColor(building.color)"
+            href="#settlement"
+        />
+        <use v-for="building in board.buildings.filter(x => x.type == BuildingType.City)"
+            :x="crossingPosition(building.coord)[0] - citySize / 2"
+            :y="crossingPosition(building.coord)[1] - citySize / 2"
+            :width="citySize"
+            :height="citySize"
+            :color="cssColor(building.color)"
+            href="#city"
+        />
     </g>
 </template>
 

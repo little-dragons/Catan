@@ -254,10 +254,10 @@ export function availableRoadPositions(board: Board, color: Color) {
         crossingsForColor(board, color)
         // this can include duplicates of the form [c1, c2], [c2, c1]
         .flatMap(adjacentRoads)
+        
+    return allPotentialRoads
         // remove duplicates
         .filter((val, idx) => allPotentialRoads.findIndex(x => sameRoad(x, val)) == idx)
-
-    return allPotentialRoads
         .filter(road => isAvailableRoadPosition(board, road, color))
 }
 
