@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BuildingType, canBuyDevCard, canFinishTurn, canOfferTrade, canPlaceRoad, canPlaceSettlement, DevCardType, GameActionType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isActive, isInitial, type CardList, tryTransferCard, isRobbingDiscardingCards, validNewRobberPositions, allRobbableCrossings, isPreDiceRoll, allRobbableCrossingsExcept, type Board, type Participant, participantName, ParticipantType, roadAdjacentToLand } from 'catan-shared';
+import { BuildingType, canBuyDevCard, canFinishTurn, canOfferTrade, canPlaceRoad, canPlaceSettlement, DevCardType, GameActionType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isActive, isInitial, type CardList, tryTransferCard, isRobbingDiscardingCards, newRobberPositions, isPreDiceRoll, type Board, type Participant, participantName, ParticipantType, roadAdjacentToLand, robbableCrossingsExceptCurrent } from 'catan-shared';
 import { computed, ref, watchEffect, watch, toRaw } from 'vue';
 import GameRenderer, { type ForbiddableButtons } from './GameRenderer.vue';
 import { type PlayerOverviewData } from '../game-components/PlayerOverviewRenderer.vue';
@@ -123,25 +123,25 @@ watchEffect(async () => {
     if (state.value == undefined || !isRobbingMovingRobber(state.value.phase) || state.value.currentPlayer != state.value.self.color)
         return undefined
 
-    const possibleRobberPositions = validNewRobberPositions(state.value.board).map(x => x.coord)
+    const possibleRobberPositions = newRobberPositions(state.value.board)
 
     let newRobberCoordinate: Coordinate | undefined
     let robbedColor: Color | undefined
     do {
         newRobberCoordinate = await renderer.value!.getUserSelection({ type: UserSelectionType.Tile, positions: possibleRobberPositions }, { noAbort: true })
         
-        const robbableCrossings = allRobbableCrossings(state.value, newRobberCoordinate)
-        if (robbableCrossings.size == 0) {
+        const robbableCrossings = robbableCrossingsExceptCurrent(state.value, newRobberCoordinate)
+        const robbableColors = [...new Set(robbableCrossings.map(x => x[0]))]
+        if (robbableColors.length == 0) {
             robbedColor = undefined
         }
-        else if (robbableCrossings.size == 1) {
-            robbedColor = robbableCrossings.keys().next?.().value!
+        else if (robbableColors.length == 1) {
+            robbedColor = robbableColors[0]
         }
         else {
-            const selectableCrossings = Array.from(robbableCrossings.values()).flat()
-            const robbedCoord = await renderer.value!.getUserSelection({ type: UserSelectionType.Crossing, positions: selectableCrossings })
+            const robbedCoord = await renderer.value!.getUserSelection({ type: UserSelectionType.Crossing, positions: robbableCrossings.map(x => x[1]) })
             if (robbedCoord != undefined)
-                robbedColor = Array.from(robbableCrossings.entries()).find(x => x[1].some(coord => sameCoordinate(coord, robbedCoord)))![0]
+                robbedColor = robbableCrossings.find(x => sameCoordinate(x[1], robbedCoord))![0]
             else
                 // no color was selected, indicating that maybe an abort is intended.
                 newRobberCoordinate = undefined
@@ -404,22 +404,24 @@ async function devCardClicked(card: DevCardType) {
             if (!isPreDiceRoll(state.value.phase) && !isActive(state.value.phase))
                 return
 
-            const newRobbers = validNewRobberPositions(state.value.board)
-            const newPosition = await renderer.value.getUserSelection({ type: UserSelectionType.Tile, positions: newRobbers.map(x => x.coord) })
+            const newRobbers = newRobberPositions(state.value.board)
+            const newPosition = await renderer.value.getUserSelection({ type: UserSelectionType.Tile, positions: newRobbers })
             if (newPosition == undefined)
                 return
 
-            const robbables = allRobbableCrossingsExcept(state.value, newPosition, state.value.self.color)
+            const robbableCrossings = robbableCrossingsExceptCurrent(state.value, newPosition)
+            const robbableColors = robbableCrossings.map(x => x[0])
+            const robbableColorsUnique = robbableColors.filter((c, i) => robbableColors.findIndex(d => d == c) == i)
             let robbedColor: Color | undefined = undefined
-            if (robbables.size > 1) {
-                const robbedCrossing = await renderer.value.getUserSelection({ type: UserSelectionType.Crossing, positions: [...robbables.values()].flat() })
+            if (robbableColorsUnique.length > 1) {
+                const robbedCrossing = await renderer.value.getUserSelection({ type: UserSelectionType.Crossing, positions: robbableCrossings.map(x => x[1])})
                 if (robbedCrossing == undefined)
                     return
 
-                robbedColor = Array.from(robbables.entries()).filter(x => x[1].some(y => sameCoordinate(y, robbedCrossing)))[0][0]
+                robbedColor = robbableCrossings.find(x => sameCoordinate(x[1], robbedCrossing))![0]
             }
-            else if (robbables.size == 1) {
-                robbedColor = robbables.keys().next().value!
+            else if (robbableColorsUnique.length == 1) {
+                robbedColor = robbableColorsUnique[0]
             }
             await room.trySendAction({ type: GameActionType.PlayDevCard, cardType: DevCardType.Knight, newPosition, robbedColor })
             return

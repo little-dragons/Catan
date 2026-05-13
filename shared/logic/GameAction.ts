@@ -4,7 +4,7 @@ import { type FullGameState, nextTurn, GamePhaseType, type DieResult, isPreDiceR
 import { Color } from "./Player"
 import { addCards, buildingCost, connectionCost, devCardCost, Resource, tryRemoveCards } from "./Resource"
 import { canTradeWithBank, type FinalizedTrade, isValidOffer, type OpenTradeOffer, sameTradeOffer, type TradeOffer, TradeStatusByColor } from "./Trade"
-import { allRobbableCrossings, allRobbableCrossingsExcept, robbableCrossingsForColor, validNewRobberPosition } from "./Robber"
+import { isNewRobberPosition, robbableCrossingsExceptCurrent } from "./Robber"
 
 function withPatch<T>(arr: readonly T[], index: number, patch: Partial<T>): T[] {
     return arr.with(index, { ...arr[index], ...patch });
@@ -416,12 +416,14 @@ function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: Ga
     if (!isRobbingMovingRobber(state.phase) || executorColor != state.currentPlayer)
         return undefined
 
-    if (!validNewRobberPosition(state.board, action.coordinate))
+    if (!isNewRobberPosition(state.board, action.coordinate))
         return undefined
 
+    // wants to take a card
     if (action.robbedColor != undefined) {
-        const robbables = robbableCrossingsForColor(publicGameState(state), action.coordinate, action.robbedColor)
-        if (robbables.length == 0)
+        const robbable = robbableCrossingsExceptCurrent(publicGameState(state), action.coordinate)
+                        .some(x => x[0] == action.robbedColor)
+        if (!robbable)
             return undefined
 
         const robbedPlayerIdx = state.players.findIndex(x => x.color == action.robbedColor)
@@ -453,20 +455,21 @@ function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: Ga
             board: {...state.board, robber: action.coordinate }
         }, { robbedResource }]
     }
-    else if (allRobbableCrossings(publicGameState(state), action.coordinate).size == 0)
-        // you can only not take a card if no robbable color is adjacent
-        return [{...state,
-            phase: {
-                type: GamePhaseType.Turns,
-                subtype: TurnPhaseType.Active,
-                tradeOffers: []
-            },
-            board: {...state.board,
-                robber: action.coordinate
-            }
-        }, { robbedResource: undefined }]
-    else
+
+    // doesn't want to take a card - only allowed if there's no robbable crossing
+    if (robbableCrossingsExceptCurrent(publicGameState(state), action.coordinate).length != 0)
         return undefined
+
+    return [{...state,
+        phase: {
+            type: GamePhaseType.Turns,
+            subtype: TurnPhaseType.Active,
+            tradeOffers: []
+        },
+        board: {...state.board,
+            robber: action.coordinate
+        }
+    }, { robbedResource: undefined }]
 }
 function tryDoBankTrade(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.BankTrade]): ResultType<GameActionType.BankTrade> {
     const executorIdx = state.players.findIndex(x => x.color == executorColor)
@@ -657,7 +660,7 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
             if ((!isActive(state.phase) && !isPreDiceRoll(state.phase)) || executorColor != state.currentPlayer)
                 return undefined
 
-            if (!validNewRobberPosition(state.board, action.newPosition))
+            if (!isNewRobberPosition(state.board, action.newPosition))
                 return undefined
         
             let newKnightForce : Color | undefined
@@ -669,7 +672,7 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
             }
             
             if (action.robbedColor == undefined) {
-                if (allRobbableCrossingsExcept(publicGameState(state), action.newPosition, executorColor).size != 0)
+                if (robbableCrossingsExceptCurrent(publicGameState(state), action.newPosition).length != 0)
                     return undefined
 
                 return [{ ...state,
@@ -683,7 +686,7 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
 
             }
             else {
-                if (robbableCrossingsForColor(publicGameState(state), action.newPosition, action.robbedColor).length == 0)
+                if (!robbableCrossingsExceptCurrent(publicGameState(state), action.newPosition).some(x => x[0] == action.robbedColor))
                     return undefined
         
                 const robbedPlayerIdx = state.players.findIndex(x => x.color == action.robbedColor)
@@ -708,7 +711,7 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
                     ).with(executorIdx, { 
                         handCards: newExecutorCards, 
                         devCards: newDevCards, 
-                        knightsPlayed: state.players[executorColor].knightsPlayed + 1,
+                        knightsPlayed: state.players[executorIdx].knightsPlayed + 1,
                         color: executorColor
                     })
                 }, { robbedCard: robbedResource }]

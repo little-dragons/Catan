@@ -1,11 +1,12 @@
 import { adjacentColorsToTile, adjacentRoads, availableRoadPositions, type Coordinate, landTiles, portsForColor, resourceFrequenciesForColor, sameCoordinate, SpecialPorts, type Board } from "./Board"
 import { availableBuildingPositions, BuildingType, ConnectionType } from "./Buildings"
 import { type GameActionInput, GameActionType, tryDoPlaceInitialRedacted } from "./GameAction"
-import { GamePhaseType, isRobbingDiscardingCards, type RedactedGameState, RobbingPhaseType, TurnPhaseType, victoryPointsFromRedacted, requireActionFrom } from "./GameState"
+import { GamePhaseType, isRobbingDiscardingCards, type RedactedGameState, RobbingPhaseType, TurnPhaseType, victoryPointsFromRedacted, requireActionFrom, publicGameState } from "./GameState"
 import { buildingCost, type CardList, connectionCost, Resource, tryRemoveCards, tryTransferCard } from "./Resource"
 import { Color } from "./Player"
 import { type Distribution, mapRecord, popcountDistribution, sumDistribution } from "./Distribution"
 import { type Pure } from "../Pure"
+import { newRobberPositions, robbableCrossingsExceptCurrent } from "./Robber"
 
 export enum BotPersonality {
     Vincent // The trader
@@ -118,11 +119,12 @@ function initialSettlementPlacement(bot: Bot, state: RedactedGameState): Pure<[C
 }
 
 export function placeRobber(bot: Bot, state: RedactedGameState): [Coordinate, Color | undefined] {
-    const validNewTiles = landTiles(state.board).filter(x => !sameCoordinate(x.coord, state.board.robber))
-    const coord = validNewTiles[0].coord
-    const colors = adjacentColorsToTile(state.board, coord).filter(x => x != state.currentPlayer)
-
-    return [coord, colors.at(0)]
+    const coord = newRobberPositions(state.board)[0]
+    const cross = robbableCrossingsExceptCurrent(state, coord)
+    if (cross.length == 0)
+        return [coord, undefined]
+    else
+        return [coord, cross[0][0]]
 }
 
 export function activeAction(bot: Bot, state: RedactedGameState): GameActionInput {
