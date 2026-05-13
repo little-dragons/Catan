@@ -46,139 +46,151 @@ export enum GameActionType {
 }
 
 type GameActionInfos = {
-    [Name in GameActionType]: 
-        Name extends GameActionType.RollDice ? {
-            type: Name,
-            input: {
-            },
-            response: {
-                die1: DieResult
-                die2: DieResult
-            }
-        } : Name extends GameActionType.PlaceSettlement ? {
-            type: Name,
-            input: {
-                coordinate: Coordinate
-            },
-            response: undefined
-        } : Name extends GameActionType.PlaceCity ? {
-            type: Name,
-            input: {
-                coordinate: Coordinate
-            },
-            response: undefined
-        } : Name extends GameActionType.PlaceRoad ? {
-            type: Name,
-            input: {
-                coordinates: Road
-            },
-            response: undefined
-        } : Name extends GameActionType.PlaceRobber ? {
-            type: Name,
-            input: {
-                coordinate: Coordinate
-                robbedColor: Color | undefined
-            },
-            response: {
-                robbedResource: Resource | undefined
-            }
-        } : Name extends GameActionType.BankTrade ? {
-            type: Name,
-            input: {
-                offeredCards: readonly Resource[]
-                desiredCards: readonly Resource[]
-            },
-            response: undefined
-        } : Name extends GameActionType.OfferTrade ? {
-            type: Name,
-            input: {
-                offeredCards: readonly Resource[]
-                desiredCards: readonly Resource[]
-            },
-            response: undefined
-        } : Name extends GameActionType.AcceptTradeOffer ? {
-            type: Name,
-            input: {
-                trade: TradeOffer
-            },
-            response: undefined
-        } : Name extends GameActionType.RejectTradeOffer ? {
-            type: Name,
-            input: {
-                trade: TradeOffer
-            },
-            response: undefined
-        } : Name extends GameActionType.FinalizeTrade ? {
-            type: Name,
-            input: {
-                trade: FinalizedTrade
-            },
-            response: undefined
-        } : Name extends GameActionType.AbortTrade ? {
-            type: Name,
-            input: {
-                trade: TradeOffer
-            },
-            response: undefined
-        } : Name extends GameActionType.PlaceInitial ? {
-            type: Name,
-            input: {
-                settlement: Coordinate
-                road: Road
-            },
-            response: undefined
-        } : Name extends GameActionType.FinishTurn ? {
-            type: Name,
-            input: {
-            },
-            response: undefined
-        } : Name extends GameActionType.PlayDevCard ? {
-            type: Name,
-        } & ({
-                input: {
-                    cardType: DevCardType.Knight
-                    newPosition: Coordinate
-                    robbedColor: Color | undefined
-                }
-                response: {
-                    robbedCard: Resource | undefined
-                }
-            } | {
-                input: {
-                    cardType: DevCardType.YearOfPlenty
-                    resources: readonly [Resource, Resource]
-                }
-                response: undefined
-            } | {
-                input: {
-                    cardType: DevCardType.Monopoly
-                    resource: Resource
-                }
-                response: undefined
-            } | {
-                input: {
-                    cardType: DevCardType.RoadBuilding
-                    roads: [Road, Road]
-                }
-                response: undefined
-            }
-        ) : Name extends GameActionType.DiscardResources ? {
-            type: Name,
-            input: {
-                resources: readonly Resource[]
-            },
-            response: undefined
-        } : Name extends GameActionType.BuyDevCard ? {
-            type: Name,
-            input: {
-
-            },
-            response: {
-                cardType: DevCardType
-            }
+    [GameActionType.RollDice]: {
+        type: GameActionType.RollDice,
+        input: {
+        },
+        response: {
+            die1: DieResult
+            die2: DieResult
         }
-        : never
+    },
+    [GameActionType.PlaceSettlement]: {
+        type: GameActionType.PlaceSettlement,
+        input: {
+            coordinate: Coordinate
+        },
+        response: undefined
+    },
+    [GameActionType.PlaceCity]: {
+        type: GameActionType.PlaceCity,
+        input: {
+            coordinate: Coordinate
+        },
+        response: undefined
+    },
+    [GameActionType.PlaceRoad]: {
+        type: GameActionType.PlaceRoad,
+        input: {
+            coordinates: Road
+        },
+        response: undefined
+    },
+    [GameActionType.PlaceRobber]: {
+        type: GameActionType.PlaceRobber,
+        input: {
+            coordinate: Coordinate
+            robbedColor: Color | undefined
+        },
+        response: {
+            robbedResource: Resource | undefined
+        }
+    },
+    [GameActionType.BankTrade]: {
+        type: GameActionType.BankTrade,
+        input: {
+            offeredCards: readonly Resource[]
+            desiredCards: readonly Resource[]
+        },
+        response: undefined
+    },
+    [GameActionType.OfferTrade]: {
+        type: GameActionType.OfferTrade,
+        input: {
+            offeredCards: readonly Resource[]
+            desiredCards: readonly Resource[]
+        },
+        response: undefined
+    },
+    [GameActionType.AcceptTradeOffer]: {
+        type: GameActionType.AcceptTradeOffer,
+        input: {
+            trade: TradeOffer
+        },
+        response: undefined
+    },
+    [GameActionType.RejectTradeOffer]: {
+        type: GameActionType.RejectTradeOffer,
+        input: {
+            trade: TradeOffer
+        },
+        response: undefined
+    },
+    [GameActionType.FinalizeTrade]: {
+        type: GameActionType.FinalizeTrade,
+        input: {
+            trade: FinalizedTrade
+        },
+        response: undefined
+    },
+    [GameActionType.AbortTrade]: {
+        type: GameActionType.AbortTrade,
+        input: {
+            trade: TradeOffer
+        },
+        response: undefined
+    },
+    [GameActionType.PlaceInitial]: {
+        type: GameActionType.PlaceInitial,
+        input: {
+            settlement: Coordinate
+            road: Road
+        },
+        response: undefined
+    },
+    [GameActionType.FinishTurn]: {
+        type: GameActionType.FinishTurn,
+        input: {
+        },
+        response: undefined
+    },
+    [GameActionType.PlayDevCard]: 
+        { type: GameActionType.PlayDevCard } & ({
+            input: {
+                cardType: DevCardType.Knight
+                newPosition: Coordinate
+                robbedColor: Color | undefined
+            }
+            response: {
+                robbedCard: Resource | undefined
+            } 
+        } | {
+            input: {
+                cardType: DevCardType.YearOfPlenty
+                resources: readonly [Resource, Resource]
+            }
+            response: undefined 
+        } | {
+            input: {
+                cardType: DevCardType.Monopoly
+                resource: Resource
+            }
+            response: undefined 
+        } | {
+            input: {
+                cardType: DevCardType.RoadBuilding
+                roads: [Road, Road]
+            }
+            response: undefined 
+        }),
+    [GameActionType.DiscardResources]: {
+        type: GameActionType.DiscardResources,
+        input: {
+            resources: readonly Resource[]
+        },
+        response: undefined
+    },
+    [GameActionType.BuyDevCard]: {
+        type: GameActionType.BuyDevCard,
+        input: {
+
+        },
+        response: {
+            cardType: DevCardType
+        }
+    }
 }
+
 export type GameActionInfo = GameActionInfos[GameActionType]
 type GameActionInputMap = {
     [Name in GameActionType]: {
