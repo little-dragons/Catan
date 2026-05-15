@@ -50,7 +50,10 @@ function possibleColorSwitchesFor(user: Color) {
                     <p :style="{ textDecoration: user.color == currentRoom.ownColor ? 'dotted underline' : 'none' }">
                         {{ participantName(user) }}
                     </p>
-                    <p v-if="currentRoom.info?.mode == RoomMode.Online && currentRoom.info.data.owner.name == participantName(user)" :style="{ userSelect: 'none' }">👑</p>
+                    <p v-if="currentRoom.info?.mode == RoomMode.Online && currentRoom.info.data.owner.name == participantName(user)" 
+                        :style="{ userSelect: 'none' }">
+                        🛠️
+                    </p>
                 </span>
                 <p>{{ user.type == ParticipantType.Bot ? 'Bot' : user.user.type == UserType.Member ? 'Member' : 'Guest' }}</p>
                 <button 
