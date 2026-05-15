@@ -3,7 +3,8 @@ import Setting from './Setting.vue'
 import { RoomMode, RoomOPResult, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import router from '@/misc/Router';
 import SideMenu from '@/misc/SideMenu.vue';
-import { cssColor, participantName, ParticipantType, UserType, isValidSetting, type Settings } from 'catan-shared';
+import { cssColor, participantName, ParticipantType, UserType, isValidSetting, type Settings, randomUnusedColor, unusedColors, Color } from 'catan-shared';
+import { useTemplateRef } from 'vue';
 
 const currentRoom = useCurrentRoomStore()
 
@@ -21,6 +22,17 @@ async function changeSetting<Key extends keyof Settings>(key: Key, value: string
     const res = await currentRoom.tryChangeSetting(key, valid)
     return res == RoomOPResult.Success
 }
+
+function possibleColorSwitchesFor(user: Color) {
+    if (currentRoom.isOwner)
+        return unusedColors([ user ])
+
+    if (user == currentRoom.ownColor)
+        return unusedColors(currentRoom.info!.data.participants.filter(x => x.type == ParticipantType.User).map(x => x.color).concat([ user ]))
+
+    return []
+}
+
 </script>
 
 <template>
@@ -36,7 +48,21 @@ async function changeSetting<Key extends keyof Settings>(key: Key, value: string
             <div v-for="user in currentRoom.info?.data.participants" class="default-grid-layout grid-columns">
                 <p>{{ participantName(user) }}</p>
                 <p>{{ user.type == ParticipantType.Bot ? 'Bot' : user.user.type == UserType.Member ? 'Member' : 'Guest' }}</p>
-                <p class="color-icon" :style="`background-color: ${cssColor(user.color)}`"></p>
+                <button 
+                    :popovertarget="`${user.color}-popover`" 
+                    class="color-icon"
+                    :style="{ backgroundColor: cssColor(user.color) }"
+                    :disabled="possibleColorSwitchesFor(user.color).length == 0">
+                    {{ possibleColorSwitchesFor(user.color).length == 0 ? '' : '✎' }}
+                </button>
+                <div :id="`${user.color}-popover`" popover ref="colorPop">
+                    <button v-for="color in possibleColorSwitchesFor(user.color)" 
+                        class="color-icon" 
+                        :style="{ backgroundColor: cssColor(color) }"
+                        :commandfor="`${user.color}-popover`"
+                        command="hide-popover"
+                        @click="() => currentRoom.tryChangeColor(user.color, color)"/>
+                </div>
             </div>
             <button 
                 class="bot-button"
@@ -100,10 +126,28 @@ async function changeSetting<Key extends keyof Settings>(key: Key, value: string
 }
 
 .color-icon {
-    width: 1em;
-    height: 1em;
+    padding: 0;
+    font-size: small;
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 1.4rem;
     margin: auto;
-    border-radius: 1em;
     border: 1px black solid;
+}
+
+button:enabled {
+    cursor: pointer;
+}
+
+:popover-open {
+    bottom: anchor(top);
+    justify-self: anchor-center;
+    align-self: anchor-center;
+    display: flex;
+    gap: 3px;    
+    background-color: var(--secondary-background-color);
+    border: var(--mute-border);
+    border-radius: 3px;
+    padding: 5px;
 }
 </style>

@@ -1,6 +1,6 @@
-import { allColors, isValidSetting, LobbyClientEventMap, LobbyServerEventMap, RoomId } from 'catan-shared';
+import { LobbyClientEventMap, LobbyServerEventMap } from 'catan-shared';
 import { type Socket } from 'socket.io'
-import { initializeGame, lobbyRoomFor, participantsForRoom } from './RoomManager';
+import { emitParticipantsChange, initializeGame, lobbyRoomFor, socketsForRoom } from './RoomManager';
 import { SocketDataType, SocketServerType } from './Common';
 import typia from 'typia';
 
@@ -70,4 +70,75 @@ export function acceptLobbyEvents(server: SocketServerType, socket: LobbySocket)
         socket.to(socket.data.room[0]).emit('settingsChange', room.settings)
         return cb(true)
     })
+
+    socket.on('changeColor', async (oldColor, newColor, cb) => {
+        // runtime validation
+        if (typeof cb != 'function') {
+            console.warn('invalid arguments:', cb)
+            return (cb as any)('invalid arguments')
+        }
+        if (!typia.is(oldColor) && !typia.is(newColor) && typeof cb != 'function') {
+            console.warn('invalid arguments:', oldColor, newColor, cb)
+            return (cb as any)('invalid arguments')
+        }
+
+        
+        // establishing preconditions
+        if (socket.data.room == undefined)
+            return cb('invalid socket state')
+
+        const room = lobbyRoomFor(socket.data.room[0])
+        if (room == undefined)
+            return cb('invalid socket state')
+        
+
+
+        const isOwner = room.owner.name == socket.data.user.name
+        const sockets = await socketsForRoom(server, room.id)
+
+
+        const playerWithOldColor = sockets.find(x => x.data.room![1] == oldColor)
+        const botWithOldColor = room.bots.find(x => x[1] == oldColor)
+        const playerWithNewColor = sockets.find(x => x.data.room![1] == newColor)
+        const botWithNewColor = room.bots.find(x => x[1] == newColor)
+
+        if (playerWithOldColor == undefined && botWithOldColor == undefined)
+            return cb('color not in use')
+
+        if (!isOwner) {
+            // check that oldColor is current player
+            if (playerWithOldColor == undefined)
+                return cb('not the owner')
+
+            if (playerWithOldColor.data.user!.name != socket.data.user.name)
+                return cb('not the owner')
+            
+            if (playerWithNewColor != undefined)
+                return cb('not the owner')
+
+            // operation allowed: swap with bot if necessary, select new color
+            if (botWithNewColor != undefined)
+                botWithNewColor[1] = oldColor
+
+            playerWithOldColor.data.room![1] = newColor
+
+            await emitParticipantsChange(server, socket.data.room[0])
+            return cb(true)
+        }
+
+        // is owner: simply swap
+
+        if (playerWithNewColor != undefined)
+            playerWithNewColor.data.room![1] = oldColor
+        if (botWithNewColor != undefined)
+            botWithNewColor[1] = oldColor
+
+        if (playerWithOldColor != undefined)
+            playerWithOldColor.data.room![1] = newColor
+        if (botWithOldColor != undefined)
+            botWithOldColor[1] = newColor
+
+        await emitParticipantsChange(server, socket.data.room[0])
+        return cb(true)
+    }) 
 }

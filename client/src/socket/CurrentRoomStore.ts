@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { type RedactedRoom, RoomType, type GameActionInput, type PossiblyRedactedGameActionInfo, generateStateFromScenario, redactGameStateFor, defaultScenario, defaultSettings, ParticipantType, Color, BotPersonality, randomUnusedColor, tryDoAction, winners, requireActionFrom, generateBotAction } from "catan-shared"
+import { type RedactedRoom, RoomType, type GameActionInput, type PossiblyRedactedGameActionInfo, generateStateFromScenario, redactGameStateFor, defaultScenario, defaultSettings, ParticipantType, Color, BotPersonality, randomUnusedColor, tryDoAction, winners, requireActionFrom, generateBotAction, participantName } from "catan-shared"
 import { ref, computed, toRaw } from "vue"
 import { useCurrentUserStore, UserStatus } from "./CurrentUserStore"
 import { socket } from "./Socket"
@@ -181,6 +181,7 @@ export const useCurrentRoomStore = defineStore('room', () => {
                                         ? info.value?.data.owner.name == user.info.user.name 
                                         : false)
                             )
+    const ownColor = computed(() => info.value?.data.participants.find(x => participantName(x) == user.loggedInInfo!.name)?.color)
 
 
     async function tryChangeSetting<Key extends keyof Settings>(key: Key, value: Settings[Key]) {
@@ -383,5 +384,21 @@ export const useCurrentRoomStore = defineStore('room', () => {
         return RoomOPResult.Success
     }
 
-    return { info, tryJoin, tryCreateOnline, tryCreateOffline, tryLeave, tryStart, canJoinOnline, isOwner, tryChangeSetting, trySendAction, actions, tryAddBot }
+    async function tryChangeColor(oldColor: Color, newColor: Color) {
+        const response = await socket.emitWithAck('changeColor', oldColor, newColor)
+        switch (response) {
+            case 'color in use':
+                return RoomOPResult.ServerRejected
+            case 'color not in use':
+                return RoomOPResult.ServerRejected
+            case 'not the owner':
+                return RoomOPResult.NotOwner
+            case 'invalid socket state':
+                return RoomOPResult.ServerRejected
+            case true:
+                return RoomOPResult.Success
+        }
+    }
+
+    return { info, tryJoin, tryChangeColor, tryCreateOnline, tryCreateOffline, tryLeave, tryStart, ownColor, canJoinOnline, isOwner, tryChangeSetting, trySendAction, actions, tryAddBot }
 })

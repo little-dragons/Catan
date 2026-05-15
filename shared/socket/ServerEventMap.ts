@@ -4,6 +4,7 @@ import type { Settings } from "../logic/Settings"
 import type { GameActionInput } from "../logic/GameAction"
 import type { User } from "../authentication/User"
 import type { PasswordNonce } from "../authentication/Password"
+import { Color } from "../logic/Player"
 
 export type GuestLoginError = 'name in use' | 'name not allowed'
 export type MemberLoginError = 'invalid password' | 'name unknown' | 'already logged in'
@@ -34,6 +35,14 @@ export type LobbyServerEventMap = {
         setting: Property,
         value: Settings[Property],
         cb: Callback<true | 'invalid socket state' | 'not the owner' |'room is ingame'>) => void
+
+    /**
+     * Allows a user to change the color. If the sender of the event is the owner of the lobby, the color switch always succeeds.
+     * If the new color was already in use, it is simply swapped with the player who had the color previously.
+     * A non-owner player can only switch to unused colors. If {@link oldColor} was not in use, that error is returned.
+     * @returns `color in use` can only be returned if the sender is not the owner.
+     */
+    changeColor: (oldColor: Color, newColor: Color, cb: Callback<true | 'invalid socket state' | 'color in use' | 'not the owner' | 'color not in use'>) => void
 }
 
 export type LoginServerEventMap = {

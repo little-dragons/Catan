@@ -1,5 +1,5 @@
 import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType, PostGameRoom, generateBoardFromScenario, defaultScenario, ParticipantType, Participant, generateStateFromScenario, randomUnusedColor } from "catan-shared"
-import { type Socket } from 'socket.io'
+import { RemoteSocket, type Socket } from 'socket.io'
 import { SocketDataType, SocketServerType } from "./Common"
 import { defaultSettings, Bot, BotPersonality } from "catan-shared"
 import { v4 } from "uuid"
@@ -34,14 +34,21 @@ export function lobbyRoomFor(roomId: RoomId): ServerLobbyRoom | undefined {
 
 type RoomSocket = Socket<RoomServerEventMap, RoomClientEventMap, {}, SocketDataType>
 
-export async function usersForRoom(io: SocketServerType, roomId: RoomId) {
-    return (await io.in(roomId).fetchSockets()).map(x => [x.data.user, x.data.room![1]] as [User, Color])
+/**
+ * Returns an array for each socket in the room.
+ */
+export function socketsForRoom(io: SocketServerType, roomId: RoomId): Promise<RemoteSocket<RoomClientEventMap, SocketDataType>[]> {
+    return io.in(roomId).fetchSockets()
 }
 export async function participantsForRoom(io: SocketServerType, roomId: RoomId): Promise<Participant[]> {
-    const users = (await io.in(roomId).fetchSockets()).map<Participant>(x => 
+    const users = (await socketsForRoom(io, roomId)).map<Participant>(x => 
                         { return { type: ParticipantType.User, user: x.data.user!, color: x.data.room![1] } })
     const bots = rooms.get(roomId)?.bots.map<Participant>(bot => { return { type: ParticipantType.Bot, bot: bot[0], color: bot[1] } })
     return users.concat(bots ?? [])
+}
+
+export async function emitParticipantsChange(io: SocketServerType, roomId: RoomId) {
+    io.in(roomId).emit('participantChange', await participantsForRoom(io, roomId))
 }
 
 export async function initializeGame(io: SocketServerType, room: ServerLobbyRoom) {
@@ -135,7 +142,7 @@ async function leaveRoom(io: SocketServerType, socket: RoomSocket) {
         return 'invalid socket state'
     }
 
-    const users = await usersForRoom(io, socket.data.room[0])
+    const users = await socketsForRoom(io, socket.data.room[0])
     if (room.owner.name == socket.data.user.name || users.length <= 1) {
         rooms.delete(socket.data.room![0])
 
