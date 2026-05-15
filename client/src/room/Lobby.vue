@@ -46,7 +46,12 @@ function possibleColorSwitchesFor(user: Color) {
                 <p>Color</p>
             </div>
             <div v-for="user in currentRoom.info?.data.participants" class="default-grid-layout grid-columns">
-                <p>{{ participantName(user) }}</p>
+                <span>
+                    <p :style="{ textDecoration: user.color == currentRoom.ownColor ? 'dotted underline' : 'none' }">
+                        {{ participantName(user) }}
+                    </p>
+                    <p v-if="currentRoom.info?.mode == RoomMode.Online && currentRoom.info.data.owner.name == participantName(user)" :style="{ userSelect: 'none' }">👑</p>
+                </span>
                 <p>{{ user.type == ParticipantType.Bot ? 'Bot' : user.user.type == UserType.Member ? 'Member' : 'Guest' }}</p>
                 <button 
                     :popovertarget="`${user.color}-popover`" 
@@ -125,6 +130,14 @@ function possibleColorSwitchesFor(user: Color) {
     margin: auto;
 }
 
+span {
+    display: flex;
+    gap: 10px;
+}
+span > p {
+    margin: 0;
+}
+
 .color-icon {
     padding: 0;
     font-size: small;
@@ -133,6 +146,7 @@ function possibleColorSwitchesFor(user: Color) {
     border-radius: 1.4rem;
     margin: auto;
     border: 1px black solid;
+    user-select: none;
 }
 
 button:enabled {
@@ -140,7 +154,7 @@ button:enabled {
 }
 
 :popover-open {
-    bottom: anchor(top);
+    transform: translateY(-90%);
     justify-self: anchor-center;
     align-self: anchor-center;
     display: flex;
