@@ -63,7 +63,7 @@ function possibleColorSwitchesFor(user: Color) {
                     :disabled="possibleColorSwitchesFor(user.color).length == 0">
                     {{ possibleColorSwitchesFor(user.color).length == 0 ? '' : '✎' }}
                 </button>
-                <div :id="`${user.color}-popover`" popover ref="colorPop">
+                <div :id="`${user.color}-popover`" popover>
                     <button v-for="color in possibleColorSwitchesFor(user.color)" 
                         class="color-icon" 
                         :style="{ backgroundColor: cssColor(color) }"

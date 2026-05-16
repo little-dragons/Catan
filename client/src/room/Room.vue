@@ -19,7 +19,10 @@ watch(roomStore, () => {
 <template>
     <Lobby v-if="roomStore.info?.data.type === RoomType.Lobby"/>
     <Game v-else-if="roomStore.info?.data.type === RoomType.InGame" />
-    <History v-else-if="roomStore.info?.data.type === RoomType.PostGame" :history="roomStore.info.data.history" />
+    <div v-else-if="roomStore.info?.data.type === RoomType.PostGame">
+        <button @click="() => roomStore.tryLeave()">Leave the room</button>
+        <History :history="roomStore.info.data.history"/>
+    </div>
     <p v-else>This is not supposed to be shown. Try reloading the page.</p>
 </template>
 

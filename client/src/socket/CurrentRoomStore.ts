@@ -115,16 +115,6 @@ export const useCurrentRoomStore = defineStore('room', () => {
 
         info.value = undefined
 
-        if (router.currentRoute.value.name == 'room') {
-            router.push('/')
-            popups.insert({
-                title: 'Automatic redirect',
-                message: 'You have been redirected out of the room page, because you left the room.',
-                autoCloses: true,
-                severity: PopupSeverity.Info
-            })
-        }
-
         return RoomOPResult.Success
     }
     async function tryStart() {
