@@ -5,10 +5,10 @@ import Modal from '@/modals/Modal.vue'
 import router from '@/misc/Router';
 import { PopupSeverity, usePopups } from '@/popup/Popup';
 import { RoomOPResult, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
-import { ref } from 'vue';
+import { ref, useTemplateRef } from 'vue';
 import { useModalStore } from './ModalStore';
 
-const roomInput = ref<null | InstanceType<typeof RoomInput>>(null)
+const roomInput = useTemplateRef('roomInput')
 
 const currentRoom = useCurrentRoomStore()
 const popups = usePopups()

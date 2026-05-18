@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, useTemplateRef } from 'vue';
 import { Color, DevCardType, Resource, type Board, type CardList, type DieResult, type OpenTradeOffer, type TradeOffer } from 'catan-shared';
 import { type InteractionPoints, type UserSelectionOptions, type UserSelectionResult } from '../game-components/board/UserSelection'
 import DiceRenderer from '../game-components/DiceRenderer.vue';
@@ -60,7 +60,7 @@ defineProps<{
     ownTrades: OpenTradeOffer[]
 }>()
 
-const boardContainer = ref<null | HTMLDivElement>(null)
+const boardContainer = useTemplateRef('boardContainer')
 const boardWidth = ref(300)
 onMounted(() => {
     boardWidth.value = boardContainer.value!.children[0].clientWidth
@@ -72,7 +72,7 @@ onMounted(() => {
     }).observe(boardContainer.value!.children[0])
 })
 
-const interaction = ref<null | InstanceType<typeof InteractionProvider>>(null)
+const interaction = useTemplateRef('interaction')
 async function getUserSelection<T extends InteractionPoints, Options extends UserSelectionOptions | undefined>(value: T, options?: Options): Promise<UserSelectionResult<T['type'], Options>> {
     return await interaction.value!.get(value, options)
 }

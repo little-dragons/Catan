@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { BuildingType, canBuyDevCard, canFinishTurn, canOfferTrade, canPlaceRoad, canPlaceSettlement, DevCardType, GameActionType, Color, canPlaceCity, canRollDice, isRobbingMovingRobber, GamePhaseType, Resource, RoomType, TurnPhaseType, UserType, addCards, adjacentRoads, availableBuildingPositions, availableRoadPositions, canTradeWithBank, isValidOffer, sameCoordinate, sameTradeOffer, tryRemoveCard, tryRemoveCards, victoryPointsFromRedacted, type Coordinate, type DieResult, type RedactedPlayer, type Road, type TradeOffer, type User, isActive, isInitial, type CardList, tryTransferCard, isRobbingDiscardingCards, newRobberPositions, isPreDiceRoll, type Board, type Participant, participantName, ParticipantType, roadAdjacentToLand, robbableCrossingsExceptCurrent } from 'catan-shared';
-import { computed, ref, watchEffect, watch, toRaw } from 'vue';
+import { computed, ref, watchEffect, watch, toRaw, useTemplateRef } from 'vue';
 import GameRenderer, { type ForbiddableButtons } from './GameRenderer.vue';
 import { type PlayerOverviewData } from '../game-components/PlayerOverviewRenderer.vue';
 import { UserSelectionType } from '../game-components/board/UserSelection';
@@ -9,7 +9,7 @@ import { RoomMode, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
 import type { DiscardMenuRendererProps } from '../game-components/DiscardRenderer.vue';
 import { isDevelopment } from '@/misc/Globals';
 
-const renderer = ref<null | InstanceType<typeof GameRenderer>>(null)
+const renderer = useTemplateRef('renderer')
 
 const room = useCurrentRoomStore()
 const state = computed(() => room.info?.data.type == RoomType.InGame ? room.info?.data.state : undefined)

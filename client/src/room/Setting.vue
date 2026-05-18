@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, ref } from 'vue';
+import { nextTick, ref, useTemplateRef } from 'vue';
 import error from '@/assets/ui/error.svg';
 import ok from '@/assets/ui/ok.svg';
 import change from '@/assets/ui/setting.svg';
@@ -12,7 +12,7 @@ const props = defineProps<{
 }>()
 
 const editing = ref<false | string>(false)
-const input = ref<null | HTMLInputElement>(null)
+const input = useTemplateRef('input')
 function sendUpdate() {
     if (editing.value === false || props.update == undefined || !props.isValid(editing.value))
         return

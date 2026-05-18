@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, useTemplateRef } from 'vue';
 import UsernameInput from './input-fields/UsernameInput.vue';
 import PasswordInput from './input-fields/PasswordInput.vue';
 import Modal from '@/modals/Modal.vue'
@@ -14,9 +14,9 @@ const currentUser = useCurrentUserStore()
 
 const showRegister = ref(false)
 
-const passwordInput = ref<null | InstanceType<typeof PasswordInput>>(null)
-const guestnameInput = ref<null | InstanceType<typeof UsernameInput>>(null)
-const membernameInput = ref<null | InstanceType<typeof UsernameInput>>(null)
+const passwordInput = useTemplateRef('passwordInput')
+const guestnameInput = useTemplateRef('guestnameInput')
+const membernameInput = useTemplateRef('membernameInput')
 
 
 async function memberLogin() {

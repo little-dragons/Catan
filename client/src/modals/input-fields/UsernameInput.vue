@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { validUsername } from 'catan-shared';
 import CustomInput from './CustomInput.vue'
-import { computed, ref } from 'vue';
+import { computed, useTemplateRef } from 'vue';
 
 defineProps<{
     tagId?: string
 }>()
-const child = ref<null | InstanceType<typeof CustomInput>>(null)
-
+const child = useTemplateRef('child')
 const disallowedNames = [] as string[]
 const namesInUse = [] as string[]
 const unknownNames = [] as string[]

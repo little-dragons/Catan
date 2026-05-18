@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, useTemplateRef } from 'vue';
 import CustomInput from './CustomInput.vue'
 import { validPassword } from 'catan-shared';
 
@@ -15,7 +15,7 @@ defineExpose({
     result: computed(() => child.value?.result ?? null)
 })
 
-const child = ref<null | InstanceType<typeof CustomInput>>(null)
+const child = useTemplateRef('child')
 
 const invalidPasswords = [] as string[]
 
