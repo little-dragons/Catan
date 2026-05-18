@@ -84,12 +84,11 @@ watchEffect(async () => {
         road = await renderer.value.getUserSelection({ type: UserSelectionType.Connection, positions: adjacentRoads(settlement).filter(road => roadAdjacentToLand(customBoard.value!, road)) })
     } while(settlement == undefined || road == undefined)
 
-    await room.trySendAction(
-        { 
-            type: GameActionType.PlaceInitial, 
-            road: road,
-            settlement: settlement
-        })
+    await room.trySendAction({ 
+        type: GameActionType.PlaceInitial, 
+        road: road,
+        settlement: settlement
+    })
     customBoard.value = undefined
 })
 
@@ -102,14 +101,16 @@ async function rollDice() {
 
 const lastDice = ref<undefined | readonly [DieResult, DieResult]>(undefined)
 watch(room.actions, () => {
-    const oldestAction = room.actions.shift()
-    if (oldestAction == undefined)
-        return
-    if (oldestAction.type == GameActionType.RollDice) {
-        lastDice.value = [oldestAction.response.die1, oldestAction.response.die2]
+    while (true) {
+        const oldestAction = room.actions.shift()
+        if (oldestAction == undefined)
+            return
+        if (oldestAction.type == GameActionType.RollDice) {
+            lastDice.value = [oldestAction.response.die1, oldestAction.response.die2]
+        }
+        // TODO handle more actions
+        // (for example, show cars sliding to player)
     }
-    // TODO handle more actions
-    // (for example, show cars sliding to player)
 })
 
 watchEffect(() => {

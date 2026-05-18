@@ -4,7 +4,7 @@ import { createServer, Server as HttpsServer } from 'https'
 import { readFileSync } from  'fs'
 import { acceptLobbyEvents } from "./socketEvents/LobbyEvents"
 import { acceptGameEvents } from "./socketEvents/GameEvents"
-import { acceptRoomEvents } from "./socketEvents/RoomManager"
+import { acceptRoomEvents, leaveRoom } from "./socketEvents/RoomManager"
 import { instrument } from "@socket.io/admin-ui"
 import { SocketDataType, SocketServerType, isDevelopment, isProduction } from "./socketEvents/Common"
 import { db } from "./database/Connection"
@@ -62,9 +62,10 @@ io.on('connection', socket => {
     acceptLobbyEvents(io, socket)
     acceptGameEvents(io, socket)
 
-    socket.on('disconnect', (reason, desc) => {
-        // TODO potentially delete some data? leave room?
-        // maybe call the logout method?
+    socket.on('disconnect', async (reason, desc) => {
+        if (socket.data.room != undefined) {
+            await leaveRoom(io, socket)
+        }
         socket.data = { user: undefined }
     })
 })

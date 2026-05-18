@@ -227,6 +227,19 @@ export const useCurrentRoomStore = defineStore('room', () => {
         info.value.data.participants = newUsers
     })
 
+    socket.on('closed', () => {
+        if (info.value == undefined || info.value.mode == RoomMode.Offline)
+            return
+
+        popups.insert({
+            autoCloses: true,
+            message: 'The room was closed and you have left it.',
+            severity: PopupSeverity.Info,
+            title: 'Room closed'
+        })
+        info.value = undefined
+    })
+
     const actions = ref<PossiblyRedactedGameActionInfo[]>([])
 
     socket.on('gameEvent', (newState, actionInfo) => {

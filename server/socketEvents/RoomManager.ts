@@ -129,34 +129,32 @@ async function joinRoom(io: SocketServerType, socket: RoomSocket, id: RoomId) {
 }
 
 
-async function leaveRoom(io: SocketServerType, socket: RoomSocket) {
+export async function leaveRoom(io: SocketServerType, socket: RoomSocket) {
     if (socket.data.user == undefined || socket.data.room == undefined)
         return 'invalid socket state'
 
-    // TODO what if index changes between here and following?
-    const room = rooms.get(socket.data.room![0])
+    const room = rooms.get(socket.data.room[0])
     if (room == undefined) {
-        // TODO this is not supposed to happen
         console.warn('Socket contained invalid room id.')
         socket.data.room = undefined
         return 'invalid socket state'
     }
 
     const users = await socketsForRoom(io, socket.data.room[0])
-    if (room.owner.name == socket.data.user.name || users.length <= 1) {
+    if (room.owner.name == socket.data.user.name || users.length < 1 || room.type == RoomType.InGame) {
+        // the ingame check is because the logic currently breaks when a participant leaves.
+        // see: https://github.com/little-dragons/Catan/issues/32
+        
         rooms.delete(socket.data.room![0])
 
         const sockets = await io.in(socket.data.room[0]).fetchSockets()
-        sockets.forEach(s => s.emit('closed'))
-        sockets.forEach(s => s.leave(socket.data.room![0]))
-
-        for (const other of sockets)
-            other.data.room = undefined
+        sockets.forEach(s => { s.emit('closed')
+                               s.leave(socket.data.room![0])
+                               s.data.room = undefined })
     }
     else {
         socket.leave(socket.data.room[0])
-        const otherParticipants = await participantsForRoom(io, socket.data.room[0])
-        io.in(socket.data.room[0]).emit('participantChange', otherParticipants)
+        emitParticipantsChange(io, socket.data.room[0])
         socket.data.room = undefined
     }
 
