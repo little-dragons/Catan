@@ -109,11 +109,13 @@ export const useCurrentRoomStore = defineStore('room', () => {
             return RoomOPResult.Success
         }
 
+        info.value = undefined
+        // putting this after the emit might lead to receiving the 'closed' event before setting
+        // the new info.value, thus leading to a popup.
         const result = await socket.emitWithAck('leave')
         if (result == 'invalid socket state')
             return RoomOPResult.ServerRejected
 
-        info.value = undefined
 
         return RoomOPResult.Success
     }
