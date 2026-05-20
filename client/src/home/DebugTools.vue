@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { v4 } from 'uuid';
-import { Color, defaultScenario, GamePhaseType, generateBoardFromScenario, Resource, TurnPhaseType, type Board, type History } from 'catan-shared';
+import { Color, defaultScenario, GamePhaseType, generateBoardFromScenario, Resource, TurnPhaseType, type Board, type History, type HonoSchema } from 'catan-shared';
 import HistoryComponent from '@/game/History.vue';
 import { usePopups, PopupSeverity } from '@/popup/Popup';
 import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
@@ -9,6 +9,10 @@ import { useCurrentUserStore, UserStatus } from '@/socket/CurrentUserStore';
 import router from '@/misc/Router';
 import Container from '@/game-components/board/Container.vue';
 import DefaultBoardItems from '@/game-components/board/DefaultBoardItems.vue';
+import { hc } from 'hono/client'
+import type { BlankEnv } from 'hono/types';
+import type { Hono } from 'hono';
+import type { StatusCode } from 'hono/utils/http-status';
 
 const currentUser = useCurrentUserStore()
 const currentRoom = useCurrentRoomStore()
@@ -63,6 +67,10 @@ const showHistory = ref(false)
 const showBoardRenderer = ref(false)
 const boardString = ref('')
 const board = computed<Board | undefined>(() => boardString.value == '' ? undefined : JSON.parse(boardString.value))
+
+const restresult = ref<StatusCode | undefined>(undefined)
+const client = hc<Hono<BlankEnv, HonoSchema, '/'>>('http://localhost:3000')
+
 </script>
 
 
@@ -80,6 +88,10 @@ const board = computed<Board | undefined>(() => boardString.value == '' ? undefi
     <button @click="() => showBoardRenderer = !showBoardRenderer">
         Toggle board renderer
     </button>
+    <button @click="async () => restresult = (await client.auth.register.$post({ json: { username: 'Alice', password: 'test' }})).status">
+        Send api request
+    </button>
+    <p v-if="restresult != undefined">{{ restresult }}</p>
 
     <HistoryComponent v-if="showHistory" :history="exampleHistory" />
     <textarea v-if="showBoardRenderer" v-model="boardString"/>

@@ -22,11 +22,12 @@
         "@types/uuid": "^11.0.0",
         "@types/seedrandom": "^3.0.8",
         "@types/bcrypt": "^6.0.0",
+        "hono": "^4.12.21",
         "socket.io": "^4.8.3",
         "socket.io-client": "^4.8.3",
         "bcrypt": "^6.0.0",
         "seedrandom": "^3.0.5",
-        "typescript": "^5.9.3",
+        "typescript": "^6.0.3",
         "uuid": "^13.0.0"
       }
     }

@@ -19,16 +19,20 @@
     "kysely-codegen": "catalog:backend"
   },
   "dependencies": {
-    "@socket.io/admin-ui": "catalog:backend",
+    "@hono/zod-validator": "^0.8.0",
+    "@socket.io/admin-ui": "^0.5.1",
+    "@socket.io/bun-engine": "^0.1.1",
     "bcrypt": "catalog:shared",
     "better-sqlite3": "catalog:backend",
     "bun-plugin-typia": "^0.1.0",
     "catan-shared": "link:catan-shared",
+    "hono": "catalog:shared",
     "kysely": "catalog:backend",
     "kysely-bun-sqlite": "catalog:backend",
     "socket.io": "catalog:shared",
     "typescript": "catalog:shared",
     "typia": "^12.1.1",
-    "uuid": "catalog:shared"
+    "uuid": "catalog:shared",
+    "zod": "^4.4.3"
   }
 }

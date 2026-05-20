@@ -9,14 +9,16 @@
     "prod": "NODE_ENV=production SSL_DIR=\"/home/catan/ssl/letsencrypt\" bunx --bun vite --host -c vite.config.prod.ts"
   },
   "dependencies": {
+    "hono": "catalog:shared",
+    "@hono/client": "^0.0.3",
     "@types/bun": "catalog:shared",
     "catan-shared": "link:catan-shared",
+    "pinia": "^3.0.4",
     "socket.io": "catalog:shared",
     "socket.io-client": "catalog:shared",
     "uuid": "catalog:shared",
     "vue": "^3.5.30",
-    "vue-router": "^5.0.4",
-    "pinia": "^3.0.4"
+    "vue-router": "^5.0.4"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.5",

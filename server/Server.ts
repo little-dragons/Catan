@@ -1,32 +1,45 @@
-import { ClientEventMap, ServerEventMap, SocketPort } from "catan-shared"
+import { ClientEventMap, ServerEventMap, SocketPort, type HonoSchema } from "catan-shared"
 import { Server } from "socket.io"
-import { createServer, Server as HttpsServer } from 'https'
+import { Server as Engine, WebSocketData } from '@socket.io/bun-engine'
+import { Hono } from 'hono'
 import { readFileSync } from  'fs'
 import { acceptLobbyEvents } from "./socketEvents/LobbyEvents"
 import { acceptGameEvents } from "./socketEvents/GameEvents"
 import { acceptRoomEvents, leaveRoom } from "./socketEvents/RoomManager"
 import { instrument } from "@socket.io/admin-ui"
-import { SocketDataType, SocketServerType, isDevelopment, isProduction } from "./socketEvents/Common"
+import { SocketDataType, isDevelopment, isProduction } from "./socketEvents/Common"
 import { db } from "./database/Connection"
 import { acceptLoginEvents } from "./socketEvents/LoginEvents"
+import { zValidator } from "@hono/zod-validator"
+import z from "zod"
+import { cors } from "hono/cors"
 
-
-let httpsServer: HttpsServer<any, any> = undefined!
-if (isDevelopment)
-    httpsServer = createServer()
-else if (isProduction)
-    httpsServer = createServer({
-        key: readFileSync(`${process.env.SSL_DIR}/privkey.pem`),
-        cert: readFileSync(`${process.env.SSL_DIR}/fullchain.pem`)
-    })
-
-const io: SocketServerType = new Server<ServerEventMap, ClientEventMap, {}, SocketDataType>(httpsServer, {
+const io = new Server<ServerEventMap, ClientEventMap, {}, SocketDataType>()
+const engine = new Engine({
     cors: {
         origin: [ 'https://admin.socket.io', 'http://localhost:5173', 'https://ichigancs.com:5173', 'http://127.0.0.1:5173' ],
         allowedHeaders: ['Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials'],
         credentials: true
-    }    
+    },
 })
+io.bind(engine)
+
+const app = new Hono()
+    .use(cors({
+        origin: [ 'https://admin.socket.io', 'http://localhost:5173', 'https://ichigancs.com:5173', 'http://127.0.0.1:5173' ],
+        credentials: true
+    }))
+    .post('/auth/register', zValidator('json', z.object({ username: z.string(), password: z.string() })), c => {
+        return c.json({ success: true, name: c.req.valid('json').username }, 200)
+    })
+
+type OnlyTrue<T extends true> = T
+type AssertContract = OnlyTrue<
+    typeof app extends Hono<any, infer Sch, any> ? 
+        Sch extends HonoSchema ? HonoSchema extends Sch ? true : false : 
+    false : false>
+
+
 
 if (isDevelopment)
     instrument(io, {
@@ -43,12 +56,25 @@ if (isProduction && process.env.SOCKET_ADMIN_AUTH)
         mode: 'production'
     })
 
-if (isDevelopment)
-    io.listen(SocketPort)
-else if (isProduction)
-    httpsServer.listen(SocketPort)
+    
+export default {
+    port: SocketPort,
+    tls: isProduction ? {
+        key: readFileSync(`${process.env.SSL_DIR}/privkey.pem`),
+        cert: readFileSync(`${process.env.SSL_DIR}/fullchain.pem`)
+    } : undefined,
+    fetch(req: Request, server: Bun.Server<WebSocketData>) {
+        const url = new URL(req.url)
+        if (url.pathname.startsWith('/socket.io/'))
+            return engine.handleRequest(req, server)
+        else
+            return app.fetch(req)
+    },
+    websocket: engine.handler().websocket
+}
 
-console.log(`Server is listening on port ${SocketPort}`)
+
+// console.log(`Server is listening on port ${SocketPort}`)
 async function printMemberCount() {
     const promise = await db.selectFrom('members').select(({ fn }) => fn.countAll().as("total_count")).execute()
     console.log(`Currently with ${promise[0].total_count} member(s)`)
