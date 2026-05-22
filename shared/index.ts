@@ -16,8 +16,7 @@ export * from './logic/Bots'
 export * from './logic/Settings'
 
 export * from './socket/Configuration'
-export * from './socket/ClientEventMap'
-export * from './socket/ServerEventMap'
+export * from './socket/SocketContract'
 export * from './socket/RESTContract'
 
 export * from './authentication/User'

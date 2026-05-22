@@ -1,12 +1,12 @@
 import { defineStore } from "pinia"
-import { type RedactedRoom, RoomType, type GameActionInput, type PossiblyRedactedGameActionInfo, generateStateFromScenario, redactGameStateFor, defaultScenario, defaultSettings, ParticipantType, Color, BotPersonality, randomUnusedColor, tryDoAction, winners, requireActionFrom, generateBotAction, participantName } from "catan-shared"
-import { ref, computed, toRaw } from "vue"
+import { type RedactedRoom, RoomType, type GameActionInput, type PossiblyRedactedGameActionInfo, generateStateFromScenario, redactGameStateFor, defaultScenario, defaultSettings, ParticipantType, Color, BotPersonality, randomUnusedColor, tryDoAction, winners, requireActionFrom, generateBotAction, participantName, SocketConnectErrorCode, SocketConnectErrorSchema, type GameClientEventMap, gameNamespace } from "catan-shared"
+import { ref, computed } from "vue"
 import { useCurrentUserStore, UserStatus } from "./CurrentUserStore"
-import { socket } from "./Socket"
-import router from "@/misc/Router"
 import { PopupSeverity, usePopups } from "@/popup/Popup"
-import type { FullGameState, GameActionInfo, LobbyRoom, PostGameRoom, RedactedGameRoom, Settings } from "catan-shared"
+import type { FullGameState, GameServerEventMap, LobbyRoom, PostGameRoom, RedactedGameRoom, RoomRequest, Settings } from "catan-shared"
 import { UserType } from "catan-shared"
+import { io, Socket } from "socket.io-client"
+import { serverAddress } from "@/misc/Globals"
 
 
 export enum RoomOPResult {
@@ -37,6 +37,11 @@ export type OnlineRoom = {
     data: RedactedRoom
 }
 
+const socket: Socket<GameClientEventMap, GameServerEventMap> = io(serverAddress + gameNamespace, {
+    withCredentials: true,
+    autoConnect: false
+})
+
 export const useCurrentRoomStore = defineStore('room', () => {
     const info = ref<undefined | OfflineRoom | OnlineRoom>(undefined)
     const user = useCurrentUserStore()
@@ -48,16 +53,57 @@ export const useCurrentRoomStore = defineStore('room', () => {
         if (user.info.status != UserStatus.LoggedIn)
             return RoomOPResult.NotLoggedIn
 
-        const result = await socket.emitWithAck('join', id)
-        if (result == 'invalid room id')
+        socket.auth = <RoomRequest>{
+            request: 'join',
+            roomID: id
+        }
+
+        const result = await (new Promise<true | string | SocketConnectErrorCode>(resolve => {
+            // minor leak, because only one will fire
+            socket.once('connect_error', err => {
+                const check = SocketConnectErrorSchema.safeParse(err)
+                if (check.success && check.data.data != undefined) {
+                    resolve(check.data.data.code)
+                }
+                resolve(err.message)
+            })
+            socket.once('connect', () => {
+                resolve(true as const)
+            })
+
+            socket.connect()
+        }))
+
+        if (result === true) {
+            const roomData = await socket.emitWithAck('fullLobbyRoom')
+            if (roomData == 'invalid socket state') {
+                popups.insert({
+                    autoCloses: true,
+                    message: 'Joining room failed because server did not respond to current state request.',
+                    severity: PopupSeverity.Warning,
+                    title: 'Joining room failed'
+                })
+                socket.disconnect()
+                return RoomOPResult.ServerRejected
+            }
+
+            info.value = { mode: RoomMode.Online, data: roomData }
+            return RoomOPResult.Success
+        }
+
+        if (result == SocketConnectErrorCode.RoomNameInvalid) 
             return RoomOPResult.RoomInvalid
-        if (result == 'invalid socket state')
-            return RoomOPResult.ServerRejected
-        if (result == 'game full')
+        if (result == SocketConnectErrorCode.RoomFull)
             return RoomOPResult.RoomFull
 
-        info.value = { mode: RoomMode.Online, data: result }
-        return RoomOPResult.Success
+        
+        popups.insert({
+            autoCloses: true,
+            message: `Joining room failed because server responded: ${result}`,
+            severity: PopupSeverity.Warning,
+            title: 'Joining room failed'
+        })
+        return RoomOPResult.ServerRejected
     }
     async function tryCreateOnline(name: string) {
         if (info.value != undefined)
@@ -65,15 +111,55 @@ export const useCurrentRoomStore = defineStore('room', () => {
         if (user.info.status != UserStatus.LoggedIn)
             return RoomOPResult.NotLoggedIn
 
-        const result = await socket.emitWithAck('createAndJoin', name)
-        if (result == 'room name in use')
+        const req: RoomRequest = {
+            request: 'create',
+            roomName: name
+        }
+        socket.auth = req
+
+        const result = await (new Promise(resolve => {
+            // minor leak, because only one will fire
+            socket.once('connect_error', err => {
+                const check = SocketConnectErrorSchema.safeParse(err)
+                if (check.success && check.data.data != undefined) {
+                    resolve(check.data.data.code)
+                }
+                resolve(err.message)
+            })
+            socket.once('connect', () => {
+                resolve(true as const)
+            })
+
+            socket.connect()
+        }))
+
+        if (result === true) {
+            const roomData = await socket.emitWithAck('fullLobbyRoom')
+            if (roomData == 'invalid socket state') {
+                popups.insert({
+                    autoCloses: true,
+                    message: 'Creating room failed because server did not respond to state request',
+                    severity: PopupSeverity.Warning,
+                    title: 'Creating room failed'
+                })
+                socket.disconnect()
+                return RoomOPResult.ServerRejected
+            }
+
+
+            info.value = { mode: RoomMode.Online, data: roomData }
+            return RoomOPResult.Success
+        }
+
+        if (result == SocketConnectErrorCode.RoomNameInvalid)
             return RoomOPResult.NameInvalid
-        if (result == 'invalid socket state')
+        if (result == SocketConnectErrorCode.RoomFull)
             return RoomOPResult.ServerRejected
 
-        info.value = { mode: RoomMode.Online, data: result }
-        return RoomOPResult.Success
+        return RoomOPResult.ServerRejected
     }
+
+
 
     function tryCreateOffline() {
         if (info.value != undefined)
@@ -110,15 +196,10 @@ export const useCurrentRoomStore = defineStore('room', () => {
         }
 
         info.value = undefined
-        // putting this after the emit might lead to receiving the 'closed' event before setting
-        // the new info.value, thus leading to a popup.
-        const result = await socket.emitWithAck('leave')
-        if (result == 'invalid socket state')
-            return RoomOPResult.ServerRejected
-
-
+        socket.disconnect()
         return RoomOPResult.Success
     }
+
     async function tryStart() {
         if (info.value == undefined)
             return RoomOPResult.NotInRoom
@@ -229,7 +310,7 @@ export const useCurrentRoomStore = defineStore('room', () => {
         info.value.data.participants = newUsers
     })
 
-    socket.on('closed', () => {
+    socket.on('disconnect', () => {
         if (info.value == undefined || info.value.mode == RoomMode.Offline)
             return
 

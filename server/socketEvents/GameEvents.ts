@@ -1,28 +1,26 @@
 import { Color, GameClientEventMap, GameActionInfo, GameActionInput, redactGameActionInfoFor, tryDoAction, GameServerEventMap, generateBotAction, redactGameStateFor, requireActionFrom, RoomType, victoryPointsFromFull, winners } from "catan-shared";
 import { type Socket } from 'socket.io'
 import { endGame, gameRoomFor, participantsForRoom, ServerGameRoom } from "./RoomManager";
-import { SocketDataType, SocketServerType } from "./Common";
+import { GameSocketDataType, GameNamespace } from "./Common";
 import typia from "typia";
 
 
-export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServerEventMap, GameClientEventMap, {}, SocketDataType>) {
+export function acceptGameEvents(io: GameNamespace, socket: Socket<GameServerEventMap, GameClientEventMap, {}, GameSocketDataType>) {
 
-    socket.on('gameState', (cb) => {
+    socket.on('gameState', cb => {
         if (typeof cb != 'function') {
             console.warn('invalid arguments:', cb)
             return (cb as any)('invalid arguments')
         }
 
-        if (socket.data.room == undefined)
-            return cb('invalid socket state')
 
-        const room = gameRoomFor(socket.data.room![0])
+        const room = gameRoomFor(socket.data.roomID)
         if (room == undefined) {
             console.error(`Socket had access to deleted room ${socket.data}`)
             return cb('invalid socket state')
         }
 
-        cb(redactGameStateFor(room.state, socket.data.room[1]))
+        cb(redactGameStateFor(room.state, socket.data.color))
     })
 
 
@@ -33,16 +31,16 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
 
         room.state = actionResult[0]
         const gameAction = { type: action.type, input: action, response: actionResult[1] } as GameActionInfo
-        for (const s of io.of('/').adapter.rooms.get(room.id)!) {
-            const fullSocket = io.sockets.sockets.get(s)!
-            fullSocket.emit('gameEvent', redactGameStateFor(room.state, fullSocket.data.room![1]), 
-                redactGameActionInfoFor(gameAction, executor, fullSocket.data.room![1]))
+        for (const s of io.adapter.rooms.get(room.id)!) {
+            const fullSocket = io.sockets.get(s)!
+            fullSocket.emit('gameEvent', redactGameStateFor(room.state, fullSocket.data.color), 
+                redactGameActionInfoFor(gameAction, executor, fullSocket.data.color))
         }
 
         return true
     }
 
-    function checkAndHandleEndGame(io: SocketServerType, room: ServerGameRoom): boolean {
+    function checkAndHandleEndGame(room: ServerGameRoom): boolean {
         if (winners(room.state, room.settings.requiredVictoryPoints).length > 0) {
             endGame(io, room)
             return true
@@ -56,21 +54,18 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
             return (cb as any)('invalid arguments')
         }
 
-        if (socket.data.room == undefined)
-            return cb('invalid socket state')
-
-        const room = gameRoomFor(socket.data.room![0])
+        const room = gameRoomFor(socket.data.roomID)
         if (room == undefined) {
             console.error(`Socket had access to deleted room ${socket.data}`)
             return cb('invalid socket state')
         }
         
-        const playerRes = handleGameAction(room, socket.data.room[1], action)
+        const playerRes = handleGameAction(room, socket.data.color, action)
         if (playerRes == 'action not allowed')
             return cb(playerRes)
 
         cb(true)
-        const ended = checkAndHandleEndGame(io, room)
+        const ended = checkAndHandleEndGame(room)
         if (ended) return
 
 
@@ -86,7 +81,7 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
             const res = handleGameAction(room, botColors[0], botAction)
             if (res == 'action not allowed')
                 console.warn('Bot generated invalid action!', botAction)
-            const ended = checkAndHandleEndGame(io, room)
+            const ended = checkAndHandleEndGame(room)
             if (ended) return
         }
     })
@@ -97,16 +92,13 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
             return (cb as any)('invalid arguments')
         }
 
-        if (socket.data.room == undefined)
-            return cb('invalid socket state')
-
-        const room = gameRoomFor(socket.data.room![0])
+        const room = gameRoomFor(socket.data.roomID)
         if (room == undefined) {
             console.error(`Socket had access to deleted room ${socket.data}`)
             return cb('invalid socket state')
         }
         
-        const participants = await participantsForRoom(io, socket.data.room[0])
+        const participants = await participantsForRoom(io, socket.data.roomID)
         cb({
             id: room.id,
             name: room.name,
@@ -114,7 +106,7 @@ export function acceptGameEvents(io: SocketServerType, socket: Socket<GameServer
             settings: room.settings,
             participants: participants,
             type: RoomType.InGame,
-            state: redactGameStateFor(room.state, socket.data.room[1]),
+            state: redactGameStateFor(room.state, socket.data.color),
             scenario: room.scenario
         })
     })

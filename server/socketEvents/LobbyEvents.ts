@@ -1,21 +1,19 @@
-import { LobbyClientEventMap, LobbyServerEventMap } from 'catan-shared';
+import { GameServerEventMap, GameClientEventMap } from 'catan-shared';
 import { type Socket } from 'socket.io'
-import { emitParticipantsChange, initializeGame, lobbyRoomFor, socketsForRoom } from './RoomManager';
-import { SocketDataType, SocketServerType } from './Common';
+import { emitParticipantsChange, initializeGame, lobbyRoomFor, participantsForRoom, socketsForRoom } from './RoomManager';
+import { GameSocketDataType, GameNamespace } from './Common';
 import typia from 'typia';
 
-type LobbySocket = Socket<LobbyServerEventMap, LobbyClientEventMap, {}, SocketDataType>
-export function acceptLobbyEvents(server: SocketServerType, socket: LobbySocket) {
+type LobbySocket = Socket<GameServerEventMap, GameClientEventMap, {}, GameSocketDataType>
+export function acceptLobbyEvents(server: GameNamespace, socket: LobbySocket) {
     socket.on('startGame', async cb => {
         if (typeof cb != 'function') {
             console.warn('invalid arguments:', cb)
             return (cb as any)('invalid arguments')
         }
 
-        if (socket.data.room == undefined)
-            return cb('invalid socket state')
 
-        const room = lobbyRoomFor(socket.data.room[0])
+        const room = lobbyRoomFor(socket.data.roomID)
         if (room == undefined)
             return cb('invalid socket state')
         
@@ -33,7 +31,6 @@ export function acceptLobbyEvents(server: SocketServerType, socket: LobbySocket)
         socket.emit('gameStarted')
         return cb(true)
     })
-
 
     socket.on('changeSettings', (property, value, cb) => {
         if (typeof cb != 'function') {
@@ -53,12 +50,10 @@ export function acceptLobbyEvents(server: SocketServerType, socket: LobbySocket)
             default: return (cb as any)('invalid arguments')
         }
 
-        if (socket.data.room == undefined)
-            return cb('invalid socket state')
 
-        const room = lobbyRoomFor(socket.data.room![0])
+        const room = lobbyRoomFor(socket.data.roomID)
         if (room == undefined) {
-            console.error(`invalid room: ${socket.data.room} from user ${socket.data.user}`)
+            console.error(`invalid room: ${socket.data.roomID} from user ${socket.data.user}`)
             return cb('invalid socket state')
         }
 
@@ -67,7 +62,7 @@ export function acceptLobbyEvents(server: SocketServerType, socket: LobbySocket)
         
         room.settings[property] = value
         socket.emit('settingsChange', room.settings)
-        socket.to(socket.data.room[0]).emit('settingsChange', room.settings)
+        socket.to(socket.data.roomID).emit('settingsChange', room.settings)
         return cb(true)
     })
 
@@ -82,12 +77,7 @@ export function acceptLobbyEvents(server: SocketServerType, socket: LobbySocket)
             return (cb as any)('invalid arguments')
         }
 
-        
-        // establishing preconditions
-        if (socket.data.room == undefined)
-            return cb('invalid socket state')
-
-        const room = lobbyRoomFor(socket.data.room[0])
+        const room = lobbyRoomFor(socket.data.roomID)
         if (room == undefined)
             return cb('invalid socket state')
         
@@ -97,9 +87,9 @@ export function acceptLobbyEvents(server: SocketServerType, socket: LobbySocket)
         const sockets = await socketsForRoom(server, room.id)
 
 
-        const playerWithOldColor = sockets.find(x => x.data.room![1] == oldColor)
+        const playerWithOldColor = sockets.find(x => x.data.color == oldColor)
         const botWithOldColor = room.bots.find(x => x[1] == oldColor)
-        const playerWithNewColor = sockets.find(x => x.data.room![1] == newColor)
+        const playerWithNewColor = sockets.find(x => x.data.color == newColor)
         const botWithNewColor = room.bots.find(x => x[1] == newColor)
 
         if (playerWithOldColor == undefined && botWithOldColor == undefined)
@@ -120,25 +110,38 @@ export function acceptLobbyEvents(server: SocketServerType, socket: LobbySocket)
             if (botWithNewColor != undefined)
                 botWithNewColor[1] = oldColor
 
-            playerWithOldColor.data.room![1] = newColor
+            playerWithOldColor.data.color = newColor
 
-            await emitParticipantsChange(server, socket.data.room[0])
+            await emitParticipantsChange(server, socket.data.roomID)
             return cb(true)
         }
 
         // is owner: simply swap
 
         if (playerWithNewColor != undefined)
-            playerWithNewColor.data.room![1] = oldColor
+            playerWithNewColor.data.color = oldColor
         if (botWithNewColor != undefined)
             botWithNewColor[1] = oldColor
 
         if (playerWithOldColor != undefined)
-            playerWithOldColor.data.room![1] = newColor
+            playerWithOldColor.data.color = newColor
         if (botWithOldColor != undefined)
             botWithOldColor[1] = newColor
 
-        await emitParticipantsChange(server, socket.data.room[0])
+        await emitParticipantsChange(server, socket.data.roomID)
         return cb(true)
     }) 
+
+    socket.on('fullLobbyRoom', async cb => {
+        if (typeof cb != 'function') {
+            console.warn('invalid arguments:', cb)
+            return (cb as any)('invalid arguments')
+        }
+
+        const room = lobbyRoomFor(socket.data.roomID)
+        if (room == undefined)
+            return cb('invalid socket state')
+        
+        return cb({ ...room, participants: await participantsForRoom(server, socket.data.roomID)!})
+    })
 }

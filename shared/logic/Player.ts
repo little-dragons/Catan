@@ -38,7 +38,7 @@ export function unusedColors(used: readonly Color[]): Color[] {
 }
 
 /**
- * Returns some unused color given a set of already used colors.
+ * Returns some unused color given a set of already used colors. Call it with an empty list to get some random color.
  * @returns `undefined` if all colors are already used.
  */
 export function randomUnusedColor(used: readonly Color[]): Color | undefined {

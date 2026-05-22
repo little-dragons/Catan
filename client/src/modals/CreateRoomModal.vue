@@ -4,7 +4,7 @@ import RoomInput from './input-fields/RoomInput.vue';
 import Modal from '@/modals/Modal.vue'
 import router from '@/misc/Router';
 import { PopupSeverity, usePopups } from '@/popup/Popup';
-import { RoomOPResult, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
+import { RoomOPResult, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore';
 import { ref, useTemplateRef } from 'vue';
 import { useModalStore } from './ModalStore';
 

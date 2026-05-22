@@ -1,14 +1,13 @@
-import { FullRoom, RoomId, LobbyRoom, FullGameRoom, allColors, User, RoomServerEventMap, RoomClientEventMap, Color, GamePhaseType, RoomType, PostGameRoom, generateBoardFromScenario, defaultScenario, ParticipantType, Participant, generateStateFromScenario, randomUnusedColor } from "catan-shared"
-import { RemoteSocket, type Socket } from 'socket.io'
-import { SocketDataType, SocketServerType } from "./Common"
+import { FullRoom, RoomId, LobbyRoom, FullGameRoom, History, Color, RoomType, PostGameRoom, defaultScenario, ParticipantType, Participant, generateStateFromScenario, randomUnusedColor, GameServerEventMap, GameClientEventMap, randomSeed, RoomRequestSchema, socketConnectError, SocketConnectErrorCode, gameNamespace } from "catan-shared"
+import { RemoteSocket } from 'socket.io'
+import { GameNamespace, GameSocket, GameSocketDataType } from "./Common"
 import { defaultSettings, Bot, BotPersonality } from "catan-shared"
-import { v4 } from "uuid"
-import typia from "typia"
 
-export type ServerLobbyRoom    = Omit<LobbyRoom, 'participants'>    & { bots : [Bot, Color][] }
+
+export type ServerLobbyRoom    = Omit<LobbyRoom   , 'participants'> & { bots : [Bot, Color][] }
 export type ServerGameRoom     = Omit<FullGameRoom, 'participants'> & { bots : [Bot, Color][] }
 export type ServerPostGameRoom = Omit<PostGameRoom, 'participants'> & { bots : [Bot, Color][] }
-export type ServerRoom         = Omit<FullRoom, 'participants'>     & { bots : [Bot, Color][] }
+export type ServerRoom         = Omit<FullRoom    , 'participants'> & { bots : [Bot, Color][] }
 
 const rooms = new Map<RoomId, ServerRoom>()
 
@@ -32,26 +31,31 @@ export function lobbyRoomFor(roomId: RoomId): ServerLobbyRoom | undefined {
     return val
 }
 
-type RoomSocket = Socket<RoomServerEventMap, RoomClientEventMap, {}, SocketDataType>
 
 /**
  * Returns an array for each socket in the room.
  */
-export function socketsForRoom(io: SocketServerType, roomId: RoomId): Promise<RemoteSocket<RoomClientEventMap, SocketDataType>[]> {
+export function socketsForRoom(io: GameNamespace, roomId: RoomId): Promise<RemoteSocket<GameClientEventMap, GameSocketDataType>[]> {
     return io.in(roomId).fetchSockets()
 }
-export async function participantsForRoom(io: SocketServerType, roomId: RoomId): Promise<Participant[]> {
-    const users = (await socketsForRoom(io, roomId)).map<Participant>(x => 
-                        { return { type: ParticipantType.User, user: x.data.user!, color: x.data.room![1] } })
-    const bots = rooms.get(roomId)?.bots.map<Participant>(bot => { return { type: ParticipantType.Bot, bot: bot[0], color: bot[1] } })
+export async function participantsForRoom(io: GameNamespace, roomId: RoomId): Promise<Participant[]> {
+    const users = (await socketsForRoom(io, roomId)).map<Participant>(x => ({ 
+        type: ParticipantType.User, 
+        user: x.data.user, 
+        color: x.data.color 
+    }))
+    const bots = rooms.get(roomId)?.bots.map<Participant>(bot => ({ 
+        type: ParticipantType.Bot, bot: bot[0], color: bot[1] 
+    }))
     return users.concat(bots ?? [])
 }
 
-export async function emitParticipantsChange(io: SocketServerType, roomId: RoomId) {
-    io.in(roomId).emit('participantChange', await participantsForRoom(io, roomId))
+export async function emitParticipantsChange(io: GameNamespace, roomId: RoomId) {
+    const parts = await participantsForRoom(io, roomId)
+    io.in(roomId).emit('participantChange', parts)
 }
 
-export async function initializeGame(io: SocketServerType, room: ServerLobbyRoom) {
+export async function initializeGame(io: GameNamespace, room: ServerLobbyRoom) {
     if (!rooms.has(room.id)) {
         console.warn(`Tried to initialize game, but there was no such lobby: ${room}`)
         return 'no correct room'
@@ -62,165 +66,101 @@ export async function initializeGame(io: SocketServerType, room: ServerLobbyRoom
     if (state == undefined)
         return 'could not generate state'
 
-    const game = room as unknown as ServerGameRoom
-    game.type = RoomType.InGame
-    game.state = state
+    const game: ServerGameRoom = {
+        ...room,
+        type: RoomType.InGame,
+        state: state
+    }
+    rooms.set(room.id, game)
+
     return true
 }
 
-export function endGame(io: SocketServerType, room: ServerGameRoom) {
-    for (const s of io.of('/').adapter.rooms.get(room.id)!) {
-        const fullSocket = io.sockets.sockets.get(s)!
-        fullSocket.emit('gameOver', {
-            lastState: room.state
-        })
-    }
-
-    const newRoom = room as unknown as ServerPostGameRoom
-    newRoom.type = RoomType.PostGame
-    newRoom.history = {
+export function endGame(io: GameNamespace, room: ServerGameRoom) {
+    const history: History = {
         lastState: room.state
     }
+
+    io.in(room.id).emit('gameOver', history)
+
+    const newRoom: ServerPostGameRoom = {
+        ...room,
+        type: RoomType.PostGame,
+        history
+    }
+    rooms.set(room.id, newRoom)
 }
 
-export function createRoom(socket: RoomSocket, name: string) {
-    if (socket.data.user == undefined || socket.data.room != undefined)
-        return 'invalid socket state'
-
-    if (Array.from(rooms.values()).some(x => x.name == name))
-        return 'room name in use'
-
-    const color = allColors[Math.floor(Math.random() * allColors.length)]
-    const room: ServerLobbyRoom = {
-        type: RoomType.Lobby,
-        name: name,
-        id: v4(),
-        owner: socket.data.user,
-        settings: defaultSettings(),
-        scenario: defaultScenario,
-        bots: []
-    }
-    rooms.set(room.id, room)
-    socket.data.room = [room.id, color]
-    socket.join(room.id)
-    return room
-}
-
-
-async function joinRoom(io: SocketServerType, socket: RoomSocket, id: RoomId) {
-    if (socket.data.user == undefined || socket.data.room != undefined)
-        return 'invalid socket state'
-
-    const room = lobbyRoomFor(id)
-    if (room == undefined || room.type != RoomType.Lobby) {
-        return 'invalid room id'
-    }
-
-
-    const otherParticipants = await participantsForRoom(io, id)
-    const usedColors = otherParticipants.map(x => x.color)
-    const remainingColors = allColors.filter(x => !usedColors.includes(x))
-    socket.data.room = [id, remainingColors[Math.floor(Math.random() * remainingColors.length)]]
-    socket.join(id)
-    // this excludes the current socket instance, which is logical
-    socket.in(id).emit('participantChange', await participantsForRoom(io, id))
-
-    return room as ServerLobbyRoom
-}
-
-
-export async function leaveRoom(io: SocketServerType, socket: RoomSocket) {
-    if (socket.data.user == undefined || socket.data.room == undefined)
-        return 'invalid socket state'
-
-    const room = rooms.get(socket.data.room[0])
-    if (room == undefined) {
-        console.warn('Socket contained invalid room id.')
-        socket.data.room = undefined
-        return 'invalid socket state'
-    }
-
-    const users = await socketsForRoom(io, socket.data.room[0])
-    if (room.owner.name == socket.data.user.name || users.length < 1 || room.type == RoomType.InGame) {
-        // the ingame check is because the logic currently breaks when a participant leaves.
-        // see: https://github.com/little-dragons/Catan/issues/32
-        
-        rooms.delete(socket.data.room![0])
-
-        const sockets = await io.in(socket.data.room[0]).fetchSockets()
-        sockets.forEach(s => { s.emit('closed')
-                               s.leave(socket.data.room![0])
-                               s.data.room = undefined })
-    }
-    else {
-        socket.leave(socket.data.room[0])
-        emitParticipantsChange(io, socket.data.room[0])
-        socket.data.room = undefined
-    }
-
-    return true
-}
-
-
-export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
-    socket.on('lobbyList', async cb => {
-        if (typeof cb != 'function') {
-            console.warn('invalid arguments:', cb)
-            return (cb as any)('invalid arguments')
+/**
+ * Registers a middleware on a given server and namespace to establish that each connection attempt
+ * lists a valid join or create room request. Also creates the rooms.
+ * 
+ * Implementation detail: since the middleware should be side effect free, the rooms are not created 
+ * during the middleware calls. Instead an additional listener on 'connection' is registered and the
+ * actual room creation and socket room joins are delayed until the connection is truly accepted. This
+ * is also the purpose of {@link GameSocketDataType.pendingRoomNameRequest}
+ */
+export function registerRoomMiddleware(io: GameNamespace) {
+    io.use(async (socket, next) => {
+        const auth = RoomRequestSchema.safeParse(socket.handshake.auth)
+        if (!auth.success)
+            return next(new Error('Malformed auth'))
+    
+        switch(auth.data.request) {
+            case "join":
+                const room = rooms.get(auth.data.roomID)
+                if (room == undefined)
+                    return next(socketConnectError('Room does not exist', SocketConnectErrorCode.RoomNameInvalid))
+                
+                const p = await participantsForRoom(io, room.id)
+                if (room.scenario.players.maxAllowedCount <= p.length)
+                    return next(socketConnectError('Room full', SocketConnectErrorCode.RoomFull))
+                
+                socket.data.roomID = auth.data.roomID
+                return next()
+    
+            case "create":
+                socket.data.roomID = randomSeed()
+                socket.data.pendingRoomNameRequest = auth.data.roomName
+                return next()
         }
-
-        cb(await Promise.all(Array.from(rooms.values()).filter(isLobby).map<Promise<LobbyRoom>>(async (x) => { 
-            return { 
-                ...x,
-                participants: await participantsForRoom(io, x.id)                
-            } })))
     })
 
-    socket.on('createAndJoin', async (name, cb) => {
-        if (!typia.is(name) && typeof cb != 'function') {
-            console.warn('invalid arguments:', name, cb)
-            return (cb as any)('invalid arguments')
-        }
+    io.on('connection', async s => {
+        s.join(s.data.roomID)
+        if (s.data.pendingRoomNameRequest !== undefined)
+            rooms.set(s.data.roomID, {
+                type: RoomType.Lobby,
+                name: s.data.pendingRoomNameRequest,
+                id: s.data.roomID,
+                owner: s.data.user,
+                settings: defaultSettings(),
+                scenario: defaultScenario,
+                bots: []
+            })
 
-        const res = createRoom(socket, name)
-        if (res == 'invalid socket state' || res == 'room name in use')
-            return cb(res)
-
-        const participants = await participantsForRoom(io, res.id)
-        cb({ ...res, participants: participants })
+        s.data.color = randomUnusedColor((await participantsForRoom(io, s.data.roomID)).map(x => x.color))!
+        await emitParticipantsChange(io, s.data.roomID)
     })
+}
 
-    socket.on('join', async (roomId, cb) => {
-        if (!typia.is(roomId) && typeof cb != 'function') {
-            console.warn('invalid arguments:', roomId, cb)
-            return (cb as any)('invalid arguments')
-        }
+export async function allLobbies(io: GameNamespace) {
+    return (await Promise.all(
+        Array.from(rooms.values()).filter(isLobby).map<Promise<LobbyRoom>>(async room => ({ 
+            ...room,
+            participants: await participantsForRoom(io, room.id)
+        }))
+    ))
+}
 
-        if (!rooms.has(roomId))
-            return cb('invalid room id')
-
-        const old = await participantsForRoom(io, roomId)
-        if (old.length >= rooms.get(roomId)!.scenario.players.maxAllowedCount)
-            return cb('game full')
-
-        const res = await joinRoom(io, socket, roomId)
-        if (res == 'invalid room id' || res == 'invalid socket state')
-            return cb(res)
-
-        return cb({ ...res, participants: await participantsForRoom(io, roomId) })
-    })
-
-
+export function acceptRoomEvents(io: GameNamespace, socket: GameSocket) {
     socket.on('addBot', async cb => {
         if (typeof cb != 'function') {
             console.warn('invalid arguments:', cb)
             return (cb as any)('invalid arguments')
         }
 
-        if (socket.data.room == undefined)
-            return cb('invalid socket state')
-
-        const room = lobbyRoomFor(socket.data.room[0])
+        const room = lobbyRoomFor(socket.data.roomID)
         if (room == undefined)
             return cb('invalid socket state')
 
@@ -234,19 +174,30 @@ export function acceptRoomEvents(io: SocketServerType, socket: RoomSocket) {
         room.bots.push([{
             name: 'Vincent',
             personality: BotPersonality.Vincent
-        }, randomUnusedColor(participants.map(x => x.color))!
-        ])
+        }, randomUnusedColor(participants.map(x => x.color))! ])
         
-        socket.emit('participantChange', await participantsForRoom(io, room.id))
-        socket.in(room.id).emit('participantChange', await participantsForRoom(io, room.id))
+        await emitParticipantsChange(io, room.id)
+        return cb(true)
     })
 
-    socket.on('leave', async cb => {
-        if (typeof cb != 'function') {
-            console.warn('invalid arguments:', cb)
-            return (cb as any)('invalid arguments')
+    socket.on('disconnect', async () => {
+        const id = socket.data.roomID
+        const room = rooms.get(id)
+        if (room == undefined) {
+            console.warn('Socket contained invalid room id.')
+            return
         }
 
-        cb(await leaveRoom(io, socket))
+        const users = await socketsForRoom(io, id)
+        if (room.owner.name == socket.data.user.name || users.length < 1 || room.type == RoomType.InGame) {
+            // the ingame check is because the logic currently breaks when a participant leaves.
+            // see: https://github.com/little-dragons/Catan/issues/32
+            
+            rooms.delete(id)
+            io.in(id).disconnectSockets()
+        }
+        else {
+            emitParticipantsChange(io, id)
+        }
     })
 }

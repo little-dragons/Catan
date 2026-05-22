@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue';
-import { RoomOPResult, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
-import { useRoomListStore } from '@/socket/Socket';
+import { RoomOPResult, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore';
+import { useRoomListStore } from '@/apiStores/RoomListStore';
 import router from '@/misc/Router';
 import { ModalType, useModalStore } from '@/modals/ModalStore';
 import { PopupSeverity, usePopups } from '@/popup/Popup';

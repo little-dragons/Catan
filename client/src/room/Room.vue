@@ -5,7 +5,7 @@ import Lobby from './Lobby.vue';
 import Game from '@/game/Game.vue';
 import { watch } from 'vue';
 import History from '@/game/History.vue';
-import { useCurrentRoomStore } from '@/socket/CurrentRoomStore';
+import { useCurrentRoomStore } from '@/apiStores/CurrentRoomStore';
 
 const roomStore = useCurrentRoomStore()
 

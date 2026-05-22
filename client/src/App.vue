@@ -4,8 +4,8 @@ import { ref } from 'vue';
 import LoginModal from './modals/LoginModal.vue'
 import Popups from './popup/Popups.vue';
 import { UserType } from 'catan-shared';
-import { useCurrentRoomStore } from './socket/CurrentRoomStore';
-import { useCurrentUserStore, UserStatus } from './socket/CurrentUserStore';
+import { useCurrentRoomStore } from './apiStores/CurrentRoomStore';
+import { useCurrentUserStore, UserStatus } from './apiStores/CurrentUserStore';
 import { ModalType, useModalStore } from './modals/ModalStore';
 import CreateRoomModal from './modals/CreateRoomModal.vue';
 

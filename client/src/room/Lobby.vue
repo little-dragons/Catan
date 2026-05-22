@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Setting from './Setting.vue'
-import { RoomMode, RoomOPResult, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
+import { RoomMode, RoomOPResult, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore';
 import router from '@/misc/Router';
 import SideMenu from '@/misc/SideMenu.vue';
 import { cssColor, participantName, ParticipantType, UserType, isValidSetting, type Settings, randomUnusedColor, unusedColors, Color } from 'catan-shared';
@@ -76,7 +76,7 @@ function possibleColorSwitchesFor(user: Color) {
                 class="bot-button"
                 :title="currentRoom.isOwner ? 'Add bot' : 'Only the owner can add a bot'"
                 :disabled="!currentRoom.isOwner || currentRoom.info!.data.participants.length >= currentRoom.info!.data.scenario.players.maxAllowedCount"
-                @click="currentRoom.tryAddBot()">
+                @click="() => currentRoom.tryAddBot()">
                 Add bot
             </button>
         </div>

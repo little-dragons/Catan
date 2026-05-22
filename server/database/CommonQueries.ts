@@ -10,3 +10,7 @@ export async function addUserToDb(name: string, passwordHash: string) {
         password_hash: passwordHash,
     }).executeTakeFirst()
 }
+
+export async function hasUserInDb(name: string) {
+    return await getUserFromDb(name) != undefined
+}

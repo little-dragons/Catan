@@ -5,7 +5,7 @@ import PasswordInput from './input-fields/PasswordInput.vue';
 import Modal from '@/modals/Modal.vue'
 import LabeledInput from './input-fields/LabeledInput.vue';
 import { PopupSeverity, usePopups } from '@/popup/Popup';
-import { useCurrentUserStore, UserOPResult, UserStatus } from '@/socket/CurrentUserStore';
+import { useCurrentUserStore, UserOPResult, UserStatus } from '@/apiStores/CurrentUserStore';
 import { useModalStore } from './ModalStore';
 
 const modalStore = useModalStore()
@@ -28,19 +28,10 @@ async function memberLogin() {
         case UserOPResult.Success:
             modalStore.value = undefined
             return
-        case UserOPResult.ServerDeniedLoginData:
-        case UserOPResult.ServerError:
-            popups.insert({
-                title: 'Server error',
-                message: 'The server responded incorrectly to a login attempt. Cause unclear.',
-                autoCloses: false,
-                severity: PopupSeverity.Warning
-            })
-            return
         case UserOPResult.NotAnonymous:
             popups.insert({
                 title: 'Already logged in',
-                message: 'You cannot login as you are already logged in or attempt tp.',
+                message: 'You cannot login as you are already logged in or attempt to.',
                 autoCloses: true,
                 severity: PopupSeverity.Warning
             })
@@ -76,15 +67,6 @@ async function guestLogin() {
         case UserOPResult.ForbiddenUsername:
             guestnameInput.value.disallowName(guestnameInput.value.result)
             return
-            
-        case UserOPResult.ServerError:
-            popups.insert({
-                title: 'Server error',
-                message: 'The server responded incorrectly to a login attempt. Cause unclear.',
-                autoCloses: false,
-                severity: PopupSeverity.Warning
-            })
-            return
     }
 }
 
@@ -110,7 +92,9 @@ async function register() {
         case UserOPResult.ForbiddenUsername:
             membernameInput.value.disallowName(membernameInput.value.result)
             return
-        case UserOPResult.ServerError:
+
+        case UserOPResult.InvalidInput:
+            // TODO
     }
 }
 

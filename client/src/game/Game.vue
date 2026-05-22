@@ -5,7 +5,7 @@ import GameRenderer, { type ForbiddableButtons } from './GameRenderer.vue';
 import { type PlayerOverviewData } from '../game-components/PlayerOverviewRenderer.vue';
 import { UserSelectionType } from '../game-components/board/UserSelection';
 import type { TradeMenuRendererProps } from '../game-components/trade/TradeMenuRenderer.vue';
-import { RoomMode, useCurrentRoomStore } from '@/socket/CurrentRoomStore';
+import { RoomMode, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore';
 import type { DiscardMenuRendererProps } from '../game-components/DiscardRenderer.vue';
 import { isDevelopment } from '@/misc/Globals';
 
