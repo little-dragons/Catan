@@ -17,15 +17,11 @@ export const useRoomListStore = defineStore('roomList', () => {
     const refreshInterval = ref(800)
     const autoRefresh = ref(false)
     
-    async function update() {
+    async function autoUpdate() {
         if (!socket.connected)
             socket.connect()
 
         lobbies.value = await socket.emitWithAck('lobbyList')
-    }
-
-    async function autoUpdate() {
-        await update()
 
         if (autoRefresh.value)
             setTimeout(autoUpdate, refreshInterval.value)
@@ -38,7 +34,7 @@ export const useRoomListStore = defineStore('roomList', () => {
             socket.disconnect()
     })
 
-    return { lobbies, update, refreshInterval, autoRefresh }
+    return { lobbies, refreshInterval, autoRefresh }
 })
 
 

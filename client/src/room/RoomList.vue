@@ -45,7 +45,6 @@ onUnmounted(() => roomList.autoRefresh = false)
     <input type="button" value="Create New Room" @click="() => modalStore.value = ModalType.CreateRoom" :disabled="!currentRoom.canJoinOnline"
         title="Create New Room" />
     <input type="button" value="Create Offline Room" @click="tryCreateOfflineAndMove" :disabled="currentRoom.info != undefined"/>
-    <input type="button" value="Refresh" @click="roomList.update"/>
     <input type="checkbox" id="autoRefresh" value="Refresh" v-model="roomList.autoRefresh"/>
     <label for="autoRefresh">Auto refresh</label>
     <div class="grid-columns heading default-grid-header-layout">
