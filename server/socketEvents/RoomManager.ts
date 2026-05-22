@@ -182,11 +182,11 @@ export function acceptRoomEvents(io: GameNamespace, socket: GameSocket) {
 
     socket.on('disconnect', async () => {
         const id = socket.data.roomID
+
         const room = rooms.get(id)
-        if (room == undefined) {
-            console.warn('Socket contained invalid room id.')
+        if (room == undefined)
+            // nothing to do
             return
-        }
 
         const users = await socketsForRoom(io, id)
         if (room.owner.name == socket.data.user.name || users.length < 1 || room.type == RoomType.InGame) {

@@ -15,9 +15,9 @@ export * from './logic/Scenario'
 export * from './logic/Bots'
 export * from './logic/Settings'
 
-export * from './socket/Configuration'
-export * from './socket/SocketContract'
-export * from './socket/RESTContract'
+export * from './api/Configuration'
+export * from './api/SocketContract'
+export * from './api/RESTContract'
 
 export * from './authentication/User'
 export * from './authentication/Password'
