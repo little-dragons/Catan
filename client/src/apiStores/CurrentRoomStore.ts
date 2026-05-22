@@ -249,12 +249,17 @@ export const useCurrentRoomStore = defineStore('room', () => {
     }
 
     const canJoinOnline = computed(() => user.info.status == UserStatus.LoggedIn && info.value == undefined)
-    const isOwner = computed(() => info.value?.mode == RoomMode.Offline || 
-                                   (user.info.status == UserStatus.LoggedIn 
-                                        ? info.value?.data.owner.name == user.info.user.name 
-                                        : false)
-                            )
-    const ownColor = computed(() => info.value?.data.participants.find(x => participantName(x) == user.loggedInInfo!.name)?.color)
+    const isOwner = computed(() => info.value?.mode == RoomMode.Offline || (
+                                user.info.status == UserStatus.LoggedIn 
+                                ? info.value?.data.owner.name == user.info.user.name 
+                                : false
+                            ))
+    const ownColor = computed(() => info.value?.mode === RoomMode.Offline 
+                                    ? info.value.data.participants.find(x => x.type == ParticipantType.User)?.color
+                                    : info.value?.mode === RoomMode.Online
+                                    ? info.value.data.participants.find(x => participantName(x) == user.loggedInInfo!.name)?.color
+                                    : undefined
+                            )                                
 
 
     async function tryChangeSetting<Key extends keyof Settings>(key: Key, value: Settings[Key]) {
@@ -471,6 +476,14 @@ export const useCurrentRoomStore = defineStore('room', () => {
     }
 
     async function tryChangeColor(oldColor: Color, newColor: Color) {
+        if (info.value?.mode === RoomMode.Offline) {
+            const oldPart = info.value.data.participants.find(x => x.color == oldColor)
+            const newPart = info.value.data.participants.find(x => x.color == newColor)
+            if (oldPart != undefined) oldPart.color = newColor
+            if (newPart != undefined) newPart.color = oldColor
+            return RoomOPResult.Success
+        }
+
         const response = await socket.emitWithAck('changeColor', oldColor, newColor)
         switch (response) {
             case 'color in use':
