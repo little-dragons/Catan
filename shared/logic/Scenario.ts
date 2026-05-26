@@ -1,10 +1,10 @@
 import { v4 } from "uuid"
-import { type Coordinate, type PortResource, type ResourceTileNumber, TileType } from "./Board"
-import { DevCardType } from "./GameAction"
-import { type CardList, Resource } from "./Resource"
-import { type Distribution } from "./Distribution"
-import { Orientation } from "./Orientation"
-import { type Pure } from "../Pure"
+import type { Pure } from "../Pure"
+import type { Coordinate, PortResource, ResourceTileNumber, TileType } from "./Board"
+import type { Distribution } from "./Distribution"
+import type { DevCardType } from "./GameAction"
+import type { Orientation } from "./Orientation"
+import type { CardList, Resource } from "./Resource"
 
 /**
  * Generally, scenario generation should be versatile. It has to combine randomness with 
@@ -43,7 +43,7 @@ export type FixedGeneration<T> = Pure<{
     method: GenerationMethod.Fixed
     data: T
 }>
-export type DistributedGeneration<T extends keyof any> = {
+export type DistributedGeneration<T extends PropertyKey> = {
     method: GenerationMethod.Distribution
     data: Distribution<T>
 }

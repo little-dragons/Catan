@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, useTemplateRef } from 'vue';
-import UsernameInput from './input-fields/UsernameInput.vue';
-import PasswordInput from './input-fields/PasswordInput.vue';
+import { UserOPResult, UserStatus, useCurrentUserStore } from '@/apiStores/CurrentUserStore';
 import Modal from '@/modals/Modal.vue'
-import LabeledInput from './input-fields/LabeledInput.vue';
 import { PopupSeverity, usePopups } from '@/popup/Popup';
-import { useCurrentUserStore, UserOPResult, UserStatus } from '@/apiStores/CurrentUserStore';
+import LabeledInput from './input-fields/LabeledInput.vue';
+import PasswordInput from './input-fields/PasswordInput.vue';
+import UsernameInput from './input-fields/UsernameInput.vue';
 import { useModalStore } from './ModalStore';
 
 const modalStore = useModalStore()
@@ -71,7 +71,7 @@ async function guestLogin() {
 }
 
 async function register() {
-    if (membernameInput.value?.result == undefined || passwordInput.value?.result == undefined)
+    if (membernameInput.value?.result == null || passwordInput.value?.result == null)
         return
 
     const result = await currentUser.tryRegister(membernameInput.value.result, passwordInput.value.result)
@@ -98,13 +98,13 @@ async function register() {
     }
 }
 
-const pending = computed(() => currentUser.info.status == UserStatus.Pending)
+const pending = computed(() => currentUser.info.status === UserStatus.Pending)
 // TODO having two modals is not very nice, but also kind of convenient. Maybe there is a better solution?
 </script>
 
 
 <template>
-    <Modal v-if="showRegister == false">
+    <Modal v-if="showRegister === false">
         <h1>Login</h1>
         <p>Please login with your account or create a temporary guest account.</p>
         <p>Kindly observe that member logins are to be done on the left side while guest logins are done on the right.</p>
@@ -144,7 +144,7 @@ const pending = computed(() => currentUser.info.status == UserStatus.Pending)
             </form>
         </div>
     </Modal>
-    <Modal v-if="showRegister == true">
+    <Modal v-if="showRegister === true">
         <h1>Register</h1>
         <p>Here you may create a member account.</p>
         <form class="member-login">

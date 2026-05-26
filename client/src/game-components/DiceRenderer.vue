@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import oneDie from '@/assets/dice/one-die.svg'
-import twoDie from '@/assets/dice/two-die.svg'
-import threeDie from '@/assets/dice/three-die.svg'
-import fourDie from '@/assets/dice/four-die.svg'
-import fiveDie from '@/assets/dice/five-die.svg'
-import sixDie from '@/assets/dice/six-die.svg'
 import type { DieResult } from 'catan-shared'
+import fiveDie from '@/assets/dice/five-die.svg'
+import fourDie from '@/assets/dice/four-die.svg'
+import oneDie from '@/assets/dice/one-die.svg'
+import sixDie from '@/assets/dice/six-die.svg'
+import threeDie from '@/assets/dice/three-die.svg'
+import twoDie from '@/assets/dice/two-die.svg'
 
 function diceToIcon(die: DieResult): string {
     switch (die) {
@@ -34,11 +34,13 @@ defineProps<{
 
 <template>
     <button
+        type="button"
         @click="() => $emit('diceClicked')"
         :disabled="!enabled"
         title="Roll dice!"
-        tabindex="1">
+        tabindex="0">
         <svg ref="svg" viewBox="0 0 80 40">
+            <title>Dice</title>
             <image x="0"
                    y="0"
                    width="40"

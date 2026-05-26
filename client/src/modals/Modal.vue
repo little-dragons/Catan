@@ -11,7 +11,7 @@ const modalStore = useModalStore()
     <div class="all">
         <div class="modal">
             <div class="close">
-                <img :src="Close" @click="() => modalStore.value = undefined"/>
+                <img :src="Close" @click="() => modalStore.value = undefined" alt=""/>
             </div>
             <slot/>
         </div>
@@ -41,6 +41,7 @@ const modalStore = useModalStore()
     background-color: var(--modal-background-color);
 }
 
+/* biome-ignore lint/correctness/noUnknownPseudoClass: Vue scoped CSS deep selector */
 .modal:deep(h1) {
     font-weight: 500;
     width: 100%;

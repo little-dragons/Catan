@@ -14,8 +14,8 @@ defineProps<{
 </script>
 
 <template>
-    <img :src="error" v-if="status != true" :title="status === false ? 'This input group is invalid' : status">
-    <img :src="ok" v-if="status == true" title="Everything is good!">
+    <img :src="error" v-if="status !== true" :title="status === false ? 'This input group is invalid' : status" alt="">
+    <img :src="ok" v-if="status === true" title="Everything is good!" alt="">
 </template>
 
 <style scoped>

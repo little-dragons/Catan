@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
-import { ref } from 'vue';
-import LoginModal from './modals/LoginModal.vue'
-import Popups from './popup/Popups.vue';
 import { UserType } from 'catan-shared';
+import { RouterView } from 'vue-router'
 import { useCurrentRoomStore } from './apiStores/CurrentRoomStore';
-import { useCurrentUserStore, UserStatus } from './apiStores/CurrentUserStore';
-import { ModalType, useModalStore } from './modals/ModalStore';
+import { UserStatus, useCurrentUserStore } from './apiStores/CurrentUserStore';
 import CreateRoomModal from './modals/CreateRoomModal.vue';
+import LoginModal from './modals/LoginModal.vue'
+import { ModalType, useModalStore } from './modals/ModalStore';
+import Popups from './popup/Popups.vue';
 
 const currentRoom = useCurrentRoomStore()
 const currentUser = useCurrentUserStore()
@@ -15,7 +14,7 @@ const modal = useModalStore()
 </script>
 
 <template>
-    <div id="app" :inert="modal.value != undefined">
+    <div id="app" :inert="modal.value !== undefined">
         <div class="navbar">
             <div>
                 <RouterLink :to="{ name: 'home' }">Home</RouterLink>
@@ -29,14 +28,14 @@ const modal = useModalStore()
                 <RouterLink :to="{ name: 'roomList' }">Room List</RouterLink>
             </div>
             <div class="empty"/>
-            <div v-if="currentRoom.info != undefined">
+            <div v-if="currentRoom.info !== undefined">
                 <RouterLink :to="{ name: 'room' }">Current room</RouterLink>
             </div>
-            <div v-if="currentRoom.info != undefined" class="empty"/>
+            <div v-if="currentRoom.info !== undefined" class="empty"/>
             <div>
-                <p v-if="currentUser.info.status == UserStatus.Anonymous">Not logged in. <button type="button" @click="() => modal.value = ModalType.Login" class="login-button" title="Login">Login</button></p>
-                <p v-else-if="currentUser.info.status == UserStatus.Pending">Pending login...</p>
-                <p v-else-if="currentUser.info.status == UserStatus.LoggedIn">Logged in as {{ currentUser.info.user.name }}<span v-if="currentUser.info.user.type == UserType.Guest"> (Guest)</span></p>
+                <p v-if="currentUser.info.status === UserStatus.Anonymous">Not logged in. <button type="button" @click="() => modal.value = ModalType.Login" class="login-button" title="Login">Login</button></p>
+                <p v-else-if="currentUser.info.status === UserStatus.Pending">Pending login...</p>
+                <p v-else-if="currentUser.info.status === UserStatus.LoggedIn">Logged in as {{ currentUser.info.user.name }}<span v-if="currentUser.info.user.type === UserType.Guest"> (Guest)</span></p>
                 <p v-else>Error with login!</p>
             </div>
         </div>
@@ -47,9 +46,9 @@ const modal = useModalStore()
             <RouterView/>
         </main>
     </div>
-    <div id="modals" v-if="modal.value != undefined" data-testid="modal">
-        <LoginModal v-if="modal.value == ModalType.Login"/>
-        <CreateRoomModal v-if="modal.value == ModalType.CreateRoom"/>
+    <div id="modals" v-if="modal.value !== undefined" data-testid="modal">
+        <LoginModal v-if="modal.value === ModalType.Login"/>
+        <CreateRoomModal v-if="modal.value === ModalType.CreateRoom"/>
     </div>
 </template>
 

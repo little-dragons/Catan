@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { cssColor, Color, type OpenTradeOffer, TradeStatusByColor } from 'catan-shared';
+import { type Color, type OpenTradeOffer, TradeStatusByColor } from 'catan-shared';
 import TradeOverview from './TradeOverview.vue';
-import PlayerTradeStatus from './PlayerTradeStatus.vue';
 
 defineProps<OpenTradeOffer>()
 defineEmits<{
@@ -14,10 +13,10 @@ defineEmits<{
 <TradeOverview 
     :to-give-away="offeredCards" 
     :to-collect="desiredCards"
-    :others="otherColors.map(x => { return { color: x.color, enabled: x.status == TradeStatusByColor.Accepting, status: x.status} })"
+    :others="otherColors.map(x => { return { color: x.color, enabled: x.status === TradeStatusByColor.Accepting, status: x.status} })"
     @accept-color="color => $emit('accept', color)">
     <div class="buttons">
-        <button @click="() => $emit('abort')">abort</button>
+        <button type="button" @click="() => $emit('abort')">abort</button>
     </div>
 </TradeOverview>
 </template>

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { type CardList, Resource, allResources, tryRemoveCard } from 'catan-shared'
-import ResourceCardsRenderer from './cards/ResourceCardsRenderer.vue'
+import { allResources, type CardList, Resource, tryRemoveCard } from 'catan-shared'
 import { computed, ref } from 'vue'
-import { imageForResource } from '@/misc/CardTextures'
-import ok from '@/assets/ui/ok.svg'
 import error from '@/assets/ui/error.svg'
+import ok from '@/assets/ui/ok.svg'
+import { imageForResource } from '@/misc/CardTextures'
+import ResourceCardsRenderer from './cards/ResourceCardsRenderer.vue'
 
 const props = defineProps<{
     count: number
@@ -22,25 +22,26 @@ const diff = computed(() => chosen.value.length - props.count)
 <div class="top default-game-ui-props">
     <div class="text">
         <p>
-            You have to select {{ count }} cards ({{ diff == 0 ? "correct amount" : diff > 0 ? `${diff} too many` : `${-diff} too few` }}).
+            You have to select {{ count }} cards ({{ diff === 0 ? "correct amount" : diff > 0 ? `${diff} too many` : `${-diff} too few` }}).
         </p>
     </div>    
     <div class="choosingButtons">
         <button
             v-for="res in allResources"
+            type="button"
             @click="() => chosen = [res, ...chosen]"
             :title="Resource[res]">
-            <img :src="imageForResource(res)" :title="Resource[res]"/>
+            <img :src="imageForResource(res)" :title="Resource[res]" alt=""/>
         </button>
     </div>
     <div class="actions">
         <ResourceCardsRenderer class="cards" :cards="chosen" @resourceClicked="res => chosen = tryRemoveCard(chosen, res) ?? chosen"/>
         <div class="right">
-            <button @click="() => $emit('selected', chosen)" :disabled="diff != 0" title="Discard selected cards">
-                <img :src="diff == 0 ? ok : error"/>
+            <button type="button" @click="() => $emit('selected', chosen)" :disabled="diff !== 0" title="Discard selected cards">
+                <img :src="diff === 0 ? ok : error" alt=""/>
             </button>
             
-            <button @click="() => $emit('abort')"  title="Abort selection">
+            <button type="button" @click="() => $emit('abort')"  title="Abort selection">
                 Abort
             </button>
         </div>

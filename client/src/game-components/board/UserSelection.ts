@@ -1,4 +1,4 @@
-import type { Road, Coordinate } from "catan-shared";
+import type { Coordinate, Road } from "catan-shared";
 
 export enum UserSelectionType {
     Crossing, Connection, Tile

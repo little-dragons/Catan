@@ -1,4 +1,4 @@
-import { portPoints, type Coordinate, type PortTile, type ResourceTileNumber, type Road } from "catan-shared"
+import { type Coordinate, type PortTile, portPoints, type ResourceTileNumber, type Road } from "catan-shared"
 import { add, distance, lerp, middlepoint, opposite, perpendicular, withLength } from "./Vector"
 
 type Pixel = [number, number]
@@ -19,7 +19,7 @@ export function svgViewboxContainer(tileCoordinates: Coordinate[]): SvgViewboxCo
     // at 0, but rather have an offset into the x-axis.
     const highestX = tileCoordinates.reduce((s, c) => c[0] > s ? c[0] : s, 0)
     const highestY = tileCoordinates.reduce((s, c) => c[1] > s ? c[1] : s, 0)
-    const viewboxStartX = tileCoordinates.some(x => x[0] == 0 && x[1] % 2 == 0) ? 0 : tileRadius * Math.cos(30 / 180 * Math.PI)
+    const viewboxStartX = tileCoordinates.some(x => x[0] === 0 && x[1] % 2 === 0) ? 0 : tileRadius * Math.cos(30 / 180 * Math.PI)
     const viewboxWidth = tileRadius * 2 * (highestX + 1.5) * Math.cos(30 / 180 * Math.PI) - viewboxStartX
     const viewboxHeight = tileRadius * ((highestY + 1)* 1.5 + 0.5)
 
@@ -41,7 +41,7 @@ export function svgViewboxStringFromTileCoords(tileCoordinates: Coordinate[]): S
 
 export function tileCenter(coord: Coordinate): Pixel {
     const halfTileWidth = tileWidth / 2
-    const firstMiddlePointInRowOffset = coord[1] % 2 == 0 ? halfTileWidth : tileWidth
+    const firstMiddlePointInRowOffset = coord[1] % 2 === 0 ? halfTileWidth : tileWidth
 
     return [firstMiddlePointInRowOffset + coord[0] * tileWidth, tileRadius + coord[1] * tileRadius * 1.5]
 }
@@ -50,7 +50,7 @@ export function tileCenter(coord: Coordinate): Pixel {
 
 export function tileHexagon(coord: Coordinate): Pixel[] {
     const center = tileCenter(coord)
-    let points: Pixel[] = []
+    const points: Pixel[] = []
     for (let corner = 0; corner < 6; corner++) {
         const angle = (corner / 6) * 2 * Math.PI
         points.push([Math.sin(angle) * tileRadius + center[0], Math.cos(angle) * tileRadius + center[1]])
@@ -63,7 +63,7 @@ export function svgPath(pixels: Pixel[]) {
     for (let corner = 1; corner < pixels.length; corner++)
         res += `L ${pixels[corner][0]} ${pixels[corner][1]}`
 
-    return res + ' Z'
+    return `${res} Z`
 }
 export function tilePath(coord: Coordinate): string {
     return svgPath(tileHexagon(coord))
@@ -122,8 +122,8 @@ export function tileNumberPosition(coord: Coordinate, number: ResourceTileNumber
 }
 
 export function crossingPosition(coord: Coordinate): Pixel {
-    const yBaseline = (coord[1] * 1.5 + (coord[1] % 2 == 1 ? 0.5 : 0)) * tileRadius
-    const yOffset = coord[0] % 2 == 1 ? 0 : (coord[1] % 2 == 1 ? -tileRadius / 2 : tileRadius / 2)
+    const yBaseline = (coord[1] * 1.5 + (coord[1] % 2 === 1 ? 0.5 : 0)) * tileRadius
+    const yOffset = coord[0] % 2 === 1 ? 0 : (coord[1] % 2 === 1 ? -tileRadius / 2 : tileRadius / 2)
     return [tileWidth / 2 * coord[0], yBaseline + yOffset]
 }
 

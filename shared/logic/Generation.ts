@@ -1,12 +1,12 @@
-import { type Board, type Coordinate, sameCoordinate, type CoordinateTile, type ResourceTileNumber, TileType, SpecialPorts, type PortTile, type LandTile, isLand, type PortResource } from "./Board";
-import { type Distribution, foldRecord, narrowDistribution } from "./Distribution";
-import { type FullGameState, type GamePhase, GamePhaseType, TurnPhaseType } from "./GameState";
-import { allOrientations, clockwise, counterclockwise, neighborTile } from "./Orientation";
-import { Color } from "./Player";
-import { Resource } from "./Resource";
 import seedrandom from 'seedrandom'
-import { type DistributedGeneration, type IndexedGeneration, type SelectGeneration, type ScenarioTileGroup, GenerationMethod, type Scenario, type Seed, ScenarioStartingPhaseType, ScenarioRobberPlacement, ScenarioResourceNumberAssignmentMethod, type ResourceNumberAssignmentInfo } from "./Scenario";
-import { type Pure } from "../Pure";
+import type { Pure } from '../Pure'
+import { type Board, type Coordinate, type CoordinateTile, isLand, type LandTile, type PortResource, type PortTile, type ResourceTileNumber, SpecialPorts, sameCoordinate, TileType } from './Board'
+import { foldRecord, narrowDistribution } from './Distribution'
+import { type FullGameState, type GamePhase, GamePhaseType, TurnPhaseType } from './GameState'
+import { allOrientations, clockwise, counterclockwise, neighborTile } from './Orientation'
+import type { Color } from './Player'
+import { Resource } from './Resource'
+import { type DistributedGeneration, GenerationMethod, type IndexedGeneration, type ResourceNumberAssignmentInfo, type Scenario, ScenarioResourceNumberAssignmentMethod, ScenarioRobberPlacement, ScenarioStartingPhaseType, type ScenarioTileGroup, type Seed, type SelectGeneration } from './Scenario'
 
 export const defaultScenario: Scenario = {
     players: {
@@ -176,8 +176,8 @@ export enum GenerationFailure {
     TooFewOptions = 'TooFewOptions'
 }
 
-function isGenerationFailure(value: any): value is GenerationFailure {
-    return Object.values(GenerationFailure).includes(value)
+function isGenerationFailure(value: unknown): value is GenerationFailure {
+    return Object.values(GenerationFailure).includes(value as GenerationFailure)
 }
 
 /**
@@ -188,10 +188,10 @@ function isGenerationFailure(value: any): value is GenerationFailure {
  * @returns The selected output, if possible. The elements are already randomly shuffled according to the random number generator. 
  * Can also return errors if the distribution does not fulfill the targeted properties.
  */
-function retrieveDistributedGeneration<Keys extends keyof any>(dist: DistributedGeneration<Keys>, target: number, rng: () => number) {
+function retrieveDistributedGeneration<Keys extends PropertyKey>(dist: DistributedGeneration<Keys>, target: number, rng: () => number) {
     const narrowed = narrowDistribution(dist.data, target, rng)
     const count = foldRecord(narrowed, (s, [_, v]) => s + v, 0)
-    if (count != target)
+    if (count !== target)
         return GenerationFailure.SourceDistributionTooSmall
 
     // narrowed contains the correct items, but they have to be sorted randomly
@@ -212,7 +212,7 @@ function retrieveIndexedGeneration<T>(dist: IndexedGeneration<T>, rng: () => num
     return source.map<Pure<T>>((_value, i) => source[indices[i]])
 }
 function retrieveSelectGeneration<T>(dist: SelectGeneration<T>, rng: () => number) {
-    if (dist.data.length == 0)
+    if (dist.data.length === 0)
         return GenerationFailure.TooFewOptions
     else
         return dist.data[Math.floor(dist.data.length * rng())]
@@ -223,11 +223,11 @@ type TileWithoutPortOrientation = Exclude<CoordinateTile, { type: TileType.Port 
 
 function generateNumberAssignment(info: ResourceNumberAssignmentInfo, coordsToAssign: Coordinate[], cordsToSkip: Coordinate[], rng: () => number): [Coordinate, ResourceTileNumber][] | undefined {
     const numbers = 
-        info.numbers.method == GenerationMethod.Distribution
+        info.numbers.method === GenerationMethod.Distribution
         ? retrieveDistributedGeneration<ResourceTileNumber>(info.numbers, coordsToAssign.length, rng)
-        : info.numbers.method == GenerationMethod.Indexed
+        : info.numbers.method === GenerationMethod.Indexed
         ? retrieveIndexedGeneration(info.numbers, rng)
-        : info.numbers.method == GenerationMethod.SelectOne
+        : info.numbers.method === GenerationMethod.SelectOne
         ? retrieveSelectGeneration(info.numbers, rng)
         : info.numbers.data
 
@@ -241,25 +241,21 @@ function generateNumberAssignment(info: ResourceNumberAssignmentInfo, coordsToAs
         
             return coordsToAssign.map((coord, i) => [coord, numbers[i]])
 
-        case ScenarioResourceNumberAssignmentMethod.CirclingOut:
+        case ScenarioResourceNumberAssignmentMethod.CirclingOut: {
             const rotValue = retrieveSelectGeneration(info.turning, rng)
             if (isGenerationFailure(rotValue))
                 return undefined
 
-            let rotFn
-            switch (rotValue) {
-                case "cw": rotFn = clockwise
-                case "ccw": rotFn = counterclockwise
-            }
+            const rotFn = { cw: clockwise, ccw: counterclockwise}[rotValue]
 
-            let initialOr = retrieveSelectGeneration(info.orientations, rng)
+            const initialOr = retrieveSelectGeneration(info.orientations, rng)
             if (isGenerationFailure(initialOr))
                 return undefined
 
             let coordsRemaining = coordsToAssign.concat(cordsToSkip)
             let currentPos = info.startCoordinate
             let currentOr = initialOr
-            let currentNumbers = numbers.slice()
+            const currentNumbers = numbers.slice()
 
             const moveNext = () => {
                 const tryOneTurnOr = rotFn(currentOr)
@@ -284,7 +280,7 @@ function generateNumberAssignment(info: ResourceNumberAssignmentInfo, coordsToAs
             const mark = () => {
                 coordsRemaining = coordsRemaining.filter(x => !sameCoordinate(x, currentPos))
             }
-            let result: [Coordinate, ResourceTileNumber][] = []
+            const result: [Coordinate, ResourceTileNumber][] = []
             const assign = () => {
                 result.push([currentPos, currentNumbers.shift()!])
             }
@@ -302,37 +298,38 @@ function generateNumberAssignment(info: ResourceNumberAssignmentInfo, coordsToAs
                 mark()
                 moveNext()
             }
-            return result            
+            return result
+        }
     }
 }
 
 function generateScenarioTileGroup(tileGroup: ScenarioTileGroup, rng: () => number): TileWithoutPortOrientation[] | undefined {
     const coords = retrieveSelectGeneration(tileGroup.coordinates, rng)
-    if (coords == GenerationFailure.TooFewOptions)
+    if (coords === GenerationFailure.TooFewOptions)
         return undefined
 
-    const tileTypes = tileGroup.tileTypes.method == GenerationMethod.Distribution
+    const tileTypes = tileGroup.tileTypes.method === GenerationMethod.Distribution
         ? retrieveDistributedGeneration(tileGroup.tileTypes, coords.length, rng)
         : tileGroup.tileTypes.data
 
-    if (isGenerationFailure(tileTypes) || coords.length != tileTypes.length)
+    if (isGenerationFailure(tileTypes) || coords.length !== tileTypes.length)
         return undefined
 
     const coordsWithTypes = coords.map((coord, i) => { return { type: tileTypes[i], coord } })
 
     
     const desertTiles: (LandTile & { coord: Coordinate })[] = 
-        coordsWithTypes.filter(({ type }) => type == TileType.Desert).map(({ coord }) => {
+        coordsWithTypes.filter(({ type }) => type === TileType.Desert).map(({ coord }) => {
             return {
                 type: TileType.Desert,
                 coord
             }
         })
 
-    const landTileResourceCoords = coordsWithTypes.filter(({ type }) => type == TileType.Resource).map(({ coord }) => coord)
+    const landTileResourceCoords = coordsWithTypes.filter(({ type }) => type === TileType.Resource).map(({ coord }) => coord)
 
     const landTileResources = 
-        tileGroup.resources.method == GenerationMethod.Distribution
+        tileGroup.resources.method === GenerationMethod.Distribution
         ? retrieveDistributedGeneration<Resource>(tileGroup.resources, landTileResourceCoords.length, rng)
         : tileGroup.resources.data
 
@@ -342,37 +339,35 @@ function generateScenarioTileGroup(tileGroup: ScenarioTileGroup, rng: () => numb
 
     const resourceNumberAssignment = 
         tileGroup.resourceNumberAssignment.reduce<[Coordinate, ResourceTileNumber][] | undefined>((state, rna) => {
-            if (state == undefined)
+            if (state === undefined)
                 return undefined
 
             const numbers = generateNumberAssignment(rna, landTileResourceCoords, desertTiles.map(x => x.coord), rng)
 
-            if (numbers == undefined)
+            if (numbers === undefined)
                 return undefined
 
             // always use the newer numbers. overwrite generated numbers for old coordinates.
             return numbers.concat(state.filter(([coord]) => !numbers.some(([coord2]) => sameCoordinate(coord, coord2))))
         }, [])
 
-    if (resourceNumberAssignment == undefined || 
+    if (resourceNumberAssignment === undefined || 
         landTileResourceCoords.some(coord => resourceNumberAssignment.findIndex(([coord2]) => sameCoordinate(coord, coord2)) < 0))
         return undefined
 
-    const resourceLandTiles = landTileResourceCoords.map<LandTile & { coord: Coordinate }>((coord, i) => {
-        return {
-            type: TileType.Resource,
-            number: resourceNumberAssignment.find(([coord2]) => sameCoordinate(coord, coord2))![1],
-            resource: landTileResources[i],
-            coord
-        }
-    })
+    const resourceLandTiles = landTileResourceCoords.map<LandTile & { coord: Coordinate }>((coord, i) => ({
+        type: TileType.Resource,
+        number: resourceNumberAssignment.find(([coord2]) => sameCoordinate(coord, coord2))![1],
+        resource: landTileResources[i],
+        coord
+    }))
     const landTiles = resourceLandTiles.concat(desertTiles)
 
     const portCoords = coordsWithTypes
-        .filter(val => val.type == TileType.Port)
+        .filter(val => val.type === TileType.Port)
         .map(({ coord }) => coord)
     const portResources =
-        tileGroup.portResources.method == GenerationMethod.Distribution
+        tileGroup.portResources.method === GenerationMethod.Distribution
         ? retrieveDistributedGeneration<PortResource>(tileGroup.portResources, portCoords.length, rng)
         : tileGroup.portResources.data
 
@@ -393,7 +388,7 @@ function generateScenarioTileGroup(tileGroup: ScenarioTileGroup, rng: () => numb
 
     const oceanTiles = 
         coordsWithTypes
-        .filter(({ type }) => type == TileType.Ocean)
+        .filter(({ type }) => type === TileType.Ocean)
         .map<CoordinateTile>(({ coord }) => {
             return {
                 type: TileType.Ocean,
@@ -410,7 +405,7 @@ export function generateBoardFromScenario(scenarioBoard: Scenario['board'], seed
     var tilesWithoutPorts: TileWithoutPortOrientation[] = []
     const generatedGroups = scenarioBoard.tileGroups.map(x => generateScenarioTileGroup(x , rng))
     for (var group of generatedGroups) {
-        if (group == undefined)
+        if (group === undefined)
             return undefined
         for (var tile of group) {
             tilesWithoutPorts = tilesWithoutPorts.filter(t => sameCoordinate(t.coord, tile.coord))
@@ -420,32 +415,32 @@ export function generateBoardFromScenario(scenarioBoard: Scenario['board'], seed
 
     const tilesByGroups = 
         scenarioBoard.tileGroups.reduce<TileWithoutPortOrientation[] | undefined>((s, group) => 
-            s == undefined
+            s === undefined
                 ? undefined
                 : generateScenarioTileGroup(group, rng)?.concat(s), [])
 
-    if (tilesByGroups == undefined)
+    if (tilesByGroups === undefined)
         return undefined
 
-    const deserts = tilesByGroups.filter(x => x.type == TileType.Desert)
-    if (deserts.length == 0) 
+    const deserts = tilesByGroups.filter(x => x.type === TileType.Desert)
+    if (deserts.length === 0) 
         return undefined
     const robber = deserts[Math.floor(deserts.length * rng())].coord
 
 
     const tryCleanedPortTiles = tilesByGroups
-        .filter(x => x.type == TileType.Port)
+        .filter(x => x.type === TileType.Port)
         .map<PortTile & { coord: Coordinate } | undefined>(({ coord, resource }) => {
             const possibleOrientations = 
                 allOrientations
                 .filter(o => {
                     const otherCoord = neighborTile(coord, o)
                     const otherTile = tilesByGroups.find(x => sameCoordinate(x.coord, otherCoord))
-                    if (otherTile == undefined)
+                    if (otherTile === undefined)
                         return false
                     return isLand(otherTile.type)
                 })
-            if (possibleOrientations.length == 0)
+            if (possibleOrientations.length === 0)
                 return undefined
 
             return {
@@ -456,7 +451,7 @@ export function generateBoardFromScenario(scenarioBoard: Scenario['board'], seed
             }
         })
 
-    const cleanPortTiles = tryCleanedPortTiles.filter(x => x != undefined)
+    const cleanPortTiles = tryCleanedPortTiles.filter(x => x !== undefined)
     if (cleanPortTiles.length < tryCleanedPortTiles.length)
         // not every port has an orientation
         return undefined
@@ -464,7 +459,7 @@ export function generateBoardFromScenario(scenarioBoard: Scenario['board'], seed
         buildings: [],
         roads: [],
         robber,
-        tiles: tilesByGroups.filter<CoordinateTile>(x => x.type != TileType.Port).concat(cleanPortTiles)
+        tiles: tilesByGroups.filter<CoordinateTile>(x => x.type !== TileType.Port).concat(cleanPortTiles)
     }    
 }
 
@@ -475,10 +470,10 @@ export function generateStateFromScenario(scenario: Scenario, participatingColor
         return undefined
 
     const board = generateBoardFromScenario(scenario.board, seed)
-    if (board == undefined)
+    if (board === undefined)
         return undefined
 
-    const phase: GamePhase = scenario.startingPhase == ScenarioStartingPhaseType.WithInitialPlacing ? {
+    const phase: GamePhase = scenario.startingPhase === ScenarioStartingPhaseType.WithInitialPlacing ? {
             type: GamePhaseType.Initial,
             forward: true
         } : {

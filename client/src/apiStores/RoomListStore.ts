@@ -1,11 +1,11 @@
+import { type LobbyRoom, type QueryServerEventMap, queryNamespace } from 'catan-shared'
 import { defineStore } from 'pinia'
-import { type LobbyRoom, UserType, RoomType, type QueryServerEventMap, queryNamespace } from 'catan-shared'
+import { io, type Socket } from 'socket.io-client'
 import { ref, watch, } from 'vue'
 import { serverAddress } from '@/misc/Globals'
-import { io, Socket } from 'socket.io-client'
 
 
-const socket: Socket<{}, QueryServerEventMap> = io(serverAddress + queryNamespace, {
+const socket: Socket<object & {}, QueryServerEventMap> = io(serverAddress + queryNamespace, {
     autoConnect: false,
     // this is required such that disconnecting with this socket does not affect the game socket
     forceNew: true

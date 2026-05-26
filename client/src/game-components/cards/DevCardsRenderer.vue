@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { countDevCards, DevCardType } from 'catan-shared';
-import { type CardStackProps } from './CardStack.vue';
-import HorizontalCardStacks from './HorizontalCardStacks.vue';
 import { computed } from 'vue';
 import { imageForDevCard } from '@/misc/CardTextures';
+import type { CardStackProps } from './CardStack.vue';
+import HorizontalCardStacks from './HorizontalCardStacks.vue';
 
 defineEmits<{
     devCardClicked: [type: DevCardType]
@@ -14,7 +14,7 @@ type DevCardsStack = CardStackProps & { card: DevCardType }
 
 const stacks = computed<DevCardsStack[]>(() => {
     return Array.from(countDevCards(props.cards))
-        .filter(x => x[1] != 0)
+        .filter(x => x[1] !== 0)
         .map(([card, count]) => {
             return {
                 title: `${DevCardType[card]} (x${count})`,

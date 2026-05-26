@@ -19,7 +19,7 @@ export type Pure<T> = T extends Primitive
   ? ReadonlySet<Pure<M>>
   : T extends ReadonlySet<infer M>
   ? ReadonlySet<Pure<M>>
-  : T extends Function
+  : T extends () => unknown
   ? T
   : T extends object
   ? PureObject<T>

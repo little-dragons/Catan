@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type Color, TradeStatusByColor } from 'catan-shared';
-import Accepting from '@/assets/ui/ok.svg'
 import Rejecting from '@/assets/ui/error.svg'
+import Accepting from '@/assets/ui/ok.svg'
 import Undecided from '@/assets/ui/questionmark.svg'
 import PlayerIcon from '../PlayerIcon.vue';
 
@@ -32,10 +32,11 @@ function iconForStatus(status: TradeStatusByColor) {
 <div class="top">
     <PlayerIcon class="icon" :color="color" :icon="icon"/>
     <button 
+        type="button"
         @click="() => enabled ? $emit('statusClicked') : ''"
         class="status"            
         :disabled="!enabled">
-            <img :src="iconForStatus(status)"/>
+            <img :src="iconForStatus(status)" alt=""/>
     </button>
 </div>
 </template>

@@ -1,21 +1,21 @@
-import { Color, GameClientEventMap, GameActionInfo, GameActionInput, redactGameActionInfoFor, tryDoAction, GameServerEventMap, generateBotAction, redactGameStateFor, requireActionFrom, RoomType, victoryPointsFromFull, winners } from "catan-shared";
-import { type Socket } from 'socket.io'
-import { endGame, gameRoomFor, participantsForRoom, ServerGameRoom } from "./RoomManager";
-import { GameSocketDataType, GameNamespace } from "./Common";
+import { type Color, type GameActionInfo, type GameActionInput, type GameClientEventMap, type GameServerEventMap, generateBotAction, RoomType, redactGameActionInfoFor, redactGameStateFor, requireActionFrom, tryDoAction, winners } from "catan-shared";
+import type { Socket } from 'socket.io'
 import typia from "typia";
+import type { GameNamespace, GameSocketDataType } from "./Common";
+import { endGame, gameRoomFor, participantsForRoom, type ServerGameRoom } from "./RoomManager";
 
 
-export function acceptGameEvents(io: GameNamespace, socket: Socket<GameServerEventMap, GameClientEventMap, {}, GameSocketDataType>) {
+export function acceptGameEvents(io: GameNamespace, socket: Socket<GameServerEventMap, GameClientEventMap, object & {}, GameSocketDataType>) {
 
     socket.on('gameState', cb => {
-        if (typeof cb != 'function') {
+        if (typeof cb !== 'function') {
             console.warn('invalid arguments:', cb)
-            return (cb as any)('invalid arguments')
+            return
         }
 
 
         const room = gameRoomFor(socket.data.roomID)
-        if (room == undefined) {
+        if (room === undefined) {
             console.error(`Socket had access to deleted room ${socket.data}`)
             return cb('invalid socket state')
         }
@@ -26,7 +26,7 @@ export function acceptGameEvents(io: GameNamespace, socket: Socket<GameServerEve
 
     function handleGameAction(room: ServerGameRoom, executor: Color, action: GameActionInput) {
         const actionResult = tryDoAction(room.state, executor, action)
-        if (actionResult == undefined)
+        if (actionResult === undefined)
             return 'action not allowed'
 
         room.state = actionResult[0]
@@ -49,19 +49,19 @@ export function acceptGameEvents(io: GameNamespace, socket: Socket<GameServerEve
     }
 
     socket.on('gameAction', (action, cb) => {
-        if (!typia.is(action) && typeof cb != 'function') {
+        if (!typia.is(action) && typeof cb !== 'function') {
             console.warn('invalid arguments:', action, cb)
-            return (cb as any)('invalid arguments')
+            return
         }
 
         const room = gameRoomFor(socket.data.roomID)
-        if (room == undefined) {
+        if (room === undefined) {
             console.error(`Socket had access to deleted room ${socket.data}`)
             return cb('invalid socket state')
         }
         
         const playerRes = handleGameAction(room, socket.data.color, action)
-        if (playerRes == 'action not allowed')
+        if (playerRes === 'action not allowed')
             return cb(playerRes)
 
         cb(true)
@@ -69,17 +69,17 @@ export function acceptGameEvents(io: GameNamespace, socket: Socket<GameServerEve
         if (ended) return
 
 
-        while (requireActionFrom(room.state).some(x => room.bots.some(([_, col]) => col == x))) {
-            const botColors = requireActionFrom(room.state).filter(x => room.bots.some(bot => bot[1] == x))
+        while (requireActionFrom(room.state).some(x => room.bots.some(([_, col]) => col === x))) {
+            const botColors = requireActionFrom(room.state).filter(x => room.bots.some(bot => bot[1] === x))
             const botAction = generateBotAction(
-                                    room.bots.find(x => x[1] == botColors[0])![0], 
+                                    room.bots.find(x => x[1] === botColors[0])![0], 
                                     redactGameStateFor(room.state, botColors[0]))
-            if (botAction == undefined) {
+            if (botAction === undefined) {
                 console.warn('Bot generated an undefined action!')
                 continue
             }
             const res = handleGameAction(room, botColors[0], botAction)
-            if (res == 'action not allowed')
+            if (res === 'action not allowed')
                 console.warn('Bot generated invalid action!', botAction)
             const ended = checkAndHandleEndGame(room)
             if (ended) return
@@ -87,13 +87,13 @@ export function acceptGameEvents(io: GameNamespace, socket: Socket<GameServerEve
     })
 
     socket.on('fullGameRoom', async cb => {
-        if (typeof cb != 'function') {
+        if (typeof cb !== 'function') {
             console.warn('invalid arguments:', cb)
-            return (cb as any)('invalid arguments')
+            return
         }
 
         const room = gameRoomFor(socket.data.roomID)
-        if (room == undefined) {
+        if (room === undefined) {
             console.error(`Socket had access to deleted room ${socket.data}`)
             return cb('invalid socket state')
         }

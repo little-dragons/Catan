@@ -10,7 +10,7 @@ export function length(v: Vector): number {
 
 export function withLength(v: Vector, l: number): Vector {
     const len = length(v)
-    if (len == 0)
+    if (len === 0)
         return [0, 0]
     return [v[0] * l / len, v[1] * l / len]
 }

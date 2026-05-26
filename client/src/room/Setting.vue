@@ -14,7 +14,7 @@ const props = defineProps<{
 const editing = ref<false | string>(false)
 const input = useTemplateRef('input')
 function sendUpdate() {
-    if (editing.value === false || props.update == undefined || !props.isValid(editing.value))
+    if (editing.value === false || props.update === undefined || !props.isValid(editing.value))
         return
 
     props.update(editing.value)
@@ -30,7 +30,7 @@ function startEditing() {
 </script>
 
 <template>
-    <div v-if="editing !== false && update != undefined" class="top">
+    <div v-if="editing !== false && update !== undefined" class="top">
         <span class="descriptor">{{ name }}:</span>
         <div class="right">            
             <input
@@ -41,17 +41,19 @@ function startEditing() {
                 @keypress.enter="() => { if (editing !== false && isValid(editing)) sendUpdate() }"
             />
             <button 
+                type="button"
                 class="edit"
                 @click="sendUpdate"
                 :disabled="!isValid(editing)"
                 :title="isValid(editing) ? 'Apply the new value.' : 'The provided value is not allowed.'">
-                <img :src="ok"/>
+                <img :src="ok" alt=""/>
             </button>
             <button 
+                type="button"
                 class="edit"
                 @click="() => editing = false"
                 title="Discard this change.">
-                <img :src="error"/>
+                <img :src="error" alt=""/>
             </button>
         </div>
     </div>
@@ -61,11 +63,12 @@ function startEditing() {
         <div class="right">            
             <span class="value">{{ initial }}</span>
             <button 
+                type="button"
                 class="edit"
                 @click="startEditing"
-                :disabled="update == undefined"
-                :title="update == undefined ? 'You are not allowed to change this value.' : 'You can change this value.'">
-                <img :src="change"/>
+                :disabled="update === undefined"
+                :title="update === undefined ? 'You are not allowed to change this value.' : 'You can change this value.'">
+                <img :src="change" alt=""/>
             </button>
         </div>
     </div>

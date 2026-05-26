@@ -1,7 +1,7 @@
-import { Kysely } from "kysely";
-import { DB } from "./DBTypes";
 import { Database } from 'bun:sqlite'
+import { Kysely } from "kysely";
 import { BunSqliteDialect } from "kysely-bun-sqlite";
+import type { DB } from "./DBTypes";
 
 export const db = new Kysely<DB>({
     dialect: new BunSqliteDialect({

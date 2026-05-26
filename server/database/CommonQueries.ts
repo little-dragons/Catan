@@ -12,5 +12,5 @@ export async function addUserToDb(name: string, passwordHash: string) {
 }
 
 export async function hasUserInDb(name: string) {
-    return await getUserFromDb(name) != undefined
+    return await getUserFromDb(name) !== undefined
 }

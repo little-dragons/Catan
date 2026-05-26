@@ -1,12 +1,11 @@
-import { defineStore } from "pinia"
-import { type RedactedRoom, RoomType, type GameActionInput, type PossiblyRedactedGameActionInfo, generateStateFromScenario, redactGameStateFor, defaultScenario, defaultSettings, ParticipantType, Color, BotPersonality, randomUnusedColor, tryDoAction, winners, requireActionFrom, generateBotAction, participantName, SocketConnectErrorCode, SocketConnectErrorSchema, type GameClientEventMap, gameNamespace } from "catan-shared"
-import { ref, computed } from "vue"
-import { useCurrentUserStore, UserStatus } from "./CurrentUserStore"
-import { PopupSeverity, usePopups } from "@/popup/Popup"
 import type { FullGameState, GameServerEventMap, LobbyRoom, PostGameRoom, RedactedGameRoom, RoomRequest, Settings } from "catan-shared"
-import { UserType } from "catan-shared"
-import { io, Socket } from "socket.io-client"
+import { BotPersonality, type Color, defaultScenario, defaultSettings, type GameActionInput, type GameClientEventMap, gameNamespace, generateBotAction, generateStateFromScenario, ParticipantType, type PossiblyRedactedGameActionInfo, participantName, type RedactedRoom, RoomType, randomUnusedColor, redactGameStateFor, requireActionFrom, SocketConnectErrorCode, SocketConnectErrorSchema, tryDoAction, UserType, winners } from "catan-shared"
+import { defineStore } from "pinia"
+import { io, type Socket } from "socket.io-client"
+import { computed, ref } from "vue"
 import { serverAddress } from "@/misc/Globals"
+import { PopupSeverity, usePopups } from "@/popup/Popup"
+import { UserStatus, useCurrentUserStore } from "./CurrentUserStore"
 
 
 export enum RoomOPResult {
@@ -48,9 +47,9 @@ export const useCurrentRoomStore = defineStore('room', () => {
     const popups = usePopups()
 
     async function tryJoin(id: string) {
-        if (info.value != undefined)
+        if (info.value !== undefined)
             return RoomOPResult.AlreadyInRoom
-        if (user.info.status != UserStatus.LoggedIn)
+        if (user.info.status !== UserStatus.LoggedIn)
             return RoomOPResult.NotLoggedIn
 
         socket.auth = <RoomRequest>{
@@ -62,7 +61,7 @@ export const useCurrentRoomStore = defineStore('room', () => {
             // minor leak, because only one will fire
             socket.once('connect_error', err => {
                 const check = SocketConnectErrorSchema.safeParse(err)
-                if (check.success && check.data.data != undefined) {
+                if (check.success && check.data.data !== undefined) {
                     resolve(check.data.data.code)
                 }
                 resolve(err.message)
@@ -76,7 +75,7 @@ export const useCurrentRoomStore = defineStore('room', () => {
 
         if (result === true) {
             const roomData = await socket.emitWithAck('fullLobbyRoom')
-            if (roomData == 'invalid socket state') {
+            if (roomData === 'invalid socket state') {
                 popups.insert({
                     autoCloses: true,
                     message: 'Joining room failed because server did not respond to current state request.',
@@ -91,9 +90,9 @@ export const useCurrentRoomStore = defineStore('room', () => {
             return RoomOPResult.Success
         }
 
-        if (result == SocketConnectErrorCode.RoomNameInvalid) 
+        if (result === SocketConnectErrorCode.RoomNameInvalid) 
             return RoomOPResult.RoomInvalid
-        if (result == SocketConnectErrorCode.RoomFull)
+        if (result === SocketConnectErrorCode.RoomFull)
             return RoomOPResult.RoomFull
 
         
@@ -106,9 +105,9 @@ export const useCurrentRoomStore = defineStore('room', () => {
         return RoomOPResult.ServerRejected
     }
     async function tryCreateOnline(name: string) {
-        if (info.value != undefined)
+        if (info.value !== undefined)
             return RoomOPResult.AlreadyInRoom
-        if (user.info.status != UserStatus.LoggedIn)
+        if (user.info.status !== UserStatus.LoggedIn)
             return RoomOPResult.NotLoggedIn
 
         const req: RoomRequest = {
@@ -121,7 +120,7 @@ export const useCurrentRoomStore = defineStore('room', () => {
             // minor leak, because only one will fire
             socket.once('connect_error', err => {
                 const check = SocketConnectErrorSchema.safeParse(err)
-                if (check.success && check.data.data != undefined) {
+                if (check.success && check.data.data !== undefined) {
                     resolve(check.data.data.code)
                 }
                 resolve(err.message)
@@ -135,7 +134,7 @@ export const useCurrentRoomStore = defineStore('room', () => {
 
         if (result === true) {
             const roomData = await socket.emitWithAck('fullLobbyRoom')
-            if (roomData == 'invalid socket state') {
+            if (roomData === 'invalid socket state') {
                 popups.insert({
                     autoCloses: true,
                     message: 'Creating room failed because server did not respond to state request',
@@ -151,9 +150,9 @@ export const useCurrentRoomStore = defineStore('room', () => {
             return RoomOPResult.Success
         }
 
-        if (result == SocketConnectErrorCode.RoomNameInvalid)
+        if (result === SocketConnectErrorCode.RoomNameInvalid)
             return RoomOPResult.NameInvalid
-        if (result == SocketConnectErrorCode.RoomFull)
+        if (result === SocketConnectErrorCode.RoomFull)
             return RoomOPResult.ServerRejected
 
         return RoomOPResult.ServerRejected
@@ -162,7 +161,7 @@ export const useCurrentRoomStore = defineStore('room', () => {
 
 
     function tryCreateOffline() {
-        if (info.value != undefined)
+        if (info.value !== undefined)
             return RoomOPResult.AlreadyInRoom
 
         info.value = {
@@ -187,10 +186,10 @@ export const useCurrentRoomStore = defineStore('room', () => {
     }
 
     async function tryLeave() {
-        if (info.value == undefined)
+        if (info.value === undefined)
             return RoomOPResult.NotInRoom
 
-        if (info.value.mode == RoomMode.Offline) {
+        if (info.value.mode === RoomMode.Offline) {
             info.value = undefined
             return RoomOPResult.Success
         }
@@ -201,17 +200,17 @@ export const useCurrentRoomStore = defineStore('room', () => {
     }
 
     async function tryStart() {
-        if (info.value == undefined)
+        if (info.value === undefined)
             return RoomOPResult.NotInRoom
 
-        if (info.value.mode == RoomMode.Offline) {
+        if (info.value.mode === RoomMode.Offline) {
             const r = info.value.data
-            if (r.type != RoomType.Lobby) {
+            if (r.type !== RoomType.Lobby) {
                 return RoomOPResult.RoomInvalid
             }
 
             const fs = generateStateFromScenario(r.scenario, r.participants.map(x => x.color), r.participants[0].color, r.settings.seed)
-            if (fs == undefined) {
+            if (fs === undefined) {
                 popups.insert({ autoCloses: false, message: "The scenario could not be generated", severity: PopupSeverity.Warning, title: "Start failed"})
                 return RoomOPResult.ServerRejected
             }
@@ -228,18 +227,18 @@ export const useCurrentRoomStore = defineStore('room', () => {
             
         }
 
-        if (user.info.status != UserStatus.LoggedIn)
+        if (user.info.status !== UserStatus.LoggedIn)
             return RoomOPResult.NotLoggedIn
 
-        if (user.info.user.name != info.value.data.owner.name)
+        if (user.info.user.name !== info.value.data.owner.name)
             return RoomOPResult.NotOwner
 
         const result = await socket.emitWithAck('startGame')
 
-        if (result == 'not the owner')
+        if (result === 'not the owner')
             return RoomOPResult.NotOwner
 
-        if (result == 'invalid socket state' || result == 'generation error') {
+        if (result === 'invalid socket state' || result === 'generation error') {
             console.log(result)
             return RoomOPResult.ServerRejected
         }
@@ -248,75 +247,75 @@ export const useCurrentRoomStore = defineStore('room', () => {
         return RoomOPResult.Success
     }
 
-    const canJoinOnline = computed(() => user.info.status == UserStatus.LoggedIn && info.value == undefined)
-    const isOwner = computed(() => info.value?.mode == RoomMode.Offline || (
-                                user.info.status == UserStatus.LoggedIn 
-                                ? info.value?.data.owner.name == user.info.user.name 
+    const canJoinOnline = computed(() => user.info.status === UserStatus.LoggedIn && info.value === undefined)
+    const isOwner = computed(() => info.value?.mode === RoomMode.Offline || (
+                                user.info.status === UserStatus.LoggedIn 
+                                ? info.value?.data.owner.name === user.info.user.name 
                                 : false
                             ))
     const ownColor = computed(() => info.value?.mode === RoomMode.Offline 
-                                    ? info.value.data.participants.find(x => x.type == ParticipantType.User)?.color
+                                    ? info.value.data.participants.find(x => x.type === ParticipantType.User)?.color
                                     : info.value?.mode === RoomMode.Online
-                                    ? info.value.data.participants.find(x => participantName(x) == user.loggedInInfo!.name)?.color
+                                    ? info.value.data.participants.find(x => participantName(x) === user.loggedInInfo!.name)?.color
                                     : undefined
                             )                                
 
 
     async function tryChangeSetting<Key extends keyof Settings>(key: Key, value: Settings[Key]) {
-        if (info.value == undefined)
+        if (info.value === undefined)
             return RoomOPResult.RoomInvalid
 
-        if (info.value.mode == RoomMode.Offline) {
+        if (info.value.mode === RoomMode.Offline) {
             info.value.data.settings[key] = value
             return RoomOPResult.Success
         }
 
-        if (user.info.status != UserStatus.LoggedIn)
+        if (user.info.status !== UserStatus.LoggedIn)
             return RoomOPResult.NotLoggedIn
 
-        if (user.info.user.name != info.value.data.owner.name)
+        if (user.info.user.name !== info.value.data.owner.name)
             return RoomOPResult.NotOwner
 
         const res = await socket.emitWithAck('changeSettings', key, value)
-        if (res == 'room is ingame')
+        if (res === 'room is ingame')
             return RoomOPResult.RoomInvalid
 
-        if (res == 'not the owner')
+        if (res === 'not the owner')
             return RoomOPResult.NotOwner
 
-        if (res == 'invalid socket state')
+        if (res === 'invalid socket state')
             return RoomOPResult.ServerRejected
         
         const _assert: true = res
         return RoomOPResult.Success
     }
     socket.on('settingsChange', set => {
-        if (info.value == undefined || info.value.mode == RoomMode.Offline)
+        if (info.value === undefined || info.value.mode === RoomMode.Offline)
             return
 
         info.value.data.settings = set
     })
     
     socket.on('gameStarted', async () => {
-        if (info.value == undefined || info.value.mode == RoomMode.Offline)
+        if (info.value === undefined || info.value.mode === RoomMode.Offline)
             return
         
         const result = await socket.emitWithAck('fullGameRoom')
-        if (result == 'invalid socket state')
+        if (result === 'invalid socket state')
             return
 
         info.value = { mode: RoomMode.Online, data: result }
     })
 
     socket.on('participantChange', newUsers => {
-        if (info.value == undefined || info.value.mode == RoomMode.Offline)
+        if (info.value === undefined || info.value.mode === RoomMode.Offline)
             return
 
         info.value.data.participants = newUsers
     })
 
     socket.on('disconnect', () => {
-        if (info.value == undefined || info.value.mode == RoomMode.Offline)
+        if (info.value === undefined || info.value.mode === RoomMode.Offline)
             return
 
         popups.insert({
@@ -331,7 +330,7 @@ export const useCurrentRoomStore = defineStore('room', () => {
     const actions = ref<PossiblyRedactedGameActionInfo[]>([])
 
     socket.on('gameEvent', (newState, actionInfo) => {
-        if (info.value == undefined || info.value.mode != RoomMode.Online || info.value.data.type != RoomType.InGame) {
+        if (info.value === undefined || info.value.mode !== RoomMode.Online || info.value.data.type !== RoomType.InGame) {
             popups.insert({ 
                 title: 'Received event',
                 message: 'Received a game event, but the client is not ingame',
@@ -347,10 +346,10 @@ export const useCurrentRoomStore = defineStore('room', () => {
     })
 
     async function trySendAction(useraction: GameActionInput) {
-        if (info.value == undefined || info.value.data.type != RoomType.InGame)
+        if (info.value === undefined || info.value.data.type !== RoomType.InGame)
             return false
 
-        if (info.value.mode == RoomMode.Offline) {
+        if (info.value.mode === RoomMode.Offline) {
             const selfcolor = info.value.data.state.self.color
             let action = useraction
             let executor = info.value.data.state.self.color
@@ -360,7 +359,7 @@ export const useCurrentRoomStore = defineStore('room', () => {
             while (true) {
                 const result = tryDoAction(state, executor, action)
 
-                if (result == undefined) {
+                if (result === undefined) {
                     popups.insert({
                         autoCloses: false,
                         title: "Invalid action",
@@ -392,13 +391,13 @@ export const useCurrentRoomStore = defineStore('room', () => {
                 }
 
                 const actionableColors = requireActionFrom(state)
-                const actionableBots = info.value.data.participants.filter(p => p.type == ParticipantType.Bot)
+                const actionableBots = info.value.data.participants.filter(p => p.type === ParticipantType.Bot)
                                                                    .filter(p => actionableColors.includes(p.color))
-                if (actionableBots.length == 0)
+                if (actionableBots.length === 0)
                     break
 
                 const botaction = generateBotAction(actionableBots[0].bot, redactGameStateFor(state, actionableBots[0].color))
-                if (botaction == undefined) {
+                if (botaction === undefined) {
                     popups.insert({
                         autoCloses: false,
                         title: "Bot failure",
@@ -415,12 +414,12 @@ export const useCurrentRoomStore = defineStore('room', () => {
         }
 
         const response = await socket.emitWithAck('gameAction', useraction)
-        if (response == true)
+        if (response === true)
             return true
     
         popups.insert({ 
             title: 'Invalid action',
-            message: `Game action did not complete correctly: \'${response}\'`,
+            message: `Game action did not complete correctly: '${response}'`,
             severity: PopupSeverity.Warning,
             autoCloses: false,
         })
@@ -428,7 +427,7 @@ export const useCurrentRoomStore = defineStore('room', () => {
     }
 
     socket.on('gameOver', history => {
-        if (info.value?.mode != RoomMode.Online || info.value?.data.type != RoomType.InGame)
+        if (info.value?.mode !== RoomMode.Online || info.value?.data.type !== RoomType.InGame)
             return
 
         info.value = {
@@ -442,16 +441,16 @@ export const useCurrentRoomStore = defineStore('room', () => {
     })
 
     async function tryAddBot() {
-        if (info.value == undefined)
+        if (info.value === undefined)
             return RoomOPResult.NotInRoom
 
-        if (info.value.data.type != RoomType.Lobby)
+        if (info.value.data.type !== RoomType.Lobby)
             return RoomOPResult.RoomInvalid
         
         if (info.value.data.scenario.players.maxAllowedCount <= info.value.data.participants.length)
             return RoomOPResult.RoomFull
 
-        if (info.value.mode == RoomMode.Offline) {
+        if (info.value.mode === RoomMode.Offline) {
             info.value.data.participants.push({
                 type: ParticipantType.Bot,
                 bot: {
@@ -464,11 +463,11 @@ export const useCurrentRoomStore = defineStore('room', () => {
         }
 
         const result = await socket.emitWithAck('addBot')
-        if (result == 'invalid socket state')
+        if (result === 'invalid socket state')
             return RoomOPResult.NotInRoom
-        if (result == 'not the owner')
+        if (result === 'not the owner')
             return RoomOPResult.NotOwner
-        if (result == 'room full')
+        if (result === 'room full')
             return RoomOPResult.RoomFull
         
         const _assert: true = result
@@ -477,10 +476,10 @@ export const useCurrentRoomStore = defineStore('room', () => {
 
     async function tryChangeColor(oldColor: Color, newColor: Color) {
         if (info.value?.mode === RoomMode.Offline) {
-            const oldPart = info.value.data.participants.find(x => x.color == oldColor)
-            const newPart = info.value.data.participants.find(x => x.color == newColor)
-            if (oldPart != undefined) oldPart.color = newColor
-            if (newPart != undefined) newPart.color = oldColor
+            const oldPart = info.value.data.participants.find(x => x.color === oldColor)
+            const newPart = info.value.data.participants.find(x => x.color === newColor)
+            if (oldPart !== undefined) oldPart.color = newColor
+            if (newPart !== undefined) newPart.color = oldColor
             return RoomOPResult.Success
         }
 

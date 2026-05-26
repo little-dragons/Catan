@@ -1,4 +1,4 @@
-import { Page, expect } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 export async function noModal(page: Page): Promise<void> {
     await expect(page.getByTestId('modal')).toHaveCount(0)

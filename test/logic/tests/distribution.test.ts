@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
+import { allResources, type Distribution, narrowDistribution, Resource } from 'catan-shared'
 import seedrandom from 'seedrandom'
-import { allResources, Distribution, narrowDistribution, Resource } from 'catan-shared'
 
 function testWithAllSeeds(lambda: (rng: () => number) => void) {
     lambda(seedrandom('seed1'))
@@ -25,8 +25,8 @@ describe('Distribution', () => {
         testWithAllSeeds(rng => {
             const narrowed = narrowDistribution(dist, 18, rng)
             const counted = allResources.map(x => narrowed[x])
-            expect(counted.filter(x => x == 3).length).toBe(2)
-            expect(counted.filter(x => x == 4).length).toBe(3)
+            expect(counted.filter(x => x === 3).length).toBe(2)
+            expect(counted.filter(x => x === 4).length).toBe(3)
         })
     })
 })

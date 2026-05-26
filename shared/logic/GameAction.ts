@@ -1,10 +1,10 @@
-import { adjacentResources, adjacentRoads, availableRoadPositions, colorWithLongestRoad, type Coordinate, gainedResources, isAvailableRoadPosition, type ResourceTileNumber, type Road, roadAdjacentToLand, sameCoordinate, sameRoad } from "./Board"
-import { BuildingType, ConnectionType, availableBuildingPositions, isAvailableBuildingPosition } from "./Buildings"
-import { type FullGameState, nextTurn, GamePhaseType, type DieResult, isPreDiceRoll, TurnPhaseType, isActive, isInitial, isRobbingDiscardingCards, isRobbingMovingRobber, RobbingPhaseType, type RedactedGameState, publicGameState } from "./GameState"
-import { Color } from "./Player"
-import { addCards, buildingCost, connectionCost, devCardCost, Resource, tryRemoveCards } from "./Resource"
-import { canTradeWithBank, type FinalizedTrade, isValidOffer, type OpenTradeOffer, sameTradeOffer, type TradeOffer, TradeStatusByColor } from "./Trade"
+import { adjacentResources, adjacentRoads, availableRoadPositions, type Coordinate, colorWithLongestRoad, gainedResources, isAvailableRoadPosition, type ResourceTileNumber, type Road, roadAdjacentToLand, sameCoordinate, sameRoad } from "./Board"
+import { availableBuildingPositions, BuildingType, ConnectionType, isAvailableBuildingPosition } from "./Buildings"
+import { type DieResult, type FullGameState, GamePhaseType, isActive, isInitial, isPreDiceRoll, isRobbingDiscardingCards, isRobbingMovingRobber, nextTurn, publicGameState, type RedactedGameState, RobbingPhaseType, TurnPhaseType } from "./GameState"
+import type { Color } from "./Player"
+import { addCards, buildingCost, connectionCost, devCardCost, type Resource, tryRemoveCards } from "./Resource"
 import { isNewRobberPosition, robbableCrossingsExceptCurrent } from "./Robber"
+import { canTradeWithBank, type FinalizedTrade, isValidOffer, type OpenTradeOffer, sameTradeOffer, type TradeOffer, TradeStatusByColor } from "./Trade"
 
 function withPatch<T>(arr: readonly T[], index: number, patch: Partial<T>): T[] {
     return arr.with(index, { ...arr[index], ...patch });
@@ -22,7 +22,7 @@ export const allDevCardTypes = [DevCardType.Knight, DevCardType.Monopoly, DevCar
 
 export function countDevCards(cards: readonly DevCardType[]): Map<DevCardType, number> {
     return new Map(
-        allDevCardTypes.map(type => [type, cards.filter(x => x == type).length])
+        allDevCardTypes.map(type => [type, cards.filter(x => x === type).length])
     )
 }
 
@@ -48,7 +48,7 @@ export enum GameActionType {
 type GameActionInfos = {
     [GameActionType.RollDice]: {
         type: GameActionType.RollDice,
-        input: {
+        input: object & {
         },
         response: {
             die1: DieResult
@@ -140,7 +140,7 @@ type GameActionInfos = {
     },
     [GameActionType.FinishTurn]: {
         type: GameActionType.FinishTurn,
-        input: {
+        input: object & {
         },
         response: undefined
     },
@@ -182,8 +182,7 @@ type GameActionInfos = {
     },
     [GameActionType.BuyDevCard]: {
         type: GameActionType.BuyDevCard,
-        input: {
-
+        input: object & {
         },
         response: {
             cardType: DevCardType
@@ -209,18 +208,18 @@ export type TypedGameActionResponse = NonNullable<{
 type ResultType<T extends GameActionType> =
     undefined | [FullGameState, GameActionInfos[T]['response']]
 
-function tryDoRollDice(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.RollDice]): ResultType<GameActionType.RollDice> {
-    if (!isPreDiceRoll(state.phase) || executorColor != state.currentPlayer)
+function tryDoRollDice(state: FullGameState, executorColor: Color, _action: GameActionInputMap[GameActionType.RollDice]): ResultType<GameActionType.RollDice> {
+    if (!isPreDiceRoll(state.phase) || executorColor !== state.currentPlayer)
         return undefined
 
     const die1 = Math.floor(Math.random() * 6) + 1 as DieResult
     const die2 = Math.floor(Math.random() * 6) + 1 as DieResult
     const sum = die1 + die2 as ResourceTileNumber | 7
 
-    if (sum == 7) {
+    if (sum === 7) {
         const playersToDiscard = state.players.filter(x => x.handCards.length > 7).map(x => x.color)
 
-        if (playersToDiscard.length == 0)
+        if (playersToDiscard.length === 0)
             return [{...state,
                 phase: {
                 type: GamePhaseType.Turns,
@@ -257,10 +256,10 @@ function tryDoRollDice(state: FullGameState, executorColor: Color, action: GameA
     }
 }
 function tryDoPlaceSettlement(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceSettlement]): ResultType<GameActionType.PlaceSettlement> {
-    if (!isActive(state.phase) || executorColor != state.currentPlayer)
+    if (!isActive(state.phase) || executorColor !== state.currentPlayer)
         return undefined
 
-    const executorIdx = state.players.findIndex(x => x.color == executorColor)
+    const executorIdx = state.players.findIndex(x => x.color === executorColor)
     if (executorIdx < 0)
         return undefined
 
@@ -268,7 +267,7 @@ function tryDoPlaceSettlement(state: FullGameState, executorColor: Color, action
         return undefined
 
     const newCards = tryBuyBuilding(state.players[executorIdx]!.handCards, BuildingType.Settlement)
-    if (newCards == undefined)
+    if (newCards === undefined)
         return undefined
 
     return [{ ...state,
@@ -277,24 +276,24 @@ function tryDoPlaceSettlement(state: FullGameState, executorColor: Color, action
     }, undefined]
 }
 function tryDoPlaceCity(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceCity]): ResultType<GameActionType.PlaceCity> {
-    if (!isActive(state.phase) || executorColor != state.currentPlayer)
+    if (!isActive(state.phase) || executorColor !== state.currentPlayer)
         return undefined
 
-    const executorIdx = state.players.findIndex(x => x.color == executorColor)
+    const executorIdx = state.players.findIndex(x => x.color === executorColor)
     if (executorIdx < 0)
         return undefined
 
     const validSettlementIdx = 
         state.board.buildings.findIndex(({ color, coord, type }) => 
             sameCoordinate(action.coordinate, coord) && 
-            type == BuildingType.Settlement && 
-            color == executorColor)
+            type === BuildingType.Settlement && 
+            color === executorColor)
 
     if (validSettlementIdx < 0)
         return undefined
 
     const newCards = tryBuyBuilding(state.players[executorIdx]!.handCards, BuildingType.City)
-    if (newCards == undefined)
+    if (newCards === undefined)
         return undefined
 
     return [{ ...state,
@@ -307,10 +306,10 @@ function tryDoPlaceCity(state: FullGameState, executorColor: Color, action: Game
     // }), undefined]
 }
 function tryDoPlaceRoad(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceRoad]): ResultType<GameActionType.PlaceRoad> {
-    if (!isActive(state.phase) || executorColor != state.currentPlayer)
+    if (!isActive(state.phase) || executorColor !== state.currentPlayer)
         return undefined
 
-    const executorIdx = state.players.findIndex(x => x.color == executorColor)
+    const executorIdx = state.players.findIndex(x => x.color === executorColor)
     if (executorIdx < 0)
         return undefined
     if (!isAvailableRoadPosition(state.board, action.coordinates, executorColor))
@@ -318,7 +317,7 @@ function tryDoPlaceRoad(state: FullGameState, executorColor: Color, action: Game
 
 
     const newCards = tryBuyConnection(state.players[executorIdx]!.handCards, ConnectionType.Road)
-    if (newCards == undefined)
+    if (newCards === undefined)
         return undefined
 
     // check for longest road
@@ -333,7 +332,7 @@ function tryDoPlaceRoad(state: FullGameState, executorColor: Color, action: Game
     }, undefined]
 }
 function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceInitial]): ResultType<GameActionType.PlaceInitial> {
-    if (!isInitial(state.phase) || executorColor != state.currentPlayer)
+    if (!isInitial(state.phase) || executorColor !== state.currentPlayer)
         return undefined
     
     if (!isAvailableBuildingPosition(action.settlement, state.board, undefined))
@@ -350,7 +349,7 @@ function tryDoPlaceInitial(state: FullGameState, executorColor: Color, action: G
         adjacentResources(action.settlement, state.board, undefined)
 
     const newPlayers = state.players.map(({ color, handCards, devCards, knightsPlayed }) => {
-        if (color == executorColor)
+        if (color === executorColor)
             return { color, handCards: newCards, devCards, knightsPlayed }
         else
             return { color, handCards, devCards, knightsPlayed }
@@ -413,29 +412,29 @@ export function tryDoPlaceInitialRedacted(state: RedactedGameState, settlement: 
 }
 function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlaceRobber]): ResultType<GameActionType.PlaceRobber> {
 
-    if (!isRobbingMovingRobber(state.phase) || executorColor != state.currentPlayer)
+    if (!isRobbingMovingRobber(state.phase) || executorColor !== state.currentPlayer)
         return undefined
 
     if (!isNewRobberPosition(state.board, action.coordinate))
         return undefined
 
     // wants to take a card
-    if (action.robbedColor != undefined) {
+    if (action.robbedColor !== undefined) {
         const robbable = robbableCrossingsExceptCurrent(publicGameState(state), action.coordinate)
-                        .some(x => x[0] == action.robbedColor)
+                        .some(x => x[0] === action.robbedColor)
         if (!robbable)
             return undefined
 
-        const robbedPlayerIdx = state.players.findIndex(x => x.color == action.robbedColor)
+        const robbedPlayerIdx = state.players.findIndex(x => x.color === action.robbedColor)
         if (robbedPlayerIdx < 0)
             return undefined
 
-        const executorIdx = state.players.findIndex(x => x.color == executorColor)
+        const executorIdx = state.players.findIndex(x => x.color === executorColor)
         if (executorIdx < 0)
             return undefined
 
         const robbedPlayerCards = state.players[robbedPlayerIdx].handCards
-        if (robbedPlayerCards.length == 0)
+        if (robbedPlayerCards.length === 0)
             return undefined
         const robbedResourceIdx = Math.floor(robbedPlayerCards.length * Math.random())
         const robbedResource = robbedPlayerCards[robbedResourceIdx]
@@ -457,7 +456,7 @@ function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: Ga
     }
 
     // doesn't want to take a card - only allowed if there's no robbable crossing
-    if (robbableCrossingsExceptCurrent(publicGameState(state), action.coordinate).length != 0)
+    if (robbableCrossingsExceptCurrent(publicGameState(state), action.coordinate).length !== 0)
         return undefined
 
     return [{...state,
@@ -472,10 +471,10 @@ function tryDoPlaceRobber(state: FullGameState, executorColor: Color, action: Ga
     }, { robbedResource: undefined }]
 }
 function tryDoBankTrade(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.BankTrade]): ResultType<GameActionType.BankTrade> {
-    const executorIdx = state.players.findIndex(x => x.color == executorColor)
+    const executorIdx = state.players.findIndex(x => x.color === executorColor)
     if (executorIdx < 0)
         return undefined
-    if (!isActive(state.phase) || executorColor != state.currentPlayer)
+    if (!isActive(state.phase) || executorColor !== state.currentPlayer)
         return undefined
 
     if(!canTradeWithBank(state.board, executorColor, action.offeredCards, action.desiredCards))
@@ -483,7 +482,7 @@ function tryDoBankTrade(state: FullGameState, executorColor: Color, action: Game
 
     const cardsAfterPayment = tryRemoveCards(state.players[executorIdx]!.handCards, action.offeredCards)
 
-    if (cardsAfterPayment == undefined)
+    if (cardsAfterPayment === undefined)
         return undefined
 
     const newCards = cardsAfterPayment.concat(action.desiredCards)
@@ -493,20 +492,20 @@ function tryDoBankTrade(state: FullGameState, executorColor: Color, action: Game
     }, undefined]
 }
 function tryDoOfferTrade(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.OfferTrade]): ResultType<GameActionType.OfferTrade> {
-    const executorIdx = state.players.findIndex(x => x.color == executorColor)
+    const executorIdx = state.players.findIndex(x => x.color === executorColor)
     if (executorIdx < 0)
         return undefined
-    if (!isActive(state.phase) || executorColor != state.currentPlayer)
+    if (!isActive(state.phase) || executorColor !== state.currentPlayer)
         return undefined
 
     if (!isValidOffer(action.offeredCards, action.desiredCards))
         return undefined
-    if (tryRemoveCards(state.players[executorIdx].handCards, action.offeredCards) == undefined)
+    if (tryRemoveCards(state.players[executorIdx].handCards, action.offeredCards) === undefined)
         return undefined
 
     const tradeObj: OpenTradeOffer = {
         otherColors: state.players
-            .filter(x => x.color != executorColor)
+            .filter(x => x.color !== executorColor)
             .map(x => { return { color: x.color, status: TradeStatusByColor.Undecided } }),
         desiredCards: action.desiredCards,
         offeredCards: action.offeredCards,
@@ -522,10 +521,10 @@ function tryDoOfferTrade(state: FullGameState, executorColor: Color, action: Gam
     }, undefined]
 }
 function tryDoAcceptTradeOffer(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.AcceptTradeOffer]): ResultType<GameActionType.AcceptTradeOffer> {
-    const executorIdx = state.players.findIndex(x => x.color == executorColor)
+    const executorIdx = state.players.findIndex(x => x.color === executorColor)
     if (executorIdx < 0)
         return undefined
-    if (!isActive(state.phase) || executorColor == state.currentPlayer)
+    if (!isActive(state.phase) || executorColor === state.currentPlayer)
         return undefined
 
     const partnerCards = state.players[executorIdx].handCards
@@ -534,10 +533,10 @@ function tryDoAcceptTradeOffer(state: FullGameState, executorColor: Color, actio
         return undefined
     
     const tradeOffer = state.phase.tradeOffers[tradeOfferIdx]
-    if (tryRemoveCards(partnerCards, action.trade.desiredCards) == undefined)
+    if (tryRemoveCards(partnerCards, action.trade.desiredCards) === undefined)
         return undefined
 
-    const otherColorsExecIdx = tradeOffer.otherColors.findIndex(x => x.color == executorColor)
+    const otherColorsExecIdx = tradeOffer.otherColors.findIndex(x => x.color === executorColor)
     if (otherColorsExecIdx < 0)
         return undefined
 
@@ -553,7 +552,7 @@ function tryDoAcceptTradeOffer(state: FullGameState, executorColor: Color, actio
     }, undefined]
 }
 function tryDoRejectTradeOffer(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.RejectTradeOffer]): ResultType<GameActionType.RejectTradeOffer> {
-    if (!isActive(state.phase) || executorColor == state.currentPlayer)
+    if (!isActive(state.phase) || executorColor === state.currentPlayer)
         return undefined
 
     const tradeOfferIdx = state.phase.tradeOffers.findIndex(x => sameTradeOffer(x, action.trade))
@@ -562,7 +561,7 @@ function tryDoRejectTradeOffer(state: FullGameState, executorColor: Color, actio
     
     const tradeOffer = state.phase.tradeOffers[tradeOfferIdx]
 
-    const otherColorsExecIdx = tradeOffer.otherColors.findIndex(x => x.color == executorColor)
+    const otherColorsExecIdx = tradeOffer.otherColors.findIndex(x => x.color === executorColor)
     if (otherColorsExecIdx < 0)
         return undefined
 
@@ -579,29 +578,29 @@ function tryDoRejectTradeOffer(state: FullGameState, executorColor: Color, actio
 
 }
 function tryDoFinalizeTrade(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.FinalizeTrade]): ResultType<GameActionType.FinalizeTrade> {
-    const executorIdx = state.players.findIndex(x => x.color == executorColor)
+    const executorIdx = state.players.findIndex(x => x.color === executorColor)
     if (executorIdx < 0)
         return undefined
-    if (!isActive(state.phase) || executorColor != state.currentPlayer)
+    if (!isActive(state.phase) || executorColor !== state.currentPlayer)
         return undefined
 
     const partnerColor = action.trade.tradePartner
     const tradeObj = state.phase.tradeOffers.find(x => sameTradeOffer(x, action.trade))
 
-    if (tradeObj == undefined)
+    if (tradeObj === undefined)
         return undefined
-    if (!tradeObj.otherColors.some(x => x.color == partnerColor && x.status == TradeStatusByColor.Accepting))
+    if (!tradeObj.otherColors.some(x => x.color === partnerColor && x.status === TradeStatusByColor.Accepting))
         return undefined
 
-    const partnerIdx = state.players.findIndex(x => x.color == partnerColor)
-    if (partnerIdx < 0 == undefined)
+    const partnerIdx = state.players.findIndex(x => x.color === partnerColor)
+    if (partnerIdx < 0 === undefined)
         return undefined
     const partner = state.players[partnerIdx]
 
     const newPartnerCards = tryRemoveCards(partner.handCards, tradeObj.desiredCards)
     const newPlayerCards = tryRemoveCards(state.players[executorIdx].handCards, tradeObj.offeredCards)
-    if (newPartnerCards == undefined ||
-        newPlayerCards == undefined)
+    if (newPartnerCards === undefined ||
+        newPlayerCards === undefined)
         return undefined
 
     return [{ ...state,
@@ -617,12 +616,12 @@ function tryDoFinalizeTrade(state: FullGameState, executorColor: Color, action: 
     }, undefined]
 }
 function tryDoAbortTrade(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.AbortTrade]): ResultType<GameActionType.AbortTrade> {
-    if (!isActive(state.phase) || executorColor != state.currentPlayer)
+    if (!isActive(state.phase) || executorColor !== state.currentPlayer)
         return undefined
 
     const tradeOffer = state.phase.tradeOffers.find(x => sameTradeOffer(x, action.trade))
     
-    if (tradeOffer == undefined || tradeOffer.offeringColor != executorColor)
+    if (tradeOffer === undefined || tradeOffer.offeringColor !== executorColor)
         return undefined
 
     return [{...state,
@@ -632,9 +631,9 @@ function tryDoAbortTrade(state: FullGameState, executorColor: Color, action: Gam
         }
     }, undefined]
 }
-function tryDoFinishTurn(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.FinishTurn]): ResultType<GameActionType.FinishTurn> {
+function tryDoFinishTurn(state: FullGameState, executorColor: Color, _action: GameActionInputMap[GameActionType.FinishTurn]): ResultType<GameActionType.FinishTurn> {
 
-    if (!isActive(state.phase) || executorColor != state.currentPlayer)
+    if (!isActive(state.phase) || executorColor !== state.currentPlayer)
         return undefined
 
     const [nextColor, nextPhase] = nextTurn(publicGameState(state))
@@ -646,33 +645,33 @@ function tryDoFinishTurn(state: FullGameState, executorColor: Color, action: Gam
 
 }
 function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.PlayDevCard]): ResultType<GameActionType.PlayDevCard> {
-    const executorIdx = state.players.findIndex(x => x.color == executorColor)
+    const executorIdx = state.players.findIndex(x => x.color === executorColor)
     if (executorIdx < 0)
         return undefined
 
-    const devCardIdx = state.players[executorIdx].devCards.findIndex(x => x == action.cardType)
+    const devCardIdx = state.players[executorIdx].devCards.indexOf(action.cardType)
     if (devCardIdx < 0)
         return undefined
     const newDevCards = state.players[executorIdx].devCards.toSpliced(devCardIdx, 1)
 
     switch (action.cardType) {
         case DevCardType.Knight: {
-            if ((!isActive(state.phase) && !isPreDiceRoll(state.phase)) || executorColor != state.currentPlayer)
+            if ((!isActive(state.phase) && !isPreDiceRoll(state.phase)) || executorColor !== state.currentPlayer)
                 return undefined
 
             if (!isNewRobberPosition(state.board, action.newPosition))
                 return undefined
         
             let newKnightForce : Color | undefined
-            if (state.knightForce == undefined) 
-                newKnightForce = state.players[executorIdx].knightsPlayed == 2 ? executorColor : undefined
+            if (state.knightForce === undefined) 
+                newKnightForce = state.players[executorIdx].knightsPlayed === 2 ? executorColor : undefined
             else {
-                const oldKnightForce = state.players.find(x => x.color == state.knightForce)!.knightsPlayed
+                const oldKnightForce = state.players.find(x => x.color === state.knightForce)!.knightsPlayed
                 newKnightForce = oldKnightForce < state.players[executorIdx].knightsPlayed + 1 ? executorColor : state.knightForce
             }
             
-            if (action.robbedColor == undefined) {
-                if (robbableCrossingsExceptCurrent(publicGameState(state), action.newPosition).length != 0)
+            if (action.robbedColor === undefined) {
+                if (robbableCrossingsExceptCurrent(publicGameState(state), action.newPosition).length !== 0)
                     return undefined
 
                 return [{ ...state,
@@ -686,15 +685,15 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
 
             }
             else {
-                if (!robbableCrossingsExceptCurrent(publicGameState(state), action.newPosition).some(x => x[0] == action.robbedColor))
+                if (!robbableCrossingsExceptCurrent(publicGameState(state), action.newPosition).some(x => x[0] === action.robbedColor))
                     return undefined
         
-                const robbedPlayerIdx = state.players.findIndex(x => x.color == action.robbedColor)
+                const robbedPlayerIdx = state.players.findIndex(x => x.color === action.robbedColor)
                 if (robbedPlayerIdx < 0)
                     return undefined
 
                 const robbedPlayerCards = state.players[robbedPlayerIdx].handCards
-                if (robbedPlayerCards.length == 0)
+                if (robbedPlayerCards.length === 0)
                     return undefined
                 const robbedResourceIdx = Math.floor(robbedPlayerCards.length * Math.random())
                 const robbedResource = robbedPlayerCards[robbedResourceIdx]
@@ -728,23 +727,23 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
         case DevCardType.Monopoly: {
             return [{ ...state,
                 players: state.players.map(player => {
-                    if (player.color == executorColor)
+                    if (player.color === executorColor)
                         return { 
                             ...player,
                             devCards: newDevCards,
                             handCards: 
-                                player.handCards.filter(x => x != action.resource)
+                                player.handCards.filter(x => x !== action.resource)
                                 .concat(
                                     state.players
                                     .flatMap(x => x.handCards
-                                        .filter(res => res == action.resource)))
+                                        .filter(res => res === action.resource)))
                         }
                     else
-                        return { ...player, handCards: player.handCards.filter(x => x != action.resource)}
+                        return { ...player, handCards: player.handCards.filter(x => x !== action.resource)}
                 })
             }, undefined]
         }
-        case DevCardType.RoadBuilding: 
+        case DevCardType.RoadBuilding: {
             if (!isAvailableRoadPosition(state.board, action.roads[0], executorColor))
                 return undefined
 
@@ -763,6 +762,7 @@ function tryDoPlayDevCard(state: FullGameState, executorColor: Color, action: Ga
                 board: secondRoadBoard,
                 players: withPatch(state.players, executorIdx, { devCards: newDevCards })
             }, undefined]
+        }
     }
 }
 function tryDoDiscardResources(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.DiscardResources]): ResultType<GameActionType.DiscardResources> {
@@ -772,21 +772,21 @@ function tryDoDiscardResources(state: FullGameState, executorColor: Color, actio
     if (!state.phase.playersLeftToDiscard.includes(executorColor))
         return undefined
 
-    const executorIdx = state.players.findIndex(x => x.color == executorColor)
+    const executorIdx = state.players.findIndex(x => x.color === executorColor)
     if (executorIdx < 0)
         return undefined
 
     const oldResources = state.players[executorIdx].handCards
-    if (action.resources.length != Math.floor(oldResources.length / 2))
+    if (action.resources.length !== Math.floor(oldResources.length / 2))
         return undefined
     
     const newResources = tryRemoveCards(oldResources, action.resources)
-    if (newResources == undefined)
+    if (newResources === undefined)
         return undefined
 
     const newPlayers = withPatch(state.players, executorIdx, { handCards: newResources})
 
-    if (state.phase.playersLeftToDiscard.length == 1)
+    if (state.phase.playersLeftToDiscard.length === 1)
         return [{ ...state,
             phase: {
                 type: GamePhaseType.Turns,
@@ -799,23 +799,23 @@ function tryDoDiscardResources(state: FullGameState, executorColor: Color, actio
         return [{ ...state,
             phase: {
                 ...state.phase,
-                playersLeftToDiscard: state.phase.playersLeftToDiscard.filter(x => x != executorColor)
+                playersLeftToDiscard: state.phase.playersLeftToDiscard.filter(x => x !== executorColor)
             },
             players: newPlayers
         }, undefined]
 }
 
-export function tryDoBuyDevCard(state: FullGameState, executorColor: Color, action: GameActionInputMap[GameActionType.BuyDevCard]): ResultType<GameActionType.BuyDevCard> {
-    if (!isActive(state.phase) || state.currentPlayer != executorColor)
+export function tryDoBuyDevCard(state: FullGameState, executorColor: Color, _action: GameActionInputMap[GameActionType.BuyDevCard]): ResultType<GameActionType.BuyDevCard> {
+    if (!isActive(state.phase) || state.currentPlayer !== executorColor)
         return undefined
 
-    const executorIdx = state.players.findIndex(x => x.color == executorColor)
+    const executorIdx = state.players.findIndex(x => x.color === executorColor)
     if (executorIdx < 0)
         return undefined
 
     const playerCards = state.players[executorIdx].handCards
     const newCards = tryRemoveCards(playerCards, devCardCost)
-    if (newCards == undefined)
+    if (newCards === undefined)
         return undefined
 
     const devCardCounts = new Map([
@@ -836,7 +836,7 @@ export function tryDoBuyDevCard(state: FullGameState, executorColor: Color, acti
         }
         idx -= count
     }
-    if (receivedCard == undefined)
+    if (receivedCard === undefined)
         receivedCard = DevCardType.Knight
 
     return [{ ...state, 
@@ -884,43 +884,43 @@ function tryBuyConnection(cards: readonly Resource[], type: ConnectionType) {
 
 
 export function canFinishTurn(state: RedactedGameState): boolean {
-    return isActive(state.phase) && state.currentPlayer == state.self.color
+    return isActive(state.phase) && state.currentPlayer === state.self.color
 }
 export function canPlaceSettlement(state: RedactedGameState): boolean {
-    if (!isActive(state.phase) || state.currentPlayer != state.self.color)
+    if (!isActive(state.phase) || state.currentPlayer !== state.self.color)
         return false
 
     const freePositions = availableBuildingPositions(state.board, state.self.color).length > 0
-    const hasCards = tryBuyBuilding(state.self.handCards, BuildingType.Settlement) != undefined
+    const hasCards = tryBuyBuilding(state.self.handCards, BuildingType.Settlement) !== undefined
     return freePositions && hasCards
 }
 export function canPlaceRoad(state: RedactedGameState): boolean {
-    if (!isActive(state.phase) || state.currentPlayer != state.self.color)
+    if (!isActive(state.phase) || state.currentPlayer !== state.self.color)
         return false
 
     const freePositions = availableRoadPositions(state.board, state.self.color).length > 0
-    const hasCards = tryBuyConnection(state.self.handCards, ConnectionType.Road) != undefined
+    const hasCards = tryBuyConnection(state.self.handCards, ConnectionType.Road) !== undefined
     return freePositions && hasCards
 }
 export function canPlaceCity(state: RedactedGameState): boolean {
-    if (!isActive(state.phase) || state.currentPlayer != state.self.color)
+    if (!isActive(state.phase) || state.currentPlayer !== state.self.color)
         return false
 
-    const freePositions = state.board.buildings.some(({ color, coord, type }) => type == BuildingType.Settlement && color == state.self.color)
-    const hasCards = tryBuyBuilding(state.self.handCards, BuildingType.City) != undefined
+    const freePositions = state.board.buildings.some(({ color, type }) => type === BuildingType.Settlement && color === state.self.color)
+    const hasCards = tryBuyBuilding(state.self.handCards, BuildingType.City) !== undefined
     return freePositions && hasCards
 }
 export function canOfferTrade(state: RedactedGameState): boolean {
-    return isActive(state.phase) && state.self.handCards.length > 0 && state.currentPlayer == state.self.color
+    return isActive(state.phase) && state.self.handCards.length > 0 && state.currentPlayer === state.self.color
 }
 export function canRollDice(state: RedactedGameState): boolean {
-    return isPreDiceRoll(state.phase) && state.currentPlayer == state.self.color
+    return isPreDiceRoll(state.phase) && state.currentPlayer === state.self.color
 }
 export function canBuyDevCard(state: RedactedGameState): boolean {
-    if (!isActive(state.phase) || state.currentPlayer != state.self.color)
+    if (!isActive(state.phase) || state.currentPlayer !== state.self.color)
         return false
 
-    const hasResources = tryRemoveCards(state.self.handCards, devCardCost) != undefined
+    const hasResources = tryRemoveCards(state.self.handCards, devCardCost) !== undefined
     return hasResources
 }
 
@@ -951,10 +951,10 @@ export type PossiblyRedactedGameActionInfo =
     GameActionInfo & { redacted: false }
 
 export function redactGameActionInfoFor(gameActionInfo: GameActionInfo, executorColor: Color, redactTarget: Color): PossiblyRedactedGameActionInfo {
-    if (executorColor == redactTarget)
+    if (executorColor === redactTarget)
         return  { ...gameActionInfo, redacted: false }
 
-    if (gameActionInfo.type == GameActionType.DiscardResources) {
+    if (gameActionInfo.type === GameActionType.DiscardResources) {
         return {
             type: GameActionType.DiscardResources,
             redacted: true,
@@ -964,7 +964,7 @@ export function redactGameActionInfoFor(gameActionInfo: GameActionInfo, executor
             response: undefined
         }
     }
-    if (gameActionInfo.type == GameActionType.PlaceRobber && gameActionInfo.input.robbedColor != redactTarget) {
+    if (gameActionInfo.type === GameActionType.PlaceRobber && gameActionInfo.input.robbedColor !== redactTarget) {
         return {
             type: GameActionType.PlaceRobber,
             redacted: true,
@@ -972,7 +972,7 @@ export function redactGameActionInfoFor(gameActionInfo: GameActionInfo, executor
             response: undefined
         }
     }
-    if (gameActionInfo.type == GameActionType.BuyDevCard) {
+    if (gameActionInfo.type === GameActionType.BuyDevCard) {
         return {
             type: GameActionType.BuyDevCard,
             redacted: true,
@@ -980,7 +980,7 @@ export function redactGameActionInfoFor(gameActionInfo: GameActionInfo, executor
             response: undefined
         }
     }
-    if (gameActionInfo.type == GameActionType.PlayDevCard && gameActionInfo.input.cardType == DevCardType.Knight && redactTarget != gameActionInfo.input.robbedColor) {
+    if (gameActionInfo.type === GameActionType.PlayDevCard && gameActionInfo.input.cardType === DevCardType.Knight && redactTarget !== gameActionInfo.input.robbedColor) {
         return {
             input: gameActionInfo.input,
             redacted: true,

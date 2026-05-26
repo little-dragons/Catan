@@ -1,11 +1,8 @@
-import * as path from 'path'
-import { promises as fs } from 'fs'
-import {
-    Migrator,
-    FileMigrationProvider,
-} from 'kysely'
-import { db } from './Connection.js'
+import { promises as fs } from 'node:fs'
+import * as path from 'node:path'
+import { FileMigrationProvider, Migrator } from 'kysely'
 import { isProduction } from '../socketEvents/Common.js'
+import { db } from './Connection.js'
 
 export async function migrateDbToLatest() {
     const migrator = new Migrator({
@@ -45,7 +42,7 @@ export async function migrateDbToLatest() {
         }
     })
 
-    if ((results?.length ?? 0) == 0)
+    if ((results?.length ?? 0) === 0)
         console.log('no migrations were executed.')
 
     if (error) {

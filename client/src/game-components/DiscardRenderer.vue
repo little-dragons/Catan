@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { CardList, Resource } from 'catan-shared'
-import ResourceCardsRenderer from './cards/ResourceCardsRenderer.vue'
 import { computed } from 'vue'
-import ok from '@/assets/ui/ok.svg'
 import error from '@/assets/ui/error.svg'
+import ok from '@/assets/ui/ok.svg'
+import ResourceCardsRenderer from './cards/ResourceCardsRenderer.vue'
 
 export type DiscardMenuRendererProps = {
     discardingCards: CardList
@@ -22,14 +22,14 @@ const diff = computed(() => props.discardingCards.length - props.expectedDiscard
 <div class="top default-game-ui-props">
     <div class="text">
         <p>
-            You have to discard {{ expectedDiscardingCount }} cards ({{ diff == 0 ? "correct amount" : diff > 0 ? `${diff} too many` : `${-diff} too few` }}).
+            You have to discard {{ expectedDiscardingCount }} cards ({{ diff === 0 ? "correct amount" : diff > 0 ? `${diff} too many` : `${-diff} too few` }}).
         </p>
     </div>
     <div class="actions">
         <ResourceCardsRenderer class="cards" :cards="discardingCards" @resourceClicked="res => $emit('removeDiscardingCard', res)"/>
         <div class="right">
-            <button @click="() => $emit('discard')" :disabled="diff != 0" title="Discard selected cards">
-                <img :src="diff == 0 ? ok : error"/>
+            <button type="button" @click="() => $emit('discard')" :disabled="diff !== 0" title="Discard selected cards">
+                <img :src="diff === 0 ? ok : error" alt=""/>
             </button>
         </div>
     </div>

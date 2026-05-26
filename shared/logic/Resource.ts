@@ -1,4 +1,5 @@
 import { BuildingType, ConnectionType } from "./Buildings"
+import type { Distribution } from "./Distribution"
 
 export enum Resource {
     Grain,
@@ -19,7 +20,7 @@ export function tryRemoveCard(cards: CardList, toRemove: Resource): CardList | u
     return cards.toSpliced(index, 1)
 }
 export function tryRemoveCards(cards: CardList, toRemove: CardList): CardList | undefined {
-    return toRemove.reduce<CardList | undefined>((state, res) => state == undefined ? undefined : tryRemoveCard(state, res), cards)
+    return toRemove.reduce<CardList | undefined>((state, res) => state === undefined ? undefined : tryRemoveCard(state, res), cards)
 }
 export function addCards(cards: CardList, newCards: CardList): CardList {
     return cards.concat(newCards)
@@ -27,16 +28,22 @@ export function addCards(cards: CardList, newCards: CardList): CardList {
 export function sameCards(c1: CardList, c2: CardList) {
     const m1 = countResources(c1)
     const m2 = countResources(c2)
-    return allResources.every(x => m1.get(x)! == m2.get(x)!)
+    return allResources.every(x => m1[x] === m2[x])
 }
 
-export function countResources(cards: CardList): Map<Resource, number> {
-    return new Map<Resource, number>(allResources.map(res => [res, cards.filter(x => res == x).length]))
+export function countResources(cards: CardList): Distribution<Resource> {
+    return {
+        [Resource.Brick]:  cards.filter(x => Resource.Brick === x).length,
+        [Resource.Wool]:   cards.filter(x => Resource.Wool === x).length,
+        [Resource.Ore]:    cards.filter(x => Resource.Ore === x).length,
+        [Resource.Lumber]: cards.filter(x => Resource.Lumber === x).length,
+        [Resource.Grain]:  cards.filter(x => Resource.Grain === x).length,
+    }
 }
 
 export function tryTransferCard(giver: CardList, receiver: CardList, res: Resource): [CardList, CardList] {
     const tryRemoved = tryRemoveCard(giver, res)
-    if (tryRemoved == undefined)
+    if (tryRemoved === undefined)
         return [giver, receiver]
     else
         return [tryRemoved, addCards(receiver, [res])]
@@ -44,7 +51,7 @@ export function tryTransferCard(giver: CardList, receiver: CardList, res: Resour
 
 export function tryTransferCards(giver: CardList, receiver: CardList, res: Resource[]): [CardList, CardList] {
     const tryRemoved = tryRemoveCards(giver, res)
-    if (tryRemoved == undefined)
+    if (tryRemoved === undefined)
         return [giver, receiver]
     else
         return [tryRemoved, addCards(receiver, res)]

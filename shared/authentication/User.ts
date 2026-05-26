@@ -12,7 +12,7 @@ export function validUsername(name: string) {
     if (name.length > 20)
         return 'name too long'
 
-    if (name.match(/^[A-Za-z0-9\-\_]+$/) == null)
+    if (name.match(/^[A-Za-z0-9\-s_]+$/) == null)
         return 'invalid tokens'
 
     return true

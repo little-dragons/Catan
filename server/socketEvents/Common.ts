@@ -1,8 +1,8 @@
-import { GameClientEventMap, Color, RoomId, GameServerEventMap, User, QueryServerEventMap } from "catan-shared"
-import { type Socket, type Server, Namespace } from 'socket.io'
+import type { Color, GameClientEventMap, GameServerEventMap, QueryServerEventMap, RoomId, User } from "catan-shared"
+import type { Namespace, Socket } from 'socket.io'
 
-export const isDevelopment = process.env.NODE_ENV == 'development'
-export const isProduction = process.env.NODE_ENV == 'production'
+export const isDevelopment = process.env.NODE_ENV === 'development'
+export const isProduction = process.env.NODE_ENV === 'production'
 
 if (!isDevelopment && !isProduction)
     console.error('NO ENVIRONMENT WAS GIVEN, CANNOT PROCEED')
@@ -18,6 +18,6 @@ export type GameSocketDataType = {
     pendingRoomNameRequest: string | undefined
 }
 
-export type GameNamespace = Namespace<GameServerEventMap, GameClientEventMap, {}, GameSocketDataType>
-export type GameSocket = Socket<GameServerEventMap, GameClientEventMap, {}, GameSocketDataType>
-export type QueryNamespace = Namespace<QueryServerEventMap, {}, {}, {}>
+export type GameNamespace = Namespace<GameServerEventMap, GameClientEventMap, object & {}, GameSocketDataType>
+export type GameSocket = Socket<GameServerEventMap, GameClientEventMap, object & {}, GameSocketDataType>
+export type QueryNamespace = Namespace<QueryServerEventMap, object & {}, object & {}, object & {}>

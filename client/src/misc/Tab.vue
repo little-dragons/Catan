@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, provide, watch } from 'vue';
+import { inject } from 'vue';
 import { activeTabInjectKey } from './Tabs.vue';
 
 defineProps<{
@@ -11,7 +11,7 @@ const activeTabTitle = inject(activeTabInjectKey)
 </script>
 
 <template>
-    <div v-show="activeTabTitle == title">
+    <div v-show="activeTabTitle === title">
         <slot/>
     </div>
 </template>

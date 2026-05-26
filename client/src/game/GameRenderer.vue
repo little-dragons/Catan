@@ -1,19 +1,19 @@
 <script setup lang="ts">
+import type { Board, CardList, Color, DevCardType, DieResult, OpenTradeOffer, Resource, TradeOffer } from 'catan-shared';
 import { onMounted, ref, useTemplateRef } from 'vue';
-import { Color, DevCardType, Resource, type Board, type CardList, type DieResult, type OpenTradeOffer, type TradeOffer } from 'catan-shared';
-import { type InteractionPoints, type UserSelectionOptions, type UserSelectionResult } from '../game-components/board/UserSelection'
-import DiceRenderer from '../game-components/DiceRenderer.vue';
-import ResourceCardsRenderer from '../game-components/cards/ResourceCardsRenderer.vue';
-import PlayerOverviewRenderer, { type PlayerOverviewData } from '../game-components/PlayerOverviewRenderer.vue';
-import TradeRenderer, { type TradeMenuRendererProps } from '../game-components/trade/TradeMenuRenderer.vue';
-import OwnTradeOverview from '../game-components/trade/OwnTradeOverview.vue';
-import DiscardRenderer, { type DiscardMenuRendererProps } from '../game-components/DiscardRenderer.vue';
-import DevCardsRenderer from '../game-components/cards/DevCardsRenderer.vue';
-import ResourceSelector from '../game-components/ResourceSelector.vue';
-import ResourceTypeSelector from '../game-components/ResourceTypeSelector.vue';
-import InteractionProvider from '../game-components/board/InteractionProvider.vue';
 import BoardContainer from '../game-components/board/Container.vue';
 import DefaultBoardItems from '../game-components/board/DefaultBoardItems.vue';
+import InteractionProvider from '../game-components/board/InteractionProvider.vue';
+import type { InteractionPoints, UserSelectionOptions, UserSelectionResult } from '../game-components/board/UserSelection'
+import DevCardsRenderer from '../game-components/cards/DevCardsRenderer.vue';
+import ResourceCardsRenderer from '../game-components/cards/ResourceCardsRenderer.vue';
+import DiceRenderer from '../game-components/DiceRenderer.vue';
+import DiscardRenderer, { type DiscardMenuRendererProps } from '../game-components/DiscardRenderer.vue';
+import PlayerOverviewRenderer, { type PlayerOverviewData } from '../game-components/PlayerOverviewRenderer.vue';
+import ResourceSelector from '../game-components/ResourceSelector.vue';
+import ResourceTypeSelector from '../game-components/ResourceTypeSelector.vue';
+import OwnTradeOverview from '../game-components/trade/OwnTradeOverview.vue';
+import TradeRenderer, { type TradeMenuRendererProps } from '../game-components/trade/TradeMenuRenderer.vue';
 
 defineEmits<{
     diceClicked: []
@@ -64,8 +64,8 @@ const boardContainer = useTemplateRef('boardContainer')
 const boardWidth = ref(300)
 onMounted(() => {
     boardWidth.value = boardContainer.value!.children[0].clientWidth
-    new ResizeObserver((entries, observer) => {
-        if (boardContainer.value == undefined)
+    new ResizeObserver(_ => {
+        if (boardContainer.value === undefined)
             return
         
         boardWidth.value = boardContainer.value!.children[0].clientWidth
@@ -103,49 +103,49 @@ defineExpose({
 <template>
     <div class="other-players">
         <PlayerOverviewRenderer 
-            v-if="otherPlayers.length >= 1 && otherPlayersDisplay == 'radial'" 
+            v-if="otherPlayers.length >= 1 && otherPlayersDisplay === 'radial'" 
             v-bind="otherPlayers[0]!"
             @accept-trade="trade => $emit('acceptTrade', trade)"
             @reject-trade="trade => $emit('rejectTrade', trade)"
             class="upper-left-radial"/>
         <PlayerOverviewRenderer 
-            v-if="otherPlayers.length >= 1 && otherPlayersDisplay == 'grid'" 
+            v-if="otherPlayers.length >= 1 && otherPlayersDisplay === 'grid'" 
             v-bind="otherPlayers[0]!"
             @accept-trade="trade => $emit('acceptTrade', trade)"
             @reject-trade="trade => $emit('rejectTrade', trade)"
             class="upper-left-grid"/>
         <PlayerOverviewRenderer 
-            v-if="otherPlayers.length >= 2 && otherPlayersDisplay == 'radial'" 
+            v-if="otherPlayers.length >= 2 && otherPlayersDisplay === 'radial'" 
             v-bind="otherPlayers[1]!"
             @accept-trade="trade => $emit('acceptTrade', trade)"
             @reject-trade="trade => $emit('rejectTrade', trade)"
             class="upper-right-radial"/>
         <PlayerOverviewRenderer 
-            v-if="otherPlayers.length >= 2 && otherPlayersDisplay == 'grid'" 
+            v-if="otherPlayers.length >= 2 && otherPlayersDisplay === 'grid'" 
             v-bind="otherPlayers[1]!"
             @accept-trade="trade => $emit('acceptTrade', trade)"
             @reject-trade="trade => $emit('rejectTrade', trade)"
             class="upper-right-grid"/>
         <PlayerOverviewRenderer 
-            v-if="otherPlayers.length >= 3 && otherPlayersDisplay == 'radial'" 
+            v-if="otherPlayers.length >= 3 && otherPlayersDisplay === 'radial'" 
             v-bind="otherPlayers[2]!"
             @accept-trade="trade => $emit('acceptTrade', trade)"
             @reject-trade="trade => $emit('rejectTrade', trade)"
             class="middle-left-radial"/>
         <PlayerOverviewRenderer 
-            v-if="otherPlayers.length >= 3 && otherPlayersDisplay == 'grid'" 
+            v-if="otherPlayers.length >= 3 && otherPlayersDisplay === 'grid'" 
             v-bind="otherPlayers[2]!"
             @accept-trade="trade => $emit('acceptTrade', trade)"
             @reject-trade="trade => $emit('rejectTrade', trade)"
             class="middle-left-grid"/>
         <PlayerOverviewRenderer 
-            v-if="otherPlayers.length >= 4 && otherPlayersDisplay == 'radial'" 
+            v-if="otherPlayers.length >= 4 && otherPlayersDisplay === 'radial'" 
             v-bind="otherPlayers[3]!"
             @accept-trade="trade => $emit('acceptTrade', trade)"
             @reject-trade="trade => $emit('rejectTrade', trade)"
             class="middle-right-radial"/>
         <PlayerOverviewRenderer 
-            v-if="otherPlayers.length >= 4 && otherPlayersDisplay == 'grid'" 
+            v-if="otherPlayers.length >= 4 && otherPlayersDisplay === 'grid'" 
             v-bind="otherPlayers[3]!"
             @accept-trade="trade => $emit('acceptTrade', trade)"
             @reject-trade="trade => $emit('rejectTrade', trade)"
@@ -159,7 +159,7 @@ defineExpose({
         <div class="below">
             <div class="rowAbove">
                 <TradeRenderer
-                    v-if="tradeMenu != undefined"
+                    v-if="tradeMenu !== undefined"
                     v-bind="tradeMenu"
                     class="tradeRenderer"
                     @tradeWithPlayer="() => $emit('tradeWithPlayer')"
@@ -169,20 +169,20 @@ defineExpose({
                     @removeOfferedCard="card => $emit('removeOfferedCard', card)"
                 />
                 <DiscardRenderer
-                    v-if="discardingInfo != undefined"
+                    v-if="discardingInfo !== undefined"
                     class="discardRenderer"
                     v-bind="discardingInfo"
                     @remove-discarding-card="res => $emit('removeDiscardingCard', res)"
                     @discard="() => $emit('discardCards')"
                 />
                 <ResourceTypeSelector 
-                    v-if="chooseResourceTypeData != undefined"
+                    v-if="chooseResourceTypeData !== undefined"
                     class="resourceTypeSelector"
                     @selected="res => chooseResourceTypeData!(res)"
                     @abort="() => chooseResourceTypeData!(undefined)"
                 />
                 <ResourceSelector 
-                    v-if="chooseResourcesData != undefined"
+                    v-if="chooseResourcesData !== undefined"
                     class="resourcesSelector"
                     :count="chooseResourcesData[0]"
                     @selected="res => chooseResourcesData![1](res)"
@@ -197,7 +197,7 @@ defineExpose({
                             @accept="color => $emit('finalizeTrade', trade, color)"/>
                     </div>
                     <DiceRenderer 
-                        v-if="dice != undefined" 
+                        v-if="dice !== undefined" 
                         class="dice" 
                         :dice="dice"
                         :enabled="forbiddableButtons.rollDice && !interaction?.running"
@@ -210,12 +210,12 @@ defineExpose({
                 <DevCardsRenderer class="devCards" :cards="devCards" @dev-card-clicked="card => $emit('devCardClicked', card)"/>
             </div>
             <div class="buttons">
-                <button class="default-button-colors" @click="() => $emit('tradeMenu')" :disabled="interaction?.running || !forbiddableButtons.offerTrade">Trade</button>
-                <button class="default-button-colors" @click="() => $emit('buyDevCard')" :disabled="interaction?.running || !forbiddableButtons.buyDevCard">Dev Card</button>
-                <button class="default-button-colors" @click="() => $emit('buildRoad')" :disabled="interaction?.running || !forbiddableButtons.placeRoad">Road</button>
-                <button class="default-button-colors" @click="() => $emit('buildSettlement')" :disabled="interaction?.running || !forbiddableButtons.placeSettlement">Settlement</button>
-                <button class="default-button-colors" @click="() => $emit('buildCity')" :disabled="interaction?.running || !forbiddableButtons.placeCity">City</button>
-                <button class="default-button-colors" @click="() => $emit('endTurn')" :disabled="interaction?.running || !forbiddableButtons.finishTurn">Finish turn</button>
+                <button type="button" class="default-button-colors" @click="() => $emit('tradeMenu')" :disabled="interaction?.running || !forbiddableButtons.offerTrade">Trade</button>
+                <button type="button" class="default-button-colors" @click="() => $emit('buyDevCard')" :disabled="interaction?.running || !forbiddableButtons.buyDevCard">Dev Card</button>
+                <button type="button" class="default-button-colors" @click="() => $emit('buildRoad')" :disabled="interaction?.running || !forbiddableButtons.placeRoad">Road</button>
+                <button type="button" class="default-button-colors" @click="() => $emit('buildSettlement')" :disabled="interaction?.running || !forbiddableButtons.placeSettlement">Settlement</button>
+                <button type="button" class="default-button-colors" @click="() => $emit('buildCity')" :disabled="interaction?.running || !forbiddableButtons.placeCity">City</button>
+                <button type="button" class="default-button-colors" @click="() => $emit('endTurn')" :disabled="interaction?.running || !forbiddableButtons.finishTurn">Finish turn</button>
             </div>
         </div>
     </div>

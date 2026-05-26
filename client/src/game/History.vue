@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Color, victoryPointsFromFull, type History } from 'catan-shared';
-import Tabs from '@/misc/Tabs.vue'
+import { Color, type History, victoryPointsFromFull } from 'catan-shared';
 import Tab from '@/misc/Tab.vue'
+import Tabs from '@/misc/Tabs.vue'
 
 const props = defineProps<{
     history: History

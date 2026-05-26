@@ -4,7 +4,7 @@ export const activeTabInjectKey = Symbol() as InjectionKey<Ref<string | undefine
 
 
 <script setup lang="ts">
-import { ref, type InjectionKey, provide, type Ref } from 'vue';
+import { type InjectionKey, provide, type Ref, ref } from 'vue';
 
 // TODO this seems weird and only seems to help with type checking in this file.
 // of course, we actually want to correct type checking also for using the Tabs object
@@ -25,7 +25,7 @@ function tabClicked(tabTitle: string) {
 
 <template>
     <ul>
-        <li v-for="child of tabTitles" @click="tabClicked(child)" :class="{ 'active': child == activeTabTitle }">{{ child }}</li>
+        <li v-for="child of tabTitles" @click="tabClicked(child)" :class="{ 'active': child === activeTabTitle }">{{ child }}</li>
     </ul>
     <div>
         <slot/>

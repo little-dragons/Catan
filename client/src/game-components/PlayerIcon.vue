@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-<img :style="{ outlineColor: cssColor(color) }" :src="icon ?? 'https://upload.wikimedia.org/wikipedia/commons/0/0c/250227nanami.jpg'"/>
+<img :style="{ outlineColor: cssColor(color) }" :src="icon ?? 'https://upload.wikimedia.org/wikipedia/commons/0/0c/250227nanami.jpg'" alt=""/>
 </template>
 
 <style scoped>

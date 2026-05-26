@@ -1,6 +1,6 @@
-import { type Board, type Coordinate, sameCoordinate, isLandTile, crossingAdjacentToTile, adjacentCrossings, adjacentBuildingsToTile } from "./Board"
-import { type PublicGameState } from "./GameState"
-import { Color } from "./Player"
+import { adjacentBuildingsToTile, type Board, type Coordinate, isLandTile, sameCoordinate } from "./Board"
+import type { PublicGameState } from "./GameState"
+import type { Color } from "./Player"
 
 export function isNewRobberPosition(board: Board, robberPositon: Coordinate): boolean {
     if (sameCoordinate(board.robber, robberPositon))
@@ -32,10 +32,10 @@ export function robbableCrossings(state: PublicGameState, tile: Coordinate, exce
     const result = buildings.filter(x => robbablePlayers.includes(x[0]))
 
 
-    if (except == undefined)
+    if (except === undefined)
         return result
     else
-        return result.filter(x => x[0] != except)
+        return result.filter(x => x[0] !== except)
 }
 
 /**

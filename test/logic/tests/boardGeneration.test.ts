@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test'
-import { allResources, availableBuildingPositions, Board, BoardSeed, clockwise, Coordinate, CoordinateTile,  defaultScenario, generateBoardFromScenario, neighborTile, Orientation, PortTile, randomBoardSeed, sameCoordinate, SpecialPorts, TileType } from 'catan-shared'
-import { Seed } from 'shared/logic/Scenario'
+import { allResources, availableBuildingPositions, type Board, type Coordinate, type CoordinateTile,  clockwise, defaultScenario, generateBoardFromScenario, neighborTile, Orientation, type PortTile, SpecialPorts, sameCoordinate, TileType } from 'catan-shared'
+import type { Seed } from 'shared/logic/Scenario'
 
 describe('Default board generation', () => {
     function testWithAllSeeds(tester: (seed: Seed) => void) {
@@ -15,7 +15,7 @@ describe('Default board generation', () => {
         testWithAllSeeds(seed => {
             const generatedBoard = generateBoardFromScenario(defaultScenario.board, seed)
             expect(generatedBoard).toBeDefined()
-            if (generatedBoard == undefined)
+            if (generatedBoard === undefined)
                 return
             test(generatedBoard)
         })
@@ -43,7 +43,7 @@ describe('Default board generation', () => {
             currentRot = clockwise(currentRot)
         }
 
-        return tiles.filter(x => x.type == TileType.Port)
+        return tiles.filter(x => x.type === TileType.Port)
     }
 
     it('should generate four general ports and five distinct resource ports', () => {
@@ -51,8 +51,8 @@ describe('Default board generation', () => {
             const ports = getPortTiles(board)
 
             expect(ports.length).toBe(9)
-            expect(allResources.every(res => ports.some(port => port.resource == res))).toBeTruthy()
-            expect(ports.filter(x => x.resource == SpecialPorts.General).length).toBe(4)
+            expect(allResources.every(res => ports.some(port => port.resource === res))).toBeTruthy()
+            expect(ports.filter(x => x.resource === SpecialPorts.General).length).toBe(4)
         })
     })
 })

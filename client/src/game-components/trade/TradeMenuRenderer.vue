@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { allResources, Resource } from 'catan-shared';
-import CardsRenderer from '../cards/ResourceCardsRenderer.vue';
+import { allResources, type Resource } from 'catan-shared';
 import { imageForResource } from '@/misc/CardTextures';
 import ResourceCardsRenderer from '../cards/ResourceCardsRenderer.vue';
 
@@ -28,9 +27,10 @@ defineEmits<{
             <div class="desiredButtons">
                 <button
                     v-for="res in allResources"
+                    type="button"
                     @click="() => $emit('addDesiredCard', res)"
                     class="desiredResource">
-                    <img :src="imageForResource(res)"/>
+                    <img :src="imageForResource(res)" alt=""/>
                 </button>
             </div>
             <ResourceCardsRenderer class="cardsRendererDesired" :cards="desiredCards" @resourceClicked="resource => $emit('removeDesiredCard', resource)"/>
@@ -38,8 +38,8 @@ defineEmits<{
         <ResourceCardsRenderer class="cardsRendererOffered" :cards="offeredCards" @resourceClicked="resource => $emit('removeOfferedCard', resource)"/>
     </div>
     <div class="right">
-        <button @click="() => $emit('tradeWithPlayer')" :disabled="!validOffer">Trade with player</button>
-        <button @click="() => $emit('tradeWithBank')" :disabled="!canTradeWithBank">Trade with bank</button>
+        <button type="button" @click="() => $emit('tradeWithPlayer')" :disabled="!validOffer">Trade with player</button>
+        <button type="button" @click="() => $emit('tradeWithBank')" :disabled="!canTradeWithBank">Trade with bank</button>
     </div>
 </div>
 </template>

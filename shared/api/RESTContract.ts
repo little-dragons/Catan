@@ -1,6 +1,6 @@
 import type { Schema } from 'hono/types'
-import * as z from 'zod'
-import { type User } from '../authentication/User'
+import type * as z from 'zod'
+import type { User } from '../authentication/User'
 
 type PostRegister = {
     $post: {
@@ -16,7 +16,7 @@ type PostRegister = {
         }>
         status: 400
     } | {
-        output: {}
+        output: object & {}
         status: 200
     } | {
         output: { message: string, code: 'NAME_INVALID' }
@@ -45,7 +45,7 @@ type PostGuest = {
         output: { message: string, code: 'NAME_INVALID' }
         status: 422
     } | {
-        output: {}
+        output: object & {}
         status: 200
     })
 }
@@ -53,7 +53,7 @@ type PostGuest = {
 
 export type HonoSchema = {
     '/auth/check': { $post : {
-        input: { },
+        input: object & {},
         outputFormat: 'json',
     } & ({
         output: { code: 'ANONYMOUS' }
@@ -63,9 +63,9 @@ export type HonoSchema = {
         status: 200
     })}
     '/auth/logout': { $post: {
-        input: { },
+        input: object & {},
         outputFormat: 'json'
-        output: { },
+        output: object & {},
         status: 200
     } }
     '/auth/register': PostRegister
@@ -83,10 +83,10 @@ export type HonoSchema = {
         output: { message: string, code : 'PASSWORD_INVALID' }
         status: 401
     } | {
-        output: { }
+        output: object & {}
         status: 200
     }) }
 }
 
-type OnlySchema<T extends Schema> = T
-type SchemaConstraint = OnlySchema<HonoSchema>
+type _OnlySchema<T extends Schema> = T
+type _SchemaConstraint = _OnlySchema<HonoSchema>

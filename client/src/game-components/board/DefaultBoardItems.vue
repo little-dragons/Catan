@@ -1,25 +1,21 @@
 <script setup lang="ts">
-import { cssColor, BuildingType, Color, Resource, type Board, type PortTile, type Tile, TileType, SpecialPorts } from 'catan-shared';
-import { tilePath, svgPath, segmentedPortPaths, tileCenter, robberHeight, robberWidth, roadCorners, tileNumberPosition, tileNumberFontSize, crossingPosition, tilePortPosition, tilePortIconSize, tileResourceIconPosition, tileResourceIconSize, settlementSize, citySize } from './Layout';
-
-import robber from '@/assets/board/robber.svg'
-
+import { type Board, BuildingType, cssColor, type PortTile, Resource, SpecialPorts, type Tile, TileType } from 'catan-shared';
 import brickPort from '@/assets/board/brick-port.svg'
+import desert from '@/assets/board/desert.svg'
+import generalPort from '@/assets/board/general-port.svg'
 import grainPort from '@/assets/board/grain-port.svg'
 import lumberPort from '@/assets/board/lumber-port.svg'
 import orePort from '@/assets/board/ore-port.svg'
+import robber from '@/assets/board/robber.svg'
 import woolPort from '@/assets/board/wool-port.svg'
-import generalPort from '@/assets/board/general-port.svg'
-
+import citySvg from '@/assets/buildings/city.svg?raw'
+import settlementSvg from '@/assets/buildings/settlement.svg?raw'
 import brick from '@/assets/resources/brick.svg'
 import grain from '@/assets/resources/grain.svg'
 import lumber from '@/assets/resources/lumber.svg'
 import ore from '@/assets/resources/ore.svg'
 import wool from '@/assets/resources/wool.svg'
-import desert from '@/assets/board/desert.svg'
-
-import settlementSvg from '@/assets/buildings/settlement.svg?raw'
-import citySvg from '@/assets/buildings/city.svg?raw'
+import { citySize, crossingPosition, roadCorners, robberHeight, robberWidth, segmentedPortPaths, settlementSize, svgPath, tileCenter, tileNumberFontSize, tileNumberPosition, tilePath, tilePortIconSize, tilePortPosition, tileResourceIconPosition, tileResourceIconSize } from './Layout';
 
 function resourceToIcon(resource: Resource): string {
     switch (resource) {
@@ -88,29 +84,29 @@ defineProps<{
                 :d="tilePath(tile.coord)"
                 :fill="backgroundColor(tile)" />
             <path
-                v-if="tile.type == TileType.Port"
+                v-if="tile.type === TileType.Port"
                 v-for="path in segmentedPortPaths(tile)"
                 :d="svgPath(path)"
                 fill="white"/>
-            <image v-if="tile.type == TileType.Port" 
+            <image v-if="tile.type === TileType.Port" 
                 :x="tilePortPosition(tile.coord)[0]"
                 :y="tilePortPosition(tile.coord)[1]"
                 :width="tilePortIconSize[0]"
                 :height="tilePortIconSize[1]"
                 :href="portToIcon(tile)"/>
-            <image v-if="tile.type == TileType.Resource"
+            <image v-if="tile.type === TileType.Resource"
                 :x="tileResourceIconPosition(tile.coord)[0]"
                 :y="tileResourceIconPosition(tile.coord)[1]"
                 :width="tileResourceIconSize[0]"
                 :height="tileResourceIconSize[1]"
                 :href="resourceToIcon(tile.resource)"/>
-            <text v-if="tile.type == TileType.Resource"
+            <text v-if="tile.type === TileType.Resource"
                 :x="tileNumberPosition(tile.coord, tile.number)[0]"    
                 :y="tileNumberPosition(tile.coord, tile.number)[1]"
                 :font-size="`${tileNumberFontSize(tile.number)}px`">
                 {{ tile.number }}
             </text>
-            <image v-if="tile.type == TileType.Desert" 
+            <image v-if="tile.type === TileType.Desert" 
                 :x="tileResourceIconPosition(tile.coord)[0]"
                 :y="tileResourceIconPosition(tile.coord)[1]"
                 :width="tileResourceIconSize[0]"
@@ -133,7 +129,7 @@ defineProps<{
         :height="robberHeight"
         :href="robber"/>
     <g id="buildings">
-        <use v-for="building in board.buildings.filter(x => x.type == BuildingType.Settlement)"
+        <use v-for="building in board.buildings.filter(x => x.type === BuildingType.Settlement)"
             :x="crossingPosition(building.coord)[0] - settlementSize / 2"
             :y="crossingPosition(building.coord)[1] - settlementSize / 2"
             :width="settlementSize"
@@ -141,7 +137,7 @@ defineProps<{
             :color="cssColor(building.color)"
             href="#settlement"
         />
-        <use v-for="building in board.buildings.filter(x => x.type == BuildingType.City)"
+        <use v-for="building in board.buildings.filter(x => x.type === BuildingType.City)"
             :x="crossingPosition(building.coord)[0] - citySize / 2"
             :y="crossingPosition(building.coord)[1] - citySize / 2"
             :width="citySize"

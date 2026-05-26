@@ -1,24 +1,24 @@
-import { GameClientEventMap, gameNamespace, queryNamespace, GameServerEventMap, SocketPort, User, UserType, type HonoSchema, validUsername } from "catan-shared"
-import { Server } from "socket.io"
-import { Server as Engine, WebSocketData } from '@socket.io/bun-engine'
-import { Hono } from 'hono'
-import { readFileSync } from  'fs'
-import { acceptLobbyEvents } from "./socketEvents/LobbyEvents"
-import { acceptGameEvents } from "./socketEvents/GameEvents"
-import { acceptRoomEvents, allLobbies, registerRoomMiddleware } from "./socketEvents/RoomManager"
-import { instrument } from "@socket.io/admin-ui"
-import { GameNamespace, GameSocketDataType, isDevelopment, isProduction, QueryNamespace } from "./socketEvents/Common"
-import { db } from "./database/Connection"
+import { readFileSync } from  'node:fs'
 import { zValidator } from "@hono/zod-validator"
-import z from "zod"
-import { cors } from "hono/cors"
-import { CookieMap, randomUUIDv7 } from "bun"
-import { deleteCookie, getCookie, setCookie } from "hono/cookie"
-import { addUserToDb, getUserFromDb, hasUserInDb } from "./database/CommonQueries"
+import { instrument } from "@socket.io/admin-ui"
+import { Server as Engine, type WebSocketData } from '@socket.io/bun-engine'
 import { compare, hash } from "bcrypt"
-import { CookieOptions } from "hono/utils/cookie"
+import { CookieMap, randomUUIDv7 } from "bun"
+import { type GameClientEventMap, type GameServerEventMap, gameNamespace, type HonoSchema, queryNamespace, SocketPort, type User, UserType, validUsername } from "catan-shared"
+import { Hono } from 'hono'
+import { deleteCookie, getCookie, setCookie } from "hono/cookie"
+import { cors } from "hono/cors"
+import type { CookieOptions } from "hono/utils/cookie"
+import { Server } from "socket.io"
+import z from "zod"
+import { addUserToDb, getUserFromDb, hasUserInDb } from "./database/CommonQueries"
+import { db } from "./database/Connection"
+import { type GameNamespace, type GameSocketDataType, isDevelopment, isProduction, type QueryNamespace } from "./socketEvents/Common"
+import { acceptGameEvents } from "./socketEvents/GameEvents"
+import { acceptLobbyEvents } from "./socketEvents/LobbyEvents"
+import { acceptRoomEvents, allLobbies, registerRoomMiddleware } from "./socketEvents/RoomManager"
 
-const io = new Server<GameServerEventMap, GameClientEventMap, {}, GameSocketDataType>()
+const io = new Server<GameServerEventMap, GameClientEventMap, object & {}, GameSocketDataType>()
 const engine = new Engine({
     cors: {
         origin: [ 'https://admin.socket.io', 'http://localhost:5173', 'https://ichigancs.com:5173', 'http://127.0.0.1:5173' ],
@@ -51,11 +51,11 @@ const app = new Hono()
     }))
     .post('/auth/check', c => {
         const cookie = getCookie(c, cookieSessionName)
-        if (cookie == undefined)
+        if (cookie === undefined)
             return c.json({ code: 'ANONYMOUS' as const }, 200)
 
         const user = sessions.get(cookie)
-        if (user == undefined) {
+        if (user === undefined) {
             deleteCookie(c, cookieSessionName)
             return c.json({ code: 'ANONYMOUS' as const }, 200)
         }
@@ -73,7 +73,7 @@ const app = new Hono()
         if (hasUserInSessions(username) || await hasUserInDb(username))
             return c.json({ message: 'Name is taken', code: 'NAME_TAKEN' as const } , 409)
 
-        const dbRes = await addUserToDb(username, await hash(password, 12))
+        const _dbRes = await addUserToDb(username, await hash(password, 12))
         // TODO check result
 
         const id = randomUUIDv7()
@@ -84,7 +84,7 @@ const app = new Hono()
     .post('/auth/login/member', zValidator('json', z.object({ username: z.string(), password: z.string() })), async c => {
         const { username, password } = c.req.valid('json')
         const dbRes = await getUserFromDb(username)
-        if (dbRes == undefined)
+        if (dbRes === undefined)
             return c.json({ message: 'Name not found', code: 'NAME_INVALID' as const }, 401)
         if (!(await compare(password, dbRes.password_hash)))
             return c.json({ message: 'Password invalid', code: 'PASSWORD_INVALID' as const }, 401)
@@ -107,12 +107,12 @@ const app = new Hono()
         return c.json({}, 200)
     })
 
-type AppSchema = typeof app extends Hono<any, infer Sch, any> ? Sch : never
+type AppSchema = typeof app extends Hono<infer _Env, infer Sch, infer _Path> ? Sch : never
 
-type Debug1<T extends HonoSchema> = true
-type Debug2<T extends AppSchema> = true
-type Test1 = Debug1<AppSchema>
-type Test2 = Debug2<HonoSchema>
+type _Debug1<_T extends HonoSchema> = true
+type _Debug2<_T extends AppSchema> = true
+type _Test1 = _Debug1<AppSchema>
+type _Test2 = _Debug2<HonoSchema>
 
 
 
@@ -163,16 +163,16 @@ const qn: QueryNamespace = io.of(queryNamespace)
 // valid login middleware
 gn.use((socket, next) => {
     const cookie = socket.handshake.headers.cookie
-    if (cookie == undefined)
+    if (cookie === undefined)
         return next(new Error('Cookie not provided'))
 
     const map = new CookieMap(cookie)
     const sessionID = map.get(cookieSessionName)
-    if (sessionID == undefined)
+    if (sessionID === null)
         return next(new Error('Session ID not provided'))
 
     const user = sessions.get(sessionID)
-    if (user == undefined)
+    if (user === undefined)
         return next(new Error('Invalid session ID'))
 
     socket.data.sessionID = sessionID

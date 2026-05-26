@@ -13,7 +13,7 @@ const modalStore = useModalStore()
 
 async function tryJoin(roomId: string) {
     const result = await currentRoom.tryJoin(roomId)
-    if (result == RoomOPResult.Success) {
+    if (result === RoomOPResult.Success) {
         router.push('/room')
         return
     }
@@ -28,7 +28,7 @@ async function tryJoin(roomId: string) {
 
 function tryCreateOfflineAndMove() {
     const res = currentRoom.tryCreateOffline()
-    if (res == RoomOPResult.Success) {
+    if (res === RoomOPResult.Success) {
         router.push('/room')
         return
     }
@@ -44,7 +44,7 @@ onUnmounted(() => roomList.autoRefresh = false)
     <h1>Room list</h1>
     <input type="button" value="Create New Room" @click="() => modalStore.value = ModalType.CreateRoom" :disabled="!currentRoom.canJoinOnline"
         title="Create New Room" />
-    <input type="button" value="Create Offline Room" @click="tryCreateOfflineAndMove" :disabled="currentRoom.info != undefined"/>
+    <input type="button" value="Create Offline Room" @click="tryCreateOfflineAndMove" :disabled="currentRoom.info !== undefined"/>
     <div class="grid-columns heading default-grid-header-layout">
         <p>Room name</p>
         <p>Players</p>
@@ -55,12 +55,13 @@ onUnmounted(() => roomList.autoRefresh = false)
         <p>{{ room.participants.length }} / {{ room.scenario.players.maxAllowedCount }}</p>
         <p>{{ room.owner.name }}</p>
         <button
+            type="button"
             class="default-button-colors"
             :title="`Join room ${room.name}`"
             :disabled="!currentRoom.canJoinOnline || room.participants.length >= room.scenario.players.maxAllowedCount"
             @click="() => tryJoin(room.id)">Join</button>
     </div>
-    <div v-if="roomList.lobbies.length == 0">
+    <div v-if="roomList.lobbies.length === 0">
         <p>Currently, there are no open lobbies. Create one at the top!</p>
     </div>
 </template>

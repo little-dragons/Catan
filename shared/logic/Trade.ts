@@ -1,7 +1,7 @@
-import { type Pure } from "../Pure";
-import { type Board, type PortResource, portsForColor, SpecialPorts } from "./Board";
-import { Color } from "./Player";
-import { allResources, type CardList, Resource, sameCards } from "./Resource";
+import type { Pure } from '../Pure'
+import { type Board, type PortResource, portsForColor, SpecialPorts } from './Board'
+import type { Color } from './Player'
+import { allResources, type CardList, type Resource, sameCards } from './Resource'
 
 
 export type TradeOffer = {
@@ -24,7 +24,7 @@ export type FinalizedTrade = TradeOffer & {
 }
 
 export function sameTradeOffer(t1: TradeOffer, t2: TradeOffer) {
-    return t1.offeringColor == t2.offeringColor && sameCards(t1.offeredCards, t2.offeredCards) && sameCards(t1.desiredCards, t2.desiredCards)
+    return t1.offeringColor === t2.offeringColor && sameCards(t1.offeredCards, t2.offeredCards) && sameCards(t1.desiredCards, t2.desiredCards)
 }
 export function isValidOffer(offered: CardList, desired: CardList) {
     if (offered.length === 0)

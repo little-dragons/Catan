@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { Color, colorWithLongestRoad, countbyRecord, longestRoadForColor, popcountDistribution, portsForColor, Resource, SpecialPorts } from 'catan-shared'
+import { Color, colorWithLongestRoad, countbyRecord, longestRoadForColor, portsForColor, SpecialPorts } from 'catan-shared'
 import { blueAndRedMoreTriangles, blueAndRedTriangle, complexBlueRoad, moreComplexBlueRoad, woolPort, yellowAndGreenSameLength, yellowAndGreenSameLength2, yellowHasLongerThanGreen, yellowHasLongestRoad2Board, yellowHasLongestRoadBoard, yellowHasLongestRoadWithCycle } from './boardRules.setup'
 
 describe('boardRules', () => {
@@ -50,6 +50,6 @@ describe('boardRules', () => {
     it('should recognize only a general port', () => {
         const ports = portsForColor(woolPort, Color.Red)
         expect(ports[SpecialPorts.General])
-        expect(countbyRecord(ports, x => x) == 1)
+        expect(countbyRecord(ports, x => x) === 1)
     })
 })

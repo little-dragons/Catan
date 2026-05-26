@@ -28,17 +28,18 @@ defineProps<CardStackProps>()
 
 <template>
     <button
+        type="button"
         class="stack"
         @click="() => $emit('clicked')"
         :title="title">
 
-        <img v-if="count < 8" v-for="_ in new Array(count)" :src="imgSrc" :title="title"/>
+        <img v-if="count < 8" v-for="_ in new Array(count)" :src="imgSrc" :title="title" alt=""/>
         
-        <img v-if="count >= 8" :src="imgSrc" :title="title"/>
-        <img v-if="count >= 8" class="tighter" :src="imgSrc" :title="title"/>
-        <img v-if="count >= 8" class="tighter" :src="imgSrc" :title="title"/>
-        <img v-if="count >= 8" class="tighter" :src="imgSrc" :title="title"/>
-        <img v-if="count >= 8" class="tighter" :src="imgSrc" :title="title"/>
+        <img v-if="count >= 8" :src="imgSrc" :title="title" alt=""/>
+        <img v-if="count >= 8" class="tighter" :src="imgSrc" :title="title" alt=""/>
+        <img v-if="count >= 8" class="tighter" :src="imgSrc" :title="title" alt=""/>
+        <img v-if="count >= 8" class="tighter" :src="imgSrc" :title="title" alt=""/>
+        <img v-if="count >= 8" class="tighter" :src="imgSrc" :title="title" alt=""/>
         <div v-if="count >= 8" class="card-counter"><span>{{ count }}</span></div>
     </button>
 </template>
@@ -74,8 +75,8 @@ img {
 img:not(:first-child) {
     margin-right: -45%;
 }
-.tighter {
-    margin-right: -55% !important;
+img.tighter {
+    margin-right: -55%;
 }
 img:hover {
     cursor: pointer;

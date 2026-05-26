@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import { ref, useTemplateRef } from 'vue';
+import { RoomOPResult, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore';
+import router from '@/misc/Router';
+import Modal from '@/modals/Modal.vue'
+import { PopupSeverity, usePopups } from '@/popup/Popup';
 import LabeledInput from './input-fields/LabeledInput.vue';
 import RoomInput from './input-fields/RoomInput.vue';
-import Modal from '@/modals/Modal.vue'
-import router from '@/misc/Router';
-import { PopupSeverity, usePopups } from '@/popup/Popup';
-import { RoomOPResult, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore';
-import { ref, useTemplateRef } from 'vue';
 import { useModalStore } from './ModalStore';
 
 const roomInput = useTemplateRef('roomInput')

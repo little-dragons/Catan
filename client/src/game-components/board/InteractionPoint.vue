@@ -14,7 +14,7 @@ defineProps<{
         :r="minInteractionPointRadius"
         role="button"
         aria-pressed="false"
-        tabindex="1">
+        tabindex="0">
         <!--
             Make sure that the values given in `values` are not reactive by vue.
             If, in the animate-elements, a reactive value is used, the svg animation does not work.

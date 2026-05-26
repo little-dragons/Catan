@@ -63,10 +63,6 @@
     border: var(--game-ui-border);
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-    }
-}
 
 html {
     background-color: var(--outside-background-color);

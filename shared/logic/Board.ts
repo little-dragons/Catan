@@ -1,10 +1,10 @@
-import type { Color } from "./Player"
-import { neighborTile, Orientation } from "./Orientation"
-import { Resource } from "./Resource"
-import { BuildingType } from "./Buildings"
 import { v4 } from "uuid"
+import type { Pure } from "../Pure"
+import { BuildingType } from "./Buildings"
 import { addDistribution, type Distribution, setRecord } from "./Distribution"
-import { type Pure } from "../Pure"
+import { neighborTile, Orientation } from "./Orientation"
+import type { Color } from "./Player"
+import { Resource } from "./Resource"
 
 /**
  * Coordinate has two meaning, depending on whether tiles or crossings are indexed.
@@ -18,7 +18,7 @@ import { type Pure } from "../Pure"
  */
 export type Coordinate = readonly [number, number]
 export function sameCoordinate(c1: Coordinate, c2: Coordinate) {
-    return c1[0] == c2[0] && c1[1] == c2[1]
+    return c1[0] === c2[0] && c1[1] === c2[1]
 }
 export type Road = readonly [Coordinate, Coordinate]
 export function sameRoad(r1: Road, r2: Road) {
@@ -34,10 +34,10 @@ export enum TileType {
 export type LandTileType = TileType.Resource | TileType.Desert
 export type SeaTileType = TileType.Port | TileType.Ocean
 export function isLandTileType(type: TileType): type is LandTileType {
-    return type == TileType.Desert || type == TileType.Resource
+    return type === TileType.Desert || type === TileType.Resource
 }
 export function isSeaTileType(type: TileType): type is SeaTileType {
-    return type == TileType.Port || type == TileType.Ocean
+    return type === TileType.Port || type === TileType.Ocean
 }
 
 export enum SpecialPorts {
@@ -52,18 +52,18 @@ export type PortTile = {
     orientation: Orientation
 }
 export type ResourceTileNumber = 2 | 3 | 4 | 5 | 6 | 8 | 9 | 10 | 11 | 12
-export const ResourceTileNumberFrequencies: ReadonlyMap<ResourceTileNumber, number> = new Map([
-    [2,  1],
-    [12, 1],
-    [3,  2],
-    [11, 2],
-    [4,  3],
-    [10, 3],
-    [5,  4],
-    [9,  4],
-    [6,  5],
-    [8,  5],
-])
+export const ResourceTileNumberFrequencies: Record<ResourceTileNumber, number> = {
+    2:  1,
+    12: 1,
+    3:  2,
+    11: 2,
+    4:  3,
+    10: 3,
+    5:  4,
+    9:  4,
+    6:  5,
+    8:  5
+}
 export const ResourceTileNumberFrequenciesMax = 15
 
 export type ResourceTile = {
@@ -78,7 +78,7 @@ export type OceanTile = { type: TileType.Ocean } | PortTile
 export type Tile = LandTile | OceanTile
 export type CoordinateTile = Tile & { coord: Coordinate }
 export function isLand(tileType: TileType) {
-    return tileType == TileType.Desert || tileType == TileType.Resource
+    return tileType === TileType.Desert || tileType === TileType.Resource
 }
 export function isLandTile(tile: Tile): tile is LandTile {
     return isLand(tile.type)
@@ -99,11 +99,11 @@ export type Board = Pure<{
 
 
 export function allCrossings(board: Board) {
-    let allPositions: Coordinate[] = []
+    const allPositions: Coordinate[] = []
     for (const tile of board.tiles) {
         const upperRow = tile.coord[1]
         const lowerRow = upperRow + 1
-        const leftCol = tile.coord[0] * 2 + (tile.coord[1] % 2 == 0 ? 0 : 1)
+        const leftCol = tile.coord[0] * 2 + (tile.coord[1] % 2 === 0 ? 0 : 1)
         const middleCol = leftCol + 1
         const rightCol = leftCol + 2
 
@@ -119,7 +119,7 @@ export function allCrossings(board: Board) {
 export function twoCrossingsFromTile(tile: Coordinate, orientation: Orientation): [Coordinate, Coordinate] {
     const upperRow = tile[1]
     const lowerRow = upperRow + 1
-    const leftCol = tile[0] * 2 + (tile[1] % 2 == 0 ? 0 : 1)
+    const leftCol = tile[0] * 2 + (tile[1] % 2 === 0 ? 0 : 1)
     const middleCol = leftCol + 1
     const rightCol = leftCol + 2
     switch (orientation) {
@@ -133,7 +133,7 @@ export function twoCrossingsFromTile(tile: Coordinate, orientation: Orientation)
 }
 
 export function crossingAdjacentToTile(crossing: Coordinate, tile: Coordinate): boolean {
-    const xCorrection = tile[1] % 2 == 0 ? 0 : 1
+    const xCorrection = tile[1] % 2 === 0 ? 0 : 1
     const xBase = tile[0] * 2 + xCorrection
     const allowedX = [xBase, xBase + 1, xBase + 2]
     const allowedY = [tile[1], tile[1] + 1]
@@ -159,7 +159,7 @@ export function portPoints(tile: PortTile & { coord: Coordinate }): [Coordinate,
  * This function usually return just one resource, if at all. But it might be wise to keep it more general.
  */
 export function portsForCoord(board: Board, coord: Coordinate): readonly PortResource[] {
-    return board.tiles.filter(x => x.type == TileType.Port).filter(x => isPointForPort(x, coord)).map(x => x.resource)
+    return board.tiles.filter(x => x.type === TileType.Port).filter(x => isPointForPort(x, coord)).map(x => x.resource)
 }
 
 /**
@@ -171,7 +171,7 @@ function isCrossingWithRoadUp(crossing: Coordinate): boolean {
     function logicalXor(a: boolean, b: boolean) {
         return a && !b || b && !a
     }
-    return logicalXor(crossing[0] % 2 == 0, crossing[1] % 2 == 0)
+    return logicalXor(crossing[0] % 2 === 0, crossing[1] % 2 === 0)
 }
 
 
@@ -204,10 +204,10 @@ export function adjacentBuildingsToTile(board: Board, tile: Coordinate) {
 }
 
 function crossingsForColor(board: Board, color: Color) {
-    const buildingCrossingsForColor = board.buildings.filter(x => x.color == color).map(x => x.coord)
-    const roadCrossingsForColor = board.roads.filter(x => x.color == color).map(x => x.coord)
-    const allCrossings = roadCrossingsForColor.flatMap(x => x).concat(buildingCrossingsForColor)
-    return allCrossings.filter((val, idx) => allCrossings.findIndex(x => sameCoordinate(x, val)) == idx)
+    const buildingCrossingsForColor = board.buildings.filter(x => x.color === color).map(x => x.coord)
+    const roadCrossingsForColor = board.roads.filter(x => x.color === color).map(x => x.coord)
+    const allCrossings = roadCrossingsForColor.flat().concat(buildingCrossingsForColor)
+    return allCrossings.filter((val, idx) => allCrossings.findIndex(x => sameCoordinate(x, val)) === idx)
 }
 
 /**
@@ -257,7 +257,7 @@ export function availableRoadPositions(board: Board, color: Color) {
         
     return allPotentialRoads
         // remove duplicates
-        .filter((val, idx) => allPotentialRoads.findIndex(x => sameRoad(x, val)) == idx)
+        .filter((val, idx) => allPotentialRoads.findIndex(x => sameRoad(x, val)) === idx)
         .filter(road => isAvailableRoadPosition(board, road, color))
 }
 
@@ -271,7 +271,7 @@ function adjacentTiles(cross: Coordinate): readonly Coordinate[] {
 
     const oneTileAbove = !isCrossingWithRoadUp(cross)
     if (oneTileAbove) {
-        if (cross[1] % 2 == 0) {
+        if (cross[1] % 2 === 0) {
             const above: Coordinate = [cross[0] / 2 - 1, cross[1] - 1]
             const belowLeft: Coordinate = [above[0], cross[1]]
             const belowRight: Coordinate = [above[0] + 1, cross[1]]
@@ -285,7 +285,7 @@ function adjacentTiles(cross: Coordinate): readonly Coordinate[] {
         }
     }
     else {
-        if (cross[1] % 2 == 0) {
+        if (cross[1] % 2 === 0) {
             const below: Coordinate = [(cross[0] - 1) / 2, cross[1]]
             const aboveLeft: Coordinate = [below[0] - 1, below[1] - 1]
             const aboveRight: Coordinate = [below[0], below[1] - 1]
@@ -304,7 +304,7 @@ export function mapFilter<T, R>(array: Pure<T[]>, mapper: ((item: Pure<T>) => Pu
     let res: Pure<R[]> = []
     for (const item of array) {
         const mapped = mapper(item)
-        if (mapped != undefined)
+        if (mapped !== undefined)
             res = [...res, mapped]
     }
     return res
@@ -313,7 +313,7 @@ export function mapFilter<T, R>(array: Pure<T[]>, mapper: ((item: Pure<T>) => Pu
 export function mapFind<T, R>(array: Pure<T[]>, finder: ((item: Pure<T>) => Pure<R |  undefined>)): Pure<R | undefined> {
     for (const item of array) {
         const mapped = finder(item)
-        if (mapped != undefined)
+        if (mapped !== undefined)
             return mapped
     }
 }
@@ -324,27 +324,27 @@ export function adjacentResourceTiles(cross: Coordinate, board: Board): readonly
         coord => 
             mapFind(
                 board.tiles, 
-                tile => sameCoordinate(tile.coord, coord) && tile.type == TileType.Resource 
+                tile => sameCoordinate(tile.coord, coord) && tile.type === TileType.Resource 
                 ? tile : undefined)
         )
 }
 export function adjacentResources(cross: Coordinate, board: Board, number: ResourceTileNumber | undefined): readonly Resource[] {
-    if (number == undefined)
+    if (number === undefined)
         return adjacentResourceTiles(cross, board).map(x => x.resource)
     else
-        return adjacentResourceTiles(cross, board).filter(x => x.number == number).map(x => x.resource)
+        return adjacentResourceTiles(cross, board).filter(x => x.number === number).map(x => x.resource)
 }
 
 export function gainedResources(board: Board, color: Color, number: ResourceTileNumber): Resource[] {
     let accumulated: Resource[] = []
     for (const building of board.buildings) {
-        if (building.color != color)
+        if (building.color !== color)
             continue
 
         const resources = adjacentResources(building.coord, board, number)
-        if (building.type == BuildingType.Settlement)
+        if (building.type === BuildingType.Settlement)
             accumulated = accumulated.concat(resources)
-        if (building.type == BuildingType.City) {
+        if (building.type === BuildingType.City) {
             accumulated = accumulated.concat(resources).concat(resources)
         }
     }
@@ -353,8 +353,8 @@ export function gainedResources(board: Board, color: Color, number: ResourceTile
 }
 
 export function hasColorPort(board: Board, color: Color, res: PortResource): boolean {
-    const ports = board.tiles.filter(x => x.type == TileType.Port).filter(x => x.resource == res)
-    return board.buildings.some(x => x.color == color && ports.some(port => isPointForPort(port, x.coord)))
+    const ports = board.tiles.filter(x => x.type === TileType.Port).filter(x => x.resource === res)
+    return board.buildings.some(x => x.color === color && ports.some(port => isPointForPort(port, x.coord)))
 }
 
 export function portsForColor(board: Board, color: Color): Record<PortResource, boolean> {
@@ -371,7 +371,7 @@ export function portsForColor(board: Board, color: Color): Record<PortResource, 
 
 function adjacentSegments(crossing: Coordinate, roads: RoadSegment[]): [RoadSegment, Coordinate][] {
     function hasValidCrossing(item: [RoadSegment, Coordinate | undefined]): item is [RoadSegment, Coordinate] {
-        return item[1] != undefined
+        return item[1] !== undefined
     }
 
     return roads
@@ -390,16 +390,16 @@ type RoadSegment = {
 
 
 function tryJoinSegments(segments: RoadSegment[]): RoadSegment[] {
-    const connectors = segments.filter(x => x.coordinates.length == 2)
+    const connectors = segments.filter(x => x.coordinates.length === 2)
     {
         // first, join connectors with exactly two coordinates
         // there is no other option to connect those and this is always a right step
         const connectorCoords = connectors.flatMap(x => x.coordinates)
         const adjacents = connectorCoords.map(coord => adjacentSegments(coord, segments))
-        const twoAdjacents = adjacents.filter(adjacents => adjacents.length == 2)
+        const twoAdjacents = adjacents.filter(adjacents => adjacents.length === 2)
         if (twoAdjacents.length > 0) {
             const [[seg1, target1], [seg2, target2]] = twoAdjacents[0]
-            const others = segments.filter(x => x != seg1 && x != seg2)
+            const others = segments.filter(x => x !== seg1 && x !== seg2)
             const newCoordinates: [Coordinate, Coordinate] = [
                 target1, target2
             ]
@@ -427,7 +427,7 @@ function longestPathFrom(inputCoord: Coordinate, segments: ReadonlySet<RoadSegme
             adjacents.map(([seg, target]) => helper(target, visited.union(new Set([seg]))) + seg.roads.length)
 
         const longest = results.find(x => !results.some(y => y > x))
-        if (longest == undefined)
+        if (longest === undefined)
             return 0
         return longest
     }
@@ -441,7 +441,7 @@ function longestRoad(road: Road[]): number {
 
     while (true) {
         const newSegments = tryJoinSegments(segments)
-        if (newSegments.length == segments.length)
+        if (newSegments.length === segments.length)
             break
         segments = newSegments
     }
@@ -454,18 +454,18 @@ function longestRoad(road: Road[]): number {
 }
 
 export function longestRoadForColor(board: Board, color: Color): number {
-    return longestRoad(board.roads.filter(x => x.color == color).map(x => x.coord))
+    return longestRoad(board.roads.filter(x => x.color === color).map(x => x.coord))
 }
 
 export function colorWithLongestRoad(board: Board, currentHolder: Color | undefined): Color | undefined {
     const colors = new Set(board.roads.map(x => x.color))
     const coloredLength = [...colors].map<[Color, number]>(color=> [color, longestRoadForColor(board, color)])
     const filtered = coloredLength.filter(([_, length]) => length >= 5)
-    const highestColors = filtered.filter(([col1, length1]) => !filtered.some(([col2, length2]) => length2 > length1)).map(x => x[0])
-    if (highestColors.length == 0)
+    const highestColors = filtered.filter(([_, length1]) => !filtered.some(([_, length2]) => length2 > length1)).map(x => x[0])
+    if (highestColors.length === 0)
         return undefined
 
-    if (currentHolder != undefined && highestColors.includes(currentHolder))
+    if (currentHolder !== undefined && highestColors.includes(currentHolder))
         return currentHolder
 
     // now highest colors may actually contain multiple values, depending on the board
@@ -486,15 +486,15 @@ export function resourceFrequencyForBuilding(board: Board, building: { coord: Co
     
     
     const adjacent = adjacentResourceTiles(building.coord, board)
-    const mult = building.type == BuildingType.City ? 2 : 1
+    const mult = building.type === BuildingType.City ? 2 : 1
     for (var {number, resource} of adjacent)
-        ret = setRecord(ret, resource, ret[resource] + mult * ResourceTileNumberFrequencies.get(number)!)
+        ret = setRecord(ret, resource, ret[resource] + mult * ResourceTileNumberFrequencies[number])
 
     return ret
 }
 
 export function resourceFrequenciesForColor(board: Board, color: Color): Distribution<Resource> {
-    let ret: Distribution<Resource> = {
+    const ret: Distribution<Resource> = {
         [Resource.Brick]: 0,
         [Resource.Lumber]: 0,
         [Resource.Wool]: 0,
@@ -502,5 +502,5 @@ export function resourceFrequenciesForColor(board: Board, color: Color): Distrib
         [Resource.Grain]: 0,
     }
 
-    return board.buildings.filter(x => x.color == color).reduce((s, v) => addDistribution(s, resourceFrequencyForBuilding(board, v)), ret)
+    return board.buildings.filter(x => x.color === color).reduce((s, v) => addDistribution(s, resourceFrequencyForBuilding(board, v)), ret)
 }

@@ -1,4 +1,4 @@
-import { Board } from "catan-shared";
+import type { Board } from "catan-shared";
 
 // This file contains some data for tests to use. For convenience, the board is given as a json string
 // which can be viewed in the devtools of this project.

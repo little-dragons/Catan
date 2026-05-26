@@ -16,7 +16,7 @@ defineOptions({
 
 const model = defineModel<number | undefined>({ required: true })
 
-const rawInput = ref(model.value == undefined ? "" : String(model.value))
+const rawInput = ref(model.value === undefined ? "" : String(model.value))
 
 const validityStatus = computed(() => {
     if (rawInput.value === "")
@@ -27,7 +27,7 @@ const validityStatus = computed(() => {
     const num = Number(rawInput.value)
     for (const rule of props.rules) {
         const result = rule(num)
-        if (result != true)
+        if (result !== true)
             return result
     }
     return true
@@ -35,7 +35,7 @@ const validityStatus = computed(() => {
 
 
 watchEffect(() => {
-    if (validityStatus.value == true)
+    if (validityStatus.value === true)
         model.value = Number(rawInput.value)
     else
         model.value = undefined
@@ -46,10 +46,10 @@ watchEffect(() => {
     <div>
         <div class="input-container" :class="disabled ? 'disabled' : ''">
             <input :id="tagId" type="number" v-model="rawInput" spellcheck="false" :disabled="disabled" v-bind="$attrs"/>
-            <img :src="error" v-if="validityStatus != true && validityStatus != null" :title="validityStatus">
-            <img :src="ok" v-if="validityStatus == true" title="Everything is good!">
+            <img :src="error" v-if="validityStatus !== true && validityStatus != null" :title="validityStatus" alt="">
+            <img :src="ok" v-if="validityStatus === true" title="Everything is good!" alt="">
         </div>
-        <p v-if="validityStatus != true && validityStatus != null"> {{ validityStatus }}</p>
+        <p v-if="validityStatus !== true && validityStatus != null"> {{ validityStatus }}</p>
     </div>
 </template>
 

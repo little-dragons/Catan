@@ -1,7 +1,6 @@
-import { FullRoom, RoomId, LobbyRoom, FullGameRoom, History, Color, RoomType, PostGameRoom, defaultScenario, ParticipantType, Participant, generateStateFromScenario, randomUnusedColor, GameServerEventMap, GameClientEventMap, randomSeed, RoomRequestSchema, socketConnectError, SocketConnectErrorCode, gameNamespace } from "catan-shared"
-import { RemoteSocket } from 'socket.io'
-import { GameNamespace, GameSocket, GameSocketDataType } from "./Common"
-import { defaultSettings, Bot, BotPersonality } from "catan-shared"
+import { type Bot, BotPersonality, type Color, defaultScenario, defaultSettings, type FullGameRoom, type FullRoom, type GameClientEventMap, generateStateFromScenario, type History, type LobbyRoom, type Participant, ParticipantType, type PostGameRoom, type RoomId, RoomRequestSchema, RoomType, randomSeed, randomUnusedColor, SocketConnectErrorCode, socketConnectError } from "catan-shared"
+import type { RemoteSocket } from 'socket.io'
+import type { GameNamespace, GameSocket, GameSocketDataType } from "./Common"
 
 
 export type ServerLobbyRoom    = Omit<LobbyRoom   , 'participants'> & { bots : [Bot, Color][] }
@@ -12,21 +11,21 @@ export type ServerRoom         = Omit<FullRoom    , 'participants'> & { bots : [
 const rooms = new Map<RoomId, ServerRoom>()
 
 function isLobby(room: ServerRoom): room is ServerLobbyRoom {
-    return room.type == RoomType.Lobby
+    return room.type === RoomType.Lobby
 }
 function isGame(room: ServerRoom): room is ServerGameRoom {
-    return room.type == RoomType.InGame
+    return room.type === RoomType.InGame
 }
 
 export function gameRoomFor(roomId: RoomId): ServerGameRoom | undefined {
     const val = rooms.get(roomId)
-    if (val == undefined || !isGame(val))
+    if (val === undefined || !isGame(val))
         return undefined
     return val
 }
 export function lobbyRoomFor(roomId: RoomId): ServerLobbyRoom | undefined {
     const val = rooms.get(roomId)
-    if (val == undefined || !isLobby(val))
+    if (val === undefined || !isLobby(val))
         return undefined
     return val
 }
@@ -63,7 +62,7 @@ export async function initializeGame(io: GameNamespace, room: ServerLobbyRoom) {
     const participants = await participantsForRoom(io, room.id)
     // TODO correct current player
     const state = generateStateFromScenario(room.scenario, participants.map(x => x.color), participants[0].color, room.settings.seed)
-    if (state == undefined)
+    if (state === undefined)
         return 'could not generate state'
 
     const game: ServerGameRoom = {
@@ -107,9 +106,9 @@ export function registerRoomMiddleware(io: GameNamespace) {
             return next(new Error('Malformed auth'))
     
         switch(auth.data.request) {
-            case "join":
+            case "join": {
                 const room = rooms.get(auth.data.roomID)
-                if (room == undefined)
+                if (room === undefined)
                     return next(socketConnectError('Room does not exist', SocketConnectErrorCode.RoomNameInvalid))
                 
                 const p = await participantsForRoom(io, room.id)
@@ -118,7 +117,7 @@ export function registerRoomMiddleware(io: GameNamespace) {
                 
                 socket.data.roomID = auth.data.roomID
                 return next()
-    
+            }
             case "create":
                 socket.data.roomID = randomSeed()
                 socket.data.pendingRoomNameRequest = auth.data.roomName
@@ -155,16 +154,16 @@ export async function allLobbies(io: GameNamespace) {
 
 export function acceptRoomEvents(io: GameNamespace, socket: GameSocket) {
     socket.on('addBot', async cb => {
-        if (typeof cb != 'function') {
+        if (typeof cb !== 'function') {
             console.warn('invalid arguments:', cb)
-            return (cb as any)('invalid arguments')
+            return
         }
 
         const room = lobbyRoomFor(socket.data.roomID)
-        if (room == undefined)
+        if (room === undefined)
             return cb('invalid socket state')
 
-        if (room.owner.name != socket.data.user.name)
+        if (room.owner.name !== socket.data.user.name)
             return cb('not the owner')
 
         const participants = await participantsForRoom(io, room.id)
@@ -184,12 +183,12 @@ export function acceptRoomEvents(io: GameNamespace, socket: GameSocket) {
         const id = socket.data.roomID
 
         const room = rooms.get(id)
-        if (room == undefined)
+        if (room === undefined)
             // nothing to do
             return
 
         const users = await socketsForRoom(io, id)
-        if (room.owner.name == socket.data.user.name || users.length < 1 || room.type == RoomType.InGame) {
+        if (room.owner.name === socket.data.user.name || users.length < 1 || room.type === RoomType.InGame) {
             // the ingame check is because the logic currently breaks when a participant leaves.
             // see: https://github.com/little-dragons/Catan/issues/32
             

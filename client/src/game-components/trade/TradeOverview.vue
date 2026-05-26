@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type CardList, Color, TradeStatusByColor } from 'catan-shared';
+import type { CardList, Color, TradeStatusByColor } from 'catan-shared';
 import GreenArrow from '@/assets/ui/greenarrow.svg'
 import RedArrow from '@/assets/ui/redarrow.svg'
 import ResourceCardsRenderer from '../cards/ResourceCardsRenderer.vue';
@@ -20,11 +20,11 @@ defineEmits<{
 <div class="default-game-ui-props tradeBox">
     <div class="left">
         <div class="top">
-            <img :src="RedArrow"/>
+            <img :src="RedArrow" alt=""/>
             <ResourceCardsRenderer :cards="toGiveAway"/>
         </div>
         <div class="bottom">
-            <img :src="GreenArrow"/>
+            <img :src="GreenArrow" alt=""/>
             <ResourceCardsRenderer :cards="toCollect"/>
         </div>
     </div>

@@ -1,15 +1,14 @@
-import brickCard from '@/assets/resource-cards/brick-card.svg'
-import grainCard from '@/assets/resource-cards/grain-card.svg'
-import lumberCard from '@/assets/resource-cards/lumber-card.svg'
-import oreCard from '@/assets/resource-cards/ore-card.svg'
-import woolCard from '@/assets/resource-cards/wool-card.svg'
+import { DevCardType, Resource } from 'catan-shared'
 import knightCard from '@/assets/dev-cards/knight-card.svg'
 import monopolyCard from '@/assets/dev-cards/monopoly-card.svg'
 import roadBuildingCard from '@/assets/dev-cards/road-building-card.svg'
 import victoryPointCard from '@/assets/dev-cards/victory-point-card.svg'
 import yearOfPlentyCard from '@/assets/dev-cards/year-of-plenty-card.svg'
-
-import { DevCardType, Resource } from 'catan-shared'
+import brickCard from '@/assets/resource-cards/brick-card.svg'
+import grainCard from '@/assets/resource-cards/grain-card.svg'
+import lumberCard from '@/assets/resource-cards/lumber-card.svg'
+import oreCard from '@/assets/resource-cards/ore-card.svg'
+import woolCard from '@/assets/resource-cards/wool-card.svg'
 
 export function imageForResource(res: Resource): string {
     switch (res) {

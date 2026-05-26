@@ -24,7 +24,7 @@ export const usePopups = defineStore('popups', () => {
             setTimeout(() => remove(popup), popupLifetime)
     }
     function remove(popup: Popup) {
-        const idx = currentPopups.value.findIndex(x => toRaw(x.info) == toRaw(popup))
+        const idx = currentPopups.value.findIndex(x => toRaw(x.info) === toRaw(popup))
         if (idx < 0)
             return
     

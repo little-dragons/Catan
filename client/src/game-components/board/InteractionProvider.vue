@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { type InteractionPoints, type AnyUserSelectionResult, type UserSelectionOptions, type UserSelectionResult, type UserSelectionDataType, UserSelectionType } from './UserSelection';
 import InteractionPoint from './InteractionPoint.vue';
-import { crossingPosition, tileCenter, roadCenter } from './Layout';
+import { crossingPosition, roadCenter, tileCenter } from './Layout';
+import { type AnyUserSelectionResult, type InteractionPoints, type UserSelectionDataType, type UserSelectionOptions, type UserSelectionResult, UserSelectionType } from './UserSelection';
 
 const interactionPoints = ref<(InteractionPoints & { resolver: (value: AnyUserSelectionResult) => boolean }) | undefined>(undefined)
 
 
-defineExpose({ get, abort, running: computed(() => interactionPoints.value != undefined) })
+defineExpose({ get, abort, running: computed(() => interactionPoints.value !== undefined) })
 function get<T extends InteractionPoints, Options extends UserSelectionOptions | undefined>(value: T, options?: Options): Promise<UserSelectionResult<T['type'], Options>> {
     return new Promise(resolve => {
         interactionPoints.value = {
             ...value,
             resolver(val) {
-                if (options?.noAbort && val == undefined)
+                if (options?.noAbort && val === undefined)
                     return false
 
                 resolve(val as UserSelectionResult<T['type'], Options>)
@@ -29,10 +29,10 @@ function abort(): boolean {
 }
 
 function handleKeyEvent(point: UserSelectionDataType<UserSelectionType>, keyEvent: KeyboardEvent) {
-    if (interactionPoints.value == undefined)
+    if (interactionPoints.value === undefined)
         return
     
-    if (keyEvent.code == 'Space' || keyEvent.code == 'Enter') {
+    if (keyEvent.code === 'Space' || keyEvent.code === 'Enter') {
         interactionPoints.value.resolver(point)
         return
     }
@@ -40,7 +40,7 @@ function handleKeyEvent(point: UserSelectionDataType<UserSelectionType>, keyEven
     // TODO pure keyboard navigation with arrows and manually setting focus here
 }
 function handleClickEvent(point: UserSelectionDataType<UserSelectionType>, mouseEvent: MouseEvent) {
-    if (interactionPoints.value == undefined)
+    if (interactionPoints.value === undefined)
         return
     
     interactionPoints.value.resolver(point)
@@ -49,9 +49,9 @@ function handleClickEvent(point: UserSelectionDataType<UserSelectionType>, mouse
 </script>
 
 <template>
-    <g id="interaction-points" v-if="interactionPoints != undefined">
+    <g id="interaction-points" v-if="interactionPoints !== undefined">
         <InteractionPoint 
-            v-if="interactionPoints.type == UserSelectionType.Crossing"
+            v-if="interactionPoints.type === UserSelectionType.Crossing"
             v-for="point in interactionPoints.positions" 
             :position="crossingPosition(point)"
             @click="(ev: MouseEvent) => handleClickEvent(point, ev)"
@@ -59,7 +59,7 @@ function handleClickEvent(point: UserSelectionDataType<UserSelectionType>, mouse
         />
 
         <InteractionPoint 
-            v-if="interactionPoints.type == UserSelectionType.Tile"
+            v-if="interactionPoints.type === UserSelectionType.Tile"
             v-for="point in interactionPoints.positions" 
             :position="tileCenter(point)"
             @click="(ev: MouseEvent) => handleClickEvent(point, ev)"
@@ -67,7 +67,7 @@ function handleClickEvent(point: UserSelectionDataType<UserSelectionType>, mouse
         />
         
         <InteractionPoint 
-            v-if="interactionPoints.type == UserSelectionType.Connection"
+            v-if="interactionPoints.type === UserSelectionType.Connection"
             v-for="road in interactionPoints.positions" 
             :position="roadCenter(road)"
             @click="(ev: MouseEvent) => handleClickEvent(road, ev)"

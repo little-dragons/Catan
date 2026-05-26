@@ -1,10 +1,10 @@
-import { type User } from '../authentication/User';
-import { type FullGameState, type RedactedGameState } from './GameState';
-import { type Color } from './Player';
-import { type Settings } from './Settings';
-import { type History } from './History';
-import { type Bot } from './Bots';
-import { type Scenario } from './Scenario';
+import type { User } from '../authentication/User';
+import type { Bot } from './Bots';
+import type { FullGameState, RedactedGameState } from './GameState';
+import type { History } from './History';
+import type { Color } from './Player';
+import type { Scenario } from './Scenario';
+import type { Settings } from './Settings';
 
 export type RoomId = string
 export enum RoomType {
@@ -26,7 +26,7 @@ export type Participant = {
     color: Color
 }
 export function participantName(p: Participant): string {
-    if (p.type == ParticipantType.User)
+    if (p.type === ParticipantType.User)
         return p.user.name
     else
         return p.bot.name

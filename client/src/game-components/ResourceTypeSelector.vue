@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Resource, allResources } from 'catan-shared'
+import { allResources, Resource } from 'catan-shared'
 import { ref } from 'vue'
 import { imageForResource } from '@/misc/CardTextures'
 
@@ -22,19 +22,20 @@ const chosen = ref<Resource | undefined>(undefined)
         <div class="choosingButtons">
             <button
                 v-for="res in allResources"
+                type="button"
                 @click="() => chosen = res"
                 :title="Resource[res]"
-                :class="chosen == res ? 'selected' : ''">
-                <img :src="imageForResource(res)" :title="Resource[res]"/>
+                :class="chosen === res ? 'selected' : ''">
+                <img :src="imageForResource(res)" :title="Resource[res]" alt=""/>
             </button>
         </div>
     </div>
     <div class="actions">
-        <button @click="() => { if (chosen != undefined) $emit('selected', chosen) }" :disabled="chosen == undefined" title="Choose selected resource">
+        <button type="button" @click="() => { if (chosen !== undefined) $emit('selected', chosen) }" :disabled="chosen === undefined" title="Choose selected resource">
             Select
         </button>
         
-        <button @click="() => $emit('abort')"  title="Abort selection">
+        <button type="button" @click="() => $emit('abort')"  title="Abort selection">
             Abort
         </button>
     </div>

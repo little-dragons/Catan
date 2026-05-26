@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, triggerRef, watch, type Ref } from 'vue';
+import { computed, type Ref, ref, triggerRef } from 'vue';
 import ErrorImg from './ErrorImg.vue';
 import ErrorText from './ErrorText.vue';
 
@@ -21,7 +21,7 @@ const validityStatus = computed(() => {
     
     for (const rule of props.rules) {
         const result = rule(rawInput.value)
-        if (result != true)
+        if (result !== true)
             return result
     }
 
@@ -30,7 +30,7 @@ const validityStatus = computed(() => {
 
 
 const result = computed(() => {
-    if (validityStatus.value == true)
+    if (validityStatus.value === true)
         return rawInput.value
     else
         return null

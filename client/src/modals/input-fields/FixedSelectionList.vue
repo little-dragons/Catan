@@ -12,7 +12,7 @@ const model = defineModel<T[]>()
 <template>
     <div class="top">        
         <div v-for="i in model!.keys()">
-            <select v-model="model![i]" :class="i == highlightIdx ? 'highlight' : ''">
+            <select v-model="model![i]" :class="i === highlightIdx ? 'highlight' : ''">
                 <option v-for="key of keys" :value="key">{{strings(key)}}</option>
             </select>
             

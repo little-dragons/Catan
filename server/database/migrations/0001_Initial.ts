@@ -1,4 +1,5 @@
-import { Kysely, sql } from "kysely";
+/** biome-ignore-all lint/suspicious/noExplicitAny: Writing migrations with `any` is the preffered choice for kysely */
+import { type Kysely, sql } from "kysely";
 
 export async function up(db: Kysely<any>): Promise<void> {
     await db.schema

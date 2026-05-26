@@ -1,6 +1,6 @@
-import { type FullGameState } from "./GameState"
+import type { FullGameState } from "./GameState"
 
-export type Statistics = {
+export type Statistics = object & {
 
 }
 
@@ -8,6 +8,6 @@ export type History = {
     lastState: FullGameState
 }
 
-export function statisticsFromHistory(history: History): Statistics {
+export function statisticsFromHistory(_history: History): Statistics {
     return { }
 }

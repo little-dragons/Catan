@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory, type RouteNamedMap, type RouteRecordInfo, type RouteRecordRaw } from 'vue-router'
 import Home from '@/home/Home.vue'
 import Room from '@/room/Room.vue'
-import RoomList from '../room/RoomList.vue'
 import ScenarioEditor from '@/scenario/ScenarioEditor.vue'
+import RoomList from '../room/RoomList.vue'
 
 declare module 'vue-router' {
     interface RouteNamedMap {
@@ -19,7 +19,7 @@ declare module 'vue-router' {
 
 type RouteRecordsFromMap = {
     [Key in keyof RouteNamedMap]: 
-        RouteNamedMap[Key] extends RouteRecordInfo<infer Name, infer Path, infer RawParams, infer NormalizedParams> ? 
+        RouteNamedMap[Key] extends RouteRecordInfo<infer Name, infer Path, infer _RawParams, infer _NormalizedParams> ? 
             Name extends Key ? Key extends Name ? 
                 RouteRecordRaw & { name: Name, path: Path }
             : never : never

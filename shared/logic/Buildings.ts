@@ -1,5 +1,5 @@
-import { type Board, type Coordinate, adjacentCrossings, adjacentRoads, allCrossings, crossingAdjacentToLand, sameCoordinate, sameRoad} from "./Board";
-import { Color } from "./Player";
+import { adjacentCrossings, adjacentRoads, allCrossings, type Board, type Coordinate, crossingAdjacentToLand, sameCoordinate, sameRoad} from "./Board";
+import type { Color } from "./Player";
 
 export enum BuildingType {
     Settlement, City
@@ -28,10 +28,10 @@ export function isAvailableBuildingPosition(crossing: Coordinate, board: Board, 
     if (!isFree)
         return false
 
-    if (forPlayer == undefined)
+    if (forPlayer === undefined)
         return true
     
-    return adjacentRoads(crossing).some(road => board.roads.some(built => sameRoad(road, built.coord) && built.color == forPlayer))
+    return adjacentRoads(crossing).some(road => board.roads.some(built => sameRoad(road, built.coord) && built.color === forPlayer))
 }
 
 export function availableBuildingPositions(board: Board, forPlayer: Color | undefined) {

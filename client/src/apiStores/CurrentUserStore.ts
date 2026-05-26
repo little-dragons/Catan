@@ -1,10 +1,10 @@
-import { defineStore } from "pinia"
 import { type HonoSchema, type User, UserType } from "catan-shared"
-import { ref, computed } from "vue"
-import { serverAddress } from "@/misc/Globals"
 import type { Hono } from "hono"
 import { hc } from "hono/client"
 import type { BlankEnv } from "hono/types"
+import { defineStore } from "pinia"
+import { computed, ref } from "vue"
+import { serverAddress } from "@/misc/Globals"
 import { useCurrentRoomStore } from "./CurrentRoomStore"
 
 export enum UserStatus {
@@ -46,13 +46,13 @@ const restClient = hc<Hono<BlankEnv, HonoSchema, '/'>>(serverAddress, {
 export const useCurrentUserStore = defineStore('user', () => {
     const info = ref<CurrentUserInfo>({ status: UserStatus.Anonymous })
     const loggedInInfo = computed<User | undefined>(() => {
-        if (info.value.status == UserStatus.LoggedIn)
+        if (info.value.status === UserStatus.LoggedIn)
             return info.value.user
         return undefined
     })
 
     async function tryGuestLogin(name: string) {
-        if (info.value.status != UserStatus.Anonymous)
+        if (info.value.status !== UserStatus.Anonymous)
             return UserOPResult.NotAnonymous
 
         
@@ -75,7 +75,7 @@ export const useCurrentUserStore = defineStore('user', () => {
 
     async function tryMemberLogin(name: string, password: string) {
 
-        if (info.value.status != UserStatus.Anonymous)
+        if (info.value.status !== UserStatus.Anonymous)
             return UserOPResult.NotAnonymous
 
         const request = { type: UserType.Member, name }
@@ -102,7 +102,7 @@ export const useCurrentUserStore = defineStore('user', () => {
 
     async function tryRegister(name: string, password: string) {
 
-        if (info.value.status != UserStatus.Anonymous)
+        if (info.value.status !== UserStatus.Anonymous)
             return UserOPResult.NotAnonymous
 
         const request = { type: UserType.Member, name }
@@ -129,13 +129,13 @@ export const useCurrentUserStore = defineStore('user', () => {
     }
 
     async function tryLogout() {
-        if (info.value.status == UserStatus.Anonymous)
+        if (info.value.status === UserStatus.Anonymous)
             return UserOPResult.Success
 
         
         // TODO: this could be done better.
         const currentRoom = useCurrentRoomStore()
-        if (currentRoom.info != undefined)
+        if (currentRoom.info !== undefined)
             return UserOPResult.InRoom
 
         await restClient.auth.logout.$post({})

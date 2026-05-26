@@ -1,34 +1,33 @@
 <script setup lang="ts">
-import Setting from './Setting.vue'
+import { type Color, cssColor, isValidSetting, ParticipantType, participantName, type Settings, UserType, unusedColors } from 'catan-shared';
 import { RoomMode, RoomOPResult, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore';
 import router from '@/misc/Router';
 import SideMenu from '@/misc/SideMenu.vue';
-import { cssColor, participantName, ParticipantType, UserType, isValidSetting, type Settings, randomUnusedColor, unusedColors, Color } from 'catan-shared';
-import { useTemplateRef } from 'vue';
+import Setting from './Setting.vue'
 
 const currentRoom = useCurrentRoomStore()
 
 async function tryStart() {
-    const result = await currentRoom.tryStart()
+    const _result = await currentRoom.tryStart()
     // TODO
 }
 
 async function changeSetting<Key extends keyof Settings>(key: Key, value: string) {
     const valid = isValidSetting(key, value)
-    if (valid == undefined)
+    if (valid === undefined)
         return false
 
 
     const res = await currentRoom.tryChangeSetting(key, valid)
-    return res == RoomOPResult.Success
+    return res === RoomOPResult.Success
 }
 
 function possibleColorSwitchesFor(user: Color) {
     if (currentRoom.isOwner)
         return unusedColors([ user ])
 
-    if (user == currentRoom.ownColor)
-        return unusedColors(currentRoom.info!.data.participants.filter(x => x.type == ParticipantType.User).map(x => x.color).concat([ user ]))
+    if (user === currentRoom.ownColor)
+        return unusedColors(currentRoom.info!.data.participants.filter(x => x.type === ParticipantType.User).map(x => x.color).concat([ user ]))
 
     return []
 }
@@ -36,8 +35,8 @@ function possibleColorSwitchesFor(user: Color) {
 </script>
 
 <template>
-    <h1 v-if="currentRoom.info?.mode == RoomMode.Online">Lobby - {{ currentRoom.info.data.name }}</h1>
-    <h1 v-else-if="currentRoom.info?.mode == RoomMode.Offline">Lobby - Offline</h1>
+    <h1 v-if="currentRoom.info?.mode === RoomMode.Online">Lobby - {{ currentRoom.info.data.name }}</h1>
+    <h1 v-else-if="currentRoom.info?.mode === RoomMode.Offline">Lobby - Offline</h1>
     <div class="container">
         <div>            
             <div class="default-grid-header-layout grid-columns">
@@ -47,24 +46,26 @@ function possibleColorSwitchesFor(user: Color) {
             </div>
             <div v-for="user in currentRoom.info?.data.participants" class="default-grid-layout grid-columns">
                 <span>
-                    <p :style="{ textDecoration: user.color == currentRoom.ownColor ? 'dotted underline' : 'none' }">
+                    <p :style="{ textDecoration: user.color === currentRoom.ownColor ? 'dotted underline' : 'none' }">
                         {{ participantName(user) }}
                     </p>
-                    <p v-if="currentRoom.info?.mode == RoomMode.Online && currentRoom.info.data.owner.name == participantName(user)" 
+                    <p v-if="currentRoom.info?.mode === RoomMode.Online && currentRoom.info.data.owner.name === participantName(user)" 
                         :style="{ userSelect: 'none' }">
                         🛠️
                     </p>
                 </span>
-                <p>{{ user.type == ParticipantType.Bot ? 'Bot' : user.user.type == UserType.Member ? 'Member' : 'Guest' }}</p>
+                <p>{{ user.type === ParticipantType.Bot ? 'Bot' : user.user.type === UserType.Member ? 'Member' : 'Guest' }}</p>
                 <button 
+                    type="button"
                     :popovertarget="`${user.color}-popover`" 
                     class="color-icon"
                     :style="{ backgroundColor: cssColor(user.color) }"
-                    :disabled="possibleColorSwitchesFor(user.color).length == 0">
-                    {{ possibleColorSwitchesFor(user.color).length == 0 ? '' : '✎' }}
+                    :disabled="possibleColorSwitchesFor(user.color).length === 0">
+                    {{ possibleColorSwitchesFor(user.color).length === 0 ? '' : '✎' }}
                 </button>
                 <div :id="`${user.color}-popover`" popover>
                     <button v-for="color in possibleColorSwitchesFor(user.color)" 
+                        type="button"
                         class="color-icon" 
                         :style="{ backgroundColor: cssColor(color) }"
                         :commandfor="`${user.color}-popover`"
@@ -72,7 +73,8 @@ function possibleColorSwitchesFor(user: Color) {
                         @click="() => currentRoom.tryChangeColor(user.color, color)"/>
                 </div>
             </div>
-            <button 
+            <button             
+                type="button"
                 class="bot-button"
                 :title="currentRoom.isOwner ? 'Add bot' : 'Only the owner can add a bot'"
                 :disabled="!currentRoom.isOwner || currentRoom.info!.data.participants.length >= currentRoom.info!.data.scenario.players.maxAllowedCount"
@@ -84,22 +86,22 @@ function possibleColorSwitchesFor(user: Color) {
             <Setting 
                 name="Required victory points" 
                 :initial="currentRoom.info!.data.settings.requiredVictoryPoints.toString()"
-                :isValid="val => isValidSetting('requiredVictoryPoints', val) != undefined"
+                :isValid="val => isValidSetting('requiredVictoryPoints', val) !== undefined"
                 :update="currentRoom.isOwner ? (val => changeSetting('requiredVictoryPoints', val)) : undefined"/>
             <Setting 
                 name="Minimal longest road" 
                 :initial="currentRoom.info!.data.settings.longestRoadMinimum.toString()"
-                :isValid="val => isValidSetting('longestRoadMinimum', val) != undefined"
+                :isValid="val => isValidSetting('longestRoadMinimum', val) !== undefined"
                 :update="currentRoom.isOwner ? (val => changeSetting('longestRoadMinimum', val)) : undefined"/>
             <Setting 
                 name="Seed" 
                 :initial="currentRoom.info!.data.settings.seed"
-                :isValid="val => isValidSetting('seed', val) != undefined"
+                :isValid="val => isValidSetting('seed', val) !== undefined"
                 :update="currentRoom.isOwner ? (val => changeSetting('seed', val)) : undefined"/>
 
             <div class="buttons">
-                <button @click="() => { router.push('/').then(currentRoom.tryLeave) }">Leave room</button>
-                <button @click="tryStart" :disabled="!currentRoom.isOwner">Start room</button>
+                <button type="button" @click="() => { router.push('/').then(currentRoom.tryLeave) }">Leave room</button>
+                <button type="button" @click="tryStart" :disabled="!currentRoom.isOwner">Start room</button>
             </div>
         </SideMenu>
     </div>

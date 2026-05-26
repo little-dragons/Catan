@@ -1,9 +1,9 @@
-import { type Board } from "./Board"
-import { Color, type FullPlayer, type RedactedPlayer, redactPlayer } from "./Player"
+import type { Pure } from "../Pure"
+import type { Board } from "./Board"
 import { BuildingType } from "./Buildings"
-import { type OpenTradeOffer } from "./Trade"
 import { DevCardType } from "./GameAction"
-import { type Pure } from "../Pure"
+import { type Color, type FullPlayer, type RedactedPlayer, redactPlayer } from "./Player"
+import type { OpenTradeOffer } from "./Trade"
 
 export enum GamePhaseType {
     Initial,
@@ -23,14 +23,14 @@ export type InitialPhase = Pure<{
     forward: boolean
 }>
 export function isInitial(phase: GamePhase): phase is InitialPhase {
-    return phase.type == GamePhaseType.Initial
+    return phase.type === GamePhaseType.Initial
 }
 export type PreDiceRollPhase = Pure<{
     type: GamePhaseType.Turns
     subtype: TurnPhaseType.PreDiceRoll
 }>
 export function isPreDiceRoll(phase: GamePhase): phase is PreDiceRollPhase {
-    return phase.type == GamePhaseType.Turns && phase.subtype == TurnPhaseType.PreDiceRoll
+    return phase.type === GamePhaseType.Turns && phase.subtype === TurnPhaseType.PreDiceRoll
 }
 export type RobbingPhase = DiscardingCardsRobberPhase | MovingRobberPhase
 export type DiscardingCardsRobberPhase = Pure<{
@@ -45,13 +45,13 @@ export type MovingRobberPhase = Pure<{
     robtype: RobbingPhaseType.MovingRobber
 }>
 export function isRobbing(phase: GamePhase): phase is RobbingPhase {
-    return phase.type == GamePhaseType.Turns && phase.subtype == TurnPhaseType.Robbing
+    return phase.type === GamePhaseType.Turns && phase.subtype === TurnPhaseType.Robbing
 }
 export function isRobbingMovingRobber(phase: GamePhase): phase is MovingRobberPhase {
-    return isRobbing(phase) && phase.robtype == RobbingPhaseType.MovingRobber
+    return isRobbing(phase) && phase.robtype === RobbingPhaseType.MovingRobber
 }
 export function isRobbingDiscardingCards(phase: GamePhase): phase is DiscardingCardsRobberPhase {
-    return isRobbing(phase) && phase.robtype == RobbingPhaseType.DiscardingCards
+    return isRobbing(phase) && phase.robtype === RobbingPhaseType.DiscardingCards
 }
 
 
@@ -61,7 +61,7 @@ export type ActivePhase = Pure<{
     tradeOffers: OpenTradeOffer[]
 }>
 export function isActive(phase: GamePhase): phase is ActivePhase {
-    return phase.type == GamePhaseType.Turns && phase.subtype == TurnPhaseType.Active
+    return phase.type === GamePhaseType.Turns && phase.subtype === TurnPhaseType.Active
 }
 
 export type GamePhase =
@@ -101,7 +101,11 @@ export type AnyGameState = FullGameState | RedactedGameState | PublicGameState
 
 export function publicGameState(state: FullGameState): PublicGameState {
     return {
-        ...state,
+        board: state.board,
+        currentPlayer: state.currentPlayer,
+        knightForce: state.knightForce,
+        longestRoad: state.longestRoad,
+        phase: state.phase,
         players: state.players.map(redactPlayer),        
         devCardCount: 
             state.devCards.knights +
@@ -115,18 +119,18 @@ export function publicGameState(state: FullGameState): PublicGameState {
 export function redactGameStateFor(state: FullGameState, color: Color): RedactedGameState {
     return {
         ...publicGameState(state),
-        self: state.players.find(player => player.color == color)!
+        self: state.players.find(player => player.color === color)!
     }
 }
 
 export function nextTurn(state: AnyGameState): [Color, GamePhase] {
-    const currentIdx = state.players.findIndex(x => x.color == state.currentPlayer)
+    const currentIdx = state.players.findIndex(x => x.color === state.currentPlayer)
     // check if index is in range? unncessary
 
-    if (state.phase.type == GamePhaseType.Initial) {
-        if (currentIdx == 0 && !state.phase.forward)
+    if (state.phase.type === GamePhaseType.Initial) {
+        if (currentIdx === 0 && !state.phase.forward)
             return [state.players[currentIdx]!.color, { type: GamePhaseType.Turns, subtype: TurnPhaseType.PreDiceRoll }]
-        else if (currentIdx == state.players.length - 1) {
+        else if (currentIdx === state.players.length - 1) {
             if (state.phase.forward)
                 return [state.players[currentIdx]!.color, { type: GamePhaseType.Initial, forward: false }]
             else
@@ -151,25 +155,25 @@ export function victoryPointsForBuildingType(buildingType: BuildingType): number
     }
 }
 export function victoryPointsFromBuildings(board: Board, color: Color): number {
-    return board.buildings.reduce((current, { color: buildColor, type }) => buildColor == color ? current + victoryPointsForBuildingType(type) : current, 0)
+    return board.buildings.reduce((current, { color: buildColor, type }) => buildColor === color ? current + victoryPointsForBuildingType(type) : current, 0)
 }
 
 
 export function victoryPointsFromLongestRoad(state: AnyGameState, color: Color): number {
-    if (state.longestRoad == color)
+    if (state.longestRoad === color)
         return 2
     return 0
 }
 
 export function victoryPointsFromKnightForce(state: AnyGameState, color: Color): number {
-    if (state.knightForce == color)
+    if (state.knightForce === color)
         return 2
     return 0
 }
 
 export function victoryPointsFromFull(state: FullGameState, color: Color): number {
-    const hiddenVpCards = state.players.find(x => x.color == color)!.devCards
-                                .filter(x => x == DevCardType.VictoryPoint).length
+    const hiddenVpCards = state.players.find(x => x.color === color)!.devCards
+                                .filter(x => x === DevCardType.VictoryPoint).length
     return victoryPointsFromBuildings(state.board, color) + 
            victoryPointsFromLongestRoad(state, color) + 
            victoryPointsFromKnightForce(state, color) +
@@ -179,8 +183,8 @@ export function victoryPointsFromFull(state: FullGameState, color: Color): numbe
 
 export function victoryPointsFromRedacted(state: RedactedGameState, color: Color): number {
     let hiddenVpCards = 0
-    if (state.self.color == color) {
-        hiddenVpCards = state.self.devCards.filter(x => x == DevCardType.VictoryPoint).length
+    if (state.self.color === color) {
+        hiddenVpCards = state.self.devCards.filter(x => x === DevCardType.VictoryPoint).length
     }
 
     return victoryPointsFromBuildings(state.board, color) + 

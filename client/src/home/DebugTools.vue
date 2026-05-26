@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { type Board, Color, defaultScenario, GamePhaseType, generateBoardFromScenario, type History, Resource, randomSeed, TurnPhaseType } from 'catan-shared'
 import { v4 } from 'uuid'
-import { Color, defaultScenario, GamePhaseType, generateBoardFromScenario, randomSeed, Resource, TurnPhaseType, type Board, type History } from 'catan-shared'
-import HistoryComponent from '@/game/History.vue'
-import { usePopups, PopupSeverity } from '@/popup/Popup'
+import { computed, ref } from 'vue'
 import { useCurrentRoomStore } from '@/apiStores/CurrentRoomStore'
-import { useCurrentUserStore, UserStatus } from '@/apiStores/CurrentUserStore'
-import router from '@/misc/Router'
+import { UserStatus, useCurrentUserStore } from '@/apiStores/CurrentUserStore'
+import HistoryComponent from '@/game/History.vue'
 import Container from '@/game-components/board/Container.vue'
 import DefaultBoardItems from '@/game-components/board/DefaultBoardItems.vue'
+import router from '@/misc/Router'
+import { PopupSeverity, usePopups } from '@/popup/Popup'
 
 const currentUser = useCurrentUserStore()
 const currentRoom = useCurrentRoomStore()
@@ -62,29 +62,29 @@ const exampleHistory: History = {
 const showHistory = ref(false)
 const showBoardRenderer = ref(false)
 const boardString = ref('')
-const board = computed<Board | undefined>(() => boardString.value == '' ? undefined : JSON.parse(boardString.value))
+const board = computed<Board | undefined>(() => boardString.value === '' ? undefined : JSON.parse(boardString.value))
 
 </script>
 
 
 <template>
-    <button @click="currentUser.tryLogout" v-if="currentUser.info.status == UserStatus.LoggedIn">Logout</button>
-    <button @click="debugLogin" :disabled="currentUser.info.status != UserStatus.Anonymous || currentRoom.info != undefined">
+    <button type="button" @click="currentUser.tryLogout" v-if="currentUser.info.status === UserStatus.LoggedIn">Logout</button>
+    <button type="button" @click="debugLogin" :disabled="currentUser.info.status !== UserStatus.Anonymous || currentRoom.info !== undefined">
         Login and create debug room
     </button>
-    <button @click="() => showHistory = !showHistory">
+    <button type="button" @click="() => showHistory = !showHistory">
         Visit example history page.
     </button>
-    <button @click="triggerNotification">
+    <button type="button" @click="triggerNotification">
         Send test notification
     </button>
-    <button @click="() => showBoardRenderer = !showBoardRenderer">
+    <button type="button" @click="() => showBoardRenderer = !showBoardRenderer">
         Toggle board renderer
     </button>
 
     <HistoryComponent v-if="showHistory" :history="exampleHistory" />
     <textarea v-if="showBoardRenderer" v-model="boardString"/>
-    <Container v-if="showBoardRenderer && board != undefined" :tile-coordinates="board.tiles.map(x => x.coord)">
+    <Container v-if="showBoardRenderer && board !== undefined" :tile-coordinates="board.tiles.map(x => x.coord)">
         <DefaultBoardItems :board="board"/>
     </Container>
 </template>

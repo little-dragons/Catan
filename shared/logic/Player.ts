@@ -1,6 +1,6 @@
-import { type CardList } from "./Resource"
-import { DevCardType } from "./GameAction"
-import { type Pure } from "../Pure"
+import type { Pure } from "../Pure"
+import type { DevCardType } from "./GameAction"
+import type { CardList } from "./Resource"
 
 export type RedactedPlayer = Pure<{
     color: Color,
@@ -43,7 +43,7 @@ export function unusedColors(used: readonly Color[]): Color[] {
  */
 export function randomUnusedColor(used: readonly Color[]): Color | undefined {
     const free = unusedColors(used)
-    if (free.length == 0)
+    if (free.length === 0)
         return undefined
     
     return free[Math.floor(free.length * Math.random())]

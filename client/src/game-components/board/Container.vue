@@ -10,6 +10,7 @@ defineProps<{
 
 <template>
     <svg :viewBox="svgViewboxStringFromTileCoords(tileCoordinates)">
+        <title>Board</title>
         <slot/>
     </svg>
 </template>

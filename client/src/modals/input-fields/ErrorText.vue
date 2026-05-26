@@ -10,7 +10,7 @@ defineProps<{
 </script>
 
 <template>
-    <p v-if="status != true && status != false">{{ status }}</p>
+    <p v-if="status !== true && status !== false">{{ status }}</p>
 </template>
 
 <style scoped>

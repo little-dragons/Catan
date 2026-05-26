@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { usePopups, popupLifetime, PopupSeverity, type Popup } from './Popup';
 import Close from '@/assets/ui/close.svg'
+import { type Popup, PopupSeverity, popupLifetime } from './Popup';
 
 const props = defineProps<{
     info: Popup
@@ -18,13 +18,13 @@ const remaining = props.info.autoCloses ? popupLifetime - (Date.now() - props.in
         <div class="content">
             <span>
                 <p>{{ PopupSeverity[info.severity] }}</p>
-                <img :src="Close" @click="() => $emit('closed')"/>
+                <img :src="Close" @click="() => $emit('closed')" title="Close" alt=""/>
             </span>
             <h3>{{ info.title }}</h3>
             <p>{{ info.message }}</p>
         </div>
         <div 
-            v-if="remaining != undefined" 
+            v-if="remaining !== undefined" 
             class="red-bar duration"/>
     </div>
 </template>
@@ -66,6 +66,10 @@ const remaining = props.info.autoCloses ? popupLifetime - (Date.now() - props.in
     justify-content: space-between;
 }
 
+.content > p {
+    margin: 0px;
+}
+
 .content > span > p {
     margin: 0;
     font-size: x-small;
@@ -85,8 +89,5 @@ const remaining = props.info.autoCloses ? popupLifetime - (Date.now() - props.in
 
 .content > h3 {
     margin: 0;
-}
-.content > p {
-    margin: 0px;
 }
 </style>

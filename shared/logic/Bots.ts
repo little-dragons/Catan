@@ -1,11 +1,11 @@
-import { adjacentColorsToTile, adjacentRoads, availableRoadPositions, type Coordinate, landTiles, portsForColor, resourceFrequenciesForColor, sameCoordinate, SpecialPorts, type Board } from "./Board"
+import type { Pure } from "../Pure"
+import { adjacentRoads, availableRoadPositions, type Board, type Coordinate, portsForColor, resourceFrequenciesForColor, SpecialPorts } from "./Board"
 import { availableBuildingPositions, BuildingType, ConnectionType } from "./Buildings"
-import { type GameActionInput, GameActionType, tryDoPlaceInitialRedacted } from "./GameAction"
-import { GamePhaseType, isRobbingDiscardingCards, type RedactedGameState, RobbingPhaseType, TurnPhaseType, victoryPointsFromRedacted, requireActionFrom, publicGameState } from "./GameState"
-import { buildingCost, type CardList, connectionCost, Resource, tryRemoveCards, tryTransferCard } from "./Resource"
-import { Color } from "./Player"
 import { type Distribution, mapRecord, popcountDistribution, sumDistribution } from "./Distribution"
-import { type Pure } from "../Pure"
+import { type GameActionInput, GameActionType, tryDoPlaceInitialRedacted } from "./GameAction"
+import { GamePhaseType, isRobbingDiscardingCards, type RedactedGameState, RobbingPhaseType, requireActionFrom, TurnPhaseType, victoryPointsFromRedacted } from "./GameState"
+import type { Color } from "./Player"
+import { buildingCost, type CardList, connectionCost, type Resource, tryRemoveCards, tryTransferCard } from "./Resource"
 import { newRobberPositions, robbableCrossingsExceptCurrent } from "./Robber"
 
 export enum BotPersonality {
@@ -47,7 +47,7 @@ export type Bot = {
  * @param state 
  * @returns A selection of half the cards of {@link RedactedGameState.self} which may be discarded
  */
-function cardsToDiscard(bot: Bot, state: RedactedGameState): CardList {
+function cardsToDiscard(_bot: Bot, state: RedactedGameState): CardList {
     const toDiscard = Math.floor(state.self.handCards.length / 2)
 
     let oldCards = state.self.handCards
@@ -105,31 +105,29 @@ export function scoreState(bot: Bot, state: RedactedGameState): number {
 
 function initialSettlementPlacement(bot: Bot, state: RedactedGameState): Pure<[Coordinate, [Coordinate, Coordinate]]> {
     const options = availableBuildingPositions(state.board, undefined)
-                    .flatMap(set => adjacentRoads(set).map(road => {
-                        return {
-                            settlement: set,
-                            road: road,
-                            score: scoreState(bot, tryDoPlaceInitialRedacted(state, set, road)!)
-                        }
-                    }))
+                    .flatMap(set => adjacentRoads(set).map(road => ({
+                        settlement: set,
+                        road: road,
+                        score: scoreState(bot, tryDoPlaceInitialRedacted(state, set, road)!)
+                    })))
 
     const best = options.sort((a, b) => b.score - a.score)[0]
 
     return [best.settlement, best.road]
 }
 
-export function placeRobber(bot: Bot, state: RedactedGameState): [Coordinate, Color | undefined] {
+export function placeRobber(_bot: Bot, state: RedactedGameState): [Coordinate, Color | undefined] {
     const coord = newRobberPositions(state.board)[0]
     const cross = robbableCrossingsExceptCurrent(state, coord)
-    if (cross.length == 0)
+    if (cross.length === 0)
         return [coord, undefined]
     else
         return [coord, cross[0][0]]
 }
 
-export function activeAction(bot: Bot, state: RedactedGameState): GameActionInput {
+export function activeAction(_bot: Bot, state: RedactedGameState): GameActionInput {
     const possibleSettlements = availableBuildingPositions(state.board, state.self.color)
-    if (possibleSettlements.length > 0 && tryRemoveCards(state.self.handCards, buildingCost(BuildingType.Settlement)) != undefined) {
+    if (possibleSettlements.length > 0 && tryRemoveCards(state.self.handCards, buildingCost(BuildingType.Settlement)) !== undefined) {
         return {
             type: GameActionType.PlaceSettlement,
             coordinate: possibleSettlements[0]
@@ -137,7 +135,7 @@ export function activeAction(bot: Bot, state: RedactedGameState): GameActionInpu
     }
 
     const possibleRoads = availableRoadPositions(state.board, state.self.color)
-    if (possibleSettlements.length == 0 && possibleRoads.length > 0 && tryRemoveCards(state.self.handCards, connectionCost(ConnectionType.Road)) != undefined) {
+    if (possibleSettlements.length === 0 && possibleRoads.length > 0 && tryRemoveCards(state.self.handCards, connectionCost(ConnectionType.Road)) !== undefined) {
         return {
             type: GameActionType.PlaceRoad,
             coordinates: possibleRoads[0]
@@ -162,10 +160,10 @@ export function generateBotAction(bot: Bot, state: RedactedGameState): GameActio
         }
     }
 
-    if (state.currentPlayer != state.self.color)
+    if (state.currentPlayer !== state.self.color)
         return undefined
 
-    if (state.phase.type == GamePhaseType.Initial) {
+    if (state.phase.type === GamePhaseType.Initial) {
         const [settlement, road] = initialSettlementPlacement(bot, state)
         return {
             type: GameActionType.PlaceInitial,
@@ -176,7 +174,7 @@ export function generateBotAction(bot: Bot, state: RedactedGameState): GameActio
     
     switch (state.phase.subtype) {
         case TurnPhaseType.Robbing: {
-            if (state.phase.robtype == RobbingPhaseType.DiscardingCards && state.phase.playersLeftToDiscard.includes(state.self.color)) {
+            if (state.phase.robtype === RobbingPhaseType.DiscardingCards && state.phase.playersLeftToDiscard.includes(state.self.color)) {
                 return {
                     type: GameActionType.DiscardResources,
                     resources: cardsToDiscard(bot, state)

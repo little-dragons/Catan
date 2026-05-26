@@ -8,13 +8,13 @@ export type Settings = {
 
 
 export function isValidSetting<Key extends keyof Settings>(key: Key, value: string): Settings[Key] | undefined {
-    const int = parseInt(value)
+    const int = parseInt(value, 10)
 
     switch (key) {
         case 'requiredVictoryPoints': 
-            return isNaN(int) || int < 5 || int > 30 ? undefined : int as Settings[Key]
+            return Number.isNaN(int) || int < 5 || int > 30 ? undefined : int as Settings[Key]
         case 'longestRoadMinimum':
-            return isNaN(int) || int < 3 || int > 8 ? undefined : int as Settings[Key]
+            return Number.isNaN(int) || int < 3 || int > 8 ? undefined : int as Settings[Key]
         case 'seed':
             return value.length >= 1 && value.length <= 50 ? value as Settings[Key] : undefined 
     }

@@ -7,8 +7,8 @@ const props = withDefaults(defineProps<{
 })
 
 const cssClass = 
-    props.type == 'space between' ? 'spaceBetween' :
-    props.type == 'tight' ? 'tight' : undefined!
+    props.type === 'space between' ? 'spaceBetween' :
+    props.type === 'tight' ? 'tight' : undefined!
 
 </script>
 
@@ -30,6 +30,7 @@ label {
 .spaceBetween {
     justify-content: space-between;
 }
+/* biome-ignore lint/correctness/noUnknownPseudoClass: Vue scoped CSS deep selector */
 .spaceBetween:deep(:not(span)) {
     max-width: 6rem;
 }
