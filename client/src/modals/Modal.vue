@@ -1,48 +1,76 @@
 <script setup lang="ts">
+import { useTemplateRef } from 'vue'
 import Close from '@/assets/ui/close.svg'
-import { useModalStore } from './ModalStore';
 
+// Right now, the setup is: the modals are created in the dom and are not shown
+// They are opened via `command` and `commandFor` using the following global ids.
+// The browser handles all modal specific overlay, interaction logic and backdrop quite nicely on its own
+// just using declarative html.
+// Still, some methods are exposed to open and close a modal programmatically, if need be.
 
-const modalStore = useModalStore()
+export const loginModalID = 'login-modal-id'
+export const createRoomModalID = 'create-room-modal-id'
+
+defineProps<{
+    title: string
+    id: string
+}>()
+
+const dialog = useTemplateRef('dialog')
+
+defineExpose({
+    open: () => dialog.value?.showModal(),
+    close: () => dialog.value?.close()
+})
 </script>
 
 
 <template>
-    <div class="all">
-        <div class="modal">
-            <div class="close">
-                <img :src="Close" @click="() => modalStore.value = undefined" alt=""/>
-            </div>
-            <slot/>
+    <dialog :id="id" closedby="closerequest" ref="dialog">
+        <div class="header">
+            <h1>{{ title }}</h1>
+            <button 
+                type="button"
+                title="Close dialog"
+                :commandfor="id"
+                command="close"
+                autofocus>
+
+                <img :src="Close" alt=""/>
+            </button>            
         </div>
-    </div>
+        <slot/>
+    </dialog>
 </template>
 
 <style scoped>
 @import '../assets/base.css';
 
-.all {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: var(--modal-background-overlay);
+dialog::backdrop {
+    background: var(--modal-background-overlay);
+    backdrop-filter: blur(4px);
 }
 
-.modal {
+dialog {
     max-width: min(80%, 35rem);
     width: fit-content;
     padding: 1rem;
     margin: auto;
-    margin-top: 10rem;
     border: var(--modal-border);
     border-radius: 10px;
     background-color: var(--modal-background-color);
 }
 
-/* biome-ignore lint/correctness/noUnknownPseudoClass: Vue scoped CSS deep selector */
-.modal:deep(h1) {
+
+header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 3rem;
+}
+
+h1 {
     font-weight: 500;
     width: 100%;
     margin: 0;
@@ -57,11 +85,20 @@ const modalStore = useModalStore()
     margin-left: auto;
 }
 
-.close>img {
+img {
     width: 1.25rem;
 }
 
-.close>img:hover {
+button {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+
+    padding: 0;
+    border: none;
+    background-color: inherit;
+}
+button:hover {
     cursor: pointer;
 }
 </style>

@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef } from 'vue';
-import { UserOPResult, UserStatus, useCurrentUserStore } from '@/apiStores/CurrentUserStore';
-import Modal from '@/modals/Modal.vue'
-import { PopupSeverity, usePopups } from '@/popup/Popup';
-import LabeledInput from './input-fields/LabeledInput.vue';
-import PasswordInput from './input-fields/PasswordInput.vue';
-import UsernameInput from './input-fields/UsernameInput.vue';
-import { useModalStore } from './ModalStore';
+import { computed, ref, useTemplateRef } from 'vue'
+import { UserOPResult, UserStatus, useCurrentUserStore } from '@/apiStores/CurrentUserStore'
+import Modal, { loginModalID } from '@/modals/Modal.vue'
+import { PopupSeverity, usePopups } from '@/popup/Popup'
+import LabeledInput from './input-fields/LabeledInput.vue'
+import PasswordInput from './input-fields/PasswordInput.vue'
+import UsernameInput from './input-fields/UsernameInput.vue'
 
-const modalStore = useModalStore()
 const popups = usePopups()
 const currentUser = useCurrentUserStore()
 
@@ -17,6 +15,7 @@ const showRegister = ref(false)
 const passwordInput = useTemplateRef('passwordInput')
 const guestnameInput = useTemplateRef('guestnameInput')
 const membernameInput = useTemplateRef('membernameInput')
+const modal = useTemplateRef('modal')
 
 
 async function memberLogin() {
@@ -26,7 +25,7 @@ async function memberLogin() {
     const result = await currentUser.tryMemberLogin(membernameInput.value.result, passwordInput.value.result)
     switch (result) {
         case UserOPResult.Success:
-            modalStore.value = undefined
+            modal.value?.close()
             return
         case UserOPResult.NotAnonymous:
             popups.insert({
@@ -52,7 +51,7 @@ async function guestLogin() {
     const result = await currentUser.tryGuestLogin(guestnameInput.value.result)
     switch (result) {
         case UserOPResult.Success:
-            modalStore.value = undefined
+            modal.value?.close()
             return
 
         case UserOPResult.NotAnonymous:
@@ -77,7 +76,7 @@ async function register() {
     const result = await currentUser.tryRegister(membernameInput.value.result, passwordInput.value.result)
     switch (result) {
         case UserOPResult.Success:
-            modalStore.value = undefined
+            modal.value?.close()
             return
 
         case UserOPResult.NotAnonymous:
@@ -104,69 +103,69 @@ const pending = computed(() => currentUser.info.status === UserStatus.Pending)
 
 
 <template>
-    <Modal v-if="showRegister === false">
-        <h1>Login</h1>
-        <p>Please login with your account or create a temporary guest account.</p>
-        <p>Kindly observe that member logins are to be done on the left side while guest logins are done on the right.</p>
-        <div class="forms">
+    <Modal :id="loginModalID" :title="showRegister ? 'Register' : 'Login'" ref="modal">
+        <div v-if="!showRegister">
+            <p>Please login with your account or create a temporary guest account.</p>
+            <p>Kindly observe that member logins are to be done on the left side while guest logins are done on the right.</p>
+            <div class="forms">
+                <form class="member-login">
+                    <LabeledInput label="Member name:" type="space between">
+                        <UsernameInput ref="membernameInput" :disabled="pending" autocomplete="username"/>
+                    </LabeledInput>
+                    
+                    <LabeledInput label="Password:" type="space between">
+                        <PasswordInput ref="passwordInput" :disabled="pending" autocomplete="current-password"/>
+                    </LabeledInput>
+
+                    <p class="register">
+                        Want to become a member? <span @click="() => { if (!pending) showRegister = true }">Register</span>
+                    </p>
+
+                    <input
+                        type="button"
+                        value="Login"
+                        @click="memberLogin"
+                        title="Member Login"
+                        :disabled="membernameInput?.result == null || passwordInput?.result == null"/>
+                </form>
+                <div class="vertical-line"/>
+                <form class="guest-login">
+                    <LabeledInput label="Guest name:" type="space between">
+                        <UsernameInput ref="guestnameInput" :disabled="pending" autocomplete="username"/>
+                    </LabeledInput>
+
+                    <input
+                        type="button" 
+                        value="Guest login" 
+                        @click="guestLogin"
+                        title="Guest Login"
+                        :disabled="pending || guestnameInput?.result == null"/>
+                </form>
+            </div>
+        </div>
+        <div v-else>
+        <p>Here you may create a member account.</p>
             <form class="member-login">
                 <LabeledInput label="Member name:" type="space between">
                     <UsernameInput ref="membernameInput" :disabled="pending" autocomplete="username"/>
                 </LabeledInput>
                 
                 <LabeledInput label="Password:" type="space between">
-                    <PasswordInput ref="passwordInput" :disabled="pending" autocomplete="current-password"/>
+                    <PasswordInput ref="passwordInput" :disabled="pending" autocomplete="new-password"/>
                 </LabeledInput>
 
                 <p class="register">
-                    Want to become a member? <span @click="() => { if (!pending) showRegister = true }">Register</span>
+                    Already have an account? <span @click="() => { if (!pending) showRegister = false }">Login</span>
                 </p>
 
                 <input
                     type="button"
-                    value="Login"
-                    @click="memberLogin"
-                    title="Member Login"
-                    :disabled="membernameInput?.result == null || passwordInput?.result == null"/>
-            </form>
-            <div class="vertical-line"/>
-            <form class="guest-login">
-                <LabeledInput label="Guest name:" type="space between">
-                    <UsernameInput ref="guestnameInput" :disabled="pending" autocomplete="username"/>
-                </LabeledInput>
-
-                <input
-                    type="button" 
-                    value="Guest login" 
-                    @click="guestLogin"
-                    title="Guest Login"
-                    :disabled="pending || guestnameInput?.result == null"/>
+                    value="Register"
+                    @click="register"
+                    title="Register"
+                    :disabled="pending || membernameInput?.result == null || passwordInput?.result == null"/>
             </form>
         </div>
-    </Modal>
-    <Modal v-if="showRegister === true">
-        <h1>Register</h1>
-        <p>Here you may create a member account.</p>
-        <form class="member-login">
-            <LabeledInput label="Member name:" type="space between">
-                <UsernameInput ref="membernameInput" :disabled="pending" autocomplete="username"/>
-            </LabeledInput>
-            
-            <LabeledInput label="Password:" type="space between">
-                <PasswordInput ref="passwordInput" :disabled="pending" autocomplete="new-password"/>
-            </LabeledInput>
-
-            <p class="register">
-                Already have an account? <span @click="() => { if (!pending) showRegister = false }">Login</span>
-            </p>
-
-            <input
-                type="button"
-                value="Register"
-                @click="register"
-                title="Register"
-                :disabled="pending || membernameInput?.result == null || passwordInput?.result == null"/>
-        </form>
     </Modal>
 </template>
 

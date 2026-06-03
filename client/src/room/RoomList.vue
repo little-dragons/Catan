@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue';
-import { RoomOPResult, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore';
-import { useRoomListStore } from '@/apiStores/RoomListStore';
-import router from '@/misc/Router';
-import { ModalType, useModalStore } from '@/modals/ModalStore';
-import { PopupSeverity, usePopups } from '@/popup/Popup';
+import { onMounted, onUnmounted } from 'vue'
+import { RoomOPResult, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore'
+import { useRoomListStore } from '@/apiStores/RoomListStore'
+import router from '@/misc/Router'
+import { createRoomModalID } from '@/modals/Modal.vue'
+import { PopupSeverity, usePopups } from '@/popup/Popup'
 
 const currentRoom = useCurrentRoomStore()
 const popups = usePopups()
 const roomList = useRoomListStore()
-const modalStore = useModalStore()
 
 async function tryJoin(roomId: string) {
     const result = await currentRoom.tryJoin(roomId)
@@ -42,9 +41,20 @@ onUnmounted(() => roomList.autoRefresh = false)
 
 <template>
     <h1>Room list</h1>
-    <input type="button" value="Create New Room" @click="() => modalStore.value = ModalType.CreateRoom" :disabled="!currentRoom.canJoinOnline"
-        title="Create New Room" />
-    <input type="button" value="Create Offline Room" @click="tryCreateOfflineAndMove" :disabled="currentRoom.info !== undefined"/>
+    <button type="button" 
+            value="Create New Room" 
+            :commandFor="createRoomModalID" 
+            command="show-modal" 
+            :disabled="!currentRoom.canJoinOnline"
+            title="Create New Room">
+            Create new room
+    </button>
+    <button type="button" 
+            value="Create Offline Room" 
+            @click="tryCreateOfflineAndMove" 
+            :disabled="currentRoom.info !== undefined">
+            Create offline room
+    </button>
     <div class="grid-columns heading default-grid-header-layout">
         <p>Room name</p>
         <p>Players</p>

@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { ref, useTemplateRef } from 'vue';
-import { RoomOPResult, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore';
-import router from '@/misc/Router';
-import Modal from '@/modals/Modal.vue'
-import { PopupSeverity, usePopups } from '@/popup/Popup';
-import LabeledInput from './input-fields/LabeledInput.vue';
-import RoomInput from './input-fields/RoomInput.vue';
-import { useModalStore } from './ModalStore';
+import { useTemplateRef } from 'vue'
+import { RoomOPResult, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore'
+import router from '@/misc/Router'
+import Modal, { createRoomModalID } from '@/modals/Modal.vue'
+import { PopupSeverity, usePopups } from '@/popup/Popup'
+import LabeledInput from './input-fields/LabeledInput.vue'
+import RoomInput from './input-fields/RoomInput.vue'
 
 const roomInput = useTemplateRef('roomInput')
 
+const modal = useTemplateRef('modal')
+
 const currentRoom = useCurrentRoomStore()
 const popups = usePopups()
-const modalStore = useModalStore()
 
 async function buttonClick() {
     if (roomInput.value?.result == null)
@@ -21,7 +21,7 @@ async function buttonClick() {
     const res = await currentRoom.tryCreateOnline(roomInput.value.result)
     switch (res) {
         case RoomOPResult.Success:
-            modalStore.value = undefined
+            modal.value?.close()
             await router.push({ name: 'room' })
             return
 
@@ -57,8 +57,7 @@ async function buttonClick() {
 
 </script>
 <template>
-    <Modal @close="() => $emit('close')">
-        <h1>Create room</h1>
+    <Modal :id="createRoomModalID" title="Create room" ref="modal">
         <p>Please enter all necessary information below.</p>
         <p>You will be the owner of the room.</p>
         <form>
