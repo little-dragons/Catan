@@ -1,9 +1,9 @@
-import type { Pure } from "../Pure"
-import type { Board } from "./Board"
-import { BuildingType } from "./Buildings"
-import { DevCardType } from "./GameAction"
-import { type Color, type FullPlayer, type RedactedPlayer, redactPlayer } from "./Player"
-import type { OpenTradeOffer } from "./Trade"
+import type { Pure } from '../Pure'
+import type { Board } from './Board'
+import { BuildingType } from './Buildings'
+import { DevCardType } from './GameAction'
+import { type Color, type FullPlayer, type RedactedPlayer, redactPlayer } from './Player'
+import type { OpenTradeOffer } from './Trade'
 
 export enum GamePhaseType {
     Initial,

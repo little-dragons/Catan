@@ -1,4 +1,4 @@
-import { type BoardSeed, randomBoardSeed } from "./Board"
+import { type BoardSeed, randomBoardSeed } from './Board'
 
 export type Settings = {
     requiredVictoryPoints: number

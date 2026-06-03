@@ -1,22 +1,22 @@
 import { readFileSync } from  'node:fs'
-import { zValidator } from "@hono/zod-validator"
-import { instrument } from "@socket.io/admin-ui"
+import { zValidator } from '@hono/zod-validator'
+import { instrument } from '@socket.io/admin-ui'
 import { Server as Engine, type WebSocketData } from '@socket.io/bun-engine'
-import { compare, hash } from "bcrypt"
-import { CookieMap, randomUUIDv7 } from "bun"
-import { type GameClientEventMap, type GameServerEventMap, gameNamespace, type HonoSchema, queryNamespace, SocketPort, type User, UserType, validUsername } from "catan-shared"
+import { compare, hash } from 'bcrypt'
+import { CookieMap, randomUUIDv7 } from 'bun'
+import { type GameClientEventMap, type GameServerEventMap, gameNamespace, type HonoSchema, queryNamespace, SocketPort, type User, UserType, validUsername } from 'catan-shared'
 import { Hono } from 'hono'
-import { deleteCookie, getCookie, setCookie } from "hono/cookie"
-import { cors } from "hono/cors"
-import type { CookieOptions } from "hono/utils/cookie"
-import { Server } from "socket.io"
-import z from "zod"
-import { addUserToDb, getUserFromDb, hasUserInDb } from "./database/CommonQueries"
-import { db } from "./database/Connection"
-import { type GameNamespace, type GameSocketDataType, isDevelopment, isProduction, type QueryNamespace } from "./socketEvents/Common"
-import { acceptGameEvents } from "./socketEvents/GameEvents"
-import { acceptLobbyEvents } from "./socketEvents/LobbyEvents"
-import { acceptRoomEvents, allLobbies, registerRoomMiddleware } from "./socketEvents/RoomManager"
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
+import { cors } from 'hono/cors'
+import type { CookieOptions } from 'hono/utils/cookie'
+import { Server } from 'socket.io'
+import z from 'zod'
+import { addUserToDb, getUserFromDb, hasUserInDb } from './database/CommonQueries'
+import { db } from './database/Connection'
+import { type GameNamespace, type GameSocketDataType, isDevelopment, isProduction, type QueryNamespace } from './socketEvents/Common'
+import { acceptGameEvents } from './socketEvents/GameEvents'
+import { acceptLobbyEvents } from './socketEvents/LobbyEvents'
+import { acceptRoomEvents, allLobbies, registerRoomMiddleware } from './socketEvents/RoomManager'
 
 const io = new Server<GameServerEventMap, GameClientEventMap, object & {}, GameSocketDataType>()
 const engine = new Engine({

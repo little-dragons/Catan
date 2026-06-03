@@ -1,10 +1,10 @@
-import type { User } from '../authentication/User';
-import type { Bot } from './Bots';
-import type { FullGameState, RedactedGameState } from './GameState';
-import type { History } from './History';
-import type { Color } from './Player';
-import type { Scenario } from './Scenario';
-import type { Settings } from './Settings';
+import type { User } from '../authentication/User'
+import type { Bot } from './Bots'
+import type { FullGameState, RedactedGameState } from './GameState'
+import type { History } from './History'
+import type { Color } from './Player'
+import type { Scenario } from './Scenario'
+import type { Settings } from './Settings'
 
 export type RoomId = string
 export enum RoomType {

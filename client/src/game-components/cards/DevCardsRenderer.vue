@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { countDevCards, DevCardType } from 'catan-shared';
-import { computed } from 'vue';
-import { imageForDevCard } from '@/misc/CardTextures';
-import type { CardStackProps } from './CardStack.vue';
-import HorizontalCardStacks from './HorizontalCardStacks.vue';
+import { countDevCards, DevCardType } from 'catan-shared'
+import { computed } from 'vue'
+import { imageForDevCard } from '@/misc/CardTextures'
+import type { CardStackProps } from './CardStack.vue'
+import HorizontalCardStacks from './HorizontalCardStacks.vue'
 
 defineEmits<{
     devCardClicked: [type: DevCardType]

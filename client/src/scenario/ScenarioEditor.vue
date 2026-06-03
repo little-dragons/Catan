@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { type Coordinate, type Distribution, defaultScenario, GenerationMethod, type Scenario, ScenarioRobberPlacement, ScenarioStartingPhaseType, sameCoordinate, sumDistribution, TileType } from 'catan-shared';
-import { computed, ref } from 'vue';
-import Container from '@/game-components/board/Container.vue';
-import { tilePath } from '@/game-components/board/Layout';
-import SideMenu from '@/misc/SideMenu.vue';
-import ErrorImg from '@/modals/input-fields/ErrorImg.vue';
-import ErrorText from '@/modals/input-fields/ErrorText.vue';
-import FixedSelectionList from '@/modals/input-fields/FixedSelectionList.vue';
-import InputGroup from '@/modals/input-fields/InputGroup.vue';
-import IntegerInput from '@/modals/input-fields/IntegerInput.vue';
-import LabeledInput from '@/modals/input-fields/LabeledInput.vue';
-import Setting from '@/room/Setting.vue';
+import { type Coordinate, type Distribution, defaultScenario, GenerationMethod, type Scenario, ScenarioRobberPlacement, ScenarioStartingPhaseType, sameCoordinate, sumDistribution, TileType } from 'catan-shared'
+import { computed, ref } from 'vue'
+import Container from '@/game-components/board/Container.vue'
+import { tilePath } from '@/game-components/board/Layout'
+import SideMenu from '@/misc/SideMenu.vue'
+import ErrorImg from '@/modals/input-fields/ErrorImg.vue'
+import ErrorText from '@/modals/input-fields/ErrorText.vue'
+import FixedSelectionList from '@/modals/input-fields/FixedSelectionList.vue'
+import InputGroup from '@/modals/input-fields/InputGroup.vue'
+import IntegerInput from '@/modals/input-fields/IntegerInput.vue'
+import LabeledInput from '@/modals/input-fields/LabeledInput.vue'
+import Setting from '@/room/Setting.vue'
 
 const minAllowedCount = ref<number | undefined>(1)
 const maxAllowedCount = ref<number | undefined>(4)

@@ -1,10 +1,10 @@
-import { v4 } from "uuid"
-import type { Pure } from "../Pure"
-import type { Coordinate, PortResource, ResourceTileNumber, TileType } from "./Board"
-import type { Distribution } from "./Distribution"
-import type { DevCardType } from "./GameAction"
-import type { Orientation } from "./Orientation"
-import type { CardList, Resource } from "./Resource"
+import { v4 } from 'uuid'
+import type { Pure } from '../Pure'
+import type { Coordinate, PortResource, ResourceTileNumber, TileType } from './Board'
+import type { Distribution } from './Distribution'
+import type { DevCardType } from './GameAction'
+import type { Orientation } from './Orientation'
+import type { CardList, Resource } from './Resource'
 
 /**
  * Generally, scenario generation should be versatile. It has to combine randomness with 

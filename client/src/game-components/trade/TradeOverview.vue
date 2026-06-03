@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { CardList, Color, TradeStatusByColor } from 'catan-shared';
+import type { CardList, Color, TradeStatusByColor } from 'catan-shared'
 import GreenArrow from '@/assets/ui/greenarrow.svg'
 import RedArrow from '@/assets/ui/redarrow.svg'
-import ResourceCardsRenderer from '../cards/ResourceCardsRenderer.vue';
-import PlayerTradeStatus from './PlayerTradeStatus.vue';
+import ResourceCardsRenderer from '../cards/ResourceCardsRenderer.vue'
+import PlayerTradeStatus from './PlayerTradeStatus.vue'
 
 defineProps<{
     toGiveAway: CardList

@@ -1,5 +1,5 @@
-import { defineStore } from "pinia"
-import { ref, toRaw } from "vue"
+import { defineStore } from 'pinia'
+import { ref, toRaw } from 'vue'
 
 export enum PopupSeverity {
     Info, Warning, Error

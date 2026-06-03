@@ -9,9 +9,11 @@
 		"includes": ["**", "!!**/dist", "!!**/*.json"]
 	},
 	"formatter": {
-		"enabled": true,
-		"indentStyle": "tab",
-        "indentWidth": 4
+		"enabled": false,
+		"indentStyle": "space",
+        "indentWidth": 4,
+        "trailingNewline": true,
+        "bracketSameLine": true
 	},
     "html": {
         "experimentalFullSupportEnabled": true
@@ -27,8 +29,14 @@
 	},
 	"javascript": {
 		"formatter": {
+            "enabled": false,
 			"quoteStyle": "single",
-            "semicolons": "asNeeded"
+            "semicolons": "asNeeded",
+            "arrowParentheses": "asNeeded",
+            "bracketSameLine": true,
+            "lineWidth": 320,
+            "operatorLinebreak": "before",
+            "trailingCommas": "none"
 		}
 	},
 	"assist": {

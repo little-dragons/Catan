@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type Board, BuildingType, cssColor, type PortTile, Resource, SpecialPorts, type Tile, TileType } from 'catan-shared';
+import { type Board, BuildingType, cssColor, type PortTile, Resource, SpecialPorts, type Tile, TileType } from 'catan-shared'
 import brickPort from '@/assets/board/brick-port.svg'
 import desert from '@/assets/board/desert.svg'
 import generalPort from '@/assets/board/general-port.svg'
@@ -15,7 +15,7 @@ import grain from '@/assets/resources/grain.svg'
 import lumber from '@/assets/resources/lumber.svg'
 import ore from '@/assets/resources/ore.svg'
 import wool from '@/assets/resources/wool.svg'
-import { citySize, crossingPosition, roadCorners, robberHeight, robberWidth, segmentedPortPaths, settlementSize, svgPath, tileCenter, tileNumberFontSize, tileNumberPosition, tilePath, tilePortIconSize, tilePortPosition, tileResourceIconPosition, tileResourceIconSize } from './Layout';
+import { citySize, crossingPosition, roadCorners, robberHeight, robberWidth, segmentedPortPaths, settlementSize, svgPath, tileCenter, tileNumberFontSize, tileNumberPosition, tilePath, tilePortIconSize, tilePortPosition, tileResourceIconPosition, tileResourceIconSize } from './Layout'
 
 function resourceToIcon(resource: Resource): string {
     switch (resource) {

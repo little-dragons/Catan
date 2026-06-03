@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="ItemType extends CardStackProps">
-import CardStack, { type CardStackProps } from './CardStack.vue';
+import CardStack, { type CardStackProps } from './CardStack.vue'
 
 defineEmits<{
     clicked: [item: ItemType]

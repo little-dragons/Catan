@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { allResources, type Resource } from 'catan-shared';
-import { imageForResource } from '@/misc/CardTextures';
-import ResourceCardsRenderer from '../cards/ResourceCardsRenderer.vue';
+import { allResources, type Resource } from 'catan-shared'
+import { imageForResource } from '@/misc/CardTextures'
+import ResourceCardsRenderer from '../cards/ResourceCardsRenderer.vue'
 
 export type TradeMenuRendererProps = {
     offeredCards: readonly Resource[]

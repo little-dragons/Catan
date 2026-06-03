@@ -1,11 +1,11 @@
-import { type HonoSchema, type User, UserType } from "catan-shared"
-import type { Hono } from "hono"
-import { hc } from "hono/client"
-import type { BlankEnv } from "hono/types"
-import { defineStore } from "pinia"
-import { computed, ref } from "vue"
-import { serverAddress } from "@/misc/Globals"
-import { useCurrentRoomStore } from "./CurrentRoomStore"
+import { type HonoSchema, type User, UserType } from 'catan-shared'
+import type { Hono } from 'hono'
+import { hc } from 'hono/client'
+import type { BlankEnv } from 'hono/types'
+import { defineStore } from 'pinia'
+import { computed, ref } from 'vue'
+import { serverAddress } from '@/misc/Globals'
+import { useCurrentRoomStore } from './CurrentRoomStore'
 
 export enum UserStatus {
     LoggedIn,

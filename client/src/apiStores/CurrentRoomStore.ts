@@ -1,11 +1,11 @@
-import type { FullGameState, GameServerEventMap, LobbyRoom, PostGameRoom, RedactedGameRoom, RoomRequest, Settings } from "catan-shared"
-import { BotPersonality, type Color, defaultScenario, defaultSettings, type GameActionInput, type GameClientEventMap, gameNamespace, generateBotAction, generateStateFromScenario, ParticipantType, type PossiblyRedactedGameActionInfo, participantName, type RedactedRoom, RoomType, randomUnusedColor, redactGameStateFor, requireActionFrom, SocketConnectErrorCode, SocketConnectErrorSchema, tryDoAction, UserType, winners } from "catan-shared"
-import { defineStore } from "pinia"
-import { io, type Socket } from "socket.io-client"
-import { computed, ref } from "vue"
-import { serverAddress } from "@/misc/Globals"
-import { PopupSeverity, usePopups } from "@/popup/Popup"
-import { UserStatus, useCurrentUserStore } from "./CurrentUserStore"
+import type { FullGameState, GameServerEventMap, LobbyRoom, PostGameRoom, RedactedGameRoom, RoomRequest, Settings } from 'catan-shared'
+import { BotPersonality, type Color, defaultScenario, defaultSettings, type GameActionInput, type GameClientEventMap, gameNamespace, generateBotAction, generateStateFromScenario, ParticipantType, type PossiblyRedactedGameActionInfo, participantName, type RedactedRoom, RoomType, randomUnusedColor, redactGameStateFor, requireActionFrom, SocketConnectErrorCode, SocketConnectErrorSchema, tryDoAction, UserType, winners } from 'catan-shared'
+import { defineStore } from 'pinia'
+import { io, type Socket } from 'socket.io-client'
+import { computed, ref } from 'vue'
+import { serverAddress } from '@/misc/Globals'
+import { PopupSeverity, usePopups } from '@/popup/Popup'
+import { UserStatus, useCurrentUserStore } from './CurrentUserStore'
 
 
 export enum RoomOPResult {
@@ -52,10 +52,11 @@ export const useCurrentRoomStore = defineStore('room', () => {
         if (user.info.status !== UserStatus.LoggedIn)
             return RoomOPResult.NotLoggedIn
 
-        socket.auth = <RoomRequest>{
+        const req: RoomRequest = {
             request: 'join',
             roomID: id
         }
+        socket.auth = req
 
         const result = await (new Promise<true | string | SocketConnectErrorCode>(resolve => {
             // minor leak, because only one will fire
@@ -67,7 +68,7 @@ export const useCurrentRoomStore = defineStore('room', () => {
                 resolve(err.message)
             })
             socket.once('connect', () => {
-                resolve(true as const)
+                resolve(true)
             })
 
             socket.connect()
@@ -116,7 +117,7 @@ export const useCurrentRoomStore = defineStore('room', () => {
         }
         socket.auth = req
 
-        const result = await (new Promise(resolve => {
+        const result = await (new Promise<true | string | SocketConnectErrorCode>(resolve => {
             // minor leak, because only one will fire
             socket.once('connect_error', err => {
                 const check = SocketConnectErrorSchema.safeParse(err)
@@ -444,13 +445,11 @@ export const useCurrentRoomStore = defineStore('room', () => {
         if (info.value === undefined)
             return RoomOPResult.NotInRoom
 
-        if (info.value.data.type !== RoomType.Lobby)
-            return RoomOPResult.RoomInvalid
-        
-        if (info.value.data.scenario.players.maxAllowedCount <= info.value.data.participants.length)
-            return RoomOPResult.RoomFull
 
         if (info.value.mode === RoomMode.Offline) {
+            if (info.value.data.scenario.players.maxAllowedCount <= info.value.data.participants.length)
+                return RoomOPResult.RoomFull
+            
             info.value.data.participants.push({
                 type: ParticipantType.Bot,
                 bot: {

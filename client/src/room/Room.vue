@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { RoomType } from 'catan-shared';
-import { watch } from 'vue';
-import { useCurrentRoomStore } from '@/apiStores/CurrentRoomStore';
-import Game from '@/game/Game.vue';
-import History from '@/game/History.vue';
-import router from '@/misc/Router';
-import Lobby from './Lobby.vue';
+import { RoomType } from 'catan-shared'
+import { watch } from 'vue'
+import { useCurrentRoomStore } from '@/apiStores/CurrentRoomStore'
+import Game from '@/game/Game.vue'
+import History from '@/game/History.vue'
+import router from '@/misc/Router'
+import Lobby from './Lobby.vue'
 
 const roomStore = useCurrentRoomStore()
 

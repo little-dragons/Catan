@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { inject } from 'vue';
-import { activeTabInjectKey } from './Tabs.vue';
+import { inject } from 'vue'
+import { activeTabInjectKey } from './Tabs.vue'
 
 defineProps<{
     title: string,

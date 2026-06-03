@@ -1,10 +1,10 @@
-import { adjacentResources, adjacentRoads, availableRoadPositions, type Coordinate, colorWithLongestRoad, gainedResources, isAvailableRoadPosition, type ResourceTileNumber, type Road, roadAdjacentToLand, sameCoordinate, sameRoad } from "./Board"
-import { availableBuildingPositions, BuildingType, ConnectionType, isAvailableBuildingPosition } from "./Buildings"
-import { type DieResult, type FullGameState, GamePhaseType, isActive, isInitial, isPreDiceRoll, isRobbingDiscardingCards, isRobbingMovingRobber, nextTurn, publicGameState, type RedactedGameState, RobbingPhaseType, TurnPhaseType } from "./GameState"
-import type { Color } from "./Player"
-import { addCards, buildingCost, connectionCost, devCardCost, type Resource, tryRemoveCards } from "./Resource"
-import { isNewRobberPosition, robbableCrossingsExceptCurrent } from "./Robber"
-import { canTradeWithBank, type FinalizedTrade, isValidOffer, type OpenTradeOffer, sameTradeOffer, type TradeOffer, TradeStatusByColor } from "./Trade"
+import { adjacentResources, adjacentRoads, availableRoadPositions, type Coordinate, colorWithLongestRoad, gainedResources, isAvailableRoadPosition, type ResourceTileNumber, type Road, roadAdjacentToLand, sameCoordinate, sameRoad } from './Board'
+import { availableBuildingPositions, BuildingType, ConnectionType, isAvailableBuildingPosition } from './Buildings'
+import { type DieResult, type FullGameState, GamePhaseType, isActive, isInitial, isPreDiceRoll, isRobbingDiscardingCards, isRobbingMovingRobber, nextTurn, publicGameState, type RedactedGameState, RobbingPhaseType, TurnPhaseType } from './GameState'
+import type { Color } from './Player'
+import { addCards, buildingCost, connectionCost, devCardCost, type Resource, tryRemoveCards } from './Resource'
+import { isNewRobberPosition, robbableCrossingsExceptCurrent } from './Robber'
+import { canTradeWithBank, type FinalizedTrade, isValidOffer, type OpenTradeOffer, sameTradeOffer, type TradeOffer, TradeStatusByColor } from './Trade'
 
 function withPatch<T>(arr: readonly T[], index: number, patch: Partial<T>): T[] {
     return arr.with(index, { ...arr[index], ...patch });

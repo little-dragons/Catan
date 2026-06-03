@@ -1,4 +1,4 @@
-import type { FullGameState } from "./GameState"
+import type { FullGameState } from './GameState'
 
 export type Statistics = object & {
 

@@ -1,4 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from '@playwright/test'
 
 
 // https://playwright.dev/docs/test-configuration
@@ -64,4 +64,4 @@ export default defineConfig({
         //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
         // },
     ]
-});
+})

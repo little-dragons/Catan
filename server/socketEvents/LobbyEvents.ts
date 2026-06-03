@@ -1,8 +1,8 @@
-import type { GameClientEventMap, GameServerEventMap } from 'catan-shared';
+import type { GameClientEventMap, GameServerEventMap } from 'catan-shared'
 import type { Socket } from 'socket.io'
-import typia from 'typia';
-import type { GameNamespace, GameSocketDataType } from './Common';
-import { emitParticipantsChange, initializeGame, lobbyRoomFor, participantsForRoom, socketsForRoom } from './RoomManager';
+import typia from 'typia'
+import type { GameNamespace, GameSocketDataType } from './Common'
+import { emitParticipantsChange, initializeGame, lobbyRoomFor, participantsForRoom, socketsForRoom } from './RoomManager'
 
 type LobbySocket = Socket<GameServerEventMap, GameClientEventMap, object & {}, GameSocketDataType>
 export function acceptLobbyEvents(server: GameNamespace, socket: LobbySocket) {

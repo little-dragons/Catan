@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { type Color, TradeStatusByColor } from 'catan-shared';
+import { type Color, TradeStatusByColor } from 'catan-shared'
 import Rejecting from '@/assets/ui/error.svg'
 import Accepting from '@/assets/ui/ok.svg'
 import Undecided from '@/assets/ui/questionmark.svg'
-import PlayerIcon from '../PlayerIcon.vue';
+import PlayerIcon from '../PlayerIcon.vue'
 
 defineProps<{
     color: Color

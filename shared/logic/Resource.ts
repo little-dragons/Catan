@@ -1,5 +1,5 @@
-import { BuildingType, ConnectionType } from "./Buildings"
-import type { Distribution } from "./Distribution"
+import { BuildingType, ConnectionType } from './Buildings'
+import type { Distribution } from './Distribution'
 
 export enum Resource {
     Grain,

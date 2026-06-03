@@ -1,8 +1,8 @@
-import { type Color, type GameActionInfo, type GameActionInput, type GameClientEventMap, type GameServerEventMap, generateBotAction, RoomType, redactGameActionInfoFor, redactGameStateFor, requireActionFrom, tryDoAction, winners } from "catan-shared";
+import { type Color, type GameActionInfo, type GameActionInput, type GameClientEventMap, type GameServerEventMap, generateBotAction, RoomType, redactGameActionInfoFor, redactGameStateFor, requireActionFrom, tryDoAction, winners } from 'catan-shared'
 import type { Socket } from 'socket.io'
-import typia from "typia";
-import type { GameNamespace, GameSocketDataType } from "./Common";
-import { endGame, gameRoomFor, participantsForRoom, type ServerGameRoom } from "./RoomManager";
+import typia from 'typia'
+import type { GameNamespace, GameSocketDataType } from './Common'
+import { endGame, gameRoomFor, participantsForRoom, type ServerGameRoom } from './RoomManager'
 
 
 export function acceptGameEvents(io: GameNamespace, socket: Socket<GameServerEventMap, GameClientEventMap, object & {}, GameSocketDataType>) {

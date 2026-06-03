@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Color, type History, victoryPointsFromFull } from 'catan-shared';
+import { Color, type History, victoryPointsFromFull } from 'catan-shared'
 import Tab from '@/misc/Tab.vue'
 import Tabs from '@/misc/Tabs.vue'
 

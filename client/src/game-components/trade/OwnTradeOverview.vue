@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { type Color, type OpenTradeOffer, TradeStatusByColor } from 'catan-shared';
-import TradeOverview from './TradeOverview.vue';
+import { type Color, type OpenTradeOffer, TradeStatusByColor } from 'catan-shared'
+import TradeOverview from './TradeOverview.vue'
 
 defineProps<OpenTradeOffer>()
 defineEmits<{

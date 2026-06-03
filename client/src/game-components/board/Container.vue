@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Coordinate } from 'catan-shared';
-import { svgViewboxStringFromTileCoords } from './Layout';
+import type { Coordinate } from 'catan-shared'
+import { svgViewboxStringFromTileCoords } from './Layout'
 
 defineProps<{
     tileCoordinates: Coordinate[]

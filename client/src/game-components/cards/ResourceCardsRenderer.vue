@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { type CardList, countResources, foldRecord, Resource } from 'catan-shared';
-import { computed } from 'vue';
-import { imageForResource } from '@/misc/CardTextures';
-import type { CardStackProps } from './CardStack.vue';
-import HorizontalCardStacks from './HorizontalCardStacks.vue';
+import { type CardList, countResources, foldRecord, Resource } from 'catan-shared'
+import { computed } from 'vue'
+import { imageForResource } from '@/misc/CardTextures'
+import type { CardStackProps } from './CardStack.vue'
+import HorizontalCardStacks from './HorizontalCardStacks.vue'
 
 defineEmits<{
     resourceClicked: [res: Resource]

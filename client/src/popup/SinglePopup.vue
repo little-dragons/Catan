@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Close from '@/assets/ui/close.svg'
-import { type Popup, PopupSeverity, popupLifetime } from './Popup';
+import { type Popup, PopupSeverity, popupLifetime } from './Popup'
 
 const props = defineProps<{
     info: Popup

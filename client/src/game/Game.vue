@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { addCards, adjacentRoads, availableBuildingPositions, availableRoadPositions, type Board, BuildingType, type CardList, type Color, type Coordinate, canBuyDevCard, canFinishTurn, canOfferTrade, canPlaceCity, canPlaceRoad, canPlaceSettlement, canRollDice, canTradeWithBank, DevCardType, type DieResult, GameActionType, GamePhaseType, isActive, isInitial, isPreDiceRoll, isRobbingDiscardingCards, isRobbingMovingRobber, isValidOffer, newRobberPositions, type Participant, ParticipantType, participantName, type RedactedPlayer, type Resource, type Road, RoomType, roadAdjacentToLand, robbableCrossingsExceptCurrent, sameCoordinate, sameTradeOffer, type TradeOffer, TurnPhaseType, tryRemoveCard, tryRemoveCards, tryTransferCard, type User, UserType, victoryPointsFromRedacted } from 'catan-shared';
-import { computed, ref, toRaw, useTemplateRef, watch, watchEffect } from 'vue';
-import { RoomMode, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore';
-import { isDevelopment } from '@/misc/Globals';
-import { UserSelectionType } from '../game-components/board/UserSelection';
-import type { DiscardMenuRendererProps } from '../game-components/DiscardRenderer.vue';
-import type { PlayerOverviewData } from '../game-components/PlayerOverviewRenderer.vue';
-import type { TradeMenuRendererProps } from '../game-components/trade/TradeMenuRenderer.vue';
-import GameRenderer, { type ForbiddableButtons } from './GameRenderer.vue';
+import { addCards, adjacentRoads, availableBuildingPositions, availableRoadPositions, type Board, BuildingType, type CardList, type Color, type Coordinate, canBuyDevCard, canFinishTurn, canOfferTrade, canPlaceCity, canPlaceRoad, canPlaceSettlement, canRollDice, canTradeWithBank, DevCardType, type DieResult, GameActionType, GamePhaseType, isActive, isInitial, isPreDiceRoll, isRobbingDiscardingCards, isRobbingMovingRobber, isValidOffer, newRobberPositions, type Participant, ParticipantType, participantName, type RedactedPlayer, type Resource, type Road, RoomType, roadAdjacentToLand, robbableCrossingsExceptCurrent, sameCoordinate, sameTradeOffer, type TradeOffer, TurnPhaseType, tryRemoveCard, tryRemoveCards, tryTransferCard, type User, UserType, victoryPointsFromRedacted } from 'catan-shared'
+import { computed, ref, toRaw, useTemplateRef, watch, watchEffect } from 'vue'
+import { RoomMode, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore'
+import { isDevelopment } from '@/misc/Globals'
+import { UserSelectionType } from '../game-components/board/UserSelection'
+import type { DiscardMenuRendererProps } from '../game-components/DiscardRenderer.vue'
+import type { PlayerOverviewData } from '../game-components/PlayerOverviewRenderer.vue'
+import type { TradeMenuRendererProps } from '../game-components/trade/TradeMenuRenderer.vue'
+import GameRenderer, { type ForbiddableButtons } from './GameRenderer.vue'
 
 const renderer = useTemplateRef('renderer')
 

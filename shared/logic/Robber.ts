@@ -1,6 +1,6 @@
-import { adjacentBuildingsToTile, type Board, type Coordinate, isLandTile, sameCoordinate } from "./Board"
-import type { PublicGameState } from "./GameState"
-import type { Color } from "./Player"
+import { adjacentBuildingsToTile, type Board, type Coordinate, isLandTile, sameCoordinate } from './Board'
+import type { PublicGameState } from './GameState'
+import type { Color } from './Player'
 
 export function isNewRobberPosition(board: Board, robberPositon: Coordinate): boolean {
     if (sameCoordinate(board.robber, robberPositon))

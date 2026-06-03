@@ -1,6 +1,6 @@
-import { type Bot, BotPersonality, type Color, defaultScenario, defaultSettings, type FullGameRoom, type FullRoom, type GameClientEventMap, generateStateFromScenario, type History, type LobbyRoom, type Participant, ParticipantType, type PostGameRoom, type RoomId, RoomRequestSchema, RoomType, randomSeed, randomUnusedColor, SocketConnectErrorCode, socketConnectError } from "catan-shared"
+import { type Bot, BotPersonality, type Color, defaultScenario, defaultSettings, type FullGameRoom, type FullRoom, type GameClientEventMap, generateStateFromScenario, type History, type LobbyRoom, type Participant, ParticipantType, type PostGameRoom, type RoomId, RoomRequestSchema, RoomType, randomSeed, randomUnusedColor, SocketConnectErrorCode, socketConnectError } from 'catan-shared'
 import type { RemoteSocket } from 'socket.io'
-import type { GameNamespace, GameSocket, GameSocketDataType } from "./Common"
+import type { GameNamespace, GameSocket, GameSocketDataType } from './Common'
 
 
 export type ServerLobbyRoom    = Omit<LobbyRoom   , 'participants'> & { bots : [Bot, Color][] }

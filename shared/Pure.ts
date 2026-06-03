@@ -23,4 +23,4 @@ export type Pure<T> = T extends Primitive
   ? T
   : T extends object
   ? PureObject<T>
-  : T;
+  : T

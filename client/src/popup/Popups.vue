@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { usePopups } from './Popup';
-import SinglePopup from './SinglePopup.vue';
+import { usePopups } from './Popup'
+import SinglePopup from './SinglePopup.vue'
 
 const { popups, remove } = usePopups()
 </script>

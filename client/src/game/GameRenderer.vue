@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import type { Board, CardList, Color, DevCardType, DieResult, OpenTradeOffer, Resource, TradeOffer } from 'catan-shared';
-import { onMounted, ref, useTemplateRef } from 'vue';
-import BoardContainer from '../game-components/board/Container.vue';
-import DefaultBoardItems from '../game-components/board/DefaultBoardItems.vue';
-import InteractionProvider from '../game-components/board/InteractionProvider.vue';
+import type { Board, CardList, Color, DevCardType, DieResult, OpenTradeOffer, Resource, TradeOffer } from 'catan-shared'
+import { onMounted, ref, useTemplateRef } from 'vue'
+import BoardContainer from '../game-components/board/Container.vue'
+import DefaultBoardItems from '../game-components/board/DefaultBoardItems.vue'
+import InteractionProvider from '../game-components/board/InteractionProvider.vue'
 import type { InteractionPoints, UserSelectionOptions, UserSelectionResult } from '../game-components/board/UserSelection'
-import DevCardsRenderer from '../game-components/cards/DevCardsRenderer.vue';
-import ResourceCardsRenderer from '../game-components/cards/ResourceCardsRenderer.vue';
-import DiceRenderer from '../game-components/DiceRenderer.vue';
-import DiscardRenderer, { type DiscardMenuRendererProps } from '../game-components/DiscardRenderer.vue';
-import PlayerOverviewRenderer, { type PlayerOverviewData } from '../game-components/PlayerOverviewRenderer.vue';
-import ResourceSelector from '../game-components/ResourceSelector.vue';
-import ResourceTypeSelector from '../game-components/ResourceTypeSelector.vue';
-import OwnTradeOverview from '../game-components/trade/OwnTradeOverview.vue';
-import TradeRenderer, { type TradeMenuRendererProps } from '../game-components/trade/TradeMenuRenderer.vue';
+import DevCardsRenderer from '../game-components/cards/DevCardsRenderer.vue'
+import ResourceCardsRenderer from '../game-components/cards/ResourceCardsRenderer.vue'
+import DiceRenderer from '../game-components/DiceRenderer.vue'
+import DiscardRenderer, { type DiscardMenuRendererProps } from '../game-components/DiscardRenderer.vue'
+import PlayerOverviewRenderer, { type PlayerOverviewData } from '../game-components/PlayerOverviewRenderer.vue'
+import ResourceSelector from '../game-components/ResourceSelector.vue'
+import ResourceTypeSelector from '../game-components/ResourceTypeSelector.vue'
+import OwnTradeOverview from '../game-components/trade/OwnTradeOverview.vue'
+import TradeRenderer, { type TradeMenuRendererProps } from '../game-components/trade/TradeMenuRenderer.vue'
 
 defineEmits<{
     diceClicked: []

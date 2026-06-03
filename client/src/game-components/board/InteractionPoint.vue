@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { maxInteractionPointRadius, minInteractionPointRadius } from './Layout';
+import { maxInteractionPointRadius, minInteractionPointRadius } from './Layout'
 
 defineProps<{
     position: [number, number]

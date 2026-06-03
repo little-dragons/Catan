@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { type Color, cssColor, isValidSetting, ParticipantType, participantName, type Settings, UserType, unusedColors } from 'catan-shared';
-import { RoomMode, RoomOPResult, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore';
-import router from '@/misc/Router';
-import SideMenu from '@/misc/SideMenu.vue';
+import { type Color, cssColor, isValidSetting, ParticipantType, participantName, type Settings, UserType, unusedColors } from 'catan-shared'
+import { RoomMode, RoomOPResult, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore'
+import router from '@/misc/Router'
+import SideMenu from '@/misc/SideMenu.vue'
 import Setting from './Setting.vue'
 
 const currentRoom = useCurrentRoomStore()

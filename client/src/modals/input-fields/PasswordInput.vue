@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { validPassword } from 'catan-shared';
-import { computed, useTemplateRef } from 'vue';
+import { validPassword } from 'catan-shared'
+import { computed, useTemplateRef } from 'vue'
 import CustomInput from './CustomInput.vue'
 
 defineProps<{

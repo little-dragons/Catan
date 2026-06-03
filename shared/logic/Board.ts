@@ -1,10 +1,10 @@
-import { v4 } from "uuid"
-import type { Pure } from "../Pure"
-import { BuildingType } from "./Buildings"
-import { addDistribution, type Distribution, setRecord } from "./Distribution"
-import { neighborTile, Orientation } from "./Orientation"
-import type { Color } from "./Player"
-import { Resource } from "./Resource"
+import { v4 } from 'uuid'
+import type { Pure } from '../Pure'
+import { BuildingType } from './Buildings'
+import { addDistribution, type Distribution, setRecord } from './Distribution'
+import { neighborTile, Orientation } from './Orientation'
+import type { Color } from './Player'
+import { Resource } from './Resource'
 
 /**
  * Coordinate has two meaning, depending on whether tiles or crossings are indexed.

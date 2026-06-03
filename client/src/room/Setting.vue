@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { nextTick, ref, useTemplateRef } from 'vue';
-import error from '@/assets/ui/error.svg';
-import ok from '@/assets/ui/ok.svg';
-import change from '@/assets/ui/setting.svg';
+import { nextTick, ref, useTemplateRef } from 'vue'
+import error from '@/assets/ui/error.svg'
+import ok from '@/assets/ui/ok.svg'
+import change from '@/assets/ui/setting.svg'
 
 const props = defineProps<{
     name: string

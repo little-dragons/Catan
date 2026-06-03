@@ -1,4 +1,4 @@
-import type { Color, GameClientEventMap, GameServerEventMap, QueryServerEventMap, RoomId, User } from "catan-shared"
+import type { Color, GameClientEventMap, GameServerEventMap, QueryServerEventMap, RoomId, User } from 'catan-shared'
 import type { Namespace, Socket } from 'socket.io'
 
 export const isDevelopment = process.env.NODE_ENV === 'development'

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, type Ref, ref, triggerRef } from 'vue';
-import ErrorImg from './ErrorImg.vue';
-import ErrorText from './ErrorText.vue';
+import { computed, type Ref, ref, triggerRef } from 'vue'
+import ErrorImg from './ErrorImg.vue'
+import ErrorText from './ErrorText.vue'
 
 const props = withDefaults(defineProps<{
     tagId?: string,

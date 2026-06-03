@@ -1,12 +1,12 @@
-import type { Pure } from "../Pure"
-import { adjacentRoads, availableRoadPositions, type Board, type Coordinate, portsForColor, resourceFrequenciesForColor, SpecialPorts } from "./Board"
-import { availableBuildingPositions, BuildingType, ConnectionType } from "./Buildings"
-import { type Distribution, mapRecord, popcountDistribution, sumDistribution } from "./Distribution"
-import { type GameActionInput, GameActionType, tryDoPlaceInitialRedacted } from "./GameAction"
-import { GamePhaseType, isRobbingDiscardingCards, type RedactedGameState, RobbingPhaseType, requireActionFrom, TurnPhaseType, victoryPointsFromRedacted } from "./GameState"
-import type { Color } from "./Player"
-import { buildingCost, type CardList, connectionCost, type Resource, tryRemoveCards, tryTransferCard } from "./Resource"
-import { newRobberPositions, robbableCrossingsExceptCurrent } from "./Robber"
+import type { Pure } from '../Pure'
+import { adjacentRoads, availableRoadPositions, type Board, type Coordinate, portsForColor, resourceFrequenciesForColor, SpecialPorts } from './Board'
+import { availableBuildingPositions, BuildingType, ConnectionType } from './Buildings'
+import { type Distribution, mapRecord, popcountDistribution, sumDistribution } from './Distribution'
+import { type GameActionInput, GameActionType, tryDoPlaceInitialRedacted } from './GameAction'
+import { GamePhaseType, isRobbingDiscardingCards, type RedactedGameState, RobbingPhaseType, requireActionFrom, TurnPhaseType, victoryPointsFromRedacted } from './GameState'
+import type { Color } from './Player'
+import { buildingCost, type CardList, connectionCost, type Resource, tryRemoveCards, tryTransferCard } from './Resource'
+import { newRobberPositions, robbableCrossingsExceptCurrent } from './Robber'
 
 export enum BotPersonality {
     Vincent // The trader

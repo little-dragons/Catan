@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import InteractionPoint from './InteractionPoint.vue';
-import { crossingPosition, roadCenter, tileCenter } from './Layout';
-import { type AnyUserSelectionResult, type InteractionPoints, type UserSelectionDataType, type UserSelectionOptions, type UserSelectionResult, UserSelectionType } from './UserSelection';
+import { computed, ref } from 'vue'
+import InteractionPoint from './InteractionPoint.vue'
+import { crossingPosition, roadCenter, tileCenter } from './Layout'
+import { type AnyUserSelectionResult, type InteractionPoints, type UserSelectionDataType, type UserSelectionOptions, type UserSelectionResult, UserSelectionType } from './UserSelection'
 
 const interactionPoints = ref<(InteractionPoints & { resolver: (value: AnyUserSelectionResult) => boolean }) | undefined>(undefined)
 
