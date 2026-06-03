@@ -20,7 +20,7 @@ export type CurrentUserInfo = {
     status: UserStatus.Anonymous,
 } | {
     status: UserStatus.Pending,
-    request: User
+    request: User | undefined
 }
 
 export enum UserOPResult {
@@ -70,6 +70,21 @@ export const useCurrentUserStore = defineStore('user', () => {
             case 409: 
                 info.value = { status: UserStatus.Anonymous }
                 return UserOPResult.ForbiddenUsername
+        }
+    }
+
+    async function checkSession() {
+        info.value = { status: UserStatus.Pending, request: undefined }
+        
+        const res = await restClient.auth.check.$post({})
+        const d = await res.json()
+        switch (d.code) {
+            case 'ANONYMOUS':
+                info.value = { status: UserStatus.Anonymous }
+                return
+            case 'SIGNEDIN':
+                info.value = { status: UserStatus.LoggedIn, user: d.user }
+                return
         }
     }
 
@@ -143,5 +158,5 @@ export const useCurrentUserStore = defineStore('user', () => {
         return UserOPResult.Success
     }
 
-    return { info, loggedInInfo, tryGuestLogin, tryMemberLogin, tryRegister, tryLogout }
+    return { info, loggedInInfo, tryGuestLogin, tryMemberLogin, tryRegister, tryLogout, checkSession }
 })

@@ -10,6 +10,8 @@ import Popups from './popup/Popups.vue'
 
 const currentRoom = useCurrentRoomStore()
 const currentUser = useCurrentUserStore()
+
+currentUser.checkSession()
 </script>
 
 <template>

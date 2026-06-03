@@ -60,6 +60,8 @@ const app = new Hono()
             return c.json({ code: 'ANONYMOUS' as const }, 200)
         }
 
+        // refresh token
+        setCookie(c, cookieSessionName, cookie, cookieSessionOpts)
         return c.json({ code: 'SIGNEDIN' as const, user: user }, 200)
     })
     .post('/auth/logout', c => {

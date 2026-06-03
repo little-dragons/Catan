@@ -64,8 +64,8 @@ function groupsFromScenario(scenario: Scenario): GroupInfo[] {
 
 const tileGroups      = ref(groupsFromScenario(defaultScenario))
 // rename groups for default scenario:
-tileGroups.value[0].name = "Sea"
-tileGroups.value[1].name = "Land"
+tileGroups.value[0].name = 'Sea'
+tileGroups.value[1].name = 'Land'
 const activeTileGroup = ref(tileGroups.value[0])
 const activeCoord     = ref(activeTileGroup.value.coordinates[0][0])
 
@@ -74,7 +74,7 @@ function mostTiles(coords: readonly (readonly Coordinate[])[]): number {
 }
 function tileGroupValid(gi : GroupInfo) {
     if (tileTypesCurrentLen(gi.tileTypes) < mostTiles(gi.coordinates)) {
-            return 'Too few tiles'
+        return 'Too few tiles'
     }
 
     return true
