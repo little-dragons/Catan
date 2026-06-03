@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
 
 test('can login as guest', async ({ page }) => {
     const guestName = (Math.random() + 1).toString(36).substring(7)
-    await page.getByTitle('Login').click()
+    await page.getByTitle('Login').and(page.locator(':visible')).click()
     await modal(page)
     await page.getByLabel('Guest Name').fill(guestName)
     await expect(page.getByTitle('Guest Login')).toBeEnabled()

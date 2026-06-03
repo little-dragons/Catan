@@ -5,7 +5,7 @@ import { modal, noModal } from './Common'
 test.beforeEach(async ({ page }) => {
     await page.goto('/')
     const guestName = (Math.random() + 1).toString(36).substring(7)
-    await page.getByTitle('Login').click()
+    await page.getByTitle('Login').and(page.locator(':visible')).click()
     await modal(page)
     await page.getByLabel('Guest Name').fill(guestName)
     await expect(page.getByTitle('Guest Login')).toBeEnabled()
@@ -18,7 +18,7 @@ test.beforeEach(async ({ page }) => {
 
 test('can create room', async ({ page }) => {
     const roomName = (Math.random() + 1).toString(36).substring(7)
-    await page.getByTitle('Create New Room').click()
+    await page.getByTitle('Create new room').click()
     await modal(page)
     await page.getByLabel('Room Name').fill(roomName)
     await expect(page.getByTitle('Create Room')).toBeEnabled()
