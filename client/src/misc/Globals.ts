@@ -10,3 +10,7 @@ if (!isDevelopment && !isProduction)
 export const serverAddress: string = 
     isDevelopment ? `http://localhost:${SocketPort}`
                   : `https://ichigancs.com:${SocketPort}`
+
+
+export const loginModalID = 'login-modal-id'
+export const createRoomModalID = 'create-room-modal-id'

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { useTemplateRef } from 'vue'
 import { RoomOPResult, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore'
+import { createRoomModalID } from '@/misc/Globals.ts'
 import router from '@/misc/Router'
-import Modal, { createRoomModalID } from '@/modals/Modal.vue'
+import Modal from '@/modals/Modal.vue'
 import { PopupSeverity, usePopups } from '@/popup/Popup'
 import LabeledInput from './input-fields/LabeledInput.vue'
 import RoomInput from './input-fields/RoomInput.vue'

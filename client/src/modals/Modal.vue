@@ -2,14 +2,6 @@
 import { useTemplateRef } from 'vue'
 import Close from '@/assets/ui/close.svg'
 
-// Right now, the setup is: the modals are created in the dom and are not shown
-// They are opened via `command` and `commandFor` using the following global ids.
-// The browser handles all modal specific overlay, interaction logic and backdrop quite nicely on its own
-// just using declarative html.
-// Still, some methods are exposed to open and close a modal programmatically, if need be.
-
-export const loginModalID = 'login-modal-id'
-export const createRoomModalID = 'create-room-modal-id'
 
 defineProps<{
     title: string

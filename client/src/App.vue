@@ -3,9 +3,9 @@ import { UserType } from 'catan-shared'
 import { RouterView } from 'vue-router'
 import { useCurrentRoomStore } from './apiStores/CurrentRoomStore'
 import { UserStatus, useCurrentUserStore } from './apiStores/CurrentUserStore'
+import { loginModalID } from './misc/Globals'
 import CreateRoomModal from './modals/CreateRoomModal.vue'
 import LoginModal from './modals/LoginModal.vue'
-import { loginModalID } from './modals/Modal.vue'
 import Popups from './popup/Popups.vue'
 
 const currentRoom = useCurrentRoomStore()

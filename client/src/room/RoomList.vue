@@ -2,8 +2,8 @@
 import { onMounted, onUnmounted } from 'vue'
 import { RoomOPResult, useCurrentRoomStore } from '@/apiStores/CurrentRoomStore'
 import { useRoomListStore } from '@/apiStores/RoomListStore'
+import { createRoomModalID } from '@/misc/Globals'
 import router from '@/misc/Router'
-import { createRoomModalID } from '@/modals/Modal.vue'
 import { PopupSeverity, usePopups } from '@/popup/Popup'
 
 const currentRoom = useCurrentRoomStore()

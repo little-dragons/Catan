@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, useTemplateRef } from 'vue'
 import { UserOPResult, UserStatus, useCurrentUserStore } from '@/apiStores/CurrentUserStore'
-import Modal, { loginModalID } from '@/modals/Modal.vue'
+import { loginModalID } from '@/misc/Globals.ts'
+import Modal from '@/modals/Modal.vue'
 import { PopupSeverity, usePopups } from '@/popup/Popup'
 import LabeledInput from './input-fields/LabeledInput.vue'
 import PasswordInput from './input-fields/PasswordInput.vue'
